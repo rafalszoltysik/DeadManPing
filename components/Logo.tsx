@@ -2,6 +2,7 @@
 
 import { useTheme } from './ThemeProvider'
 import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 interface LogoProps {
   className?: string
@@ -37,11 +38,12 @@ export function Logo({ className = '', showText = true, variant = 'with-text' }:
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <img 
+      <Image 
         src="/icon.svg" 
         alt="DeadManPing Logo" 
+        width={32}
+        height={32}
         className="flex-shrink-0"
-        style={{ width: '32px', height: '32px' }}
       />
       
       {showText && variant === 'with-text' && (
@@ -75,11 +77,12 @@ export function LogoIcon({ className = '', size = 32 }: { className?: string; si
   }
 
   return (
-    <img 
+    <Image 
       src="/icon.svg" 
       alt="DeadManPing Logo" 
+      width={size}
+      height={size}
       className={className}
-      style={{ width: `${size}px`, height: `${size}px` }}
     />
   )
 }

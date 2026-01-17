@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import Link from 'next/link'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon } from './Icons'
@@ -178,7 +178,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     } else if (editingPayloadRules && (!monitor.payload_validation_rules || !monitor.payload_validation_rules.fields)) {
       setPayloadFields([])
     }
-  }, [editingPayloadRules])
+  }, [editingPayloadRules, monitor.payload_validation_rules])
 
   // Load existing interval settings when editing
   useEffect(() => {
@@ -311,7 +311,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   }
 
   // Fetch latest monitor and pings data
-  const fetchMonitorData = async () => {
+  const fetchMonitorData = useCallback(async () => {
     try {
       const response = await fetch(`/api/monitors/${monitor.slug}/update`)
       if (response.ok) {
@@ -342,7 +342,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     } catch (err) {
       console.error('Error fetching monitor data:', err)
     }
-  }
+  }, [monitor.slug])
 
   // Poll for new pings and monitor updates
   // Don't poll when editing forms to prevent overwriting user changes
@@ -367,7 +367,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       return () => clearInterval(interval)
     }
-  }, [isOnboarding, waitingForPing, monitor.slug, editingPayloadRules, editingAlertChannels, editingInterval])
+  }, [isOnboarding, waitingForPing, monitor.slug, editingPayloadRules, editingAlertChannels, editingInterval, fetchMonitorData])
 
   useEffect(() => {
     if (pings.length > 0 && waitingForPing) {

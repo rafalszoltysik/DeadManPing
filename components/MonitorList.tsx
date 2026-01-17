@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 import { ChevronRightIcon } from './Icons'
 import { MonitorListProps } from '@/lib/types/monitor'
-import { MonitorStatusIcon } from './MonitorStatus'
+import { MonitorStatusIcon, MonitorStatus } from './MonitorStatus'
 import { getStatusColor } from '@/lib/monitor-utils'
 
 export function MonitorList({ monitors }: MonitorListProps) {

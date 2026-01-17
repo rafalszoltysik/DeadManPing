@@ -20,7 +20,7 @@ export async function verifyMonitorAccess(
     .from('monitors')
     .select('*')
     .eq('id', monitorId)
-    .single()
+    .single() as { data: any; error: any }
 
   if (monitorError || !monitor) {
     return {
@@ -36,7 +36,7 @@ export async function verifyMonitorAccess(
       .select('id')
       .eq('workspace_id', monitor.workspace_id)
       .eq('user_id', userId)
-      .single()
+      .single() as { data: { id: string } | null }
 
     if (!member) {
       // Check if user is workspace owner
@@ -44,7 +44,7 @@ export async function verifyMonitorAccess(
         .from('workspaces')
         .select('owner_id')
         .eq('id', monitor.workspace_id)
-        .single()
+        .single() as { data: { owner_id: string } | null }
 
       if (!workspace || workspace.owner_id !== userId) {
         return {
@@ -86,7 +86,7 @@ export async function verifyMonitorAccessBySlug(
     .from('monitors')
     .select('*')
     .eq('slug', slug)
-    .single()
+    .single() as { data: any; error: any }
 
   if (monitorError || !monitor) {
     return {
@@ -102,7 +102,7 @@ export async function verifyMonitorAccessBySlug(
       .select('id')
       .eq('workspace_id', monitor.workspace_id)
       .eq('user_id', userId)
-      .single()
+      .single() as { data: { id: string } | null }
 
     if (!member) {
       // Check if user is workspace owner
@@ -110,7 +110,7 @@ export async function verifyMonitorAccessBySlug(
         .from('workspaces')
         .select('owner_id')
         .eq('id', monitor.workspace_id)
-        .single()
+        .single() as { data: { owner_id: string } | null }
 
       if (!workspace || workspace.owner_id !== userId) {
         return {
@@ -156,7 +156,7 @@ export async function checkOptimisticLock(
     .from('monitors')
     .select('updated_at')
     .eq('id', monitorId)
-    .single()
+    .single() as { data: { updated_at: string } | null }
 
   if (currentMonitor) {
     const expectedTime = new Date(expectedUpdatedAt).getTime()
@@ -169,7 +169,7 @@ export async function checkOptimisticLock(
         .from('monitors')
         .select('*')
         .eq('id', monitorId)
-        .single()
+        .single() as { data: any | null }
 
       if (latestMonitor) {
         return {

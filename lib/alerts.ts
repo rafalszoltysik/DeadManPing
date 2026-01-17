@@ -16,14 +16,15 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
     .from('monitors')
     .select('*, profiles(*)')
     .eq('id', monitor_id)
-    .single()
+    .single() as { data: any; error: any }
 
   if (monitorError || !monitor) {
     console.error('Monitor not found:', monitorError)
     return { success: false, error: 'Monitor not found' }
   }
 
-  const profile = monitor.profiles as any
+  const monitorWithProfile = monitor as any
+  const profile = monitorWithProfile.profiles as any
   if (!profile) {
     console.error('Profile not found for monitor')
     return { success: false, error: 'Profile not found' }
@@ -31,12 +32,12 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 
   // Get subscription tier (from workspace or profile)
   let subscriptionTier = profile.subscription_tier || 'free'
-  if (monitor.workspace_id) {
+  if (monitorWithProfile.workspace_id) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('subscription_tier')
-      .eq('id', monitor.workspace_id)
-      .single()
+      .eq('id', monitorWithProfile.workspace_id)
+      .single() as { data: { subscription_tier?: string } | null }
     if (workspace) {
       subscriptionTier = workspace.subscription_tier || subscriptionTier
     }
@@ -65,15 +66,15 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   const results: any[] = []
 
   // Determine which channels to use: monitor override first, then profile/workspace default
-  const emailToUse = monitor.alert_email || profile.alert_email || profile.email
-  const slackWebhook = monitor.slack_webhook_url || (hasSlackDiscord ? profile.slack_webhook_url : null)
-  const discordWebhook = monitor.discord_webhook_url || (hasSlackDiscord ? profile.discord_webhook_url : null)
-  const customWebhook = monitor.custom_webhook_url || (hasCustomWebhook ? profile.custom_webhook_url : null)
+  const emailToUse = monitorWithProfile.alert_email || profile.alert_email || profile.email
+  const slackWebhook = monitorWithProfile.slack_webhook_url || (hasSlackDiscord ? profile.slack_webhook_url : null)
+  const discordWebhook = monitorWithProfile.discord_webhook_url || (hasSlackDiscord ? profile.discord_webhook_url : null)
+  const customWebhook = monitorWithProfile.custom_webhook_url || (hasCustomWebhook ? profile.custom_webhook_url : null)
 
   // Send email alert
   if (emailToUse) {
     try {
-      const emailResult = await sendEmailAlert(emailToUse, monitor, alert_type)
+      const emailResult = await sendEmailAlert(emailToUse, monitorWithProfile, alert_type)
       if (emailResult.success) {
         channels.push('email')
         results.push({ channel: 'email', success: true })
@@ -89,7 +90,7 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   // Send Slack alert
   if (slackWebhook) {
     try {
-      const slackResult = await sendSlackAlert(slackWebhook, monitor, alert_type)
+      const slackResult = await sendSlackAlert(slackWebhook, monitorWithProfile, alert_type)
       if (slackResult.success) {
         channels.push('slack')
         results.push({ channel: 'slack', success: true })
@@ -105,7 +106,7 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   // Send Discord alert
   if (discordWebhook) {
     try {
-      const discordResult = await sendDiscordAlert(discordWebhook, monitor, alert_type)
+      const discordResult = await sendDiscordAlert(discordWebhook, monitorWithProfile, alert_type)
       if (discordResult.success) {
         channels.push('discord')
         results.push({ channel: 'discord', success: true })
@@ -121,7 +122,7 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   // Send custom webhook alert (Team plan only)
   if (customWebhook) {
     try {
-      const customResult = await sendCustomWebhookAlert(customWebhook, monitor, alert_type)
+      const customResult = await sendCustomWebhookAlert(customWebhook, monitorWithProfile, alert_type)
       if (customResult.success) {
         channels.push('custom_webhook')
         results.push({ channel: 'custom_webhook', success: true })
@@ -136,7 +137,7 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 
   // Log alert to database
   if (channels.length > 0) {
-    await supabaseAdmin.from('alerts').insert({
+    await (supabaseAdmin.from('alerts') as any).insert({
       monitor_id,
       alert_type,
       channels,
