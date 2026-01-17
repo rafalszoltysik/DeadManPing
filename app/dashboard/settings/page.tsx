@@ -1,19 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { SettingsForm } from '@/components/SettingsForm'
-
-// Use admin client to bypass RLS, but we'll verify ownership via our session
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function SettingsPage() {
   const session = await verifySession()
@@ -24,16 +12,17 @@ export default async function SettingsPage() {
 
   // Use admin client to fetch profile (bypasses RLS)
   // We verify ownership by checking id matches session
+  const supabaseAdmin = getSupabaseAdmin()
   let { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('*')
     .eq('id', session.userId)
-    .maybeSingle()
+    .maybeSingle() as { data: any; error: any }
 
   // If profile doesn't exist, try to create it
   if (!profile && (!profileError || profileError.code === 'PGRST116')) {
-    const { data: newProfile, error: insertError } = await supabaseAdmin
-      .from('profiles')
+    const { data: newProfile, error: insertError } = await (supabaseAdmin
+      .from('profiles') as any)
       .insert({
         id: session.userId,
         email: session.email,
@@ -84,8 +73,8 @@ export default async function SettingsPage() {
       isTrialExpired = true
       // Update status to free if trial expired (but don't block the page)
       if (daysRemaining <= 0) {
-        supabaseAdmin
-          .from('profiles')
+        (supabaseAdmin
+          .from('profiles') as any)
           .update({
             subscription_status: 'free',
             updated_at: new Date().toISOString(),
@@ -93,8 +82,8 @@ export default async function SettingsPage() {
           .eq('id', profile.id)
           .then(() => {
             // Also update workspace if exists
-            supabaseAdmin
-              .from('workspaces')
+            (supabaseAdmin
+              .from('workspaces') as any)
               .update({
                 subscription_status: 'free',
                 updated_at: new Date().toISOString(),

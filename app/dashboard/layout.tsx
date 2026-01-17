@@ -4,18 +4,7 @@ import Link from 'next/link'
 import { LogoutButton } from '@/components/LogoutButton'
 import { Logo, LogoIcon } from '@/components/Logo'
 import { DashboardNav, DashboardMobileNav } from '@/components/DashboardNav'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function DashboardLayout({
   children,
@@ -29,18 +18,19 @@ export default async function DashboardLayout({
   }
 
   // Get profile and workspace to check trial status and grace period
+  const supabaseAdmin = getSupabaseAdmin()
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('subscription_status, subscription_tier, created_at, grace_period_ends_at')
     .eq('id', session.userId)
-    .single()
+    .single() as { data: { subscription_status?: string; subscription_tier?: string; created_at?: string; grace_period_ends_at?: string | null } | null }
 
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
     .select('grace_period_ends_at, subscription_tier')
     .eq('owner_id', session.userId)
     .limit(1)
-    .maybeSingle()
+    .maybeSingle() as { data: { grace_period_ends_at?: string | null; subscription_tier?: string } | null }
 
   // Use workspace grace_period_ends_at if available, otherwise profile
   const gracePeriodEndsAt = workspace?.grace_period_ends_at || profile?.grace_period_ends_at

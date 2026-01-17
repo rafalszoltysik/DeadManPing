@@ -1,19 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { MonitorDetail } from '@/components/MonitorDetail'
-
-// Use admin client to bypass RLS, but we'll verify ownership via our session
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { verifyMonitorAccessBySlug } from '@/lib/api/monitors'
 
 export default async function MonitorDetailPage(props: {
   params: Promise<{ slug: string }>
@@ -30,54 +19,16 @@ export default async function MonitorDetailPage(props: {
     redirect('/auth/login')
   }
 
-  // Use admin client to fetch monitor (bypasses RLS)
-  // We verify ownership by checking user_id matches session
-  const { data: monitor, error } = await supabaseAdmin
-    .from('monitors')
-    .select('*')
-    .eq('slug', slug)
-    .single()
-
-  if (error) {
-    console.error('Error fetching monitor:', error)
+  // Verify monitor access (checks workspace membership)
+  const accessResult = await verifyMonitorAccessBySlug(slug, session.userId)
+  
+  if (!accessResult.success) {
     redirect('/dashboard')
   }
 
-  if (!monitor) {
-    console.error('Monitor not found for slug:', slug)
-    redirect('/dashboard')
-  }
+  const monitor = accessResult.monitor
 
-  // Verify ownership - check workspace membership
-  if (monitor.workspace_id) {
-    const { data: member } = await supabaseAdmin
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', monitor.workspace_id)
-      .eq('user_id', session.userId)
-      .single()
-
-    if (!member) {
-      // Check if user is workspace owner
-      const { data: workspace } = await supabaseAdmin
-        .from('workspaces')
-        .select('owner_id')
-        .eq('id', monitor.workspace_id)
-        .single()
-
-      if (!workspace || workspace.owner_id !== session.userId) {
-        console.error('Access denied: User is not a member of this workspace')
-        redirect('/dashboard')
-      }
-    }
-  } else {
-    // Legacy: check user_id directly
-    if (monitor.user_id !== session.userId) {
-      console.error('Access denied: Monitor belongs to different user')
-      redirect('/dashboard')
-    }
-  }
-
+  const supabaseAdmin = getSupabaseAdmin()
   const { data: pings } = await supabaseAdmin
     .from('pings')
     .select('*')

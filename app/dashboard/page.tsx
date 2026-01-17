@@ -1,22 +1,10 @@
-import { createClient } from '@supabase/supabase-js'
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { MonitorList } from '@/components/MonitorList'
 import { PlusIcon } from '@/components/Icons'
 import { checkMonitorLimitByWorkspace } from '@/lib/limits'
-
-// Use admin client to bypass RLS, but we'll verify ownership via our session
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function DashboardPage() {
   const session = await verifySession()
@@ -25,11 +13,13 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
+  const supabaseAdmin = getSupabaseAdmin()
+  
   // Get user's workspaces (user can be member of multiple workspaces)
   const { data: workspaceMembers } = await supabaseAdmin
     .from('workspace_members')
     .select('workspace_id')
-    .eq('user_id', session.userId)
+    .eq('user_id', session.userId) as { data: { workspace_id: string }[] | null }
 
   const workspaceIds = workspaceMembers?.map(wm => wm.workspace_id) || []
 
@@ -40,7 +30,7 @@ export default async function DashboardPage() {
       .select('id')
       .eq('owner_id', session.userId)
       .limit(1)
-      .single()
+      .single() as { data: { id: string } | null }
 
     if (ownedWorkspace) {
       workspaceIds.push(ownedWorkspace.id)
@@ -58,7 +48,7 @@ export default async function DashboardPage() {
       .select('*')
       .in('workspace_id', workspaceIds)
       .order('status', { ascending: false })
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }) as { data: any[] | null; error: any }
     
     monitors = result.data
     error = result.error
@@ -69,7 +59,7 @@ export default async function DashboardPage() {
       .select('*')
       .eq('user_id', session.userId)
       .order('status', { ascending: false })
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: false }) as { data: any[] | null; error: any }
     
     monitors = result.data
     error = result.error

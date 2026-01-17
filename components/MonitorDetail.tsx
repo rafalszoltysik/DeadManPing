@@ -4,40 +4,7 @@ import { useState, useEffect } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import Link from 'next/link'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon } from './Icons'
-
-interface Monitor {
-  id: string
-  name: string
-  slug: string
-  status: 'pending' | 'healthy' | 'late' | 'failed'
-  last_ping_at: string | null
-  next_expected_ping_at: string | null
-  expected_interval_seconds: number
-  grace_period_seconds: number
-  payload_validation_rules: any
-  alert_email: string | null
-  slack_webhook_url: string | null
-  discord_webhook_url: string | null
-  custom_webhook_url: string | null
-  created_at: string
-  updated_at: string
-}
-
-interface Ping {
-  id: string
-  status: 'ok' | 'fail'
-  message: string | null
-  duration_ms: number | null
-  metadata: any
-  received_at: string
-}
-
-interface MonitorDetailProps {
-  monitor: Monitor
-  pings: Ping[]
-  pingUrl: string
-  isOnboarding?: boolean
-}
+import { Monitor, Ping, MonitorDetailProps } from '@/lib/types/monitor'
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -47,6 +14,8 @@ function getStatusIcon(status: string) {
       return <StatusLateIcon className="w-5 h-5" />
     case 'failed':
       return <StatusFailedIcon className="w-5 h-5" />
+    case 'paused':
+      return <StatusPendingIcon className="w-5 h-5" />
     default:
       return <StatusPendingIcon className="w-5 h-5" />
   }
@@ -60,6 +29,8 @@ function getStatusColor(status: string) {
       return 'bg-warning/10 text-warning border-warning/20'
     case 'failed':
       return 'bg-error/10 text-error border-error/20'
+    case 'paused':
+      return 'bg-muted text-muted-foreground border-border'
     default:
       return 'bg-muted text-muted-foreground border-border'
   }
@@ -73,6 +44,8 @@ function getStatusLabel(status: string) {
       return 'Late'
     case 'failed':
       return 'Failed'
+    case 'paused':
+      return 'Paused'
     default:
       return 'Pending'
   }
@@ -232,7 +205,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const buildCurlCommand = () => {
     const hasPayloadFields = monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0
     
-    if (hasPayloadFields) {
+    if (hasPayloadFields && monitor.payload_validation_rules) {
       // Build example payload from configured fields
       const examplePayload: Record<string, any> = {}
       monitor.payload_validation_rules.fields.forEach((field: any) => {
