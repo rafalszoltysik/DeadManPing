@@ -1,0 +1,48 @@
+Contact: mailto:security@yourdomain.com
+Expires: 2027-01-01T00:00:00.000Z
+Preferred-Languages: en, pl
+Canonical: https://yourdomain.com/security.txt
+
+# Security Policy
+
+If you discover a security vulnerability in DeadManPing, please report it responsibly.
+
+## Reporting
+
+Please email security@yourdomain.com with:
+- Description of the vulnerability
+- Steps to reproduce
+- Potential impact
+- Any proof of concept code
+
+## Response Time
+
+We aim to respond to security reports within 48 hours.
+
+## Scope
+
+In scope:
+- SQL Injection
+- XSS (Cross-Site Scripting)
+- CSRF (Cross-Site Request Forgery)
+- Authentication/Authorization issues
+- SSRF (Server-Side Request Forgery)
+- Rate limiting bypass
+- Information disclosure
+
+Out of scope:
+- Social engineering
+- Physical attacks
+- DoS/DDoS attacks on infrastructure
+- Issues in third-party dependencies (report to maintainers)
+
+## Disclosure Policy
+
+Please do not publicly disclose the issue until we have addressed it.
+
+## Hall of Fame
+
+We appreciate responsible disclosure and will credit researchers who help us improve security.
+
+Thank you for helping keep DeadManPing secure!
+

@@ -1,0 +1,232 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+
+interface Member {
+  id: string
+  role: 'owner' | 'admin' | 'member'
+  invited_at: string
+  joined_at: string | null
+  profiles: {
+    id: string
+    email: string
+  }
+}
+
+interface TeamMembersProps {
+  workspaceId: string
+  subscriptionTier: string
+  maxMembers: number
+}
+
+export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamMembersProps) {
+  const [members, setMembers] = useState<Member[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviting, setInviting] = useState(false)
+  const [removing, setRemoving] = useState<string | null>(null)
+  const router = useRouter()
+
+  useEffect(() => {
+    fetchMembers()
+  }, [])
+
+  const fetchMembers = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/workspace/members')
+      if (!response.ok) {
+        throw new Error('Failed to fetch members')
+      }
+      const data = await response.json()
+      setMembers(data.members || [])
+    } catch (err: any) {
+      setError(err.message || 'Failed to load members')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!inviteEmail.trim()) {
+      setError('Email is required')
+      return
+    }
+
+    setInviting(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/workspace/members', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteEmail.trim() }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add member')
+      }
+
+      setInviteEmail('')
+      await fetchMembers()
+    } catch (err: any) {
+      setError(err.message || 'Failed to add member')
+    } finally {
+      setInviting(false)
+    }
+  }
+
+  const handleRemove = async (memberId: string) => {
+    if (!confirm('Are you sure you want to remove this member?')) {
+      return
+    }
+
+    setRemoving(memberId)
+    setError(null)
+
+    try {
+      const response = await fetch(`/api/workspace/members?memberId=${memberId}`, {
+        method: 'DELETE',
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to remove member')
+      }
+
+      await fetchMembers()
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove member')
+    } finally {
+      setRemoving(null)
+    }
+  }
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'owner':
+        return 'Owner'
+      case 'admin':
+        return 'Admin'
+      case 'member':
+        return 'Member'
+      default:
+        return role
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-muted-foreground">Loading members...</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {error && (
+        <div className="bg-error/10 border border-error/20 rounded-lg p-4 text-sm text-error">
+          {error}
+        </div>
+      )}
+
+      {/* Member limit info */}
+      <div className="bg-card border border-border rounded-lg p-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-medium">Members</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {members.length} of {maxMembers} members
+            </p>
+          </div>
+          {members.length >= maxMembers && (
+            <span className="text-xs text-warning">Limit reached</span>
+          )}
+        </div>
+      </div>
+
+      {/* Invite form */}
+      {members.length < maxMembers && (
+        <form onSubmit={handleInvite} className="bg-card border border-border rounded-lg p-6">
+          <h2 className="text-lg font-semibold mb-4">Invite Team Member</h2>
+          <div className="flex gap-3">
+            <input
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="Enter email address"
+              className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              disabled={inviting}
+            />
+            <button
+              type="submit"
+              disabled={inviting || !inviteEmail.trim()}
+              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            >
+              {inviting ? 'Adding...' : 'Add Member'}
+            </button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-2">
+            The user must have an account. They will be added immediately if they exist.
+          </p>
+        </form>
+      )}
+
+      {/* Members list */}
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="p-6 border-b border-border">
+          <h2 className="text-lg font-semibold">Current Members</h2>
+        </div>
+        <div className="divide-y divide-border">
+          {members.length === 0 ? (
+            <div className="p-6 text-center text-muted-foreground text-sm">
+              No members yet. Invite someone to get started!
+            </div>
+          ) : (
+            members.map((member) => (
+              <div
+                key={member.id}
+                className="p-6 flex items-center justify-between hover:bg-accent/50 transition-smooth"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                      {member.profiles.email.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium">{member.profiles.email}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {getRoleLabel(member.role)}
+                        {member.joined_at && (
+                          <> • Joined {new Date(member.joined_at).toLocaleDateString()}</>
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {member.role !== 'owner' && (
+                  <button
+                    onClick={() => handleRemove(member.id)}
+                    disabled={removing === member.id}
+                    className="px-4 py-2 text-sm text-error hover:bg-error/10 rounded-lg transition-smooth disabled:opacity-50"
+                  >
+                    {removing === member.id ? 'Removing...' : 'Remove'}
+                  </button>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+

@@ -1,0 +1,46 @@
+import type { Metadata } from "next";
+import "./globals.css";
+import { CookieBanner } from '@/components/CookieBanner'
+import { ThemeProvider } from '@/components/ThemeProvider'
+
+export const metadata: Metadata = {
+  title: "DeadManPing - Monitor Your Cron Jobs",
+  description: "Simple dead-man switch monitoring for your cron jobs and scheduled tasks",
+  keywords: "cron monitoring, job monitoring, dead man switch, scheduled tasks, cron jobs",
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
+  openGraph: {
+    title: "DeadManPing - Never Miss a Cron Job Again",
+    description: "Simple dead-man switch monitoring for your cron jobs and scheduled tasks. Get alerted when your backups, reports, or sync jobs don't run.",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DeadManPing - Never Miss a Cron Job Again",
+    description: "Simple dead-man switch monitoring for your cron jobs and scheduled tasks.",
+  },
+  alternates: {
+    canonical: "/",
+  },
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" suppressHydrationWarning className="dark">
+      <body>
+        <ThemeProvider>
+          {children}
+          <CookieBanner />
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+
