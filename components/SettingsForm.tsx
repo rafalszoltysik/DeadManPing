@@ -18,15 +18,18 @@ interface Profile {
 
 interface SettingsFormProps {
   profile: Profile
-  portalUrl: string | null
+  hasStripeCustomer: boolean
+  trialDaysRemaining?: number | null
+  isTrialExpired?: boolean
 }
 
-export function SettingsForm({ profile, portalUrl }: SettingsFormProps) {
+export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, isTrialExpired }: SettingsFormProps) {
   const [slackWebhook, setSlackWebhook] = useState(profile.slack_webhook_url || '')
   const [discordWebhook, setDiscordWebhook] = useState(profile.discord_webhook_url || '')
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
   const [alertEmail, setAlertEmail] = useState(profile.alert_email || '')
   const [loading, setLoading] = useState(false)
+  const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
@@ -180,6 +183,35 @@ export function SettingsForm({ profile, portalUrl }: SettingsFormProps) {
     }
   }
 
+  const handleManageSubscription = async () => {
+    setPortalLoading(true)
+    setError(null)
+
+    try {
+      const response = await fetch('/api/billing/create-portal-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to create portal session')
+      }
+
+      const data = await response.json()
+      if (data.url) {
+        window.location.href = data.url
+      } else {
+        throw new Error('No portal URL received')
+      }
+    } catch (err: any) {
+      setError(err.message)
+      setPortalLoading(false)
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Subscription Section */}
@@ -202,7 +234,7 @@ export function SettingsForm({ profile, portalUrl }: SettingsFormProps) {
               {profile.subscription_status}
             </span>
           </div>
-          {portalUrl ? (
+          {hasStripeCustomer ? (
             <div className="pt-2 space-y-2">
               <div className="flex flex-col sm:flex-row gap-2">
                 <Link
@@ -211,14 +243,13 @@ export function SettingsForm({ profile, portalUrl }: SettingsFormProps) {
                 >
                   Upgrade Plan
                 </Link>
-                <a
-                  href={portalUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth text-center border border-border"
+                <button
+                  onClick={handleManageSubscription}
+                  disabled={portalLoading}
+                  className="inline-block w-full sm:w-auto bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth text-center border border-border disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Manage Subscription
-                </a>
+                  {portalLoading ? 'Loading...' : 'Manage Subscription'}
+                </button>
               </div>
               <p className="text-xs text-muted-foreground">
                 Upgrade your plan to get more features, or manage your subscription, payment method, and invoices in Stripe Customer Portal.

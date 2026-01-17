@@ -15,6 +15,76 @@ const supabaseAdmin = createClient(
   }
 )
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // Verify session
+    const session = await verifySession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { slug } = await params
+
+    // Find monitor by slug and verify ownership
+    const { data: monitor, error: monitorError } = await supabaseAdmin
+      .from('monitors')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+
+    if (monitorError || !monitor) {
+      return NextResponse.json({ error: 'Monitor not found' }, { status: 404 })
+    }
+
+    // Verify workspace membership
+    if (monitor.workspace_id) {
+      const { data: member } = await supabaseAdmin
+        .from('workspace_members')
+        .select('id')
+        .eq('workspace_id', monitor.workspace_id)
+        .eq('user_id', session.userId)
+        .single()
+
+      if (!member) {
+        // Check if user is workspace owner
+        const { data: workspace } = await supabaseAdmin
+          .from('workspaces')
+          .select('owner_id')
+          .eq('id', monitor.workspace_id)
+          .single()
+
+        if (!workspace || workspace.owner_id !== session.userId) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+        }
+      }
+    } else {
+      // Legacy: check user_id directly
+      if (monitor.user_id !== session.userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
+    }
+
+    // Get pings
+    const { data: pings } = await supabaseAdmin
+      .from('pings')
+      .select('*')
+      .eq('monitor_id', monitor.id)
+      .order('received_at', { ascending: false })
+      .limit(50)
+
+    return NextResponse.json({ monitor, pings: pings || [] }, { status: 200 })
+  } catch (error) {
+    console.error('Error in get monitor API:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

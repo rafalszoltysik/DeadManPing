@@ -77,10 +77,12 @@ function getStatusLabel(status: string) {
   }
 }
 
-export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: MonitorDetailProps) {
+export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pingUrl, isOnboarding }: MonitorDetailProps) {
+  const [monitor, setMonitor] = useState(initialMonitor)
+  const [pings, setPings] = useState(initialPings)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [copiedCurl, setCopiedCurl] = useState(false)
-  const [waitingForPing, setWaitingForPing] = useState(monitor.status === 'pending' && pings.length === 0)
+  const [waitingForPing, setWaitingForPing] = useState(initialMonitor.status === 'pending' && initialPings.length === 0)
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
   const [editingPayloadRules, setEditingPayloadRules] = useState(false)
   const [payloadFields, setPayloadFields] = useState<Array<{
@@ -98,8 +100,11 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
   const [customWebhook, setCustomWebhook] = useState('')
   const [userTier, setUserTier] = useState('free')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [payloadError, setPayloadError] = useState<string | null>(null)
+  const [payloadSuccess, setPayloadSuccess] = useState(false)
+  const [alertChannelsError, setAlertChannelsError] = useState<string | null>(null)
+  const [alertChannelsSuccess, setAlertChannelsSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null) // For delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   
@@ -122,7 +127,7 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
     fetchUserTier()
   }, [])
 
-  // Load existing payload validation rules
+  // Load existing payload validation rules when monitor changes
   useEffect(() => {
     if (monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
       const fields = monitor.payload_validation_rules.fields.map((field: any) => ({
@@ -137,6 +142,22 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
       setPayloadFields([])
     }
   }, [monitor.payload_validation_rules])
+
+  // Reload payload fields when opening edit mode (in case monitor was updated)
+  useEffect(() => {
+    if (editingPayloadRules && monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
+      const fields = monitor.payload_validation_rules.fields.map((field: any) => ({
+        name: field.name || '',
+        type: field.type || 'number',
+        rule: field.rule || '>',
+        value: String(field.value ?? ''),
+        severity: field.severity || 'error',
+      }))
+      setPayloadFields(fields)
+    } else if (editingPayloadRules && (!monitor.payload_validation_rules || !monitor.payload_validation_rules.fields)) {
+      setPayloadFields([])
+    }
+  }, [editingPayloadRules])
 
   // Load existing alert channel overrides
   useEffect(() => {
@@ -206,16 +227,42 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
     setTimeout(() => setCopiedCurl(false), 2000)
   }
 
-  // Poll for new pings if onboarding
+  // Fetch latest monitor and pings data
+  const fetchMonitorData = async () => {
+    try {
+      const response = await fetch(`/api/monitors/${monitor.slug}/update`)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.monitor) {
+          setMonitor(data.monitor)
+        }
+        if (data.pings) {
+          setPings(data.pings)
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching monitor data:', err)
+    }
+  }
+
+  // Poll for new pings and monitor updates
   useEffect(() => {
+    // Poll every 5 seconds if onboarding and waiting for first ping
     if (isOnboarding && waitingForPing) {
       const interval = setInterval(() => {
-        window.location.reload()
+        fetchMonitorData()
       }, 5000)
 
       return () => clearInterval(interval)
+    } else {
+      // Poll every 10 seconds for regular updates
+      const interval = setInterval(() => {
+        fetchMonitorData()
+      }, 10000)
+
+      return () => clearInterval(interval)
     }
-  }, [isOnboarding, waitingForPing])
+  }, [isOnboarding, waitingForPing, monitor.slug])
 
   useEffect(() => {
     if (pings.length > 0 && waitingForPing) {
@@ -225,8 +272,8 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
 
   const handleSavePayloadRules = async () => {
     setLoading(true)
-    setError(null)
-    setSuccess(false)
+    setPayloadError(null)
+    setPayloadSuccess(false)
 
     try {
       // Build payload validation rules from fields
@@ -281,13 +328,15 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
         throw new Error(data.error || 'Failed to update payload validation rules')
       }
 
-      setSuccess(true)
+      setPayloadSuccess(true)
       setEditingPayloadRules(false)
+      // Refresh monitor data instead of full page reload
+      await fetchMonitorData()
       setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+        setPayloadSuccess(false)
+      }, 3000)
     } catch (err: any) {
-      setError(err.message)
+      setPayloadError(err.message)
     } finally {
       setLoading(false)
     }
@@ -295,8 +344,8 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
 
   const handleSaveAlertChannels = async () => {
     setLoading(true)
-    setError(null)
-    setSuccess(false)
+    setAlertChannelsError(null)
+    setAlertChannelsSuccess(false)
 
     const alertChannels: any = {}
     if (alertEmail.trim()) {
@@ -328,13 +377,15 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
         throw new Error(data.error || 'Failed to update alert channels')
       }
 
-      setSuccess(true)
+      setAlertChannelsSuccess(true)
       setEditingAlertChannels(false)
+      // Refresh monitor data instead of full page reload
+      await fetchMonitorData()
       setTimeout(() => {
-        window.location.reload()
-      }, 1000)
+        setAlertChannelsSuccess(false)
+      }, 3000)
     } catch (err: any) {
-      setError(err.message)
+      setAlertChannelsError(err.message)
     } finally {
       setLoading(false)
     }
@@ -564,13 +615,13 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
           )}
         </div>
 
-        {error && (
+        {payloadError && (
           <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-4 text-sm">
-            {error}
+            {payloadError}
           </div>
         )}
 
-        {success && (
+        {payloadSuccess && (
           <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg mb-4 text-sm">
             Payload validation rules updated successfully!
           </div>
@@ -760,8 +811,8 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
                 type="button"
                 onClick={() => {
                   setEditingPayloadRules(false)
-                  setError(null)
-                  setSuccess(false)
+                  setPayloadError(null)
+                  setPayloadSuccess(false)
                   // Reset to original values
                   if (monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
                     const fields = monitor.payload_validation_rules.fields.map((field: any) => ({
@@ -827,13 +878,13 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
           )}
         </div>
 
-        {error && (
+        {alertChannelsError && (
           <div className="mx-4 sm:mx-6 mt-4 bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg text-sm">
-            {error}
+            {alertChannelsError}
           </div>
         )}
 
-        {success && (
+        {alertChannelsSuccess && (
           <div className="mx-4 sm:mx-6 mt-4 bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg text-sm">
             Alert channels updated successfully!
           </div>
@@ -928,8 +979,8 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
                 type="button"
                 onClick={() => {
                   setEditingAlertChannels(false)
-                  setError(null)
-                  setSuccess(false)
+                  setAlertChannelsError(null)
+                  setAlertChannelsSuccess(false)
                   // Reset to original values
                   setAlertEmail(monitor.alert_email || '')
                   setSlackWebhook(monitor.slack_webhook_url || '')

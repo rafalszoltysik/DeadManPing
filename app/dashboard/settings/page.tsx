@@ -2,7 +2,6 @@ import { createClient } from '@supabase/supabase-js'
 import { verifySession } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
 import { SettingsForm } from '@/components/SettingsForm'
-import { stripe } from '@/lib/stripe'
 
 // Use admin client to bypass RLS, but we'll verify ownership via our session
 const supabaseAdmin = createClient(
@@ -64,19 +63,8 @@ export default async function SettingsPage() {
     redirect('/dashboard')
   }
 
-  // Get Stripe customer portal URL if customer exists
-  let portalUrl: string | null = null
-  if (profile.stripe_customer_id) {
-    try {
-      const session = await stripe.billingPortal.sessions.create({
-        customer: profile.stripe_customer_id,
-        return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
-      })
-      portalUrl = session.url
-    } catch (error) {
-      console.error('Error creating portal session:', error)
-    }
-  }
+  // Check if user has Stripe customer ID (portal URL will be created on-demand via API)
+  const hasStripeCustomer = !!profile.stripe_customer_id
 
   // Calculate trial days remaining
   let trialDaysRemaining: number | null = null
@@ -128,7 +116,7 @@ export default async function SettingsPage() {
 
       <SettingsForm 
         profile={profile} 
-        portalUrl={portalUrl}
+        hasStripeCustomer={hasStripeCustomer}
         trialDaysRemaining={trialDaysRemaining}
         isTrialExpired={isTrialExpired}
       />
