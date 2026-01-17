@@ -1,165 +1,124 @@
 /**
- * Payload validation rules structure:
+ * New payload validation rules structure:
  * {
- *   maxDurationMs?: number,
- *   minCount?: number,
- *   maxCount?: number,
- *   requiredFields?: Record<string, any>,
- *   customChecks?: Array<{
- *     field: string,
- *     operator: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'notIn' | 'exists',
- *     value: any
- *   }>
+ *   fields: [
+ *     {
+ *       name: string,           // Field name in payload (e.g., "count")
+ *       type: "number" | "boolean" | "string",
+ *       rule: ">" | "<" | ">=" | "<=" | "==" | "!=",
+ *       value: number | boolean | string,  // Value to compare against
+ *       severity?: "warn" | "error"       // Optional, defaults to "error"
+ *     }
+ *   ]
  * }
+ * 
+ * Max 5 fields (MVP: 1 field)
+ * Only declared fields are processed, rest is ignored
  */
 
-interface PayloadValidationRules {
-  maxDurationMs?: number
-  minCount?: number
-  maxCount?: number
-  requiredFields?: Record<string, any>
-  customChecks?: Array<{
-    field: string
-    operator: 'eq' | 'gt' | 'lt' | 'gte' | 'lte' | 'in' | 'notIn' | 'exists'
-    value: any
-  }>
+export interface PayloadField {
+  name: string
+  type: 'number' | 'boolean' | 'string'
+  rule: '>' | '<' | '>=' | '<=' | '==' | '!='
+  value: number | boolean | string
+  severity?: 'warn' | 'error'
+}
+
+export interface PayloadValidationRules {
+  fields: PayloadField[]
 }
 
 interface PayloadData {
-  s?: 'ok' | 'fail'
-  m?: string
-  d?: number
-  count?: number
-  [key: string]: any // for metadata fields
+  [key: string]: any // User can send any JSON, we only read declared fields
 }
 
 interface ValidationResult {
   valid: boolean
   errors: string[]
+  failedFields?: string[] // Names of fields that failed validation
 }
 
-/**
- * Get nested value from object using dot notation (e.g., "metadata.file_exists")
- */
-function getNestedValue(obj: any, path: string): any {
-  const parts = path.split('.')
-  let current = obj
-  for (const part of parts) {
-    if (current === null || current === undefined) {
-      return undefined
-    }
-    current = current[part]
-  }
-  return current
-}
+const MAX_FIELDS = 5 // Max fields per monitor (MVP can start with 1)
 
 /**
  * Validate payload against validation rules
+ * Only processes fields declared in rules, ignores everything else
  */
 export function validatePayload(
   payload: PayloadData,
   rules: PayloadValidationRules | null | undefined
 ): ValidationResult {
   const errors: string[] = []
+  const failedFields: string[] = []
 
-  if (!rules) {
+  if (!rules || !rules.fields || rules.fields.length === 0) {
     return { valid: true, errors: [] }
   }
 
-  // Validate max duration
-  if (rules.maxDurationMs !== undefined && payload.d !== undefined) {
-    if (payload.d > rules.maxDurationMs) {
-      errors.push(
-        `Execution time (${payload.d}ms) exceeds maximum allowed (${rules.maxDurationMs}ms)`
-      )
-    }
-  }
+  // Process only declared fields
+  for (const field of rules.fields) {
+    const fieldValue = payload[field.name]
 
-  // Validate count range
-  if (rules.minCount !== undefined && payload.count !== undefined) {
-    if (payload.count < rules.minCount) {
-      errors.push(
-        `Count (${payload.count}) is below minimum (${rules.minCount})`
-      )
+    // Check if field exists
+    if (fieldValue === undefined || fieldValue === null) {
+      errors.push(`Field '${field.name}' is missing`)
+      failedFields.push(field.name)
+      continue
     }
-  }
 
-  if (rules.maxCount !== undefined && payload.count !== undefined) {
-    if (payload.count > rules.maxCount) {
-      errors.push(
-        `Count (${payload.count}) exceeds maximum (${rules.maxCount})`
-      )
+    // Check type
+    let actualType: string
+    if (typeof fieldValue === 'number') {
+      actualType = 'number'
+    } else if (typeof fieldValue === 'boolean') {
+      actualType = 'boolean'
+    } else if (typeof fieldValue === 'string') {
+      actualType = 'string'
+    } else {
+      errors.push(`Field '${field.name}' has invalid type (expected ${field.type}, got ${typeof fieldValue})`)
+      failedFields.push(field.name)
+      continue
     }
-  }
 
-  // Validate required fields (check in metadata or top-level)
-  if (rules.requiredFields) {
-    for (const [fieldName, expectedValue] of Object.entries(rules.requiredFields)) {
-      const fieldValue = getNestedValue(payload, fieldName) ?? getNestedValue(payload, `metadata.${fieldName}`)
-      
-      if (fieldValue === undefined) {
-        errors.push(`Required field '${fieldName}' is missing`)
-      } else if (expectedValue !== null && fieldValue !== expectedValue) {
-        errors.push(
-          `Field '${fieldName}' has value '${fieldValue}' but expected '${expectedValue}'`
-        )
-      }
+    if (actualType !== field.type) {
+      errors.push(`Field '${field.name}' has wrong type (expected ${field.type}, got ${actualType})`)
+      failedFields.push(field.name)
+      continue
     }
-  }
 
-  // Validate custom checks
-  if (rules.customChecks) {
-    for (const check of rules.customChecks) {
-      const fieldValue = getNestedValue(payload, check.field) ?? getNestedValue(payload, `metadata.${check.field}`)
-      
-      switch (check.operator) {
-        case 'eq':
-          if (fieldValue !== check.value) {
-            errors.push(`Field '${check.field}' (${fieldValue}) is not equal to ${check.value}`)
-          }
-          break
-        case 'gt':
-          if (fieldValue === undefined || fieldValue <= check.value) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must be greater than ${check.value}`)
-          }
-          break
-        case 'lt':
-          if (fieldValue === undefined || fieldValue >= check.value) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must be less than ${check.value}`)
-          }
-          break
-        case 'gte':
-          if (fieldValue === undefined || fieldValue < check.value) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must be greater than or equal to ${check.value}`)
-          }
-          break
-        case 'lte':
-          if (fieldValue === undefined || fieldValue > check.value) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must be less than or equal to ${check.value}`)
-          }
-          break
-        case 'in':
-          if (!Array.isArray(check.value) || !check.value.includes(fieldValue)) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must be one of: ${check.value.join(', ')}`)
-          }
-          break
-        case 'notIn':
-          if (Array.isArray(check.value) && check.value.includes(fieldValue)) {
-            errors.push(`Field '${check.field}' (${fieldValue}) must not be one of: ${check.value.join(', ')}`)
-          }
-          break
-        case 'exists':
-          if (fieldValue === undefined || fieldValue === null) {
-            errors.push(`Field '${check.field}' must exist`)
-          }
-          break
-      }
+    // Check rule
+    let rulePassed = false
+    switch (field.rule) {
+      case '>':
+        rulePassed = (fieldValue as number) > (field.value as number)
+        break
+      case '<':
+        rulePassed = (fieldValue as number) < (field.value as number)
+        break
+      case '>=':
+        rulePassed = (fieldValue as number) >= (field.value as number)
+        break
+      case '<=':
+        rulePassed = (fieldValue as number) <= (field.value as number)
+        break
+      case '==':
+        rulePassed = fieldValue === field.value
+        break
+      case '!=':
+        rulePassed = fieldValue !== field.value
+        break
+    }
+
+    if (!rulePassed) {
+      errors.push(`Field '${field.name}' (${fieldValue}) does not satisfy rule: ${field.rule} ${field.value}`)
+      failedFields.push(field.name)
     }
   }
 
   return {
     valid: errors.length === 0,
     errors,
+    failedFields: failedFields.length > 0 ? failedFields : undefined,
   }
 }
 
@@ -175,78 +134,98 @@ export function validatePayloadRules(rules: any): {
     return { valid: true, sanitized: undefined }
   }
 
-  const sanitized: PayloadValidationRules = {}
-
-  // Validate maxDurationMs
-  if (rules.maxDurationMs !== undefined) {
-    if (typeof rules.maxDurationMs !== 'number' || rules.maxDurationMs < 0 || rules.maxDurationMs > 3600000) {
-      return { valid: false, error: 'maxDurationMs must be a number between 0 and 3600000' }
-    }
-    sanitized.maxDurationMs = rules.maxDurationMs
+  // Check if it's the new structure
+  if (!rules.fields || !Array.isArray(rules.fields)) {
+    return { valid: false, error: 'Payload validation rules must have a "fields" array' }
   }
 
-  // Validate minCount
-  if (rules.minCount !== undefined) {
-    if (typeof rules.minCount !== 'number' || rules.minCount < 0) {
-      return { valid: false, error: 'minCount must be a non-negative number' }
-    }
-    sanitized.minCount = rules.minCount
+  if (rules.fields.length === 0) {
+    return { valid: true, sanitized: undefined }
   }
 
-  // Validate maxCount
-  if (rules.maxCount !== undefined) {
-    if (typeof rules.maxCount !== 'number' || rules.maxCount < 0) {
-      return { valid: false, error: 'maxCount must be a non-negative number' }
-    }
-    sanitized.maxCount = rules.maxCount
+  if (rules.fields.length > MAX_FIELDS) {
+    return { valid: false, error: `Maximum ${MAX_FIELDS} fields allowed per monitor` }
   }
 
-  // Validate minCount <= maxCount if both are set
-  if (sanitized.minCount !== undefined && sanitized.maxCount !== undefined) {
-    if (sanitized.minCount > sanitized.maxCount) {
-      return { valid: false, error: 'minCount cannot be greater than maxCount' }
-    }
-  }
+  const validTypes = ['number', 'boolean', 'string']
+  const validRules = ['>', '<', '>=', '<=', '==', '!=']
+  const validSeverities = ['warn', 'error']
 
-  // Validate requiredFields
-  if (rules.requiredFields !== undefined) {
-    if (typeof rules.requiredFields !== 'object' || Array.isArray(rules.requiredFields)) {
-      return { valid: false, error: 'requiredFields must be an object' }
-    }
-    if (Object.keys(rules.requiredFields).length > 10) {
-      return { valid: false, error: 'requiredFields cannot have more than 10 fields' }
-    }
-    sanitized.requiredFields = rules.requiredFields
-  }
+  const sanitizedFields: PayloadField[] = []
 
-  // Validate customChecks
-  if (rules.customChecks !== undefined) {
-    if (!Array.isArray(rules.customChecks)) {
-      return { valid: false, error: 'customChecks must be an array' }
-    }
-    if (rules.customChecks.length > 20) {
-      return { valid: false, error: 'customChecks cannot have more than 20 checks' }
+  for (let i = 0; i < rules.fields.length; i++) {
+    const field = rules.fields[i]
+
+    if (!field || typeof field !== 'object') {
+      return { valid: false, error: `fields[${i}] must be an object` }
     }
 
-    const validOperators = ['eq', 'gt', 'lt', 'gte', 'lte', 'in', 'notIn', 'exists']
-    for (let i = 0; i < rules.customChecks.length; i++) {
-      const check = rules.customChecks[i]
-      if (typeof check !== 'object' || !check.field || !check.operator) {
-        return { valid: false, error: `customChecks[${i}] must have 'field' and 'operator' properties` }
+    // Validate name
+    if (!field.name || typeof field.name !== 'string' || field.name.trim().length === 0) {
+      return { valid: false, error: `fields[${i}].name is required and must be a non-empty string` }
+    }
+    if (field.name.length > 100) {
+      return { valid: false, error: `fields[${i}].name must be 100 characters or less` }
+    }
+
+    // Validate type
+    if (!validTypes.includes(field.type)) {
+      return { valid: false, error: `fields[${i}].type must be one of: ${validTypes.join(', ')}` }
+    }
+
+    // Validate rule
+    if (!validRules.includes(field.rule)) {
+      return { valid: false, error: `fields[${i}].rule must be one of: ${validRules.join(', ')}` }
+    }
+
+    // Validate value type matches field type
+    if (field.type === 'number') {
+      if (typeof field.value !== 'number') {
+        return { valid: false, error: `fields[${i}].value must be a number when type is "number"` }
       }
-      if (typeof check.field !== 'string' || check.field.length > 100) {
-        return { valid: false, error: `customChecks[${i}].field must be a string with max 100 characters` }
+      // Only allow comparison operators for numbers
+      if (!['>', '<', '>=', '<=', '==', '!='].includes(field.rule)) {
+        return { valid: false, error: `fields[${i}].rule must be a comparison operator (>, <, >=, <=, ==, !=) for number type` }
       }
-      if (!validOperators.includes(check.operator)) {
-        return { valid: false, error: `customChecks[${i}].operator must be one of: ${validOperators.join(', ')}` }
+    } else if (field.type === 'boolean') {
+      if (typeof field.value !== 'boolean') {
+        return { valid: false, error: `fields[${i}].value must be a boolean when type is "boolean"` }
       }
-      if (check.operator !== 'exists' && !('value' in check)) {
-        return { valid: false, error: `customChecks[${i}] must have 'value' property when operator is not 'exists'` }
+      // Only allow equality operators for booleans
+      if (!['==', '!='].includes(field.rule)) {
+        return { valid: false, error: `fields[${i}].rule must be == or != for boolean type` }
+      }
+    } else if (field.type === 'string') {
+      if (typeof field.value !== 'string') {
+        return { valid: false, error: `fields[${i}].value must be a string when type is "string"` }
+      }
+      // Only allow equality operators for strings
+      if (!['==', '!='].includes(field.rule)) {
+        return { valid: false, error: `fields[${i}].rule must be == or != for string type` }
       }
     }
-    sanitized.customChecks = rules.customChecks
+
+    // Validate severity (optional)
+    if (field.severity !== undefined) {
+      if (!validSeverities.includes(field.severity)) {
+        return { valid: false, error: `fields[${i}].severity must be one of: ${validSeverities.join(', ')}` }
+      }
+    }
+
+    // Sanitize field
+    sanitizedFields.push({
+      name: field.name.trim(),
+      type: field.type,
+      rule: field.rule,
+      value: field.value,
+      severity: field.severity || 'error', // Default to 'error'
+    })
   }
 
-  return { valid: true, sanitized }
+  return {
+    valid: true,
+    sanitized: {
+      fields: sanitizedFields,
+    },
+  }
 }
-

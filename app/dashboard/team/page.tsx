@@ -21,20 +21,24 @@ export default async function TeamPage() {
     redirect('/auth/login')
   }
 
-  // Get user's workspace
+  // Get user's profile and workspace
+  const { data: profile } = await supabaseAdmin
+    .from('profiles')
+    .select('subscription_tier')
+    .eq('id', session.userId)
+    .single()
+
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
     .select('id, subscription_tier, max_members')
     .eq('owner_id', session.userId)
     .limit(1)
-    .single()
+    .maybeSingle()
 
-  if (!workspace) {
-    redirect('/dashboard')
-  }
-
+  const subscriptionTier = workspace?.subscription_tier || profile?.subscription_tier || 'free'
+  
   // Check if plan supports team members (Pro: 3, Team: 10)
-  const supportsMembers = ['pro', 'team'].includes(workspace.subscription_tier)
+  const supportsMembers = ['pro', 'team'].includes(subscriptionTier)
 
   return (
     <div>
@@ -50,6 +54,19 @@ export default async function TeamPage() {
           <h2 className="text-lg font-semibold text-warning mb-2">Team members not available</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Team collaboration is available on Pro (3 members) and Team (10 members) plans.
+          </p>
+          <a
+            href="/dashboard/billing"
+            className="inline-block px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-smooth text-sm font-medium"
+          >
+            Upgrade Plan
+          </a>
+        </div>
+      ) : !workspace ? (
+        <div className="bg-warning/10 border border-warning/20 rounded-lg p-6">
+          <h2 className="text-lg font-semibold text-warning mb-2">Workspace required</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            You need to have a workspace to manage team members. Please upgrade to Pro or Team plan to create a workspace.
           </p>
           <a
             href="/dashboard/billing"

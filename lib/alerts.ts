@@ -165,9 +165,14 @@ async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   const body = getEmailBody(monitor, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
 
+  // Use environment variable for from email, or fallback to Resend's default domain for development
+  // For production, set RESEND_FROM_EMAIL in environment variables
+  // For development, Resend allows using onboarding@resend.dev
+  const fromEmail = process.env.RESEND_FROM_EMAIL || 'DeadManPing <onboarding@resend.dev>'
+
   try {
     const { data, error } = await resend.emails.send({
-      from: 'DeadManPing <alerts@deadmanping.com>',
+      from: fromEmail,
       to: email,
       subject,
       html: `

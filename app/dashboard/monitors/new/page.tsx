@@ -15,10 +15,13 @@ function NewMonitorForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
-  const [maxDurationMs, setMaxDurationMs] = useState<number | ''>('')
-  const [minCount, setMinCount] = useState<number | ''>('')
-  const [maxCount, setMaxCount] = useState<number | ''>('')
-  const [requiredFields, setRequiredFields] = useState<Array<{ key: string; value: string }>>([])
+  const [payloadFields, setPayloadFields] = useState<Array<{
+    name: string
+    type: 'number' | 'boolean' | 'string'
+    rule: '>' | '<' | '>=' | '<=' | '==' | '!='
+    value: string
+    severity: 'warn' | 'error'
+  }>>([])
   const [showAlertChannels, setShowAlertChannels] = useState(false)
   const [alertEmail, setAlertEmail] = useState('')
   const [slackWebhook, setSlackWebhook] = useState('')
@@ -124,32 +127,40 @@ function NewMonitorForm() {
     // gracePeriodHours is always stored in hours (conversion happens in setGraceValue)
     const gracePeriodSeconds = gracePeriodHours * 3600
 
-    // Build payload validation rules
-    const payloadValidationRules: any = {}
-    if (maxDurationMs !== '') {
-      payloadValidationRules.maxDurationMs = Number(maxDurationMs)
-    }
-    if (minCount !== '') {
-      payloadValidationRules.minCount = Number(minCount)
-    }
-    if (maxCount !== '') {
-      payloadValidationRules.maxCount = Number(maxCount)
-    }
-    if (requiredFields.length > 0) {
-      const requiredFieldsObj: Record<string, any> = {}
-      requiredFields.forEach((field) => {
-        if (field.key.trim()) {
-          // Try to parse as number or boolean, otherwise use as string
-          let value: any = field.value.trim()
-          if (value === 'true') value = true
-          else if (value === 'false') value = false
-          else if (!isNaN(Number(value)) && value !== '') value = Number(value)
-          else if (value === '') value = null
-          requiredFieldsObj[field.key.trim()] = value
-        }
-      })
-      if (Object.keys(requiredFieldsObj).length > 0) {
-        payloadValidationRules.requiredFields = requiredFieldsObj
+    // Build payload validation rules from fields
+    let payloadValidationRules: any = null
+    if (payloadFields.length > 0) {
+      const fields = payloadFields
+        .filter((field) => field.name.trim() !== '')
+        .map((field) => {
+          // Parse value based on type
+          let parsedValue: number | boolean | string
+          if (field.type === 'number') {
+            parsedValue = Number(field.value)
+            if (isNaN(parsedValue)) {
+              throw new Error(`Field "${field.name}" value must be a valid number`)
+            }
+          } else if (field.type === 'boolean') {
+            if (field.value === 'true') parsedValue = true
+            else if (field.value === 'false') parsedValue = false
+            else {
+              throw new Error(`Field "${field.name}" value must be "true" or "false"`)
+            }
+          } else {
+            parsedValue = field.value
+          }
+
+          return {
+            name: field.name.trim(),
+            type: field.type,
+            rule: field.rule,
+            value: parsedValue,
+            severity: field.severity || 'error',
+          }
+        })
+
+      if (fields.length > 0) {
+        payloadValidationRules = { fields }
       }
     }
 
@@ -159,8 +170,8 @@ function NewMonitorForm() {
       gracePeriodSeconds,
     }
 
-    // Only include payload validation rules if any are set
-    if (Object.keys(payloadValidationRules).length > 0) {
+    // Include payload validation rules if any fields are configured
+    if (payloadValidationRules) {
       requestBody.payloadValidationRules = payloadValidationRules
     }
 
@@ -388,7 +399,7 @@ function NewMonitorForm() {
               <div>
                 <h3 className="text-sm font-medium group-hover:text-primary transition-smooth">Payload Validation (Optional)</h3>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Verify that your cron job executed correctly by validating payload data
+                  Verify that your cron job executed correctly by validating payload fields
                 </p>
               </div>
               <span className="text-muted-foreground text-lg transition-transform group-hover:text-primary">
@@ -399,126 +410,171 @@ function NewMonitorForm() {
             {showPayloadValidation && (
               <div className="mt-4 space-y-4 pl-4 border-l-2 border-border">
                 <div>
-                  <label htmlFor="maxDuration" className="block text-sm font-medium mb-2">
-                    Max Execution Time (milliseconds)
-                  </label>
-                  <input
-                    id="maxDuration"
-                    type="number"
-                    min="0"
-                    max="3600000"
-                    value={maxDurationMs}
-                    onChange={(e) => {
-                      const val = e.target.value === '' ? '' : Number(e.target.value)
-                      setMaxDurationMs(val as number | '')
-                    }}
-                    placeholder="e.g., 5000 (5 seconds)"
-                    className="w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-                  />
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Alert if script execution time exceeds this value
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="minCount" className="block text-sm font-medium mb-2">
-                      Min Count
-                    </label>
-                    <input
-                      id="minCount"
-                      type="number"
-                      min="0"
-                      value={minCount}
-                      onChange={(e) => {
-                        const val = e.target.value === '' ? '' : Number(e.target.value)
-                        setMinCount(val as number | '')
-                      }}
-                      placeholder="e.g., 10"
-                      className="w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="maxCount" className="block text-sm font-medium mb-2">
-                      Max Count
-                    </label>
-                    <input
-                      id="maxCount"
-                      type="number"
-                      min="0"
-                      value={maxCount}
-                      onChange={(e) => {
-                        const val = e.target.value === '' ? '' : Number(e.target.value)
-                        setMaxCount(val as number | '')
-                      }}
-                      placeholder="e.g., 100"
-                      className="w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-muted-foreground -mt-2">
-                  Validate that the <code className="px-1 py-0.5 bg-muted rounded">count</code> field in payload is within this range
-                </p>
-
-                <div>
                   <div className="flex items-center justify-between mb-2">
                     <label className="block text-sm font-medium">
-                      Required Fields
+                      Payload Fields
                     </label>
                     <button
                       type="button"
-                      onClick={() => setRequiredFields([...requiredFields, { key: '', value: '' }])}
-                      className="text-xs px-2 py-1 border border-border rounded hover:bg-accent transition-smooth"
+                      onClick={() => {
+                        if (payloadFields.length < 5) {
+                          setPayloadFields([...payloadFields, {
+                            name: '',
+                            type: 'number',
+                            rule: '>',
+                            value: '',
+                            severity: 'error',
+                          }])
+                        }
+                      }}
+                      disabled={payloadFields.length >= 5}
+                      className="text-xs px-2 py-1 border border-border rounded hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      + Add Field
+                      + Add Field {payloadFields.length >= 5 ? '(max 5)' : ''}
                     </button>
                   </div>
-                  {requiredFields.length === 0 ? (
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Configure fields to validate in your payload. Only declared fields are processed, rest is ignored.
+                  </p>
+                  
+                  {payloadFields.length === 0 ? (
                     <p className="text-xs text-muted-foreground italic">
-                      No required fields configured
+                      No fields configured. Click "Add Field" to add validation rules.
                     </p>
                   ) : (
-                    <div className="space-y-2">
-                      {requiredFields.map((field, index) => (
-                        <div key={index} className="flex gap-2 items-center">
-                          <input
-                            type="text"
-                            value={field.key}
-                            onChange={(e) => {
-                              const newFields = [...requiredFields]
-                              newFields[index].key = e.target.value
-                              setRequiredFields(newFields)
-                            }}
-                            placeholder="Field name (e.g., file_exists)"
-                            className="flex-1 px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                          />
-                          <span className="text-muted-foreground">=</span>
-                          <input
-                            type="text"
-                            value={field.value}
-                            onChange={(e) => {
-                              const newFields = [...requiredFields]
-                              newFields[index].value = e.target.value
-                              setRequiredFields(newFields)
-                            }}
-                            placeholder="Expected value (true, false, number, or string)"
-                            className="flex-1 px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setRequiredFields(requiredFields.filter((_, i) => i !== index))
-                            }}
-                            className="px-2 py-2 text-error hover:bg-error/10 rounded-lg transition-smooth"
-                          >
-                            ×
-                          </button>
+                    <div className="space-y-3">
+                      {payloadFields.map((field, index) => (
+                        <div key={index} className="bg-background border border-input rounded-lg p-3 space-y-2">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPayloadFields(payloadFields.filter((_, i) => i !== index))
+                              }}
+                              className="text-xs px-2 py-1 text-error hover:bg-error/10 rounded transition-smooth"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium mb-1">Field Name</label>
+                              <input
+                                type="text"
+                                value={field.name}
+                                onChange={(e) => {
+                                  const newFields = [...payloadFields]
+                                  newFields[index].name = e.target.value
+                                  setPayloadFields(newFields)
+                                }}
+                                placeholder="e.g., count"
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium mb-1">Type</label>
+                              <select
+                                value={field.type}
+                                onChange={(e) => {
+                                  const newFields = [...payloadFields]
+                                  newFields[index].type = e.target.value as 'number' | 'boolean' | 'string'
+                                  // Reset rule and value when type changes
+                                  if (e.target.value === 'number') {
+                                    newFields[index].rule = '>'
+                                    newFields[index].value = ''
+                                  } else {
+                                    newFields[index].rule = '=='
+                                    newFields[index].value = ''
+                                  }
+                                  setPayloadFields(newFields)
+                                }}
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              >
+                                <option value="number">Number</option>
+                                <option value="boolean">Boolean</option>
+                                <option value="string">String</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium mb-1">Rule</label>
+                              <select
+                                value={field.rule}
+                                onChange={(e) => {
+                                  const newFields = [...payloadFields]
+                                  newFields[index].rule = e.target.value as '>' | '<' | '>=' | '<=' | '==' | '!='
+                                  setPayloadFields(newFields)
+                                }}
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              >
+                                {field.type === 'number' ? (
+                                  <>
+                                    <option value=">">Greater than (&gt;)</option>
+                                    <option value="<">Less than (&lt;)</option>
+                                    <option value=">=">Greater or equal (&gt;=)</option>
+                                    <option value="<=">Less or equal (&lt;=)</option>
+                                    <option value="==">Equal (==)</option>
+                                    <option value="!=">Not equal (!=)</option>
+                                  </>
+                                ) : (
+                                  <>
+                                    <option value="==">Equal (==)</option>
+                                    <option value="!=">Not equal (!=)</option>
+                                  </>
+                                )}
+                              </select>
+                            </div>
+                            
+                            <div>
+                              <label className="block text-xs font-medium mb-1">Value</label>
+                              <input
+                                type={field.type === 'number' ? 'number' : 'text'}
+                                value={field.value}
+                                onChange={(e) => {
+                                  const newFields = [...payloadFields]
+                                  newFields[index].value = e.target.value
+                                  setPayloadFields(newFields)
+                                }}
+                                placeholder={
+                                  field.type === 'number' 
+                                    ? 'e.g., 100' 
+                                    : field.type === 'boolean'
+                                    ? 'true or false'
+                                    : 'e.g., "ok"'
+                                }
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                              />
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-xs font-medium mb-1">Severity</label>
+                            <select
+                              value={field.severity}
+                              onChange={(e) => {
+                                const newFields = [...payloadFields]
+                                newFields[index].severity = e.target.value as 'warn' | 'error'
+                                setPayloadFields(newFields)
+                              }}
+                              className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                            >
+                              <option value="error">Error (mark as FAIL)</option>
+                              <option value="warn">Warning</option>
+                            </select>
+                          </div>
                         </div>
                       ))}
                     </div>
                   )}
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Fields that must be present in payload metadata with specific values (e.g., <code className="px-1 py-0.5 bg-muted rounded">file_exists: true</code>)
+                  
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    Example: Validate that <code className="px-1 py-0.5 bg-muted rounded">count</code> field is greater than 100.
+                    Your cron job should send: <code className="px-1 py-0.5 bg-muted rounded">{"{ \"count\": 120 }"}</code>
                   </p>
                 </div>
               </div>

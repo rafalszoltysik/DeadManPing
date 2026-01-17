@@ -1,6 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import { NextRequest, NextResponse } from 'next/server'
-import { z } from 'zod'
 import { validatePayload } from '@/lib/payload-validator'
 
 const supabaseAdmin = createClient(
@@ -17,27 +16,6 @@ const supabaseAdmin = createClient(
 // Rate limiting: simple in-memory store (for MVP)
 // In production, use Redis or similar
 const rateLimitStore = new Map<string, number>()
-
-const PingSchema = z.object({
-  s: z.enum(['ok', 'fail']).optional(),
-  m: z.string().max(255).optional(),
-  d: z.number().int().positive().max(3600000).optional(), // max 1 hour in ms
-  count: z.number().int().min(0).max(1000000).optional(), // reasonable limits
-})
-
-// Metadata validation - prevent injection attacks
-const MetadataSchema = z.record(
-  z.string().max(50), // key max length
-  z.union([
-    z.string().max(500),
-    z.number(),
-    z.boolean(),
-    z.null()
-  ])
-).refine(
-  (data) => Object.keys(data).length <= 10, // max 10 keys
-  { message: 'Too many metadata fields (max 10)' }
-)
 
 export async function GET(
   request: NextRequest,
@@ -130,33 +108,56 @@ async function handlePing(
     }
     rateLimitStore.set(rateLimitKey, now)
 
-    // Parse payload (from query params or JSON body)
+    // Parse payload (user can send any JSON)
     let payload: any = {}
     if (method === 'GET' || method === 'HEAD') {
+      // For GET/HEAD, parse query params as JSON-like structure
       const searchParams = request.nextUrl.searchParams
-      if (searchParams.has('s')) payload.s = searchParams.get('s')
-      if (searchParams.has('m')) payload.m = searchParams.get('m')
-      if (searchParams.has('d')) payload.d = Number(searchParams.get('d'))
-      if (searchParams.has('count')) payload.count = Number(searchParams.get('count'))
+      searchParams.forEach((value, key) => {
+        // Try to parse as number or boolean, otherwise keep as string
+        if (value === 'true') payload[key] = true
+        else if (value === 'false') payload[key] = false
+        else if (!isNaN(Number(value)) && value !== '') payload[key] = Number(value)
+        else payload[key] = value
+      })
     } else {
       try {
         const contentType = request.headers.get('content-type')
         if (contentType?.includes('application/json')) {
-          const body = await request.json()
-          payload = body
+          // Try to read body as text first to handle parsing errors better
+          const bodyText = await request.text()
+          if (bodyText.trim()) {
+            try {
+              payload = JSON.parse(bodyText)
+            } catch (parseError) {
+              console.error('JSON parse error:', parseError, 'Body:', bodyText)
+              return NextResponse.json(
+                { ok: false, error: 'Invalid JSON payload', details: parseError instanceof Error ? parseError.message : 'Parse error' },
+                { status: 400 }
+              )
+            }
+          }
         } else if (contentType?.includes('application/x-www-form-urlencoded')) {
           const formData = await request.formData()
-          if (formData.has('s')) payload.s = formData.get('s')
-          if (formData.has('m')) payload.m = formData.get('m')
-          if (formData.has('d')) payload.d = Number(formData.get('d'))
-          if (formData.has('count')) payload.count = Number(formData.get('count'))
+          formData.forEach((value, key) => {
+            const strValue = value.toString()
+            if (strValue === 'true') payload[key] = true
+            else if (strValue === 'false') payload[key] = false
+            else if (!isNaN(Number(strValue)) && strValue !== '') payload[key] = Number(strValue)
+            else payload[key] = strValue
+          })
         }
       } catch (e) {
-        // Ignore parse errors, use defaults
+        // If request reading fails, return error
+        console.error('Error reading request body:', e)
+        return NextResponse.json(
+          { ok: false, error: 'Invalid request body', details: e instanceof Error ? e.message : 'Unknown error' },
+          { status: 400 }
+        )
       }
     }
 
-    // Validate payload (max 2KB total)
+    // Validate payload size (max 2KB total)
     const payloadStr = JSON.stringify(payload)
     if (payloadStr.length > 2048) {
       return NextResponse.json(
@@ -165,57 +166,39 @@ async function handlePing(
       )
     }
 
-    const validatedPayload = PingSchema.parse(payload)
-    const status = validatedPayload.s || 'ok'
-    const message = validatedPayload.m || null
-    const durationMs = validatedPayload.d || null
-    
-    // Build and validate metadata
-    const metadata: Record<string, string | number | boolean | null> = {}
-    if (validatedPayload.count !== undefined) {
-      metadata.count = validatedPayload.count
-    }
+    // Get validation rules from monitor
+    const validationRules = monitor.payload_validation_rules
 
-    // Validate metadata structure to prevent injection
-    try {
-      MetadataSchema.parse(metadata)
-    } catch (metadataError) {
-      return NextResponse.json(
-        { ok: false, error: 'Invalid metadata structure' },
-        { status: 400 }
-      )
+    // Extract only declared fields from payload (ignore everything else)
+    const declaredFields: Record<string, any> = {}
+    if (validationRules && validationRules.fields && Array.isArray(validationRules.fields)) {
+      for (const field of validationRules.fields) {
+        if (payload[field.name] !== undefined) {
+          declaredFields[field.name] = payload[field.name]
+        }
+      }
     }
 
     // Validate payload against monitor's validation rules
-    const validationRules = monitor.payload_validation_rules
-    const payloadForValidation = {
-      s: status,
-      m: message || undefined,
-      d: durationMs || undefined,
-      count: validatedPayload.count,
-      ...metadata, // Include metadata fields for validation
-    }
-
-    const validationResult = validatePayload(payloadForValidation, validationRules)
-    let validationMessage = message
-
-    // If validation failed, mark as failed and include validation errors
-    if (!validationResult.valid) {
-      const validationErrors = validationResult.errors.join('; ')
-      validationMessage = validationMessage
-        ? `${validationMessage} | Validation errors: ${validationErrors}`
-        : `Validation errors: ${validationErrors}`
-    }
-
-    // Determine new monitor status
+    // Only declared fields are validated, rest is ignored
+    const validationResult = validatePayload(declaredFields, validationRules)
+    
+    // Determine new monitor status based on validation
+    // OK = cron ran and all rules passed
+    // FAIL = cron ran but some rule failed
+    // DOWN = cron didn't run (handled by timeout checker)
     let newStatus = monitor.status
-    if (status === 'fail' || !validationResult.valid) {
+    if (!validationResult.valid) {
+      // Validation failed - mark as failed
       newStatus = 'failed'
     } else if (monitor.status === 'late' || monitor.status === 'failed') {
+      // Recovered from failed/late state
       newStatus = 'healthy'
     } else if (monitor.status === 'pending') {
+      // First successful ping
       newStatus = 'healthy'
     }
+    // If already healthy and validation passed, stay healthy
 
     // Calculate next expected ping time
     const currentTime = new Date()
@@ -242,13 +225,31 @@ async function handlePing(
       )
     }
 
-    // Insert ping record (use validation message if validation failed)
-    const finalStatus = !validationResult.valid ? 'fail' : status
+    // Build metadata with only declared field values (for storage)
+    // We don't store the entire payload, only the values we validated
+    const metadata: Record<string, string | number | boolean | null> = {}
+    if (validationRules && validationRules.fields && Array.isArray(validationRules.fields)) {
+      for (const field of validationRules.fields) {
+        if (declaredFields[field.name] !== undefined) {
+          metadata[field.name] = declaredFields[field.name]
+        }
+      }
+    }
+
+    // Build validation message
+    let validationMessage: string | null = null
+    if (!validationResult.valid && validationResult.errors.length > 0) {
+      validationMessage = validationResult.errors.join('; ')
+    }
+
+    // Insert ping record
+    // Status: 'ok' if validation passed, 'fail' if validation failed
+    const pingStatus = validationResult.valid ? 'ok' : 'fail'
     const { error: pingError } = await supabaseAdmin.from('pings').insert({
       monitor_id: monitor.id,
-      status: finalStatus,
+      status: pingStatus,
       message: validationMessage,
-      duration_ms: durationMs,
+      duration_ms: null, // Not used in new model
       metadata: Object.keys(metadata).length > 0 ? metadata : null,
       received_at: currentTime.toISOString(),
     })
@@ -278,20 +279,50 @@ async function handlePing(
       console.error('Error cleaning up old pings:', cleanupError)
     }
 
-    // If status changed to healthy from failed/late, trigger recovery alert
-    if ((monitor.status === 'late' || monitor.status === 'failed') && newStatus === 'healthy') {
-      // Trigger alert asynchronously (don't wait)
-      fetch(`${request.nextUrl.origin}/api/internal/send-alert`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Internal-Secret': process.env.INTERNAL_API_SECRET || '',
-        },
-        body: JSON.stringify({
-          monitor_id: monitor.id,
-          alert_type: 'recovered',
-        }),
-      }).catch((err) => console.error('Error triggering recovery alert:', err))
+    // Trigger alerts based on status changes
+    if (monitor.status !== newStatus) {
+      console.log(`[Ping] Monitor ${monitor.id} status changed: ${monitor.status} -> ${newStatus}`)
+      // Status changed - determine alert type
+      let alertType: 'failed' | 'recovered' | null = null
+      
+      if (newStatus === 'failed' && (monitor.status === 'healthy' || monitor.status === 'pending')) {
+        // Changed to failed - send failure alert
+        alertType = 'failed'
+        console.log(`[Ping] Triggering failed alert for monitor ${monitor.id}`)
+      } else if (newStatus === 'healthy' && (monitor.status === 'late' || monitor.status === 'failed')) {
+        // Recovered from failed/late - send recovery alert
+        alertType = 'recovered'
+        console.log(`[Ping] Triggering recovered alert for monitor ${monitor.id}`)
+      }
+      
+      if (alertType) {
+        // Trigger alert asynchronously (don't wait)
+        const alertUrl = `${request.nextUrl.origin}/api/internal/send-alert`
+        console.log(`[Ping] Sending alert request to ${alertUrl}`)
+        fetch(alertUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Internal-Secret': process.env.INTERNAL_API_SECRET || '',
+          },
+          body: JSON.stringify({
+            monitor_id: monitor.id,
+            alert_type: alertType,
+          }),
+        })
+        .then((res) => {
+          console.log(`[Ping] Alert response status: ${res.status}`)
+          return res.json()
+        })
+        .then((data) => {
+          console.log(`[Ping] Alert response:`, data)
+        })
+        .catch((err) => console.error(`[Ping] Error triggering ${alertType} alert:`, err))
+      } else {
+        console.log(`[Ping] No alert needed for status change: ${monitor.status} -> ${newStatus}`)
+      }
+    } else {
+      console.log(`[Ping] Monitor ${monitor.id} status unchanged: ${monitor.status}`)
     }
 
     return NextResponse.json({
@@ -301,12 +332,6 @@ async function handlePing(
     })
   } catch (error) {
     console.error('Error handling ping:', error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { ok: false, error: 'Invalid payload', details: error.errors },
-        { status: 400 }
-      )
-    }
     return NextResponse.json(
       { ok: false, error: 'Internal server error' },
       { status: 500 }
