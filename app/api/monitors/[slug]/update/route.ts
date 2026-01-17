@@ -98,7 +98,7 @@ export async function PUT(
 
     const { slug } = await params
     const body = await request.json()
-    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels } = body
+    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status } = body
 
     // Find monitor by slug and verify ownership
     const { data: monitor, error: monitorError } = await supabaseAdmin
@@ -203,6 +203,16 @@ export async function PUT(
       }
     }
 
+    // Handle status update (only allow setting to 'late' or 'failed' for timeout checks)
+    if (status !== undefined) {
+      if ((status === 'late' || status === 'failed') && 
+          (monitor.status === 'healthy' || monitor.status === 'pending' || 
+           (status === 'failed' && monitor.status === 'late'))) {
+        updateData.status = status
+      }
+      // Don't allow other status changes through this endpoint
+    }
+
     // Handle alert channel overrides
     if (alertChannels !== undefined) {
       if (alertChannels === null) {
@@ -228,7 +238,42 @@ export async function PUT(
       }
     }
 
-    // Update monitor
+    // Optimistic locking: check if monitor was modified since we fetched it
+    // This prevents overwriting concurrent changes
+    const { data: currentMonitor } = await supabaseAdmin
+      .from('monitors')
+      .select('updated_at')
+      .eq('id', monitor.id)
+      .single()
+
+    if (currentMonitor && body.expectedUpdatedAt) {
+      // Client sent expected updated_at timestamp
+      const expectedTime = new Date(body.expectedUpdatedAt).getTime()
+      const currentTime = new Date(currentMonitor.updated_at).getTime()
+      
+      if (Math.abs(currentTime - expectedTime) > 1000) {
+        // Monitor was updated by someone else (more than 1 second difference)
+        // Fetch latest version and return conflict
+        const { data: latestMonitor } = await supabaseAdmin
+          .from('monitors')
+          .select('*')
+          .eq('id', monitor.id)
+          .single()
+        
+        return NextResponse.json(
+          { 
+            error: 'Monitor was modified by another process. Please refresh and try again.',
+            conflict: true,
+            latestMonitor 
+          },
+          { status: 409 }
+        )
+      }
+    }
+
+    // Update monitor with new updated_at timestamp
+    updateData.updated_at = new Date().toISOString()
+    
     const { data: updatedMonitor, error: updateError } = await supabaseAdmin
       .from('monitors')
       .update(updateData)

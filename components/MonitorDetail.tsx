@@ -20,6 +20,7 @@ interface Monitor {
   discord_webhook_url: string | null
   custom_webhook_url: string | null
   created_at: string
+  updated_at: string
 }
 
 interface Ping {
@@ -107,6 +108,14 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [error, setError] = useState<string | null>(null) // For delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [editingInterval, setEditingInterval] = useState(false)
+  const [intervalMinutes, setIntervalMinutes] = useState(Math.floor(monitor.expected_interval_seconds / 60))
+  const [gracePeriodMinutes, setGracePeriodMinutes] = useState(Math.floor(monitor.grace_period_seconds / 60))
+  const [intervalError, setIntervalError] = useState<string | null>(null)
+  const [intervalSuccess, setIntervalSuccess] = useState(false)
+  const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
+  const [minIntervalMinutes, setMinIntervalMinutes] = useState(5)
   
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(userTier)
   const hasCustomWebhook = userTier === 'team'
@@ -118,7 +127,14 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         const response = await fetch('/api/user/tier')
         if (response.ok) {
           const data = await response.json()
-          setUserTier(data.tier || 'free')
+          const tier = data.tier || 'free'
+          setUserTier(tier)
+          
+          // Set minimum interval based on tier
+          const { TIER_LIMITS } = await import('@/lib/limits')
+          const limit = TIER_LIMITS[tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.free
+          const minMinutes = limit.minInterval / 60
+          setMinIntervalMinutes(minMinutes)
         }
       } catch (err) {
         console.error('Error fetching user tier:', err)
@@ -126,6 +142,38 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     }
     fetchUserTier()
   }, [])
+
+  // Convert interval to appropriate unit for display
+  const getIntervalValue = () => {
+    if (intervalUnit === 'hours') {
+      return Math.round((intervalMinutes / 60) * 10) / 10
+    }
+    return intervalMinutes
+  }
+
+  const setIntervalValue = (value: number) => {
+    if (intervalUnit === 'hours') {
+      setIntervalMinutes(Math.round(value * 60))
+    } else {
+      setIntervalMinutes(value)
+    }
+  }
+
+  // Convert grace period to appropriate unit for display
+  const getGraceValue = () => {
+    if (graceUnit === 'minutes') {
+      return Math.round(gracePeriodMinutes)
+    }
+    return Math.round((gracePeriodMinutes / 60) * 10) / 10
+  }
+
+  const setGraceValue = (value: number) => {
+    if (graceUnit === 'minutes') {
+      setGracePeriodMinutes(Math.round(value))
+    } else {
+      setGracePeriodMinutes(Math.round(value * 60))
+    }
+  }
 
   // Load existing payload validation rules when monitor changes
   useEffect(() => {
@@ -158,6 +206,19 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
       setPayloadFields([])
     }
   }, [editingPayloadRules])
+
+  // Load existing interval settings when editing
+  useEffect(() => {
+    if (editingInterval) {
+      const currentIntervalMinutes = Math.floor(monitor.expected_interval_seconds / 60)
+      const currentGraceMinutes = Math.floor(monitor.grace_period_seconds / 60)
+      setIntervalMinutes(currentIntervalMinutes)
+      setGracePeriodMinutes(currentGraceMinutes)
+      // Auto-select appropriate unit based on value
+      setIntervalUnit(currentIntervalMinutes >= 60 ? 'hours' : 'minutes')
+      setGraceUnit(currentGraceMinutes >= 60 ? 'hours' : 'minutes')
+    }
+  }, [editingInterval, monitor.expected_interval_seconds, monitor.grace_period_seconds])
 
   // Load existing alert channel overrides
   useEffect(() => {
@@ -227,6 +288,55 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     setTimeout(() => setCopiedCurl(false), 2000)
   }
 
+  // Check if monitor should be marked as late or failed based on last_ping_at and expected interval
+  const checkMonitorStatus = (monitorData: Monitor): Monitor => {
+    // Only check if monitor is currently healthy or pending
+    if (monitorData.status !== 'healthy' && monitorData.status !== 'pending') {
+      return monitorData
+    }
+
+    const now = new Date()
+    let referenceTime: Date | null = null
+    
+    // Determine reference time (when the ping was expected)
+    if (monitorData.last_ping_at) {
+      referenceTime = new Date(monitorData.last_ping_at)
+    } else if (monitorData.status === 'pending' || (monitorData.status === 'healthy' && !monitorData.last_ping_at)) {
+      referenceTime = new Date(monitorData.created_at)
+    }
+    
+    if (!referenceTime) {
+      return monitorData
+    }
+    
+    const expectedIntervalEnd = new Date(
+      referenceTime.getTime() + monitorData.expected_interval_seconds * 1000
+    )
+    const gracePeriodEnd = new Date(
+      referenceTime.getTime() + 
+      monitorData.expected_interval_seconds * 1000 + 
+      monitorData.grace_period_seconds * 1000
+    )
+    
+    // If grace period is 0, mark as failed immediately after expected interval
+    if (monitorData.grace_period_seconds === 0) {
+      if (now > expectedIntervalEnd) {
+        return { ...monitorData, status: 'failed' as const }
+      }
+    } else {
+      // Check if monitor is in grace period (late)
+      if (now > expectedIntervalEnd && now <= gracePeriodEnd) {
+        return { ...monitorData, status: 'late' as const }
+      }
+      // Check if monitor is past grace period (failed)
+      else if (now > gracePeriodEnd) {
+        return { ...monitorData, status: 'failed' as const }
+      }
+    }
+
+    return monitorData
+  }
+
   // Fetch latest monitor and pings data
   const fetchMonitorData = async () => {
     try {
@@ -234,7 +344,23 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
       if (response.ok) {
         const data = await response.json()
         if (data.monitor) {
-          setMonitor(data.monitor)
+          // Check if monitor should be marked as late or failed
+          const checkedMonitor = checkMonitorStatus(data.monitor)
+          setMonitor(checkedMonitor)
+          
+          // If status changed to late or failed, update it on the server
+          if ((checkedMonitor.status === 'late' || checkedMonitor.status === 'failed') && 
+              data.monitor.status !== checkedMonitor.status) {
+            // Silently update status on server (don't await to avoid blocking)
+            fetch(`/api/monitors/${monitor.slug}/update`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                status: checkedMonitor.status,
+                expectedUpdatedAt: data.monitor.updated_at 
+              }),
+            }).catch(err => console.error('Error updating monitor status:', err))
+          }
         }
         if (data.pings) {
           setPings(data.pings)
@@ -246,7 +372,13 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   }
 
   // Poll for new pings and monitor updates
+  // Don't poll when editing forms to prevent overwriting user changes
   useEffect(() => {
+    // Don't poll if user is editing forms
+    if (editingPayloadRules || editingAlertChannels || editingInterval) {
+      return
+    }
+
     // Poll every 5 seconds if onboarding and waiting for first ping
     if (isOnboarding && waitingForPing) {
       const interval = setInterval(() => {
@@ -262,7 +394,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       return () => clearInterval(interval)
     }
-  }, [isOnboarding, waitingForPing, monitor.slug])
+  }, [isOnboarding, waitingForPing, monitor.slug, editingPayloadRules, editingAlertChannels, editingInterval])
 
   useEffect(() => {
     if (pings.length > 0 && waitingForPing) {
@@ -315,6 +447,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       const requestBody: any = {
         payloadValidationRules: payloadValidationRules,
+        expectedUpdatedAt: monitor.updated_at, // Send current updated_at for optimistic locking
       }
 
       const response = await fetch(`/api/monitors/${monitor.slug}/update`, {
@@ -325,12 +458,23 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       if (!response.ok) {
         const data = await response.json()
+        if (data.conflict && data.latestMonitor) {
+          // Monitor was modified - update local state and show error
+          setMonitor(data.latestMonitor)
+          throw new Error(data.error || 'Monitor was modified. Please review changes and try again.')
+        }
         throw new Error(data.error || 'Failed to update payload validation rules')
+      }
+
+      const data = await response.json()
+      // Update monitor state with latest data (including new updated_at)
+      if (data.monitor) {
+        setMonitor(data.monitor)
       }
 
       setPayloadSuccess(true)
       setEditingPayloadRules(false)
-      // Refresh monitor data instead of full page reload
+      // Refresh monitor data to get latest pings
       await fetchMonitorData()
       setTimeout(() => {
         setPayloadSuccess(false)
@@ -363,6 +507,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
     const requestBody: any = {
       alertChannels: Object.keys(alertChannels).length > 0 ? alertChannels : null,
+      expectedUpdatedAt: monitor.updated_at, // Send current updated_at for optimistic locking
     }
 
     try {
@@ -374,12 +519,23 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       if (!response.ok) {
         const data = await response.json()
+        if (data.conflict && data.latestMonitor) {
+          // Monitor was modified - update local state and show error
+          setMonitor(data.latestMonitor)
+          throw new Error(data.error || 'Monitor was modified. Please review changes and try again.')
+        }
         throw new Error(data.error || 'Failed to update alert channels')
+      }
+
+      const data = await response.json()
+      // Update monitor state with latest data (including new updated_at)
+      if (data.monitor) {
+        setMonitor(data.monitor)
       }
 
       setAlertChannelsSuccess(true)
       setEditingAlertChannels(false)
-      // Refresh monitor data instead of full page reload
+      // Refresh monitor data to get latest pings
       await fetchMonitorData()
       setTimeout(() => {
         setAlertChannelsSuccess(false)
@@ -575,13 +731,299 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-        <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth">
-          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Expected Interval</h3>
-          <p className="text-xl sm:text-2xl font-bold font-mono">
-            {Math.floor(monitor.expected_interval_seconds / 60)} min
-          </p>
+      {/* Interval Settings Section */}
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-base sm:text-lg font-semibold">Interval Settings</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+              Configure how often your cron job should ping and the grace period
+            </p>
+          </div>
+          {!editingInterval && (
+            <button
+              onClick={() => setEditingInterval(true)}
+              className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent transition-smooth"
+            >
+              Edit
+            </button>
+          )}
         </div>
+
+        {intervalError && (
+          <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-4 text-sm">
+            {intervalError}
+          </div>
+        )}
+
+        {intervalSuccess && (
+          <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg mb-4 text-sm">
+            Interval settings updated successfully!
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Expected Interval</h3>
+            <p className="text-xl sm:text-2xl font-bold font-mono">
+              {Math.floor(monitor.expected_interval_seconds / 60)} min
+            </p>
+          </div>
+          <div>
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Grace Period</h3>
+            <p className="text-xl sm:text-2xl font-bold font-mono">
+              {Math.floor(monitor.grace_period_seconds / 60)} min
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Interval Edit Modal */}
+      {editingInterval && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold">Edit Interval Settings</h2>
+                <button
+                  onClick={() => {
+                    setEditingInterval(false)
+                    setIntervalError(null)
+                    setIntervalSuccess(false)
+                    setIntervalMinutes(Math.floor(monitor.expected_interval_seconds / 60))
+                    setGracePeriodMinutes(Math.floor(monitor.grace_period_seconds / 60))
+                  }}
+                  className="text-muted-foreground hover:text-foreground transition-smooth text-xl"
+                >
+                  ×
+                </button>
+              </div>
+
+              {intervalError && (
+                <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-4 text-sm">
+                  {intervalError}
+                </div>
+              )}
+
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="interval" className="block text-sm font-medium">
+                      Expected Interval
+                    </label>
+                    <div className="flex gap-1 bg-muted rounded-lg p-1">
+                      <button
+                        type="button"
+                        onClick={() => setIntervalUnit('minutes')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          intervalUnit === 'minutes'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Minutes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIntervalUnit('hours')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          intervalUnit === 'hours'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Hours
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="interval"
+                      type="range"
+                      min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
+                      max={intervalUnit === 'hours' ? '24' : '1440'}
+                      step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
+                      value={getIntervalValue()}
+                      onChange={(e) => setIntervalValue(Number(e.target.value))}
+                      className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                    />
+                    <input
+                      type="number"
+                      min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
+                      max={intervalUnit === 'hours' ? '24' : '1440'}
+                      step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
+                      value={getIntervalValue()}
+                      onChange={(e) => {
+                        const value = Number(e.target.value)
+                        if (value >= (intervalUnit === 'hours' ? 0.1 : minIntervalMinutes)) {
+                          setIntervalValue(value)
+                        }
+                      }}
+                      className="w-20 px-2 py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                    />
+                  </div>
+
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>
+                      {intervalUnit === 'hours' 
+                        ? '0.1 hr' 
+                        : minIntervalMinutes >= 1 
+                          ? `${minIntervalMinutes} min` 
+                          : `${minIntervalMinutes * 60} sec`}
+                    </span>
+                    <span>24 {intervalUnit === 'hours' ? 'hours' : 'hours'}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    How often should this job run?
+                  </p>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="grace" className="block text-sm font-medium">
+                      Grace Period
+                    </label>
+                    <div className="flex gap-1 bg-muted rounded-lg p-1">
+                      <button
+                        type="button"
+                        onClick={() => setGraceUnit('minutes')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          graceUnit === 'minutes'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Minutes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGraceUnit('hours')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          graceUnit === 'hours'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Hours
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <input
+                      id="grace"
+                      type="range"
+                      min="0"
+                      max={graceUnit === 'hours' ? '24' : '1440'}
+                      step={graceUnit === 'hours' ? '0.5' : '30'}
+                      value={getGraceValue()}
+                      onChange={(e) => setGraceValue(Number(e.target.value))}
+                      className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max={graceUnit === 'hours' ? '24' : '1440'}
+                      step={graceUnit === 'hours' ? '0.5' : '30'}
+                      value={getGraceValue()}
+                      onChange={(e) => setGraceValue(Number(e.target.value))}
+                      className="w-20 px-2 py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                    />
+                  </div>
+
+                  <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                    <span>0 {graceUnit}</span>
+                    <span>{graceUnit === 'hours' ? '24 hours' : '1440 min'}</span>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    How long to wait before alerting if the job doesn't run?
+                  </p>
+                </div>
+
+                <div className="flex gap-3 pt-4 border-t border-border">
+                  <button
+                    onClick={async () => {
+                      setLoading(true)
+                      setIntervalError(null)
+                      setIntervalSuccess(false)
+
+                      try {
+                        const expectedIntervalSeconds = intervalMinutes * 60
+                        const gracePeriodSeconds = gracePeriodMinutes * 60
+
+                        if (expectedIntervalSeconds < 30) {
+                          throw new Error('Expected interval must be at least 30 seconds')
+                        }
+
+                        if (gracePeriodSeconds < 0) {
+                          throw new Error('Grace period cannot be negative')
+                        }
+
+                        const requestBody: any = {
+                          expectedIntervalSeconds,
+                          gracePeriodSeconds,
+                          expectedUpdatedAt: monitor.updated_at,
+                        }
+
+                        const response = await fetch(`/api/monitors/${monitor.slug}/update`, {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(requestBody),
+                        })
+
+                        if (!response.ok) {
+                          const data = await response.json()
+                          if (data.conflict && data.latestMonitor) {
+                            setMonitor(data.latestMonitor)
+                            throw new Error(data.error || 'Monitor was modified. Please review changes and try again.')
+                          }
+                          throw new Error(data.error || 'Failed to update interval settings')
+                        }
+
+                        const data = await response.json()
+                        if (data.monitor) {
+                          setMonitor(data.monitor)
+                        }
+
+                        setIntervalSuccess(true)
+                        setEditingInterval(false)
+                        await fetchMonitorData()
+                        setTimeout(() => {
+                          setIntervalSuccess(false)
+                        }, 3000)
+                      } catch (err: any) {
+                        setIntervalError(err.message)
+                      } finally {
+                        setLoading(false)
+                      }
+                    }}
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg text-sm font-medium transition-smooth disabled:opacity-50"
+                  >
+                    Save Changes
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingInterval(false)
+                      setIntervalError(null)
+                      setIntervalSuccess(false)
+                      setIntervalMinutes(Math.floor(monitor.expected_interval_seconds / 60))
+                      setGracePeriodMinutes(Math.floor(monitor.grace_period_seconds / 60))
+                    }}
+                    disabled={loading}
+                    className="px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-accent transition-smooth disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
         <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Last Ping</h3>
           <p className="text-xl sm:text-2xl font-bold text-sm sm:text-base">

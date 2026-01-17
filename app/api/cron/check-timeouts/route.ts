@@ -25,32 +25,84 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const now = new Date().toISOString()
+    const now = new Date()
+    const nowISO = now.toISOString()
 
-    // Find monitors that are overdue (exclude paused monitors)
-    const { data: overdueMonitors, error } = await supabaseAdmin
+    // Get all active monitors (exclude paused, but include late to check if they should become failed)
+    const { data: allMonitors, error: fetchError } = await supabaseAdmin
       .from('monitors')
       .select('*')
-      .lt('next_expected_ping_at', now)
-      .neq('status', 'late')
-      .neq('status', 'failed')
       .neq('status', 'paused')
 
-    if (error) {
-      console.error('Error fetching overdue monitors:', error)
+    if (fetchError) {
+      console.error('Error fetching monitors:', fetchError)
       return NextResponse.json({ error: 'Failed to fetch monitors' }, { status: 500 })
     }
 
-    if (!overdueMonitors || overdueMonitors.length === 0) {
+    if (!allMonitors || allMonitors.length === 0) {
       return NextResponse.json({ checked: 0, updated: 0 })
     }
 
-    // Update status to 'late' and trigger alerts
+    // Check each monitor to see if it's overdue
+    const lateMonitors: typeof allMonitors = []
+    const failedMonitors: typeof allMonitors = []
+    
+    for (const monitor of allMonitors) {
+      let referenceTime: Date | null = null
+      
+      // Determine reference time (when the ping was expected)
+      if (monitor.last_ping_at) {
+        referenceTime = new Date(monitor.last_ping_at)
+      } else if (monitor.status === 'pending' || (monitor.status === 'healthy' && !monitor.last_ping_at)) {
+        referenceTime = new Date(monitor.created_at)
+      }
+      
+      if (!referenceTime) {
+        continue
+      }
+      
+      const expectedIntervalEnd = new Date(
+        referenceTime.getTime() + monitor.expected_interval_seconds * 1000
+      )
+      const gracePeriodEnd = new Date(
+        referenceTime.getTime() + 
+        monitor.expected_interval_seconds * 1000 + 
+        monitor.grace_period_seconds * 1000
+      )
+      
+      // If grace period is 0, mark as failed immediately after expected interval
+      if (monitor.grace_period_seconds === 0) {
+        if (now > expectedIntervalEnd) {
+          // Mark as failed if not already failed
+          if (monitor.status !== 'failed') {
+            failedMonitors.push(monitor)
+          }
+        }
+      } else {
+        // Check if monitor is in grace period (late)
+        if (now > expectedIntervalEnd && now <= gracePeriodEnd) {
+          // Only mark as late if not already late or failed
+          if (monitor.status !== 'late' && monitor.status !== 'failed') {
+            lateMonitors.push(monitor)
+          }
+        }
+        // Check if monitor is past grace period (failed)
+        else if (now > gracePeriodEnd) {
+          // Mark as failed (can transition from late to failed)
+          if (monitor.status !== 'failed') {
+            failedMonitors.push(monitor)
+          }
+        }
+      }
+    }
+
     let updatedCount = 0
-    for (const monitor of overdueMonitors) {
+
+    // Update monitors to 'late' status
+    for (const monitor of lateMonitors) {
       const { error: updateError } = await supabaseAdmin
         .from('monitors')
-        .update({ status: 'late', updated_at: now })
+        .update({ status: 'late', updated_at: nowISO })
         .eq('id', monitor.id)
 
       if (updateError) {
@@ -59,6 +111,20 @@ export async function GET(request: NextRequest) {
       }
 
       updatedCount++
+
+      // Insert ping record for late status
+      const { error: pingError } = await supabaseAdmin.from('pings').insert({
+        monitor_id: monitor.id,
+        status: 'fail',
+        message: 'Monitor is late - ping not received within expected interval',
+        duration_ms: null,
+        metadata: null,
+        received_at: nowISO,
+      })
+
+      if (pingError) {
+        console.error(`Error inserting ping for monitor ${monitor.id}:`, pingError)
+      }
 
       // Trigger alert
       try {
@@ -78,7 +144,62 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    return NextResponse.json({ checked: overdueMonitors.length, updated: updatedCount })
+    // Update monitors to 'failed' status
+    for (const monitor of failedMonitors) {
+      const { error: updateError } = await supabaseAdmin
+        .from('monitors')
+        .update({ status: 'failed', updated_at: nowISO })
+        .eq('id', monitor.id)
+
+      if (updateError) {
+        console.error(`Error updating monitor ${monitor.id}:`, updateError)
+        continue
+      }
+
+      updatedCount++
+
+      // Insert ping record for failed status
+      const { error: pingError } = await supabaseAdmin.from('pings').insert({
+        monitor_id: monitor.id,
+        status: 'fail',
+        message: 'Monitor failed - ping not received within grace period',
+        duration_ms: null,
+        metadata: null,
+        received_at: nowISO,
+      })
+
+      if (pingError) {
+        console.error(`Error inserting ping for monitor ${monitor.id}:`, pingError)
+      }
+
+      // Trigger alert
+      try {
+        await fetch(`${request.nextUrl.origin}/api/internal/send-alert`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Internal-Secret': process.env.INTERNAL_API_SECRET || '',
+          },
+          body: JSON.stringify({
+            monitor_id: monitor.id,
+            alert_type: 'missing',
+          }),
+        })
+      } catch (alertError) {
+        console.error(`Error triggering alert for monitor ${monitor.id}:`, alertError)
+      }
+    }
+
+    if (lateMonitors.length === 0 && failedMonitors.length === 0) {
+      return NextResponse.json({ checked: allMonitors.length, updated: 0 })
+    }
+
+    return NextResponse.json({ 
+      checked: allMonitors.length, 
+      updated: updatedCount,
+      late: lateMonitors.length,
+      failed: failedMonitors.length
+    })
   } catch (error: any) {
     console.error('Error in check-timeouts:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
