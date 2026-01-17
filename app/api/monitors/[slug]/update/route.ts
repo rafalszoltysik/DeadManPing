@@ -204,11 +204,22 @@ export async function PUT(
     }
 
     // Handle status update (only allow setting to 'late' or 'failed' for timeout checks)
+    let shouldInsertPing = false
+    let pingMessage = ''
     if (status !== undefined) {
       if ((status === 'late' || status === 'failed') && 
           (monitor.status === 'healthy' || monitor.status === 'pending' || 
            (status === 'failed' && monitor.status === 'late'))) {
         updateData.status = status
+        // Track if we need to insert a ping record and send alert
+        if (monitor.status !== status) {
+          shouldInsertPing = true
+          if (status === 'late') {
+            pingMessage = 'Monitor is late - ping not received within expected interval'
+          } else if (status === 'failed') {
+            pingMessage = 'Monitor failed - ping not received within grace period'
+          }
+        }
       }
       // Don't allow other status changes through this endpoint
     }
@@ -284,6 +295,55 @@ export async function PUT(
     if (updateError) {
       console.error('Error updating monitor:', updateError)
       return NextResponse.json({ error: updateError.message || 'Failed to update monitor' }, { status: 500 })
+    }
+
+    // Insert ping record and trigger alert if status changed to late or failed
+    if (shouldInsertPing && updatedMonitor) {
+      const nowISO = new Date().toISOString()
+      const { error: pingError } = await supabaseAdmin.from('pings').insert({
+        monitor_id: updatedMonitor.id,
+        status: 'fail',
+        message: pingMessage,
+        duration_ms: null,
+        metadata: null,
+        received_at: nowISO,
+      })
+
+      if (pingError) {
+        console.error(`Error inserting ping for monitor ${updatedMonitor.id}:`, pingError)
+        // Don't fail the request if ping insert fails
+      }
+
+      // Trigger alert asynchronously (don't await to avoid blocking the response)
+      try {
+        const internalSecret = process.env.INTERNAL_API_SECRET || ''
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || request.nextUrl.origin || 'http://localhost:3000'
+        if (internalSecret && updatedMonitor.status) {
+          // Determine alert type based on status
+          let alertType: 'warn' | 'missing' = 'missing'
+          if (updatedMonitor.status === 'late') {
+            alertType = 'warn'
+          } else if (updatedMonitor.status === 'failed') {
+            alertType = 'missing'
+          }
+
+          fetch(`${appUrl}/api/internal/send-alert`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Internal-Secret': internalSecret,
+            },
+            body: JSON.stringify({
+              monitor_id: updatedMonitor.id,
+              alert_type: alertType,
+            }),
+          }).catch(alertError => {
+            console.error(`Error triggering alert for monitor ${updatedMonitor.id}:`, alertError)
+          })
+        }
+      } catch (alertError) {
+        console.error(`Error triggering alert for monitor ${updatedMonitor.id}:`, alertError)
+      }
     }
 
     return NextResponse.json({ monitor: updatedMonitor }, { status: 200 })

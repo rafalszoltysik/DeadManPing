@@ -36,6 +36,10 @@ interface ValidationResult {
   valid: boolean
   errors: string[]
   failedFields?: string[] // Names of fields that failed validation
+  hasErrors?: boolean // true if any field with severity 'error' failed
+  hasWarnings?: boolean // true if any field with severity 'warn' failed
+  errorFields?: string[] // Names of fields that failed with severity 'error'
+  warningFields?: string[] // Names of fields that failed with severity 'warn'
 }
 
 const MAX_FIELDS = 5 // Max fields per monitor (MVP can start with 1)
@@ -50,19 +54,27 @@ export function validatePayload(
 ): ValidationResult {
   const errors: string[] = []
   const failedFields: string[] = []
+  const errorFields: string[] = []
+  const warningFields: string[] = []
 
   if (!rules || !rules.fields || rules.fields.length === 0) {
-    return { valid: true, errors: [] }
+    return { valid: true, errors: [], hasErrors: false, hasWarnings: false }
   }
 
   // Process only declared fields
   for (const field of rules.fields) {
     const fieldValue = payload[field.name]
+    const severity = field.severity || 'error' // Default to 'error' if not specified
 
     // Check if field exists
     if (fieldValue === undefined || fieldValue === null) {
       errors.push(`Field '${field.name}' is missing`)
       failedFields.push(field.name)
+      if (severity === 'error') {
+        errorFields.push(field.name)
+      } else {
+        warningFields.push(field.name)
+      }
       continue
     }
 
@@ -77,12 +89,22 @@ export function validatePayload(
     } else {
       errors.push(`Field '${field.name}' has invalid type (expected ${field.type}, got ${typeof fieldValue})`)
       failedFields.push(field.name)
+      if (severity === 'error') {
+        errorFields.push(field.name)
+      } else {
+        warningFields.push(field.name)
+      }
       continue
     }
 
     if (actualType !== field.type) {
       errors.push(`Field '${field.name}' has wrong type (expected ${field.type}, got ${actualType})`)
       failedFields.push(field.name)
+      if (severity === 'error') {
+        errorFields.push(field.name)
+      } else {
+        warningFields.push(field.name)
+      }
       continue
     }
 
@@ -112,6 +134,11 @@ export function validatePayload(
     if (!rulePassed) {
       errors.push(`Field '${field.name}' (${fieldValue}) does not satisfy rule: ${field.rule} ${field.value}`)
       failedFields.push(field.name)
+      if (severity === 'error') {
+        errorFields.push(field.name)
+      } else {
+        warningFields.push(field.name)
+      }
     }
   }
 
@@ -119,6 +146,10 @@ export function validatePayload(
     valid: errors.length === 0,
     errors,
     failedFields: failedFields.length > 0 ? failedFields : undefined,
+    hasErrors: errorFields.length > 0,
+    hasWarnings: warningFields.length > 0,
+    errorFields: errorFields.length > 0 ? errorFields : undefined,
+    warningFields: warningFields.length > 0 ? warningFields : undefined,
   }
 }
 

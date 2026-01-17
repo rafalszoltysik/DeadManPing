@@ -290,8 +290,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
   // Check if monitor should be marked as late or failed based on last_ping_at and expected interval
   const checkMonitorStatus = (monitorData: Monitor): Monitor => {
-    // Only check if monitor is currently healthy or pending
-    if (monitorData.status !== 'healthy' && monitorData.status !== 'pending') {
+    // Check if monitor is healthy, pending, or late (late can transition to failed)
+    if (monitorData.status !== 'healthy' && monitorData.status !== 'pending' && monitorData.status !== 'late') {
       return monitorData
     }
 
@@ -1026,7 +1026,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
         <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth">
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Last Ping</h3>
-          <p className="text-xl sm:text-2xl font-bold text-sm sm:text-base">
+          <p className="text-xl sm:text-2xl font-bold text-sm sm:text-base" suppressHydrationWarning>
             {monitor.last_ping_at
               ? formatDistanceToNow(new Date(monitor.last_ping_at), { addSuffix: true })
               : 'Never'}
@@ -1487,13 +1487,38 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
               >
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
-                    <span
-                      className={`px-2 py-0.5 sm:py-1 text-xs font-semibold rounded border flex-shrink-0 ${
-                        ping.status === 'ok' ? 'bg-success/10 text-success border-success/20' : 'bg-error/10 text-error border-error/20'
-                      }`}
-                    >
-                      {ping.status === 'ok' ? 'OK' : 'FAIL'}
-                    </span>
+                    {(() => {
+                      // Determine ping display status based on ping.status and message
+                      let displayStatus: 'ok' | 'warn' | 'fail' = 'ok'
+                      let statusClass = 'bg-success/10 text-success border-success/20'
+                      let statusText = 'OK'
+                      
+                      if (ping.status === 'fail') {
+                        // Check if it's a "late" warning, payload warning, or a "failed" error
+                        if (ping.message && ping.message.includes('Monitor is late')) {
+                          displayStatus = 'warn'
+                          statusClass = 'bg-warning/10 text-warning border-warning/20'
+                          statusText = 'WARN'
+                        } else if (ping.message && ping.message.includes('[WARNING]')) {
+                          // Payload validation warning (severity: 'warn')
+                          displayStatus = 'warn'
+                          statusClass = 'bg-warning/10 text-warning border-warning/20'
+                          statusText = 'WARN'
+                        } else {
+                          displayStatus = 'fail'
+                          statusClass = 'bg-error/10 text-error border-error/20'
+                          statusText = 'FAIL'
+                        }
+                      }
+                      
+                      return (
+                        <span
+                          className={`px-2 py-0.5 sm:py-1 text-xs font-semibold rounded border flex-shrink-0 ${statusClass}`}
+                        >
+                          {statusText}
+                        </span>
+                      )
+                    })()}
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm font-medium font-mono truncate">
                         {format(new Date(ping.received_at), 'PPp')}
@@ -1507,7 +1532,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                     {ping.duration_ms !== null && (
                       <p className="text-xs sm:text-sm text-muted-foreground font-mono">{ping.duration_ms}ms</p>
                     )}
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground" suppressHydrationWarning>
                       {formatDistanceToNow(new Date(ping.received_at), { addSuffix: true })}
                     </p>
                   </div>

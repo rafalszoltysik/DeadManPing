@@ -16,7 +16,7 @@ const supabaseAdmin = createClient(
 
 interface AlertData {
   monitor_id: string
-  alert_type: 'missing' | 'failed' | 'recovered'
+  alert_type: 'missing' | 'failed' | 'recovered' | 'warn'
 }
 
 export async function sendAlert({ monitor_id, alert_type }: AlertData) {
@@ -63,8 +63,8 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
     .gte('sent_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
     .limit(1)
 
-  // For missing/failed alerts, only send if no recent alert of same type
-  if ((alert_type === 'missing' || alert_type === 'failed') && recentAlerts && recentAlerts.length > 0) {
+  // For missing/failed/warn alerts, only send if no recent alert of same type
+  if ((alert_type === 'missing' || alert_type === 'failed' || alert_type === 'warn') && recentAlerts && recentAlerts.length > 0) {
     console.log('Skipping alert due to recent alert (anti-spam)')
     return { success: false, error: 'Recent alert exists, skipping' }
   }
@@ -291,7 +291,7 @@ async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, alertTyp
       message,
       timestamp: new Date().toISOString(),
       dashboard_url: dashboardUrl,
-      severity: alertType === 'recovered' ? 'info' : 'critical',
+      severity: alertType === 'recovered' ? 'info' : alertType === 'warn' ? 'warning' : 'critical',
     }
 
     const response = await fetch(webhookUrl, {
@@ -320,6 +320,8 @@ function getAlertEmoji(alertType: string): string {
       return '🔴'
     case 'failed':
       return '🔴'
+    case 'warn':
+      return '⚠️'
     case 'recovered':
       return '🟢'
     default:
@@ -333,6 +335,8 @@ function getEmailSubject(monitorName: string, alertType: string): string {
       return `🔴 MISSING: ${monitorName} didn't ping`
     case 'failed':
       return `🔴 FAILED: ${monitorName} reported failure`
+    case 'warn':
+      return `⚠️ WARNING: ${monitorName} is late`
     case 'recovered':
       return `🟢 RECOVERED: ${monitorName} is back online`
     default:
@@ -346,6 +350,8 @@ function getEmailBody(monitor: any, alertType: string): string {
       return `Your monitor "${monitor.name}" hasn't sent a ping in the expected time window. This could indicate that your cron job or scheduled task didn't run.`
     case 'failed':
       return `Your monitor "${monitor.name}" reported a failure status. Please check your job logs.`
+    case 'warn':
+      return `Your monitor "${monitor.name}" is late - ping not received within expected interval. It's still within grace period, but please check your cron job.`
     case 'recovered':
       return `Good news! Your monitor "${monitor.name}" is back online and working correctly.`
     default:
@@ -359,6 +365,8 @@ function getAlertMessage(monitor: any, alertType: string): string {
       return `🔴 MISSING: ${monitor.name} didn't ping`
     case 'failed':
       return `🔴 FAILED: ${monitor.name} reported failure`
+    case 'warn':
+      return `⚠️ WARNING: ${monitor.name} is late`
     case 'recovered':
       return `🟢 RECOVERED: ${monitor.name} is back online`
     default:
@@ -371,6 +379,8 @@ function getAlertColor(alertType: string): string {
     case 'missing':
     case 'failed':
       return '#dc2626'
+    case 'warn':
+      return '#f59e0b'
     case 'recovered':
       return '#16a34a'
     default:

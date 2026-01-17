@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!['missing', 'failed', 'recovered'].includes(alert_type)) {
+    if (!['missing', 'failed', 'recovered', 'warn'].includes(alert_type)) {
       return NextResponse.json(
         { error: 'Invalid alert_type' },
         { status: 400 }

@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
         console.error(`Error inserting ping for monitor ${monitor.id}:`, pingError)
       }
 
-      // Trigger alert
+      // Trigger alert (warn for late status)
       try {
         await fetch(`${request.nextUrl.origin}/api/internal/send-alert`, {
           method: 'POST',
@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
           },
           body: JSON.stringify({
             monitor_id: monitor.id,
-            alert_type: 'missing',
+            alert_type: 'warn',
           }),
         })
       } catch (alertError) {

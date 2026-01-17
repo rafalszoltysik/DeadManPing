@@ -185,20 +185,36 @@ async function handlePing(
     
     // Determine new monitor status based on validation
     // OK = cron ran and all rules passed
-    // FAIL = cron ran but some rule failed
+    // FAIL = cron ran but some rule with severity 'error' failed
+    // WARN = cron ran but only rules with severity 'warn' failed (monitor stays healthy)
     // DOWN = cron didn't run (handled by timeout checker)
     let newStatus = monitor.status
     if (!validationResult.valid) {
-      // Validation failed - mark as failed
-      newStatus = 'failed'
-    } else if (monitor.status === 'late' || monitor.status === 'failed') {
-      // Recovered from failed/late state
-      newStatus = 'healthy'
-    } else if (monitor.status === 'pending') {
-      // First successful ping
-      newStatus = 'healthy'
+      // Check if there are any errors (severity 'error') or only warnings (severity 'warn')
+      if (validationResult.hasErrors) {
+        // At least one field with severity 'error' failed - mark as failed
+        newStatus = 'failed'
+      } else if (validationResult.hasWarnings) {
+        // Only warnings - monitor stays healthy but ping will show as fail/warn
+        // Don't change status to failed, but also don't mark as recovered if it was failed/late
+        // Only recover if it was already failed/late and we got a ping (even with warnings)
+        if (monitor.status === 'late' || monitor.status === 'failed') {
+          // Recovered from failed/late state (ping received, even if with warnings)
+          newStatus = 'healthy'
+        }
+        // If already healthy, stay healthy (warnings don't change status)
+      }
+    } else {
+      // All validations passed
+      if (monitor.status === 'late' || monitor.status === 'failed') {
+        // Recovered from failed/late state
+        newStatus = 'healthy'
+      } else if (monitor.status === 'pending') {
+        // First successful ping
+        newStatus = 'healthy'
+      }
+      // If already healthy and validation passed, stay healthy
     }
-    // If already healthy and validation passed, stay healthy
 
     // Calculate next expected ping time
     const currentTime = new Date()
@@ -240,6 +256,11 @@ async function handlePing(
     let validationMessage: string | null = null
     if (!validationResult.valid && validationResult.errors.length > 0) {
       validationMessage = validationResult.errors.join('; ')
+      
+      // If only warnings (no errors), prepend message to indicate it's a warning
+      if (validationResult.hasWarnings && !validationResult.hasErrors) {
+        validationMessage = `[WARNING] ${validationMessage}`
+      }
     }
 
     // Insert ping record
