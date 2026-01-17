@@ -1,17 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { validatePayload } from '@/lib/payload-validator'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { parsePayload, extractDeclaredFields } from '@/lib/payload-parser'
+import { errorResponse, successResponse } from '@/lib/api/response'
 
 // Rate limiting: simple in-memory store (for MVP)
 // In production, use Redis or similar
@@ -47,26 +38,22 @@ async function handlePing(
   method: string
 ) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
+
     // Find monitor by slug
     const { data: monitor, error: monitorError } = await supabaseAdmin
       .from('monitors')
       .select('*')
       .eq('slug', slug)
-      .single()
+      .single() as { data: any; error: any }
 
     if (monitorError || !monitor) {
-      return NextResponse.json(
-        { ok: false, error: 'Monitor not found' },
-        { status: 404 }
-      )
+      return errorResponse('Monitor not found', 404)
     }
 
     // Check if monitor is paused (blocked after grace period)
     if (monitor.status === 'paused') {
-      return NextResponse.json(
-        { ok: false, error: 'Monitor is paused. Please upgrade your plan to reactivate it.' },
-        { status: 403 }
-      )
+      return errorResponse('Monitor is paused. Please upgrade your plan to reactivate it.', 403)
     }
 
     // Check subscription status
@@ -74,7 +61,7 @@ async function handlePing(
       .from('profiles')
       .select('subscription_status')
       .eq('id', monitor.user_id)
-      .single()
+      .single() as { data: any }
 
     if (profile?.subscription_status === 'canceled' || profile?.subscription_status === 'past_due') {
       // Grace period: allow pings for 7 days after cancellation
@@ -82,16 +69,13 @@ async function handlePing(
         .from('profiles')
         .select('updated_at')
         .eq('id', monitor.user_id)
-        .single()
+        .single() as { data: any }
 
       if (canceledProfile?.updated_at) {
         const canceledDate = new Date(canceledProfile.updated_at)
         const daysSinceCanceled = (Date.now() - canceledDate.getTime()) / (1000 * 60 * 60 * 24)
         if (daysSinceCanceled > 7) {
-          return NextResponse.json(
-            { ok: false, error: 'Subscription expired' },
-            { status: 403 }
-          )
+          return errorResponse('Subscription expired', 403)
         }
       }
     }
@@ -101,83 +85,22 @@ async function handlePing(
     const lastPing = rateLimitStore.get(rateLimitKey) || 0
     const now = Date.now()
     if (now - lastPing < 10000) {
-      return NextResponse.json(
-        { ok: false, error: 'Rate limit exceeded' },
-        { status: 429 }
-      )
+      return errorResponse('Rate limit exceeded', 429)
     }
     rateLimitStore.set(rateLimitKey, now)
 
     // Parse payload (user can send any JSON)
-    let payload: any = {}
-    if (method === 'GET' || method === 'HEAD') {
-      // For GET/HEAD, parse query params as JSON-like structure
-      const searchParams = request.nextUrl.searchParams
-      searchParams.forEach((value, key) => {
-        // Try to parse as number or boolean, otherwise keep as string
-        if (value === 'true') payload[key] = true
-        else if (value === 'false') payload[key] = false
-        else if (!isNaN(Number(value)) && value !== '') payload[key] = Number(value)
-        else payload[key] = value
-      })
-    } else {
-      try {
-        const contentType = request.headers.get('content-type')
-        if (contentType?.includes('application/json')) {
-          // Try to read body as text first to handle parsing errors better
-          const bodyText = await request.text()
-          if (bodyText.trim()) {
-            try {
-              payload = JSON.parse(bodyText)
-            } catch (parseError) {
-              console.error('JSON parse error:', parseError, 'Body:', bodyText)
-              return NextResponse.json(
-                { ok: false, error: 'Invalid JSON payload', details: parseError instanceof Error ? parseError.message : 'Parse error' },
-                { status: 400 }
-              )
-            }
-          }
-        } else if (contentType?.includes('application/x-www-form-urlencoded')) {
-          const formData = await request.formData()
-          formData.forEach((value, key) => {
-            const strValue = value.toString()
-            if (strValue === 'true') payload[key] = true
-            else if (strValue === 'false') payload[key] = false
-            else if (!isNaN(Number(strValue)) && strValue !== '') payload[key] = Number(strValue)
-            else payload[key] = strValue
-          })
-        }
-      } catch (e) {
-        // If request reading fails, return error
-        console.error('Error reading request body:', e)
-        return NextResponse.json(
-          { ok: false, error: 'Invalid request body', details: e instanceof Error ? e.message : 'Unknown error' },
-          { status: 400 }
-        )
-      }
+    const parseResult = await parsePayload(request, method)
+    if (!parseResult.success) {
+      return errorResponse(parseResult.error, parseResult.status, parseResult.details)
     }
-
-    // Validate payload size (max 2KB total)
-    const payloadStr = JSON.stringify(payload)
-    if (payloadStr.length > 2048) {
-      return NextResponse.json(
-        { ok: false, error: 'Payload too large (max 2KB)' },
-        { status: 400 }
-      )
-    }
+    const payload = parseResult.payload
 
     // Get validation rules from monitor
     const validationRules = monitor.payload_validation_rules
 
     // Extract only declared fields from payload (ignore everything else)
-    const declaredFields: Record<string, any> = {}
-    if (validationRules && validationRules.fields && Array.isArray(validationRules.fields)) {
-      for (const field of validationRules.fields) {
-        if (payload[field.name] !== undefined) {
-          declaredFields[field.name] = payload[field.name]
-        }
-      }
-    }
+    const declaredFields = extractDeclaredFields(payload, validationRules)
 
     // Validate payload against monitor's validation rules
     // Only declared fields are validated, rest is ignored
@@ -223,22 +146,20 @@ async function handlePing(
     )
 
     // Update monitor
-    const { error: updateError } = await supabaseAdmin
-      .from('monitors')
-      .update({
-        status: newStatus,
-        last_ping_at: currentTime.toISOString(),
-        next_expected_ping_at: nextExpectedPing.toISOString(),
-        updated_at: currentTime.toISOString(),
-      })
+    const updateData = {
+      status: newStatus,
+      last_ping_at: currentTime.toISOString(),
+      next_expected_ping_at: nextExpectedPing.toISOString(),
+      updated_at: currentTime.toISOString(),
+    }
+    const { error: updateError } = await (supabaseAdmin
+      .from('monitors') as any)
+      .update(updateData)
       .eq('id', monitor.id)
 
     if (updateError) {
       console.error('Error updating monitor:', updateError)
-      return NextResponse.json(
-        { ok: false, error: 'Failed to update monitor' },
-        { status: 500 }
-      )
+      return errorResponse('Failed to update monitor', 500)
     }
 
     // Build metadata with only declared field values (for storage)
@@ -273,7 +194,7 @@ async function handlePing(
       duration_ms: null, // Not used in new model
       metadata: Object.keys(metadata).length > 0 ? metadata : null,
       received_at: currentTime.toISOString(),
-    })
+    } as any)
 
     if (pingError) {
       console.error('Error inserting ping:', pingError)
@@ -289,7 +210,7 @@ async function handlePing(
         .select('id')
         .eq('monitor_id', monitor.id)
         .order('received_at', { ascending: false })
-        .range(100, 999999)
+        .range(100, 999999) as { data: any[] | null }
 
       if (oldPings && oldPings.length > 0) {
         const idsToDelete = oldPings.map((p) => p.id)
@@ -329,17 +250,14 @@ async function handlePing(
       }
     }
 
-    return NextResponse.json({
+    return successResponse({
       ok: true,
       monitor: monitor.name,
       status: newStatus,
     })
   } catch (error) {
     console.error('Error handling ping:', error)
-    return NextResponse.json(
-      { ok: false, error: 'Internal server error' },
-      { status: 500 }
-    )
+    return errorResponse('Internal server error', 500)
   }
 }
 

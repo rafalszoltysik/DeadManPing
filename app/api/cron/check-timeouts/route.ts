@@ -1,30 +1,21 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest } from 'next/server'
 import { compareSecrets } from '@/lib/security'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { verifyCronSecret } from '@/lib/api/auth'
+import { shouldMarkAsLate, shouldMarkAsFailed } from '@/lib/monitor-utils'
+import { errorResponse, successResponse, unauthorizedResponse } from '@/lib/api/response'
 
 // This endpoint can be called by Vercel Cron Jobs
 export async function GET(request: NextRequest) {
   // Verify cron secret (set in Vercel environment variables)
-  // Use timing-safe comparison to prevent timing attacks
   const authHeader = request.headers.get('authorization')
-  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
   
-  if (!authHeader || !compareSecrets(authHeader, expectedAuth)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!verifyCronSecret(authHeader)) {
+    return unauthorizedResponse()
   }
 
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const now = new Date()
     const nowISO = now.toISOString()
 
@@ -32,76 +23,27 @@ export async function GET(request: NextRequest) {
     const { data: allMonitors, error: fetchError } = await supabaseAdmin
       .from('monitors')
       .select('*')
-      .neq('status', 'paused')
+      .neq('status', 'paused') as { data: any[] | null; error: any }
 
     if (fetchError) {
       console.error('Error fetching monitors:', fetchError)
-      return NextResponse.json({ error: 'Failed to fetch monitors' }, { status: 500 })
+      return errorResponse('Failed to fetch monitors', 500)
     }
 
     if (!allMonitors || allMonitors.length === 0) {
-      return NextResponse.json({ checked: 0, updated: 0 })
+      return successResponse({ checked: 0, updated: 0 })
     }
 
     // Check each monitor to see if it's overdue
-    const lateMonitors: typeof allMonitors = []
-    const failedMonitors: typeof allMonitors = []
-    
-    for (const monitor of allMonitors) {
-      let referenceTime: Date | null = null
-      
-      // Determine reference time (when the ping was expected)
-      if (monitor.last_ping_at) {
-        referenceTime = new Date(monitor.last_ping_at)
-      } else if (monitor.status === 'pending' || (monitor.status === 'healthy' && !monitor.last_ping_at)) {
-        referenceTime = new Date(monitor.created_at)
-      }
-      
-      if (!referenceTime) {
-        continue
-      }
-      
-      const expectedIntervalEnd = new Date(
-        referenceTime.getTime() + monitor.expected_interval_seconds * 1000
-      )
-      const gracePeriodEnd = new Date(
-        referenceTime.getTime() + 
-        monitor.expected_interval_seconds * 1000 + 
-        monitor.grace_period_seconds * 1000
-      )
-      
-      // If grace period is 0, mark as failed immediately after expected interval
-      if (monitor.grace_period_seconds === 0) {
-        if (now > expectedIntervalEnd) {
-          // Mark as failed if not already failed
-          if (monitor.status !== 'failed') {
-            failedMonitors.push(monitor)
-          }
-        }
-      } else {
-        // Check if monitor is in grace period (late)
-        if (now > expectedIntervalEnd && now <= gracePeriodEnd) {
-          // Only mark as late if not already late or failed
-          if (monitor.status !== 'late' && monitor.status !== 'failed') {
-            lateMonitors.push(monitor)
-          }
-        }
-        // Check if monitor is past grace period (failed)
-        else if (now > gracePeriodEnd) {
-          // Mark as failed (can transition from late to failed)
-          if (monitor.status !== 'failed') {
-            failedMonitors.push(monitor)
-          }
-        }
-      }
-    }
+    const lateMonitors = allMonitors.filter((monitor) => shouldMarkAsLate(monitor, now))
+    const failedMonitors = allMonitors.filter((monitor) => shouldMarkAsFailed(monitor, now))
 
     let updatedCount = 0
 
     // Update monitors to 'late' status
     for (const monitor of lateMonitors) {
-      const { error: updateError } = await supabaseAdmin
-        .from('monitors')
+      const { error: updateError } = await (supabaseAdmin
+        .from('monitors') as any)
         .update({ status: 'late', updated_at: nowISO })
         .eq('id', monitor.id)
 
@@ -120,7 +62,7 @@ export async function GET(request: NextRequest) {
         duration_ms: null,
         metadata: null,
         received_at: nowISO,
-      })
+      } as any)
 
       if (pingError) {
         console.error(`Error inserting ping for monitor ${monitor.id}:`, pingError)
@@ -146,8 +88,8 @@ export async function GET(request: NextRequest) {
 
     // Update monitors to 'failed' status
     for (const monitor of failedMonitors) {
-      const { error: updateError } = await supabaseAdmin
-        .from('monitors')
+      const { error: updateError } = await (supabaseAdmin
+        .from('monitors') as any)
         .update({ status: 'failed', updated_at: nowISO })
         .eq('id', monitor.id)
 
@@ -166,7 +108,7 @@ export async function GET(request: NextRequest) {
         duration_ms: null,
         metadata: null,
         received_at: nowISO,
-      })
+      } as any)
 
       if (pingError) {
         console.error(`Error inserting ping for monitor ${monitor.id}:`, pingError)
@@ -191,10 +133,10 @@ export async function GET(request: NextRequest) {
     }
 
     if (lateMonitors.length === 0 && failedMonitors.length === 0) {
-      return NextResponse.json({ checked: allMonitors.length, updated: 0 })
+      return successResponse({ checked: allMonitors.length, updated: 0 })
     }
 
-    return NextResponse.json({ 
+    return successResponse({ 
       checked: allMonitors.length, 
       updated: updatedCount,
       late: lateMonitors.length,
@@ -202,7 +144,7 @@ export async function GET(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Error in check-timeouts:', error)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return errorResponse(error.message, 500)
   }
 }
 

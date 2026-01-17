@@ -1,71 +1,32 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest } from 'next/server'
 import { verifySession } from '@/lib/auth/session'
 import { validatePayloadRules } from '@/lib/payload-validator'
 import { checkIntervalLimitByWorkspace } from '@/lib/limits'
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { requireAuth } from '@/lib/api/auth'
+import { verifyMonitorAccessBySlug, checkOptimisticLock } from '@/lib/api/monitors'
+import { errorResponse, successResponse, conflictResponse, badRequestResponse } from '@/lib/api/response'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    // Verify session
-    const session = await verifySession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (!authResult.success) {
+      return authResult.response
     }
 
     const { slug } = await params
 
-    // Find monitor by slug and verify ownership
-    const { data: monitor, error: monitorError } = await supabaseAdmin
-      .from('monitors')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
-    if (monitorError || !monitor) {
-      return NextResponse.json({ error: 'Monitor not found' }, { status: 404 })
+    // Verify monitor access
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    if (!accessResult.success) {
+      return accessResult.response
     }
 
-    // Verify workspace membership
-    if (monitor.workspace_id) {
-      const { data: member } = await supabaseAdmin
-        .from('workspace_members')
-        .select('id')
-        .eq('workspace_id', monitor.workspace_id)
-        .eq('user_id', session.userId)
-        .single()
-
-      if (!member) {
-        // Check if user is workspace owner
-        const { data: workspace } = await supabaseAdmin
-          .from('workspaces')
-          .select('owner_id')
-          .eq('id', monitor.workspace_id)
-          .single()
-
-        if (!workspace || workspace.owner_id !== session.userId) {
-          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-        }
-      }
-    } else {
-      // Legacy: check user_id directly
-      if (monitor.user_id !== session.userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-      }
-    }
+    const monitor = accessResult.monitor
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Get pings
     const { data: pings } = await supabaseAdmin
@@ -75,12 +36,12 @@ export async function GET(
       .order('received_at', { ascending: false })
       .limit(50)
 
-    return NextResponse.json({ monitor, pings: pings || [] }, { status: 200 })
+    return successResponse({ monitor, pings: pings || [] })
   } catch (error) {
     console.error('Error in get monitor API:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : 'Internal server error',
+      500
     )
   }
 }
@@ -90,71 +51,40 @@ export async function PUT(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    // Verify session
-    const session = await verifySession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (!authResult.success) {
+      return authResult.response
     }
 
     const { slug } = await params
     const body = await request.json()
-    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status } = body
+    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status, expectedUpdatedAt } = body
 
-    // Find monitor by slug and verify ownership
-    const { data: monitor, error: monitorError } = await supabaseAdmin
-      .from('monitors')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
-    if (monitorError || !monitor) {
-      return NextResponse.json({ error: 'Monitor not found' }, { status: 404 })
+    // Verify monitor access
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    if (!accessResult.success) {
+      return accessResult.response
     }
 
-    // Verify workspace membership
-    if (monitor.workspace_id) {
-      const { data: member } = await supabaseAdmin
-        .from('workspace_members')
-        .select('id')
-        .eq('workspace_id', monitor.workspace_id)
-        .eq('user_id', session.userId)
-        .single()
-
-      if (!member) {
-        // Check if user is workspace owner
-        const { data: workspace } = await supabaseAdmin
-          .from('workspaces')
-          .select('owner_id')
-          .eq('id', monitor.workspace_id)
-          .single()
-
-        if (!workspace || workspace.owner_id !== session.userId) {
-          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-        }
-      }
-    } else {
-      // Legacy: check user_id directly
-      if (monitor.user_id !== session.userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-      }
-    }
+    const monitor = accessResult.monitor
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Build update object
     const updateData: any = {}
 
     if (name !== undefined) {
       if (typeof name !== 'string' || name.trim().length === 0) {
-        return NextResponse.json({ error: 'Monitor name cannot be empty' }, { status: 400 })
+        return badRequestResponse('Monitor name cannot be empty')
       }
       if (name.trim().length > 100) {
-        return NextResponse.json({ error: 'Monitor name must be 100 characters or less' }, { status: 400 })
+        return badRequestResponse('Monitor name must be 100 characters or less')
       }
       updateData.name = name.trim()
     }
 
     if (expectedIntervalSeconds !== undefined) {
       if (typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 30) {
-        return NextResponse.json({ error: 'Expected interval must be at least 30 seconds' }, { status: 400 })
+        return badRequestResponse('Expected interval must be at least 30 seconds')
       }
 
       // Check interval limit by workspace
@@ -167,13 +97,7 @@ export async function PUT(
             ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro plan for 1-minute intervals or Team plan for 30-second intervals.`
             : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Team plan for 30-second intervals.`
           
-          return NextResponse.json(
-            {
-              error: errorMsg,
-              type: 'interval',
-            },
-            { status: 403 }
-          )
+          return errorResponse(errorMsg, 403, { type: 'interval' })
         }
       }
 
@@ -182,7 +106,7 @@ export async function PUT(
 
     if (gracePeriodSeconds !== undefined) {
       if (typeof gracePeriodSeconds !== 'number' || gracePeriodSeconds < 0) {
-        return NextResponse.json({ error: 'Grace period cannot be negative' }, { status: 400 })
+        return badRequestResponse('Grace period cannot be negative')
       }
       updateData.grace_period_seconds = gracePeriodSeconds
     }
@@ -194,10 +118,7 @@ export async function PUT(
       } else {
         const validationResult = validatePayloadRules(payloadValidationRules)
         if (!validationResult.valid) {
-          return NextResponse.json(
-            { error: `Invalid payload validation rules: ${validationResult.error}` },
-            { status: 400 }
-          )
+          return badRequestResponse(`Invalid payload validation rules: ${validationResult.error}`)
         }
         updateData.payload_validation_rules = validationResult.sanitized || null
       }
@@ -250,43 +171,19 @@ export async function PUT(
     }
 
     // Optimistic locking: check if monitor was modified since we fetched it
-    // This prevents overwriting concurrent changes
-    const { data: currentMonitor } = await supabaseAdmin
-      .from('monitors')
-      .select('updated_at')
-      .eq('id', monitor.id)
-      .single()
-
-    if (currentMonitor && body.expectedUpdatedAt) {
-      // Client sent expected updated_at timestamp
-      const expectedTime = new Date(body.expectedUpdatedAt).getTime()
-      const currentTime = new Date(currentMonitor.updated_at).getTime()
-      
-      if (Math.abs(currentTime - expectedTime) > 1000) {
-        // Monitor was updated by someone else (more than 1 second difference)
-        // Fetch latest version and return conflict
-        const { data: latestMonitor } = await supabaseAdmin
-          .from('monitors')
-          .select('*')
-          .eq('id', monitor.id)
-          .single()
-        
-        return NextResponse.json(
-          { 
-            error: 'Monitor was modified by another process. Please refresh and try again.',
-            conflict: true,
-            latestMonitor 
-          },
-          { status: 409 }
-        )
-      }
+    const lockResult = await checkOptimisticLock(monitor.id, expectedUpdatedAt)
+    if (lockResult.conflict) {
+      return conflictResponse(
+        'Monitor was modified by another process. Please refresh and try again.',
+        lockResult.latestMonitor
+      )
     }
 
     // Update monitor with new updated_at timestamp
     updateData.updated_at = new Date().toISOString()
     
-    const { data: updatedMonitor, error: updateError } = await supabaseAdmin
-      .from('monitors')
+    const { data: updatedMonitor, error: updateError } = await (supabaseAdmin
+      .from('monitors') as any)
       .update(updateData)
       .eq('id', monitor.id)
       .select()
@@ -294,7 +191,7 @@ export async function PUT(
 
     if (updateError) {
       console.error('Error updating monitor:', updateError)
-      return NextResponse.json({ error: updateError.message || 'Failed to update monitor' }, { status: 500 })
+      return errorResponse(updateError.message || 'Failed to update monitor', 500)
     }
 
     // Insert ping record and trigger alert if status changed to late or failed
@@ -307,7 +204,7 @@ export async function PUT(
         duration_ms: null,
         metadata: null,
         received_at: nowISO,
-      })
+      } as any)
 
       if (pingError) {
         console.error(`Error inserting ping for monitor ${updatedMonitor.id}:`, pingError)
@@ -346,12 +243,12 @@ export async function PUT(
       }
     }
 
-    return NextResponse.json({ monitor: updatedMonitor }, { status: 200 })
+    return successResponse({ monitor: updatedMonitor })
   } catch (error) {
     console.error('Error in update monitor API:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : 'Internal server error',
+      500
     )
   }
 }
@@ -361,52 +258,21 @@ export async function DELETE(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    // Verify session
-    const session = await verifySession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (!authResult.success) {
+      return authResult.response
     }
 
     const { slug } = await params
 
-    // Find monitor by slug and verify ownership
-    const { data: monitor, error: monitorError } = await supabaseAdmin
-      .from('monitors')
-      .select('*')
-      .eq('slug', slug)
-      .single()
-
-    if (monitorError || !monitor) {
-      return NextResponse.json({ error: 'Monitor not found' }, { status: 404 })
+    // Verify monitor access
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    if (!accessResult.success) {
+      return accessResult.response
     }
 
-    // Verify workspace membership
-    if (monitor.workspace_id) {
-      const { data: member } = await supabaseAdmin
-        .from('workspace_members')
-        .select('id')
-        .eq('workspace_id', monitor.workspace_id)
-        .eq('user_id', session.userId)
-        .single()
-
-      if (!member) {
-        // Check if user is workspace owner
-        const { data: workspace } = await supabaseAdmin
-          .from('workspaces')
-          .select('owner_id')
-          .eq('id', monitor.workspace_id)
-          .single()
-
-        if (!workspace || workspace.owner_id !== session.userId) {
-          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-        }
-      }
-    } else {
-      // Legacy: check user_id directly
-      if (monitor.user_id !== session.userId) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
-      }
-    }
+    const monitor = accessResult.monitor
+    const supabaseAdmin = getSupabaseAdmin()
 
     // Delete monitor (cascade will delete pings and alerts)
     const { error: deleteError } = await supabaseAdmin
@@ -416,15 +282,15 @@ export async function DELETE(
 
     if (deleteError) {
       console.error('Error deleting monitor:', deleteError)
-      return NextResponse.json({ error: deleteError.message || 'Failed to delete monitor' }, { status: 500 })
+      return errorResponse(deleteError.message || 'Failed to delete monitor', 500)
     }
 
-    return NextResponse.json({ success: true }, { status: 200 })
+    return successResponse({ success: true })
   } catch (error) {
     console.error('Error in delete monitor API:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : 'Internal server error',
+      500
     )
   }
 }

@@ -1,29 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextRequest } from 'next/server'
 import { randomBytes } from 'crypto'
-import { verifySession } from '@/lib/auth/session'
 import { checkMonitorLimitByWorkspace, checkIntervalLimitByWorkspace } from '@/lib/limits'
 import { validatePayloadRules } from '@/lib/payload-validator'
-
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is not set')
-  }
-
-  if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is not set')
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
-}
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { requireAuth } from '@/lib/api/auth'
+import { errorResponse, successResponse, badRequestResponse } from '@/lib/api/response'
 
 function generateSlug(): string {
   return randomBytes(32).toString('hex')
@@ -31,31 +12,32 @@ function generateSlug(): string {
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify session
-    const session = await verifySession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const authResult = await requireAuth()
+    if (!authResult.success) {
+      return authResult.response
     }
+
+    const session = authResult.session
 
     const body = await request.json()
     const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels } = body
 
     // Validate input
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return NextResponse.json({ error: 'Monitor name is required' }, { status: 400 })
+      return badRequestResponse('Monitor name is required')
     }
 
     if (name.trim().length > 100) {
-      return NextResponse.json({ error: 'Monitor name must be 100 characters or less' }, { status: 400 })
+      return badRequestResponse('Monitor name must be 100 characters or less')
     }
 
     if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 30) {
-      return NextResponse.json({ error: 'Expected interval must be at least 30 seconds' }, { status: 400 })
+      return badRequestResponse('Expected interval must be at least 30 seconds')
     }
 
     const gracePeriod = gracePeriodSeconds || 3600
     if (gracePeriod < 0) {
-      return NextResponse.json({ error: 'Grace period cannot be negative' }, { status: 400 })
+      return badRequestResponse('Grace period cannot be negative')
     }
 
     // Validate and sanitize payload validation rules
@@ -63,10 +45,7 @@ export async function POST(request: NextRequest) {
     if (payloadValidationRules) {
       const validationResult = validatePayloadRules(payloadValidationRules)
       if (!validationResult.valid) {
-        return NextResponse.json(
-          { error: `Invalid payload validation rules: ${validationResult.error}` },
-          { status: 400 }
-        )
+        return badRequestResponse(`Invalid payload validation rules: ${validationResult.error}`)
       }
       validatedRules = validationResult.sanitized || null
     }
@@ -80,7 +59,7 @@ export async function POST(request: NextRequest) {
       .select('id')
       .eq('owner_id', session.userId)
       .limit(1)
-      .single()
+      .single() as { data: { id: string } | null }
 
     // If no workspace exists, create one
     let workspaceId: string
@@ -89,10 +68,10 @@ export async function POST(request: NextRequest) {
         .from('profiles')
         .select('email')
         .eq('id', session.userId)
-        .single()
+        .single() as { data: { email?: string } | null }
 
-      const { data: newWorkspace, error: workspaceError } = await supabaseAdmin
-        .from('workspaces')
+      const { data: newWorkspace, error: workspaceError } = await (supabaseAdmin
+        .from('workspaces') as any)
         .insert({
           name: `${profile?.email || 'User'}'s Workspace`,
           slug: 'workspace-' + session.userId,
@@ -103,12 +82,12 @@ export async function POST(request: NextRequest) {
         .single()
 
       if (workspaceError || !newWorkspace) {
-        return NextResponse.json({ error: 'Failed to create workspace' }, { status: 500 })
+        return errorResponse('Failed to create workspace', 500)
       }
 
       // Create workspace member
-      await supabaseAdmin
-        .from('workspace_members')
+      await (supabaseAdmin
+        .from('workspace_members') as any)
         .insert({
           workspace_id: newWorkspace.id,
           user_id: session.userId,
@@ -124,12 +103,10 @@ export async function POST(request: NextRequest) {
     // Check limits by workspace
     const monitorLimit = await checkMonitorLimitByWorkspace(workspaceId)
     if (!monitorLimit.allowed) {
-      return NextResponse.json(
-        {
-          error: `Monitor limit reached (${monitorLimit.current}/${monitorLimit.limit}). Upgrade your plan to create more monitors.`,
-          type: 'monitors',
-        },
-        { status: 403 }
+      return errorResponse(
+        `Monitor limit reached (${monitorLimit.current}/${monitorLimit.limit}). Upgrade your plan to create more monitors.`,
+        403,
+        { type: 'monitors' }
       )
     }
 
@@ -141,13 +118,7 @@ export async function POST(request: NextRequest) {
         ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro plan for 1-minute intervals or Team plan for 30-second intervals.`
         : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Team plan for 30-second intervals.`
       
-      return NextResponse.json(
-        {
-          error: errorMsg,
-          type: 'interval',
-        },
-        { status: 403 }
-      )
+      return errorResponse(errorMsg, 403, { type: 'interval' })
     }
 
     // Generate unique slug
@@ -173,7 +144,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (attempts >= maxAttempts) {
-      return NextResponse.json({ error: 'Failed to generate unique slug. Please try again.' }, { status: 500 })
+      return errorResponse('Failed to generate unique slug. Please try again.', 500)
     }
 
     // Calculate next expected ping time
@@ -220,15 +191,15 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Error creating monitor:', insertError)
-      return NextResponse.json({ error: insertError.message || 'Failed to create monitor' }, { status: 500 })
+      return errorResponse(insertError.message || 'Failed to create monitor', 500)
     }
 
-    return NextResponse.json({ monitor }, { status: 201 })
+    return successResponse({ monitor }, 201)
   } catch (error) {
     console.error('Error in create monitor API:', error)
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Internal server error' },
-      { status: 500 }
+    return errorResponse(
+      error instanceof Error ? error.message : 'Internal server error',
+      500
     )
   }
 }

@@ -2,61 +2,10 @@
 
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, ChevronRightIcon } from './Icons'
-
-interface Monitor {
-  id: string
-  name: string
-  slug: string
-  status: 'pending' | 'healthy' | 'late' | 'failed'
-  last_ping_at: string | null
-  next_expected_ping_at: string | null
-  expected_interval_seconds: number
-  created_at: string
-}
-
-interface MonitorListProps {
-  monitors: Monitor[]
-}
-
-function getStatusIcon(status: string) {
-  switch (status) {
-    case 'healthy':
-      return <StatusHealthyIcon className="w-4 h-4" />
-    case 'late':
-      return <StatusLateIcon className="w-4 h-4" />
-    case 'failed':
-      return <StatusFailedIcon className="w-4 h-4" />
-    default:
-      return <StatusPendingIcon className="w-4 h-4" />
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'healthy':
-      return 'bg-success/10 text-success border-success/20'
-    case 'late':
-      return 'bg-warning/10 text-warning border-warning/20'
-    case 'failed':
-      return 'bg-error/10 text-error border-error/20'
-    default:
-      return 'bg-muted text-muted-foreground border-border'
-  }
-}
-
-function getStatusLabel(status: string) {
-  switch (status) {
-    case 'healthy':
-      return 'Healthy'
-    case 'late':
-      return 'Late'
-    case 'failed':
-      return 'Failed'
-    default:
-      return 'Pending'
-  }
-}
+import { ChevronRightIcon } from './Icons'
+import { MonitorListProps } from '@/lib/types/monitor'
+import { MonitorStatusIcon } from './MonitorStatus'
+import { getStatusColor } from '@/lib/monitor-utils'
 
 export function MonitorList({ monitors }: MonitorListProps) {
   return (
@@ -73,14 +22,12 @@ export function MonitorList({ monitors }: MonitorListProps) {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                   <div className={`p-1.5 sm:p-2 rounded-lg border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
-                    {getStatusIcon(monitor.status)}
+                    <MonitorStatusIcon status={monitor.status} className="w-4 h-4" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap">
                       <h3 className="text-base sm:text-lg font-medium truncate">{monitor.name}</h3>
-                      <span className={`px-2 py-0.5 text-xs font-semibold rounded-full border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
-                        {getStatusLabel(monitor.status)}
-                      </span>
+                      <MonitorStatus status={monitor.status} size="sm" />
                     </div>
                     <p className="text-xs sm:text-sm text-muted-foreground font-mono">
                       Expected every {Math.floor(monitor.expected_interval_seconds / 60)} minutes

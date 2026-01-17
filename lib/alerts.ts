@@ -1,18 +1,7 @@
 import { Resend } from 'resend'
-import { createClient } from '@supabase/supabase-js'
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  }
-)
 
 interface AlertData {
   monitor_id: string
@@ -20,6 +9,8 @@ interface AlertData {
 }
 
 export async function sendAlert({ monitor_id, alert_type }: AlertData) {
+  const supabaseAdmin = getSupabaseAdmin()
+  
   // Fetch monitor with profile
   const { data: monitor, error: monitorError } = await supabaseAdmin
     .from('monitors')

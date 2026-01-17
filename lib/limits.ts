@@ -1,24 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
-
-function getSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-  if (!supabaseUrl) {
-    throw new Error('NEXT_PUBLIC_SUPABASE_URL environment variable is not set')
-  }
-
-  if (!serviceRoleKey) {
-    throw new Error('SUPABASE_SERVICE_ROLE_KEY environment variable is not set')
-  }
-
-  return createClient(supabaseUrl, serviceRoleKey, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
-}
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const TIER_LIMITS = {
   free: {
@@ -58,7 +38,7 @@ export async function checkMonitorLimit(userId: string): Promise<{
     .select('id, subscription_tier')
     .eq('owner_id', userId)
     .limit(1)
-    .single()
+    .single() as { data: { id: string; subscription_tier?: string } | null }
 
   if (!workspace) {
     // Fallback to profile if no workspace exists
@@ -66,7 +46,7 @@ export async function checkMonitorLimit(userId: string): Promise<{
       .from('profiles')
       .select('subscription_tier')
       .eq('id', userId)
-      .single()
+      .single() as { data: { subscription_tier?: string } | null }
 
     const tier = (profile?.subscription_tier || 'free') as keyof typeof TIER_LIMITS
     const limit = TIER_LIMITS[tier] || TIER_LIMITS.free
@@ -102,7 +82,7 @@ export async function checkMonitorLimitByWorkspace(workspaceId: string): Promise
     .from('workspaces')
     .select('subscription_tier, grace_period_ends_at')
     .eq('id', workspaceId)
-    .single()
+    .single() as { data: { subscription_tier?: string; grace_period_ends_at?: string | null } | null }
 
   const tier = (workspace?.subscription_tier || 'free') as keyof typeof TIER_LIMITS
   const limit = TIER_LIMITS[tier] || TIER_LIMITS.free
@@ -149,7 +129,7 @@ export async function checkIntervalLimit(
     .select('id, subscription_tier')
     .eq('owner_id', userId)
     .limit(1)
-    .single()
+    .single() as { data: { id: string; subscription_tier?: string } | null }
 
   if (!workspace) {
     // Fallback to profile
@@ -157,7 +137,7 @@ export async function checkIntervalLimit(
       .from('profiles')
       .select('subscription_tier')
       .eq('id', userId)
-      .single()
+      .single() as { data: { subscription_tier?: string } | null }
 
     const tier = (profile?.subscription_tier || 'free') as keyof typeof TIER_LIMITS
     const limit = TIER_LIMITS[tier] || TIER_LIMITS.free
@@ -183,7 +163,7 @@ export async function checkIntervalLimitByWorkspace(
     .from('workspaces')
     .select('subscription_tier')
     .eq('id', workspaceId)
-    .single()
+    .single() as { data: { subscription_tier?: string } | null }
 
   const tier = (workspace?.subscription_tier || 'free') as keyof typeof TIER_LIMITS
   const limit = TIER_LIMITS[tier] || TIER_LIMITS.free
@@ -208,7 +188,7 @@ export async function checkMemberLimit(workspaceId: string): Promise<{
     .from('workspaces')
     .select('subscription_tier')
     .eq('id', workspaceId)
-    .single()
+    .single() as { data: { subscription_tier?: string } | null }
 
   const tier = (workspace?.subscription_tier || 'free') as keyof typeof TIER_LIMITS
   const limit = TIER_LIMITS[tier] || TIER_LIMITS.free
