@@ -281,25 +281,20 @@ async function handlePing(
 
     // Trigger alerts based on status changes
     if (monitor.status !== newStatus) {
-      console.log(`[Ping] Monitor ${monitor.id} status changed: ${monitor.status} -> ${newStatus}`)
       // Status changed - determine alert type
       let alertType: 'failed' | 'recovered' | null = null
       
       if (newStatus === 'failed' && (monitor.status === 'healthy' || monitor.status === 'pending')) {
         // Changed to failed - send failure alert
         alertType = 'failed'
-        console.log(`[Ping] Triggering failed alert for monitor ${monitor.id}`)
       } else if (newStatus === 'healthy' && (monitor.status === 'late' || monitor.status === 'failed')) {
         // Recovered from failed/late - send recovery alert
         alertType = 'recovered'
-        console.log(`[Ping] Triggering recovered alert for monitor ${monitor.id}`)
       }
       
       if (alertType) {
         // Trigger alert asynchronously (don't wait)
-        const alertUrl = `${request.nextUrl.origin}/api/internal/send-alert`
-        console.log(`[Ping] Sending alert request to ${alertUrl}`)
-        fetch(alertUrl, {
+        fetch(`${request.nextUrl.origin}/api/internal/send-alert`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -309,20 +304,8 @@ async function handlePing(
             monitor_id: monitor.id,
             alert_type: alertType,
           }),
-        })
-        .then((res) => {
-          console.log(`[Ping] Alert response status: ${res.status}`)
-          return res.json()
-        })
-        .then((data) => {
-          console.log(`[Ping] Alert response:`, data)
-        })
-        .catch((err) => console.error(`[Ping] Error triggering ${alertType} alert:`, err))
-      } else {
-        console.log(`[Ping] No alert needed for status change: ${monitor.status} -> ${newStatus}`)
+        }).catch((err) => console.error(`Error triggering ${alertType} alert:`, err))
       }
-    } else {
-      console.log(`[Ping] Monitor ${monitor.id} status unchanged: ${monitor.status}`)
     }
 
     return NextResponse.json({

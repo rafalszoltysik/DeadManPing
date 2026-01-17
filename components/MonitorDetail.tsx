@@ -78,7 +78,8 @@ function getStatusLabel(status: string) {
 }
 
 export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: MonitorDetailProps) {
-  const [copied, setCopied] = useState(false)
+  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [copiedCurl, setCopiedCurl] = useState(false)
   const [waitingForPing, setWaitingForPing] = useState(monitor.status === 'pending' && pings.length === 0)
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
   const [editingPayloadRules, setEditingPayloadRules] = useState(false)
@@ -99,6 +100,8 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(userTier)
   const hasCustomWebhook = userTier === 'team'
@@ -191,10 +194,16 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
   const [selectedPlatform, setSelectedPlatform] = useState<'windows' | 'unix'>('unix')
   const curlCommand = curlCommands[selectedPlatform]
 
-  const copyToClipboard = () => {
+  const copyUrlToClipboard = () => {
+    navigator.clipboard.writeText(pingUrl)
+    setCopiedUrl(true)
+    setTimeout(() => setCopiedUrl(false), 2000)
+  }
+
+  const copyCurlToClipboard = () => {
     navigator.clipboard.writeText(curlCommands[selectedPlatform])
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+    setCopiedCurl(true)
+    setTimeout(() => setCopiedCurl(false), 2000)
   }
 
   // Poll for new pings if onboarding
@@ -349,8 +358,66 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
               </span>
             </div>
           </div>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="px-3 py-1.5 text-sm text-error border border-error/20 rounded-lg hover:bg-error/10 transition-smooth flex-shrink-0"
+          >
+            Delete
+          </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 max-w-md w-full">
+            <h2 className="text-xl font-semibold mb-2">Delete Monitor</h2>
+            <p className="text-muted-foreground mb-6">
+              Are you sure you want to delete "{monitor.name}"? This action cannot be undone. All pings and alerts for this monitor will also be deleted.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={deleting}
+                className="px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-accent transition-smooth disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setDeleting(true)
+                  setError(null)
+                  try {
+                    const response = await fetch(`/api/monitors/${monitor.slug}/update`, {
+                      method: 'DELETE',
+                    })
+
+                    if (!response.ok) {
+                      const data = await response.json()
+                      throw new Error(data.error || 'Failed to delete monitor')
+                    }
+
+                    // Redirect to dashboard after successful deletion
+                    window.location.href = '/dashboard'
+                  } catch (err: any) {
+                    setError(err.message)
+                    setDeleting(false)
+                  }
+                }}
+                disabled={deleting}
+                className="px-4 py-2 bg-error text-error-foreground rounded-lg text-sm font-medium hover:bg-error/90 transition-smooth disabled:opacity-50"
+              >
+                {deleting ? 'Deleting...' : 'Delete Monitor'}
+              </button>
+            </div>
+            {error && (
+              <div className="mt-4 bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {isOnboarding && waitingForPing && (
         <div className="bg-primary/10 border border-primary/20 rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6 animate-fade-in">
@@ -391,12 +458,12 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
               <code className="text-foreground whitespace-pre-wrap break-all">{curlCommand}</code>
             </div>
           </div>
-          <button
-            onClick={copyToClipboard}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto"
-          >
-            {copied ? '✓ Copied!' : 'Copy Command'}
-          </button>
+            <button
+              onClick={copyCurlToClipboard}
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto"
+            >
+              {copiedCurl ? '✓ Copied!' : 'Copy Command'}
+            </button>
         </div>
       )}
 
@@ -406,10 +473,10 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <code className="flex-1 bg-background border border-border px-3 py-2 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto break-all">{pingUrl}</code>
             <button
-              onClick={copyToClipboard}
+              onClick={copyUrlToClipboard}
               className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto flex-shrink-0"
             >
-              {copied ? '✓ Copied!' : 'Copy'}
+              {copiedUrl ? '✓ Copied!' : 'Copy'}
             </button>
           </div>
           <div className="mt-4">
@@ -447,10 +514,10 @@ export function MonitorDetail({ monitor, pings, pingUrl, isOnboarding }: Monitor
                 {curlCommand}
               </code>
               <button
-                onClick={copyToClipboard}
+                onClick={copyCurlToClipboard}
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto flex-shrink-0"
               >
-                {copied ? '✓ Copied!' : 'Copy'}
+                {copiedCurl ? '✓ Copied!' : 'Copy'}
               </button>
             </div>
           </div>

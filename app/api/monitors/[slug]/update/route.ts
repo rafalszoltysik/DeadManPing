@@ -181,3 +181,76 @@ export async function PUT(
   }
 }
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  try {
+    // Verify session
+    const session = await verifySession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { slug } = await params
+
+    // Find monitor by slug and verify ownership
+    const { data: monitor, error: monitorError } = await supabaseAdmin
+      .from('monitors')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+
+    if (monitorError || !monitor) {
+      return NextResponse.json({ error: 'Monitor not found' }, { status: 404 })
+    }
+
+    // Verify workspace membership
+    if (monitor.workspace_id) {
+      const { data: member } = await supabaseAdmin
+        .from('workspace_members')
+        .select('id')
+        .eq('workspace_id', monitor.workspace_id)
+        .eq('user_id', session.userId)
+        .single()
+
+      if (!member) {
+        // Check if user is workspace owner
+        const { data: workspace } = await supabaseAdmin
+          .from('workspaces')
+          .select('owner_id')
+          .eq('id', monitor.workspace_id)
+          .single()
+
+        if (!workspace || workspace.owner_id !== session.userId) {
+          return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+        }
+      }
+    } else {
+      // Legacy: check user_id directly
+      if (monitor.user_id !== session.userId) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      }
+    }
+
+    // Delete monitor (cascade will delete pings and alerts)
+    const { error: deleteError } = await supabaseAdmin
+      .from('monitors')
+      .delete()
+      .eq('id', monitor.id)
+
+    if (deleteError) {
+      console.error('Error deleting monitor:', deleteError)
+      return NextResponse.json({ error: deleteError.message || 'Failed to delete monitor' }, { status: 500 })
+    }
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+    console.error('Error in delete monitor API:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}
+
