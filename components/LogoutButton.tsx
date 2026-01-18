@@ -16,16 +16,56 @@ export function LogoutButton() {
         credentials: 'include', // Important: include cookies
       })
 
-      if (response.ok) {
+      let responseData
+      try {
+        responseData = await response.json()
+      } catch (e) {
+        // If response is not JSON, try to get text
+        const text = await response.text()
+        console.error('Logout response is not JSON:', text)
+        responseData = { success: false, error: 'Invalid response format' }
+      }
+
+      if (response.ok && responseData.success) {
+        console.log('Logout successful')
         // Force a hard refresh to clear any cached state
         window.location.href = '/'
       } else {
-        console.error('Logout failed')
-        // Still redirect even if there's an error
+        const errorMessage = responseData.error || `HTTP ${response.status}: ${response.statusText}`
+        console.error('Logout failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          response: responseData,
+        })
+        
+        // In development, show alert with full details
+        if (process.env.NODE_ENV === 'development') {
+          const details = responseData.details ? `\n\nDetails: ${JSON.stringify(responseData.details, null, 2)}` : ''
+          alert(`Logout failed: ${errorMessage}${details}\n\nCheck console for full details.`)
+          // Wait a bit so user can read the error
+          await new Promise(resolve => setTimeout(resolve, 5000))
+        }
+        // Still redirect even if there's an error (cookies might still be cleared)
         window.location.href = '/'
       }
     } catch (error) {
-      console.error('Logout error:', error)
+      console.error('Logout fetch error:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+      })
+      
+      // In development, show alert with full error details
+      if (process.env.NODE_ENV === 'development') {
+        const errorMsg = error instanceof Error 
+          ? `${error.name}: ${error.message}`
+          : String(error)
+        const stack = error instanceof Error ? error.stack : undefined
+        alert(`Logout fetch error: ${errorMsg}${stack ? `\n\nStack:\n${stack}` : ''}\n\nCheck console for full details.`)
+        // Wait a bit so user can read the error
+        await new Promise(resolve => setTimeout(resolve, 5000))
+      }
       // Still redirect even if there's an error
       window.location.href = '/'
     } finally {
