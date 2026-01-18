@@ -340,16 +340,12 @@ export default function Home() {
                   <div className="bg-background border border-border rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 overflow-hidden">
                     <p className="text-xs sm:text-sm text-muted-foreground mb-2 font-mono break-words"># sync_users.sh</p>
                     <pre className="bg-background border border-border rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm">
-                      <code className="break-words whitespace-pre-wrap">{`#!/bin/bash
+                      <code className="break-words">{`#!/bin/bash
 users_synced=$(./sync_users_logic.sh)
 if [ $? -eq 0 ]; then
-  curl https://deadmanping.com/ping/abc123 \\
-    -H "Content-Type: application/json" \\
-    -d "{\\"success\\": true, \\"count\\": $users_synced}"
+  curl https://deadmanping.com/ping/abc123 -H "Content-Type: application/json" -d "{\\"success\\": true, \\"count\\": $users_synced}"
 else
-  curl https://deadmanping.com/ping/abc123 \\
-    -H "Content-Type: application/json" \\
-    -d '{"success": false}'
+  curl https://deadmanping.com/ping/abc123 -H "Content-Type: application/json" -d '{"success": false}'
 fi`}</code>
                     </pre>
                     <p className="text-xs sm:text-sm text-muted-foreground mt-2 font-mono break-words"># In crontab: */5 * * * * /path/to/sync_users.sh</p>
