@@ -381,6 +381,7 @@ fi`}</code>
                   </p>
                 </div>
               </div>
+              </div>
             </AnimatedItem>
 
             <AnimatedItem delay={400}>
@@ -402,6 +403,7 @@ fi`}</code>
                     No spam. No silence.
                   </p>
                 </div>
+              </div>
               </div>
             </AnimatedItem>
           </div>
