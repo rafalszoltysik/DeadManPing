@@ -83,8 +83,8 @@ export async function PUT(
     }
 
     if (expectedIntervalSeconds !== undefined) {
-      if (typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 30) {
-        return badRequestResponse('Expected interval must be at least 30 seconds')
+      if (typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 60) {
+        return badRequestResponse('Expected interval must be at least 60 seconds (1 minute)')
       }
 
       // Check interval limit by workspace
@@ -94,8 +94,8 @@ export async function PUT(
           const minMinutes = intervalLimit.minInterval / 60
           const minSeconds = intervalLimit.minInterval
           const errorMsg = minMinutes >= 1
-            ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro plan for 1-minute intervals or Team plan for 30-second intervals.`
-            : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Team plan for 30-second intervals.`
+            ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro or Team plan for 1-minute intervals.`
+            : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Pro or Team plan for 1-minute intervals.`
           
           return errorResponse(errorMsg, 403, { type: 'interval' })
         }

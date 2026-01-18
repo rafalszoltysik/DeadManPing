@@ -18,7 +18,7 @@ export const TIER_LIMITS = {
   },
   team: {
     monitors: 500,
-    minInterval: 30, // 30 seconds
+    minInterval: 60, // 1 minute (cron checks every 60s, so 30s interval is not achievable)
     maxMembers: 10,
   },
 } as const

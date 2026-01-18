@@ -48,47 +48,73 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Check if user exists in Supabase
-    const { data: existingUser } = await supabase
+    // Check if email already exists in profiles (from email/password signup)
+    // Normalize email to lowercase for comparison
+    const normalizedEmail = googleUser.email.toLowerCase().trim()
+    const { data: existingProfile } = await supabase
       .from('profiles')
       .select('id, email, email_verified')
-      .eq('email', googleUser.email)
+      .eq('email', normalizedEmail) // After migration 014, emails are normalized to lowercase
       .maybeSingle()
 
     let userId: string
     let emailVerified = googleUser.emailVerified
 
-    if (existingUser) {
-      // User exists, use existing ID
-      userId = existingUser.id
+    if (existingProfile) {
+      // Email exists - check if it's from email/password signup (has auth.users entry)
+      // We'll use the existing profile ID and link the accounts
+      userId = existingProfile.id
       
       // Update email verification status if needed
-      if (googleUser.emailVerified && !existingUser.email_verified) {
+      if (googleUser.emailVerified && !existingProfile.email_verified) {
         await supabase
           .from('profiles')
           .update({ email_verified: true })
           .eq('id', userId)
         emailVerified = true
       }
+      
+      // Note: Accounts are automatically linked by using the same profile ID
+      // If user signed up with email/password, they can now also login with Google
     } else {
-      // Create new user
+      // Create new user profile
       userId = randomUUID()
       
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
           id: userId,
-          email: googleUser.email,
+          email: normalizedEmail,
           email_verified: googleUser.emailVerified,
           subscription_tier: 'free',
           subscription_status: 'trialing',
         })
 
       if (insertError) {
-        console.error('Error creating user:', insertError)
-        const loginUrl = new URL('/auth/login', requestUrl.origin)
-        loginUrl.searchParams.set('error', 'Failed to create account')
-        return NextResponse.redirect(loginUrl)
+        // Check if it's a unique constraint violation (email already exists)
+        if (insertError.code === '23505' || insertError.message?.includes('unique')) {
+          // Email exists but we didn't find it (race condition) - try to find it again
+          const { data: retryProfile } = await supabase
+            .from('profiles')
+            .select('id, email, email_verified')
+            .eq('email', normalizedEmail)
+            .maybeSingle()
+          
+          if (retryProfile) {
+            userId = retryProfile.id
+            emailVerified = googleUser.emailVerified || retryProfile.email_verified
+          } else {
+            console.error('Error creating user - email conflict:', insertError)
+            const loginUrl = new URL('/auth/login', requestUrl.origin)
+            loginUrl.searchParams.set('error', 'An account with this email already exists. Please sign in with your password.')
+            return NextResponse.redirect(loginUrl)
+          }
+        } else {
+          console.error('Error creating user:', insertError)
+          const loginUrl = new URL('/auth/login', requestUrl.origin)
+          loginUrl.searchParams.set('error', 'Failed to create account')
+          return NextResponse.redirect(loginUrl)
+        }
       }
     }
 

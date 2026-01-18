@@ -925,8 +925,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                         const expectedIntervalSeconds = intervalMinutes * 60
                         const gracePeriodSeconds = gracePeriodMinutes * 60
 
-                        if (expectedIntervalSeconds < 30) {
-                          throw new Error('Expected interval must be at least 30 seconds')
+                        if (expectedIntervalSeconds < 60) {
+                          throw new Error('Expected interval must be at least 60 seconds (1 minute)')
                         }
 
                         if (gracePeriodSeconds < 0) {

@@ -28,20 +28,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create user with Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-    })
-
-    if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: authError?.message || 'Failed to create account' },
-        { status: 400 }
-      )
-    }
-
-    // Create profile
+    // Check if email already exists in profiles (from OAuth or previous signup)
     const serviceClient = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -53,24 +40,82 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    const { data: existingProfile } = await serviceClient
+      .from('profiles')
+      .select('id, email')
+      .eq('email', email.toLowerCase().trim())
+      .maybeSingle()
+
+    if (existingProfile) {
+      // Email already exists - suggest linking accounts
+      return NextResponse.json(
+        { 
+          error: 'An account with this email already exists. Please sign in or use "Link accounts" if you signed up with Google.',
+          existingAccount: true,
+          canLink: true
+        },
+        { status: 409 }
+      )
+    }
+
+    // Create user with Supabase auth
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: email.toLowerCase().trim(),
+      password,
+    })
+
+    if (authError || !authData.user) {
+      return NextResponse.json(
+        { error: authError?.message || 'Failed to create account' },
+        { status: 400 }
+      )
+    }
+
     const userId = authData.user.id
     const emailVerified = authData.user.email_confirmed_at ? true : false
 
-    const { error: profileError } = await serviceClient
+    // Check if profile already exists (created by trigger or previous attempt)
+    const { data: existingProfileById } = await serviceClient
       .from('profiles')
-      .upsert({
-        id: userId,
-        email: authData.user.email!,
-        email_verified: emailVerified,
-        subscription_tier: 'free',
-        subscription_status: 'trialing',
-      }, {
-        onConflict: 'id'
-      })
+      .select('id')
+      .eq('id', userId)
+      .maybeSingle()
 
-    if (profileError) {
-      console.error('Error creating profile:', profileError)
-      // Don't fail signup if profile creation fails - it might already exist
+    if (!existingProfileById) {
+      // Create profile if it doesn't exist
+      const { error: profileError } = await serviceClient
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: authData.user.email!.toLowerCase().trim(),
+          email_verified: emailVerified,
+          subscription_tier: 'free',
+          subscription_status: 'trialing',
+        })
+
+      if (profileError) {
+        console.error('Error creating profile:', {
+          message: profileError.message,
+          code: profileError.code,
+          details: profileError.details,
+          hint: profileError.hint,
+          userId,
+          email: authData.user.email,
+        })
+        // Return error - profile creation is critical
+        return NextResponse.json(
+          { error: 'Failed to create user profile. Please try again or contact support.' },
+          { status: 500 }
+        )
+      }
+    } else {
+      // Profile exists, update email_verified if needed
+      if (emailVerified) {
+        await serviceClient
+          .from('profiles')
+          .update({ email_verified: true })
+          .eq('id', userId)
+      }
     }
 
     // Create JWT session

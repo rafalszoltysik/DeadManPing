@@ -31,8 +31,8 @@ export async function POST(request: NextRequest) {
       return badRequestResponse('Monitor name must be 100 characters or less')
     }
 
-    if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 30) {
-      return badRequestResponse('Expected interval must be at least 30 seconds')
+    if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 60) {
+      return badRequestResponse('Expected interval must be at least 60 seconds (1 minute)')
     }
 
     const gracePeriod = gracePeriodSeconds || 3600
@@ -115,8 +115,8 @@ export async function POST(request: NextRequest) {
       const minMinutes = intervalLimit.minInterval / 60
       const minSeconds = intervalLimit.minInterval
       const errorMsg = minMinutes >= 1
-        ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro plan for 1-minute intervals or Team plan for 30-second intervals.`
-        : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Team plan for 30-second intervals.`
+        ? `Minimum interval for ${intervalLimit.tier} plan is ${minMinutes} minute${minMinutes > 1 ? 's' : ''}. Upgrade to Pro or Team plan for 1-minute intervals.`
+        : `Minimum interval for ${intervalLimit.tier} plan is ${minSeconds} seconds. Upgrade to Pro or Team plan for 1-minute intervals.`
       
       return errorResponse(errorMsg, 403, { type: 'interval' })
     }

@@ -5,13 +5,21 @@ import { verifyCronSecret } from '@/lib/api/auth'
 import { shouldMarkAsLate, shouldMarkAsFailed } from '@/lib/monitor-utils'
 import { errorResponse, successResponse, unauthorizedResponse } from '@/lib/api/response'
 
+// Force dynamic rendering - cron jobs should never be cached
+export const dynamic = 'force-dynamic'
+
 // This endpoint can be called by Vercel Cron Jobs
 export async function GET(request: NextRequest) {
   // Verify cron secret (set in Vercel environment variables)
   const authHeader = request.headers.get('authorization')
   
   if (!verifyCronSecret(authHeader)) {
-    return unauthorizedResponse()
+    console.error('[Cron] Unauthorized - missing or invalid CRON_SECRET', {
+      hasAuthHeader: !!authHeader,
+      hasCronSecret: !!process.env.CRON_SECRET,
+      authHeaderPrefix: authHeader?.substring(0, 20) || 'none',
+    })
+    return unauthorizedResponse('Invalid or missing CRON_SECRET')
   }
 
   try {

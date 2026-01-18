@@ -9,7 +9,7 @@
 | **Price/month** | $0 | $9 | $29 | $79 |
 | **Tagline** | Get started free | Perfect for solo devs | Scale without hassle | Built for teams |
 | **Max Monitors** | 10 | 25 | 100 | 500 |
-| **Min Interval** | 5 minutes | 5 minutes | 1 minute | 30 seconds |
+| **Min Interval** | 5 minutes | 5 minutes | 1 minute | 1 minute |
 | **Max Team Members** | 1 | 1 | 3 | 10 |
 | **Email Alerts** | ✓ | ✓ | ✓ | ✓ |
 | **Slack Integration** | — | ✓ | ✓ | ✓ |
@@ -65,7 +65,7 @@
 **Tagline:** *Built for teams*
 
 - 500 monitors
-- 30-second minimum interval
+- 1-minute minimum interval (same as Pro, but with more monitors and team features)
 - All alert channels: Email, Slack, Discord, Custom Webhooks
 - API access for programmatic monitoring
 - Priority support (24-hour response)
@@ -112,7 +112,7 @@
 - All plans include the 14-day free trial
 - Annual billing saves customers money and improves MRR predictability
 - Team plan features (API, webhooks, analytics) differentiate it as a premium offering
-- 30-second intervals target high-frequency monitoring use cases (health checks, real-time systems)
+- 1-minute intervals (same as Pro) with team collaboration for high-frequency monitoring use cases
 
 ## Team Collaboration
 

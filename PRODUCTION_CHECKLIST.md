@@ -42,9 +42,14 @@
   - [ ] `004_add_profile_insert_policy.sql`
   - [ ] `005_update_profiles_for_custom_auth.sql`
   - [ ] `006_add_payload_validation.sql`
-  - [ ] `007_pricing_and_teams.sql`
-  - [ ] `008_add_grace_period.sql`
-  - [ ] `009_add_warn_alert_type.sql`
+- [ ] `007_pricing_and_teams.sql`
+- [ ] `008_add_grace_period.sql`
+- [ ] `009_add_warn_alert_type.sql`
+- [ ] `010_add_currency_support.sql`
+- [ ] `011_remove_currency_column.sql`
+- [ ] `012_update_min_interval_to_60s.sql`
+- [ ] `013_fix_profile_insert_for_service_role.sql`
+- [ ] `014_add_unique_email_constraint.sql`
 - [ ] Row Level Security (RLS) jest włączone na wszystkich tabelach
 - [ ] Polityki RLS są poprawnie skonfigurowane
 - [ ] Extensions są włączone: `uuid-ossp`
