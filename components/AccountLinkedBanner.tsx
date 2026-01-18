@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 
+const ACCOUNT_LINKED_BANNER_KEY = 'accountLinkedBannerShown'
+
 export function AccountLinkedBanner() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -11,15 +13,29 @@ export function AccountLinkedBanner() {
   useEffect(() => {
     const accountLinked = searchParams.get('accountLinked')
     if (accountLinked === 'true') {
-      setShow(true)
-      // Remove query parameter from URL
-      const url = new URL(window.location.href)
-      url.searchParams.delete('accountLinked')
-      router.replace(url.pathname + url.search, { scroll: false })
+      // Check if banner was already shown (stored in localStorage)
+      const bannerShown = localStorage.getItem(ACCOUNT_LINKED_BANNER_KEY)
       
-      // Hide after 5 seconds
-      const timer = setTimeout(() => setShow(false), 5000)
-      return () => clearTimeout(timer)
+      if (!bannerShown) {
+        // First time showing banner - mark it as shown
+        localStorage.setItem(ACCOUNT_LINKED_BANNER_KEY, 'true')
+        setShow(true)
+        
+        // Hide after 5 seconds
+        const timer = setTimeout(() => setShow(false), 5000)
+        
+        // Remove query parameter from URL
+        const url = new URL(window.location.href)
+        url.searchParams.delete('accountLinked')
+        router.replace(url.pathname + url.search, { scroll: false })
+        
+        return () => clearTimeout(timer)
+      } else {
+        // Banner was already shown - just remove the parameter
+        const url = new URL(window.location.href)
+        url.searchParams.delete('accountLinked')
+        router.replace(url.pathname + url.search, { scroll: false })
+      }
     }
   }, [searchParams, router])
 

@@ -66,9 +66,18 @@ export async function GET(request: NextRequest) {
       const { data: authUser } = await supabase.auth.admin.getUserById(existingProfile.id)
       
       // If auth user exists, this means the account was created with email/password
-      // and we're now linking it with Google OAuth
+      // Check if this is FIRST TIME linking (user had only email provider before)
       if (authUser?.user) {
-        accountLinked = true
+        // Check if user already has Google identity provider
+        // If user already has Google identity, accounts are already linked (don't show banner)
+        const hasGoogleIdentity = authUser.user.identities?.some(
+          (identity: any) => identity.provider === 'google'
+        ) || false
+        
+        // Only set accountLinked if user doesn't have Google identity yet (first-time linking)
+        if (!hasGoogleIdentity) {
+          accountLinked = true
+        }
       }
       
       // We'll use the existing profile ID and link the accounts

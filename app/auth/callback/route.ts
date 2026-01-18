@@ -321,14 +321,42 @@ export async function GET(request: NextRequest) {
         .eq('id', user.id)
         .single()
 
-      // Check if this is account linking (user signed up with email/password, now logging in with Google)
+      // Check if this is FIRST TIME account linking (user signed up with email/password, now FIRST TIME logging in with Google)
       // Account linking happens when:
       // 1. Profile exists (user was created with email/password)
       // 2. User has 'email' provider in identities (meaning they have a password)
       // 3. User is now logging in with Google (has 'google' provider)
+      // 4. This is the FIRST TIME - Google identity was just created (within last 30 seconds)
       const hasEmailProvider = user.identities?.some((identity: any) => identity.provider === 'email') || false
       const hasGoogleProvider = user.identities?.some((identity: any) => identity.provider === 'google') || false
-      const isAccountLinking = !!existingProfile && hasEmailProvider && hasGoogleProvider
+      
+      // Check if this is first-time account linking
+      // If user already has both providers but Google identity was created a while ago, 
+      // accounts are already linked (don't show banner)
+      let isFirstTimeAccountLinking = false
+      if (existingProfile && hasEmailProvider && hasGoogleProvider) {
+        // User has both providers now - check if Google identity was just created
+        const googleIdentity = user.identities?.find((identity: any) => identity.provider === 'google')
+        
+        // If Google identity was created very recently (within last 30 seconds), it's first-time linking
+        if (googleIdentity?.created_at) {
+          const googleCreatedAt = new Date(googleIdentity.created_at)
+          const now = new Date()
+          const secondsSinceGoogleCreated = (now.getTime() - googleCreatedAt.getTime()) / 1000
+          
+          // If Google identity was created within last 30 seconds, it's first-time linking
+          if (secondsSinceGoogleCreated < 30) {
+            isFirstTimeAccountLinking = true
+          }
+        } else {
+          // If created_at is not available, assume it's first-time linking if user has exactly 2 identities
+          // (email + google) and profile exists - this is a fallback
+          const identityCount = user.identities?.length || 0
+          if (identityCount === 2) {
+            isFirstTimeAccountLinking = true
+          }
+        }
+      }
 
       if (!existingProfile) {
         const { error: profileError } = await serviceClient
@@ -349,8 +377,8 @@ export async function GET(request: NextRequest) {
           })
           // Don't block the flow - user is authenticated, profile might be created later
         }
-      } else if (isAccountLinking) {
-        // Add account linked parameter to redirect URL
+      } else if (isFirstTimeAccountLinking) {
+        // Add account linked parameter to redirect URL only for first-time linking
         finalRedirectUrl.searchParams.set('accountLinked', 'true')
         // Update response URL (preserving cookies from Supabase Auth)
         response.headers.set('Location', finalRedirectUrl.toString())
