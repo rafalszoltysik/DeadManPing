@@ -10,8 +10,17 @@ import { stripe } from '@/lib/stripe'
  * 
  * This will fetch the checkout session and subscription, then manually
  * process the checkout.session.completed event.
+ * 
+ * ⚠️ SECURITY: This endpoint is disabled in production
  */
 export async function POST(request: NextRequest) {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Test endpoints are disabled in production' },
+      { status: 403 }
+    )
+  }
   try {
     const body = await request.json()
     const { sessionId } = body

@@ -11,8 +11,17 @@ import { stripe, PRICING_PLANS } from '@/lib/stripe'
  * - If Stripe API keys are configured
  * - If connection to Stripe works
  * - If products/price IDs are configured correctly
+ * 
+ * ⚠️ SECURITY: This endpoint is disabled in production
  */
 export async function GET() {
+  // Block in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { error: 'Test endpoints are disabled in production' },
+      { status: 403 }
+    )
+  }
   const results: {
     status: 'success' | 'error' | 'warning'
     message: string
