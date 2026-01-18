@@ -321,26 +321,26 @@ export default function Home() {
         {/* How It Works */}
         <AnimatedSection>
           <section className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12 px-4">How It Works</h2>
-          <div className="max-w-5xl mx-auto px-4 space-y-8 sm:space-y-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8 lg:space-y-12">
             <AnimatedItem delay={0}>
-              <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
-                    <span className="text-xl font-mono font-bold text-primary">1</span>
+              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
+                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">1</span>
                   </div>
-                <div className="flex-grow">
-                  <h3 className="text-xl font-semibold mb-4">Add one line at the end of your existing script</h3>
-                  <p className="text-muted-foreground mb-4">
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Add one line at the end of your existing script</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">
                     Cron runs your script. Your script executes logic and collects data. At the end of your script — one curl line with data from execution.
                   </p>
-                  <p className="text-muted-foreground mb-4 font-medium">
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4 font-medium">
                     Important: Curl must be INSIDE the script, not in the cron line, because only in the script do you have access to variables from execution results.
                   </p>
-                  <div className="bg-background border border-border rounded-lg p-4 mb-4">
-                    <p className="text-sm text-muted-foreground mb-2 font-mono"># sync_users.sh</p>
-                    <pre className="bg-background border border-border rounded-lg p-4 overflow-x-auto text-sm">
-                      <code>{`#!/bin/bash
+                  <div className="bg-background border border-border rounded-lg p-3 sm:p-4 mb-3 sm:mb-4 overflow-hidden">
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 font-mono break-words"># sync_users.sh</p>
+                    <pre className="bg-background border border-border rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm">
+                      <code className="break-words whitespace-pre-wrap">{`#!/bin/bash
 users_synced=$(./sync_users_logic.sh)
 if [ $? -eq 0 ]; then
   curl https://deadmanping.com/ping/abc123 \\
@@ -352,9 +352,9 @@ else
     -d '{"success": false}'
 fi`}</code>
                     </pre>
-                    <p className="text-sm text-muted-foreground mt-2 font-mono"># In crontab: */5 * * * * /path/to/sync_users.sh</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-2 font-mono break-words"># In crontab: */5 * * * * /path/to/sync_users.sh</p>
                   </div>
-                  <ul className="mt-4 space-y-2 text-muted-foreground text-sm">
+                  <ul className="mt-3 sm:mt-4 space-y-1 sm:space-y-2 text-muted-foreground text-xs sm:text-sm">
                     <li>• No SDKs.</li>
                     <li>• No branching logic.</li>
                     <li>• No alert decisions in code.</li>
@@ -362,53 +362,50 @@ fi`}</code>
                   </ul>
                 </div>
               </div>
-            </div>
             </AnimatedItem>
 
             <AnimatedItem delay={200}>
-              <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
-                    <span className="text-xl font-mono font-bold text-primary">2</span>
+              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
+                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">2</span>
                   </div>
-                <div className="flex-grow">
-                  <h3 className="text-xl font-semibold mb-4">Define rules in the dashboard</h3>
-                  <p className="text-muted-foreground mb-4">Example rules:</p>
-                  <ul className="space-y-2 text-muted-foreground text-sm mb-4">
-                    <li>• <code className="bg-background px-2 py-1 rounded">success == true</code></li>
-                    <li>• <code className="bg-background px-2 py-1 rounded">count {'>='} 100 → OK</code></li>
-                    <li>• <code className="bg-background px-2 py-1 rounded">count {'<'} 100 → WARN</code></li>
-                    <li>• <code className="bg-background px-2 py-1 rounded">no ping for 15 min → FAIL</code></li>
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Define rules in the dashboard</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">Example rules:</p>
+                  <ul className="space-y-1 sm:space-y-2 text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">
+                    <li>• <code className="bg-background px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm break-words">success == true</code></li>
+                    <li>• <code className="bg-background px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm break-words">count {'>='} 100 → OK</code></li>
+                    <li>• <code className="bg-background px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm break-words">count {'<'} 100 → WARN</code></li>
+                    <li>• <code className="bg-background px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs sm:text-sm break-words">no ping for 15 min → FAIL</code></li>
                   </ul>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-xs sm:text-sm text-muted-foreground">
                     Change rules anytime. No redeploys.
                   </p>
                 </div>
               </div>
-            </div>
             </AnimatedItem>
 
             <AnimatedItem delay={400}>
-              <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover">
-                <div className="flex items-start gap-4">
-                  <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
-                    <span className="text-xl font-mono font-bold text-primary">3</span>
+              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover">
+                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
+                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">3</span>
                   </div>
-                <div className="flex-grow">
-                  <h3 className="text-xl font-semibold mb-4">Get state-aware alerts</h3>
-                  <p className="text-muted-foreground mb-4">DeadManPing tracks transitions:</p>
-                  <ul className="space-y-2 text-muted-foreground text-sm">
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
+                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Get state-aware alerts</h3>
+                  <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">DeadManPing tracks transitions:</p>
+                  <ul className="space-y-1 sm:space-y-2 text-muted-foreground text-xs sm:text-sm">
                     <li>• OK → FAIL</li>
                     <li>• FAIL → OK</li>
                     <li>• job didn't run</li>
                     <li>• result degraded but not broken</li>
                   </ul>
-                  <p className="mt-4 text-sm text-muted-foreground">
+                  <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
                     No spam. No silence.
                   </p>
                 </div>
               </div>
-            </div>
             </AnimatedItem>
           </div>
         </section>
@@ -483,13 +480,13 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
               </div>
               
               {/* Third row: Count Verification centered */}
-              <div className="flex justify-center">
+              <div className="flex justify-center px-4 sm:px-0">
                 <AnimatedItem delay={400}>
-                  <div className="bg-background border border-border rounded-lg p-6 card-hover w-full max-w-md flex flex-col">
-                    <h3 className="text-lg font-semibold mb-3">Count Verification</h3>
-                    <p className="text-sm text-muted-foreground mb-3">How many records/items were processed</p>
-                    <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs flex-grow">
-                      <code>{`RECORDS_PROCESSED=$(./sync.sh | grep -c "synced")
+                  <div className="bg-background border border-border rounded-lg p-4 sm:p-6 card-hover w-full max-w-md flex flex-col">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3">Count Verification</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">How many records/items were processed</p>
+                    <pre className="bg-background border border-border rounded p-2 sm:p-3 overflow-x-auto text-xs flex-grow">
+                      <code className="break-words whitespace-pre-wrap">{`RECORDS_PROCESSED=$(./sync.sh | grep -c "synced")
 curl ... -d "{\\"count\\": $RECORDS_PROCESSED}"`}</code>
                     </pre>
                   </div>

@@ -80,7 +80,9 @@ function LoginForm() {
     }
 
     try {
-      const redirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`
+      // Use NEXT_PUBLIC_APP_URL for production, fallback to window.location.origin for development
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
+      const redirectTo = `${appUrl}/auth/callback?redirect=${encodeURIComponent(redirect)}`
       // Use Supabase Auth OAuth - automatically links accounts with same email
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
