@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { TeamMembers } from '@/components/TeamMembers'
 
@@ -15,9 +15,9 @@ const supabaseAdmin = createClient(
 )
 
 export default async function TeamPage() {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     redirect('/auth/login')
   }
 
@@ -25,13 +25,13 @@ export default async function TeamPage() {
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('subscription_tier')
-    .eq('id', session.userId)
+    .eq('id', user.id)
     .single()
 
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
     .select('id, subscription_tier, max_members')
-    .eq('owner_id', session.userId)
+    .eq('owner_id', user.id)
     .limit(1)
     .maybeSingle()
 

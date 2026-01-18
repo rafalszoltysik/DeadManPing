@@ -72,7 +72,7 @@ export default function SignupPage() {
       : null
     const redirect = plan ? `/dashboard/billing?plan=${plan}` : '/dashboard'
 
-    // Use API route to signup (will create user with Supabase auth and create JWT session)
+    // Use API route to signup (will create user with Supabase auth and create session)
     const response = await fetch('/api/auth/signup', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -94,17 +94,9 @@ export default function SignupPage() {
   }
 
   const handleGoogleSignup = async (e?: React.MouseEvent) => {
-    // #region agent log
-    console.log('[DEBUG] handleGoogleSignup called', { hasEvent: !!e, eventType: e?.type });
-    fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:82',message:'handleGoogleSignup called',data:{hasEvent:!!e,eventType:e?.type},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-    // #endregion
     if (e) {
       e.preventDefault()
       e.stopPropagation()
-      // #region agent log
-      console.log('[DEBUG] Event prevented and stopped', { defaultPrevented: e.defaultPrevented });
-      fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:86',message:'Event prevented and stopped',data:{defaultPrevented:e.defaultPrevented},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'D'})}).catch(()=>{});
-      // #endregion
     }
 
     try {
@@ -113,12 +105,8 @@ export default function SignupPage() {
         : null
       
       const redirect = plan ? `/dashboard/billing?plan=${plan}` : '/dashboard'
+      const redirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`
       
-      // #region agent log
-      const redirectTo = `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirect)}`;
-      console.log('[DEBUG] Before signInWithOAuth call', { redirectTo, supabaseInitialized: !!supabase });
-      fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:96',message:'Before signInWithOAuth call',data:{redirectTo,supabaseInitialized:!!supabase},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'E'})}).catch(()=>{});
-      // #endregion
       // Use Supabase Auth OAuth - automatically links accounts with same email
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
@@ -130,11 +118,6 @@ export default function SignupPage() {
         },
       })
 
-      // #region agent log
-      console.log('[DEBUG] After signInWithOAuth call', { hasError: !!error, errorMessage: error?.message, hasData: !!data, hasUrl: !!data?.url, url: data?.url });
-      fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:104',message:'After signInWithOAuth call',data:{hasError:!!error,errorMessage:error?.message,hasData:!!data,hasUrl:!!data?.url,url:data?.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
-
       if (error) {
         console.error('OAuth error:', error)
         setError(error.message)
@@ -144,27 +127,13 @@ export default function SignupPage() {
 
       // Redirect to Google OAuth URL - immediate redirect with no state updates
       if (data?.url) {
-        // #region agent log
-        console.log('[DEBUG] Before location.href redirect', { url: data.url });
-        fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:113',message:'Before location.href redirect',data:{url:data.url},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
-        // Use window.location.href directly - most reliable method
-        console.log('[DEBUG] Setting location.href to OAuth URL');
         window.location.href = data.url
-        // #region agent log
-        console.log('[DEBUG] After location.href assignment');
-        fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:115',message:'After location.href assignment',data:{},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'B'})}).catch(()=>{});
-        // #endregion
         return
       } else {
-        console.error('No URL in OAuth response:', data)
         setError('Failed to get OAuth URL')
         setLoading(false)
       }
     } catch (err: any) {
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:120',message:'OAuth exception caught',data:{errorMessage:err?.message,errorStack:err?.stack},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
-      // #endregion
       console.error('OAuth exception:', err)
       setError(err.message || 'Failed to sign up with Google')
       setLoading(false)
@@ -208,10 +177,6 @@ export default function SignupPage() {
             action="#" 
             className="mt-8 space-y-6" 
             onSubmit={(e) => {
-              // #region agent log
-              console.log('[DEBUG] Form onSubmit fired', { method: e.currentTarget.method, action: e.currentTarget.action });
-              fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:189',message:'Form onSubmit fired',data:{method:e.currentTarget.method,action:e.currentTarget.action},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-              // #endregion
               handleSignup(e)
             }} 
             noValidate
@@ -326,10 +291,6 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={(e) => {
-                  // #region agent log
-                  console.log('[DEBUG] Google button clicked', { eventType: e.type, buttonType: 'button', isInsideForm: false });
-                  fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/signup/page.tsx:294',message:'Button onClick fired',data:{eventType:e.type,buttonType:'button',isInsideForm:false},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'A'})}).catch(()=>{});
-                  // #endregion
                   handleGoogleSignup(e)
                 }}
                 disabled={loading}

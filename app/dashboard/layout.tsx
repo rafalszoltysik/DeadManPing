@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/LogoutButton'
@@ -11,9 +11,9 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode
 }) {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     redirect('/auth/login')
   }
 
@@ -22,13 +22,13 @@ export default async function DashboardLayout({
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('subscription_status, subscription_tier, created_at, grace_period_ends_at')
-    .eq('id', session.userId)
+    .eq('id', user.id)
     .single() as { data: { subscription_status?: string; subscription_tier?: string; created_at?: string; grace_period_ends_at?: string | null } | null }
 
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
     .select('grace_period_ends_at, subscription_tier')
-    .eq('owner_id', session.userId)
+    .eq('owner_id', user.id)
     .limit(1)
     .maybeSingle() as { data: { grace_period_ends_at?: string | null; subscription_tier?: string } | null }
 
@@ -81,7 +81,7 @@ export default async function DashboardLayout({
           <div className="px-4 py-[9px] border-t border-border flex-shrink-0">
             <div className="flex items-center justify-between mb-2.5">
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{session.email}</p>
+                <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
               </div>
             </div>
             <LogoutButton />

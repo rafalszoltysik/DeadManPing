@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { MonitorList } from '@/components/MonitorList'
@@ -8,9 +8,9 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AccountLinkedBanner } from '@/components/AccountLinkedBanner'
 
 export default async function DashboardPage() {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     redirect('/auth/login')
   }
 
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const { data: workspaceMembers } = await supabaseAdmin
     .from('workspace_members')
     .select('workspace_id')
-    .eq('user_id', session.userId) as { data: { workspace_id: string }[] | null }
+    .eq('user_id', user.id) as { data: { workspace_id: string }[] | null }
 
   const workspaceIds = workspaceMembers?.map(wm => wm.workspace_id) || []
 
@@ -29,7 +29,7 @@ export default async function DashboardPage() {
     const { data: ownedWorkspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single() as { data: { id: string } | null }
 
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     const result = await supabaseAdmin
       .from('monitors')
       .select('*')
-      .eq('user_id', session.userId)
+      .eq('user_id', user.id)
       .order('status', { ascending: false })
       .order('created_at', { ascending: false }) as { data: any[] | null; error: any }
     

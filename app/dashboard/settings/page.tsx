@@ -1,22 +1,22 @@
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { SettingsForm } from '@/components/SettingsForm'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export default async function SettingsPage() {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     redirect('/auth/login')
   }
 
   // Use admin client to fetch profile (bypasses RLS)
-  // We verify ownership by checking id matches session
+  // We verify ownership by checking id matches user
   const supabaseAdmin = getSupabaseAdmin()
   let { data: profile, error: profileError } = await supabaseAdmin
     .from('profiles')
     .select('*')
-    .eq('id', session.userId)
+    .eq('id', user.id)
     .maybeSingle() as { data: any; error: any }
 
   // If profile doesn't exist, try to create it
@@ -24,9 +24,9 @@ export default async function SettingsPage() {
     const { data: newProfile, error: insertError } = await (supabaseAdmin
       .from('profiles') as any)
       .insert({
-        id: session.userId,
-        email: session.email,
-        email_verified: session.emailVerified,
+        id: user.id,
+        email: user.email,
+        email_verified: !!user.email_confirmed_at,
         subscription_tier: 'free',
         subscription_status: 'trialing',
       })
@@ -47,7 +47,7 @@ export default async function SettingsPage() {
   }
 
   // Verify ownership - user can only access their own profile
-  if (profile.id !== session.userId) {
+  if (profile.id !== user.id) {
     console.error('Access denied: Profile belongs to different user')
     redirect('/dashboard')
   }
@@ -59,7 +59,7 @@ export default async function SettingsPage() {
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
     .select('currency')
-    .eq('owner_id', session.userId)
+    .eq('owner_id', user.id)
     .limit(1)
     .maybeSingle() as { data: { currency?: string } | null }
   

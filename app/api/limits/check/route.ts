@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMonitorLimit, checkIntervalLimit } from '@/lib/limits'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const user = await getSupabaseUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
     const { intervalSeconds } = body
 
     // Check monitor limit
-    const monitorLimit = await checkMonitorLimit(session.userId)
+    const monitorLimit = await checkMonitorLimit(user.id)
     if (!monitorLimit.allowed) {
       return NextResponse.json({
         allowed: false,
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
     // Check interval limit if provided
     if (intervalSeconds !== undefined) {
-      const intervalLimit = await checkIntervalLimit(session.userId, intervalSeconds)
+      const intervalLimit = await checkIntervalLimit(user.id, intervalSeconds)
       if (!intervalLimit.allowed) {
         return NextResponse.json({
           allowed: false,

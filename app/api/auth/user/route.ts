@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 export async function GET() {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   return NextResponse.json({
-    userId: session.userId,
-    email: session.email,
-    emailVerified: session.emailVerified,
+    userId: user.id,
+    email: user.email,
+    emailVerified: !!user.email_confirmed_at,
   })
 }
 

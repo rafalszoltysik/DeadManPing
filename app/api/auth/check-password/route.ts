@@ -1,52 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const user = await getSupabaseUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
-      )
-    }
-
-    // Use Supabase client with cookie-based session
-    const cookieStore = await cookies()
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
-            cookiesToSet.forEach(({ name, value, options }) => {
-              cookieStore.set(name, value, options)
-            })
-          },
-        },
-      }
-    )
-
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      return NextResponse.json(
-        { error: 'Failed to get user information' },
-        { status: 401 }
-      )
-    }
-
-    // Verify that the user ID matches the session
-    if (user.id !== session.userId) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 403 }
       )
     }
 

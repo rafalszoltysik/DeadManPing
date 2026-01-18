@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { SessionPayload } from '@/lib/auth/session'
 import { Monitor } from '@/lib/types/monitor'
 
 /**

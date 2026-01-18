@@ -1,4 +1,4 @@
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { MonitorDetail } from '@/components/MonitorDetail'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -13,14 +13,14 @@ export default async function MonitorDetailPage(props: {
   const searchParams = await props.searchParams
   const { slug } = params
   const resolvedSearchParams = searchParams
-  const session = await verifySession()
+  const user = await getSupabaseUser()
 
-  if (!session) {
+  if (!user) {
     redirect('/auth/login')
   }
 
   // Verify monitor access (checks workspace membership)
-  const accessResult = await verifyMonitorAccessBySlug(slug, session.userId)
+  const accessResult = await verifyMonitorAccessBySlug(slug, user.id)
   
   if (!accessResult.success) {
     redirect('/dashboard')

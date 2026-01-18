@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       return authResult.response
     }
 
-    const session = authResult.session
+    const user = authResult.user
 
     const body = await request.json()
     const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels } = body
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single() as { data: { id: string } | null }
 
@@ -67,15 +67,15 @@ export async function POST(request: NextRequest) {
       const { data: profile } = await supabaseAdmin
         .from('profiles')
         .select('email')
-        .eq('id', session.userId)
+        .eq('id', user.id)
         .single() as { data: { email?: string } | null }
 
       const { data: newWorkspace, error: workspaceError } = await (supabaseAdmin
         .from('workspaces') as any)
         .insert({
           name: `${profile?.email || 'User'}'s Workspace`,
-          slug: 'workspace-' + session.userId,
-          owner_id: session.userId,
+          slug: 'workspace-' + user.id,
+          owner_id: user.id,
           subscription_tier: 'free',
         })
         .select()
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
         .from('workspace_members') as any)
         .insert({
           workspace_id: newWorkspace.id,
-          user_id: session.userId,
+          user_id: user.id,
           role: 'owner',
           joined_at: new Date().toISOString(),
         })
@@ -155,7 +155,7 @@ export async function POST(request: NextRequest) {
 
     // Prepare monitor data
     const monitorData: any = {
-      user_id: session.userId, // Keep for backward compatibility
+      user_id: user.id, // Keep for backward compatibility
       workspace_id: workspaceId,
       name: name.trim(),
       slug,

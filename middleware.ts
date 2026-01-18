@@ -1,6 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -28,13 +27,11 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refresh session if it exists
-  await supabase.auth.getUser()
-
-  const session = await verifySession()
+  // Get user from Supabase session (this also refreshes the session)
+  const { data: { user } } = await supabase.auth.getUser()
 
   // Protect dashboard routes
-  if (request.nextUrl.pathname.startsWith('/dashboard') && !session) {
+  if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     url.searchParams.set('redirect', request.nextUrl.pathname)
@@ -47,7 +44,7 @@ export async function middleware(request: NextRequest) {
       !request.nextUrl.pathname.startsWith('/api') &&
       request.nextUrl.pathname !== '/auth/logout' &&
       request.nextUrl.pathname !== '/auth/callback' &&
-      session) {
+      user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 

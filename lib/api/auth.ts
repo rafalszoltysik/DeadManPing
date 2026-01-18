@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server'
-import { verifySession, SessionPayload } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 /**
- * Verify session and return session payload or error response
+ * Verify session and return user or error response
  * Use this in API routes that require authentication
  */
 export async function requireAuth(): Promise<
-  | { success: true; session: SessionPayload }
+  | { success: true; user: { id: string; email?: string; email_confirmed_at?: string | null } }
   | { success: false; response: NextResponse }
 > {
-  const session = await verifySession()
+  const user = await getSupabaseUser()
   
-  if (!session) {
+  if (!user) {
     return {
       success: false,
       response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }),
@@ -20,7 +20,11 @@ export async function requireAuth(): Promise<
 
   return {
     success: true,
-    session,
+    user: {
+      id: user.id,
+      email: user.email,
+      email_confirmed_at: user.email_confirmed_at,
+    },
   }
 }
 

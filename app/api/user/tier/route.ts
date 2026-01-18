@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createClient } from '@supabase/supabase-js'
 
 const supabaseAdmin = createClient(
@@ -15,9 +15,9 @@ const supabaseAdmin = createClient(
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const user = await getSupabaseUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('subscription_tier')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single()
 
@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('subscription_tier')
-      .eq('id', session.userId)
+      .eq('id', user.id)
       .single()
 
     return NextResponse.json({ tier: profile?.subscription_tier || 'free' })

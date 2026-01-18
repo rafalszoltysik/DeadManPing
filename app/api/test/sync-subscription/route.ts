@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -35,8 +35,8 @@ export async function POST(request: NextRequest) {
     )
   }
   try {
-    const session = await verifySession()
-    if (!session) {
+    const user = await getSupabaseUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
       const { data: profile } = await supabaseAdmin
         .from('profiles')
         .select('stripe_customer_id')
-        .eq('id', session.userId)
+        .eq('id', user.id)
         .single()
 
       if (!profile?.stripe_customer_id) {
@@ -116,7 +116,7 @@ export async function POST(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single()
 
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
         subscription_status: subscription.status === 'active' ? 'active' : 'trialing',
         updated_at: new Date().toISOString(),
       })
-      .eq('id', session.userId)
+      .eq('id', user.id)
       .select()
       .single()
 

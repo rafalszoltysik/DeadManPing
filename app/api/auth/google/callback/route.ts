@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getGoogleUserInfo } from '@/lib/auth/google-oauth'
-import { createSession } from '@/lib/auth/session'
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 
@@ -128,8 +127,8 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Create session
-    await createSession(userId, googleUser.email, emailVerified)
+    // Supabase Auth automatically creates and manages the session via cookies
+    // No need for custom JWT session - middleware uses Supabase auth directly
 
     // Redirect to dashboard or specified redirect
     const redirectUrl = new URL(redirect, requestUrl.origin)

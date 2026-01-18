@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createCheckoutSession } from '@/lib/stripe'
 import { getPriceIdForPlan, type PlanKey } from '@/lib/stripe-prices'
 import { type Currency } from '@/lib/currency-detection'
@@ -18,9 +18,9 @@ const supabase = createClient(
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const user = await getSupabaseUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id, email')
-      .eq('id', session.userId)
+      .eq('id', user.id)
       .single()
 
     if (!profile) {
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     let { data: workspace } = await supabase
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .maybeSingle()
 
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
         .from('workspaces')
         .insert({
           name: `${profile.email || 'User'}'s Workspace`,
-          slug: 'workspace-' + session.userId,
-          owner_id: session.userId,
+          slug: 'workspace-' + user.id,
+          owner_id: user.id,
           subscription_tier: 'free',
         })
         .select()
@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         .from('workspace_members')
         .insert({
           workspace_id: newWorkspace.id,
-          user_id: session.userId,
+          user_id: user.id,
           role: 'owner',
           joined_at: new Date().toISOString(),
         })
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       profile.stripe_customer_id || null,
       priceId,
       workspace.id,
-      profile.email || session.email
+      profile.email || user.email || ''
     )
 
     return NextResponse.json({ url: checkoutSession.url })

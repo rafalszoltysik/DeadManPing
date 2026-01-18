@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMemberLimit } from '@/lib/limits'
 
 const supabaseAdmin = createClient(
@@ -17,8 +17,8 @@ const supabaseAdmin = createClient(
 // GET: List workspace members
 export async function GET(request: NextRequest) {
   try {
-    const session = await verifySession()
-    if (!session) {
+    const user = await getSupabaseUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single()
 
@@ -70,8 +70,8 @@ export async function GET(request: NextRequest) {
 // POST: Add member to workspace
 export async function POST(request: NextRequest) {
   try {
-    const session = await verifySession()
-    if (!session) {
+    const user = await getSupabaseUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id, name, subscription_tier')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single()
 
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
       .from('workspace_members')
       .select('role')
       .eq('workspace_id', workspace.id)
-      .eq('user_id', session.userId)
+      .eq('user_id', user.id)
       .single()
 
     if (!userMembership || !['owner', 'admin'].includes(userMembership.role)) {
@@ -160,7 +160,7 @@ export async function POST(request: NextRequest) {
           user_id: userProfile.id,
           role: 'member',
           status: 'accepted',
-          invited_by: session.userId,
+          invited_by: user.id,
           joined_at: new Date().toISOString(),
         })
         .select(`
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
           invite_email: normalizedEmail,
           role: 'member',
           status: 'pending',
-          invited_by: session.userId,
+          invited_by: user.id,
         })
         .select(`
           id,
@@ -262,8 +262,8 @@ export async function POST(request: NextRequest) {
 // DELETE: Remove member from workspace
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await verifySession()
-    if (!session) {
+    const user = await getSupabaseUser()
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -278,7 +278,7 @@ export async function DELETE(request: NextRequest) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
-      .eq('owner_id', session.userId)
+      .eq('owner_id', user.id)
       .limit(1)
       .single()
 
@@ -291,7 +291,7 @@ export async function DELETE(request: NextRequest) {
       .from('workspace_members')
       .select('role')
       .eq('workspace_id', workspace.id)
-      .eq('user_id', session.userId)
+      .eq('user_id', user.id)
       .single()
 
     if (!userMembership || !['owner', 'admin'].includes(userMembership.role)) {
@@ -316,7 +316,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Prevent removing yourself if you're the only admin
-    if (member.user_id === session.userId && userMembership.role === 'admin') {
+    if (member.user_id === user.id && userMembership.role === 'admin') {
       const { count } = await supabaseAdmin
         .from('workspace_members')
         .select('*', { count: 'exact', head: true })

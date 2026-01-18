@@ -1,5 +1,4 @@
 import { NextRequest } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
 import { validatePayloadRules } from '@/lib/payload-validator'
 import { checkIntervalLimitByWorkspace } from '@/lib/limits'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -20,7 +19,7 @@ export async function GET(
     const { slug } = await params
 
     // Verify monitor access
-    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.user.id)
     if (!accessResult.success) {
       return accessResult.response
     }
@@ -61,7 +60,7 @@ export async function PUT(
     const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status, expectedUpdatedAt } = body
 
     // Verify monitor access
-    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.user.id)
     if (!accessResult.success) {
       return accessResult.response
     }
@@ -266,7 +265,7 @@ export async function DELETE(
     const { slug } = await params
 
     // Verify monitor access
-    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.session.userId)
+    const accessResult = await verifyMonitorAccessBySlug(slug, authResult.user.id)
     if (!accessResult.success) {
       return accessResult.response
     }

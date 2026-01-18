@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { createSession } from '@/lib/auth/session'
 import { randomUUID } from 'crypto'
 
 const supabase = createClient(
@@ -85,8 +84,8 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Create JWT session
-    await createSession(userId, authData.user.email!, emailVerified)
+    // Supabase Auth automatically creates and manages the session via cookies
+    // No need for custom JWT session - middleware uses Supabase auth directly
 
     return NextResponse.json({ success: true, redirect })
   } catch (error: any) {

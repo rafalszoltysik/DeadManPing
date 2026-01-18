@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
+import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-prices'
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const user = await getSupabaseUser()
 
-    if (!session) {
+    if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
