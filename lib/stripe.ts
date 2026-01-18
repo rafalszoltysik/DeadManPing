@@ -84,12 +84,18 @@ export async function createCheckoutSession(
     metadata: {
       workspaceId,
     },
+    // Note: Stripe hosted Checkout automatically follows user's system dark mode preference
+    // There's no direct API parameter to force dark mode for hosted Checkout
+    // For custom dark mode, you would need to use embedded Checkout with custom styling
   })
 
   return session
 }
 
 export async function createCustomerPortalSession(customerId: string) {
+  // Note: Billing Portal dark mode is configured in Stripe Dashboard:
+  // Settings > Billing > Customer portal > Appearance > Theme: Dark
+  // Stripe Checkout automatically follows user's system dark mode preference
   const session = await stripe.billingPortal.sessions.create({
     customer: customerId,
     return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,

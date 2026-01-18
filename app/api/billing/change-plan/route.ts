@@ -120,6 +120,7 @@ export async function POST(request: NextRequest) {
     }
 
     // If no active subscription or update failed, create new checkout session
+    // Note: Stripe hosted Checkout automatically follows user's system dark mode preference
     const checkoutSession = await stripe.checkout.sessions.create({
       customer: profile.stripe_customer_id || undefined,
       customer_email: profile.stripe_customer_id ? undefined : profile.email,
