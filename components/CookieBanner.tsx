@@ -27,14 +27,14 @@ export function CookieBanner() {
   if (!showBanner) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50 animate-slide-up">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex-1">
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-foreground">
               We use cookies to enhance your experience, analyze site usage, and assist in our marketing efforts.
               By clicking "Accept All", you consent to our use of cookies.{' '}
-              <Link href="/legal/cookies" className="text-blue-600 hover:text-blue-800 underline">
+              <Link href="/legal/cookies" className="text-primary hover:text-primary/80 underline transition-smooth">
                 Learn more
               </Link>
             </p>
@@ -42,13 +42,13 @@ export function CookieBanner() {
           <div className="flex gap-3">
             <button
               onClick={rejectCookies}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 border border-border rounded-md transition-smooth"
             >
               Reject
             </button>
             <button
               onClick={acceptCookies}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              className="px-4 py-2 text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-md transition-smooth shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30"
             >
               Accept All
             </button>
