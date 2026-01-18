@@ -1,28 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifySession } from '@/lib/auth/session'
 import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-prices'
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await verifySession()
-
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Pobierz walutę z query param (preferencja użytkownika) lub wykryj z kraju
     const { searchParams } = new URL(request.url)
     const currencyParam = searchParams.get('currency')
     
-    let currency: Currency
-    if (currencyParam && ['usd', 'eur', 'pln'].includes(currencyParam)) {
-      currency = currencyParam as Currency
-    } else {
-      // Wykryj walutę na podstawie kraju użytkownika
-      currency = getCurrencyFromHeaders(request.headers)
-    }
+    // Użyj waluty z query param lub wykryj z kraju
+    const currency: Currency = (currencyParam && ['usd', 'eur', 'pln'].includes(currencyParam))
+      ? currencyParam as Currency
+      : getCurrencyFromHeaders(request.headers)
 
     // Pobierz ceny z Stripe
     let prices: Map<PlanKey, Map<Currency, PriceInfo>>
@@ -40,11 +29,12 @@ export async function GET(request: NextRequest) {
       team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null },
     }
 
-    // Sprawdź które waluty są dostępne
+    // Sprawdź które waluty są dostępne (mają ceny dla wszystkich planów)
     const availableCurrencies: Currency[] = []
     for (const curr of ['usd', 'eur', 'pln'] as Currency[]) {
       const allPlansHavePrices = (['starter', 'pro', 'team'] as PlanKey[]).every(planKey => {
         const priceInfo = prices.get(planKey)?.get(curr)
+        // USD ma fallback z env, inne muszą być w Stripe
         if (curr === 'usd') {
           return true // USD zawsze dostępne (fallback)
         }
@@ -56,7 +46,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Jeśli wybrana waluta nie jest dostępna, użyj pierwszej dostępnej
+    // Jeśli wybrana waluta nie jest dostępna, użyj pierwszej dostępnej (lub USD)
     const finalCurrency = availableCurrencies.includes(currency) 
       ? currency 
       : (availableCurrencies.length > 0 ? availableCurrencies[0] : 'usd')

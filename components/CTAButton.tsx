@@ -1,0 +1,48 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+
+interface CTAButtonProps {
+  children: React.ReactNode
+  className?: string
+}
+
+export function CTAButton({ children, className = '' }: CTAButtonProps) {
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+
+  const handleClick = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+
+    try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (session) {
+        // Zalogowany - idź do dashboard
+        router.push('/dashboard')
+      } else {
+        // Niezalogowany - idź do signup
+        router.push('/auth/signup')
+      }
+    } catch (error) {
+      console.error('Error checking session:', error)
+      // W razie błędu, przekieruj do signup
+      router.push('/auth/signup')
+    }
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={isLoading}
+      className={`${className} disabled:opacity-50`}
+    >
+      {isLoading ? 'Loading...' : children}
+    </button>
+  )
+}
+

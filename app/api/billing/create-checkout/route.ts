@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { verifySession } from '@/lib/auth/session'
 import { createCheckoutSession } from '@/lib/stripe'
-import { getPriceIdForPlan, type Currency, type PlanKey } from '@/lib/stripe-prices'
+import { getPriceIdForPlan, type PlanKey } from '@/lib/stripe-prices'
+import { type Currency } from '@/lib/currency-detection'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -44,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Get or create workspace
     let { data: workspace } = await supabase
       .from('workspaces')
-      .select('id, currency')
+      .select('id')
       .eq('owner_id', session.userId)
       .limit(1)
       .maybeSingle()
@@ -58,7 +59,6 @@ export async function POST(request: NextRequest) {
           slug: 'workspace-' + session.userId,
           owner_id: session.userId,
           subscription_tier: 'free',
-          currency: 'usd',
         })
         .select()
         .single()
@@ -84,8 +84,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to get or create workspace' }, { status: 500 })
     }
 
+    // Pobierz walutę z query param lub body
+    const { currency: currencyFromBody } = body
+    const currency = (currencyFromBody && ['usd', 'eur', 'pln'].includes(currencyFromBody))
+      ? currencyFromBody as Currency
+      : 'usd' as Currency
+
     // Pobierz Price ID dla wybranej waluty
-    const currency = (workspace.currency || 'usd') as Currency
     const priceId = await getPriceIdForPlan(plan as PlanKey, currency)
 
     if (!priceId) {

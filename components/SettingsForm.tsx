@@ -48,15 +48,24 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
     setError(null)
     setSuccess(false)
 
-    // Update workspace currency if changed
+    // Update workspace currency if changed using API endpoint (bypasses RLS)
     if (currency !== initialCurrency) {
-      const { error: workspaceError } = await supabase
-        .from('workspaces')
-        .update({ currency })
-        .eq('owner_id', profile.id)
+      try {
+        const response = await fetch('/api/workspace/currency', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ currency }),
+        })
 
-      if (workspaceError) {
-        setError(`Failed to update currency: ${workspaceError.message}`)
+        const data = await response.json()
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to update currency')
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to update currency')
         setLoading(false)
         return
       }
@@ -242,52 +251,6 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
   return (
     <div className="space-y-6">
-      {/* Currency Preference Section */}
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold mb-4">Currency Preference</h2>
-        <form onSubmit={handleCurrencySubmit} className="space-y-4">
-          {error && (
-            <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-              Settings saved successfully!
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="currency" className="block text-sm font-medium mb-2">
-              Preferred Currency
-            </label>
-            <select
-              id="currency"
-              value={currency}
-              onChange={(e) => setCurrency(e.target.value as 'usd' | 'eur' | 'pln')}
-              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-            >
-              <option value="usd">USD ($) - US Dollar</option>
-              <option value="eur">EUR (€) - Euro</option>
-              <option value="pln">PLN (zł) - Polish Zloty</option>
-            </select>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Prices will be displayed in your preferred currency. This setting applies to all billing pages.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row justify-end gap-3">
-            <button
-              type="submit"
-              disabled={loading}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth hover-lift"
-            >
-              {loading ? 'Saving...' : 'Save Currency'}
-            </button>
-          </div>
-        </form>
-      </div>
-
       {/* Subscription Section */}
       <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Subscription</h2>

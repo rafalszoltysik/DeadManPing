@@ -1,9 +1,9 @@
 import { stripe } from './stripe'
+import { Currency } from './currency-detection'
 
 // Re-export stripe for convenience
 export { stripe }
 
-export type Currency = 'usd' | 'eur' | 'pln'
 export type PlanKey = 'starter' | 'pro' | 'team'
 
 export interface PriceInfo {
@@ -131,18 +131,5 @@ export async function getAllPricesForPlan(
 /**
  * Formatuje cenę do wyświetlenia
  */
-export function formatPrice(amountInCents: number, currency: Currency): string {
-  const amount = amountInCents / 100
-  const formatted = amount.toFixed(2)
-
-  switch (currency) {
-    case 'eur':
-      return `€${formatted}`
-    case 'pln':
-      return `${formatted} zł`
-    case 'usd':
-    default:
-      return `$${formatted}`
-  }
-}
+// formatPrice moved to lib/currency-detection.ts
 

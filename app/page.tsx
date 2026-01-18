@@ -5,6 +5,8 @@ import { Logo } from '@/components/Logo'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
 import { DashboardPreview } from '@/components/DashboardPreview'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
+import { PricingSection } from '@/components/PricingSection'
+import { CTAButton } from '@/components/CTAButton'
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
@@ -64,12 +66,9 @@ export default function Home() {
               One curl line. Zero execution changes. Stop writing alert connectors.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
-              <Link
-                href="/auth/signup"
-                className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
-              >
+              <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
                 Start monitoring in 2 minutes
-              </Link>
+              </CTAButton>
             </div>
             <p className="text-sm text-muted-foreground">
               14-day free trial · No credit card required
@@ -423,68 +422,79 @@ fi`}</code>
             <p className="text-center text-lg text-muted-foreground mb-8 sm:mb-12">
               Different types of verification that DeadManPing can monitor:
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              <AnimatedItem delay={0}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">File Verification</h3>
-                  <p className="text-sm text-muted-foreground mb-3">Check if backup file exists and size (GB)</p>
-                  <pre className="bg-background border border-border rounded p-3 overflow-x-hidden text-xs break-words whitespace-pre-wrap">
-                    <code className="break-words">{`if [ -f "$BACKUP_FILE" ]; then
+            <div className="space-y-6 sm:space-y-8">
+              {/* First row: File Verification and Status Verification */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <AnimatedItem delay={0}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full flex flex-col">
+                    <h3 className="text-lg font-semibold mb-3">File Verification</h3>
+                    <p className="text-sm text-muted-foreground mb-3">Check if backup file exists and size (GB)</p>
+                    <pre className="bg-background border border-border rounded p-3 overflow-x-hidden text-xs break-words whitespace-pre-wrap flex-grow">
+                      <code className="break-words">{`if [ -f "$BACKUP_FILE" ]; then
   FILE_SIZE_GB=$(du -h "$BACKUP_FILE" | ...)
   curl ... -d "{\\"file_exists\\": true, 
     \\"size_gb\\": $FILE_SIZE_GB}"
 fi`}</code>
-                  </pre>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={100}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Count Verification</h3>
-                  <p className="text-sm text-muted-foreground mb-3">How many records/items were processed</p>
-                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
-                    <code>{`RECORDS_PROCESSED=$(./sync.sh | grep -c "synced")
-curl ... -d "{\\"count\\": $RECORDS_PROCESSED}"`}</code>
-                  </pre>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={200}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Duration Verification</h3>
-                  <p className="text-sm text-muted-foreground mb-3">How long script execution took</p>
-                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
-                    <code>{`START_TIME=$(date +%s)
-./generate_report.sh
-DURATION=$((END_TIME - START_TIME))
-curl ... -d "{\\"duration_seconds\\": $DURATION}"`}</code>
-                  </pre>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={300}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Status Verification</h3>
-                  <p className="text-sm text-muted-foreground mb-3">Success/failure with context</p>
-                  <pre className="bg-background border border-border rounded p-3 overflow-x-hidden text-xs break-words whitespace-pre-wrap">
-                    <code className="break-words">{`if ./backup.sh; then
+                    </pre>
+                  </div>
+                </AnimatedItem>
+                <AnimatedItem delay={100}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full flex flex-col">
+                    <h3 className="text-lg font-semibold mb-3">Status Verification</h3>
+                    <p className="text-sm text-muted-foreground mb-3">Success/failure with context</p>
+                    <pre className="bg-background border border-border rounded p-3 overflow-x-hidden text-xs break-words whitespace-pre-wrap flex-grow">
+                      <code className="break-words">{`if ./backup.sh; then
   curl ... -d "{\\"success\\": true, 
     \\"backup_size\\": \\"$SIZE\\"}"
 else
   curl ... -d "{\\"success\\": false, 
     \\"error\\": \\"$ERROR\\"}"
 fi`}</code>
-                  </pre>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={400}>
-                <div className="bg-background border border-border rounded-lg p-6 md:col-span-2 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Threshold Verification</h3>
-                  <p className="text-sm text-muted-foreground mb-3">Numeric values (more/less than X)</p>
-                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
-                    <code>{`FILES_DELETED=$(./cleanup.sh | wc -l)
+                    </pre>
+                  </div>
+                </AnimatedItem>
+              </div>
+              
+              {/* Second row: Duration Verification and Threshold Verification */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <AnimatedItem delay={200}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full flex flex-col">
+                    <h3 className="text-lg font-semibold mb-3">Duration Verification</h3>
+                    <p className="text-sm text-muted-foreground mb-3">How long script execution took</p>
+                    <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs flex-grow">
+                      <code>{`START_TIME=$(date +%s)
+./generate_report.sh
+DURATION=$((END_TIME - START_TIME))
+curl ... -d "{\\"duration_seconds\\": $DURATION}"`}</code>
+                    </pre>
+                  </div>
+                </AnimatedItem>
+                <AnimatedItem delay={300}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full flex flex-col">
+                    <h3 className="text-lg font-semibold mb-3">Threshold Verification</h3>
+                    <p className="text-sm text-muted-foreground mb-3">Numeric values (more/less than X)</p>
+                    <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs flex-grow">
+                      <code>{`FILES_DELETED=$(./cleanup.sh | wc -l)
 curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
 # In dashboard: files_deleted >= 10 → OK, < 10 → WARN`}</code>
-                  </pre>
-                </div>
-              </AnimatedItem>
+                    </pre>
+                  </div>
+                </AnimatedItem>
+              </div>
+              
+              {/* Third row: Count Verification centered */}
+              <div className="flex justify-center">
+                <AnimatedItem delay={400}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover w-full max-w-md flex flex-col">
+                    <h3 className="text-lg font-semibold mb-3">Count Verification</h3>
+                    <p className="text-sm text-muted-foreground mb-3">How many records/items were processed</p>
+                    <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs flex-grow">
+                      <code>{`RECORDS_PROCESSED=$(./sync.sh | grep -c "synced")
+curl ... -d "{\\"count\\": $RECORDS_PROCESSED}"`}</code>
+                    </pre>
+                  </div>
+                </AnimatedItem>
+              </div>
             </div>
           </div>
         </section>
@@ -495,37 +505,44 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
           <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators">
           <div className="max-w-5xl mx-auto px-4">
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Key Differentiators</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              <AnimatedItem delay={0}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Result-aware monitoring</h3>
-                  <p className="text-muted-foreground">We monitor outcomes, not just execution.</p>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={100}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Declarative rules</h3>
-                  <p className="text-muted-foreground">Rules live in the UI, not inside scripts.</p>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={200}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Built-in recovery logic</h3>
-                  <p className="text-muted-foreground">Alerts fire on state change, not every run.</p>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={300}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Missing-run detection</h3>
-                  <p className="text-muted-foreground">If your cron never executes — you still get alerted.</p>
-                </div>
-              </AnimatedItem>
-              <AnimatedItem delay={400}>
-                <div className="bg-background border border-border rounded-lg p-6 md:col-span-2 card-hover">
-                  <h3 className="text-lg font-semibold mb-3">Zero custom logic per customer</h3>
-                  <p className="text-muted-foreground">Same payload schema. Same evaluation engine. No support burden.</p>
-                </div>
-              </AnimatedItem>
+            <div className="space-y-6 sm:space-y-8">
+              {/* First 4 items in 2x2 grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                <AnimatedItem delay={0}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                    <h3 className="text-lg font-semibold mb-3">Result-aware monitoring</h3>
+                    <p className="text-muted-foreground">We monitor outcomes, not just execution.</p>
+                  </div>
+                </AnimatedItem>
+                <AnimatedItem delay={100}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                    <h3 className="text-lg font-semibold mb-3">Declarative rules</h3>
+                    <p className="text-muted-foreground">Rules live in the UI, not inside scripts.</p>
+                  </div>
+                </AnimatedItem>
+                <AnimatedItem delay={200}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                    <h3 className="text-lg font-semibold mb-3">Built-in recovery logic</h3>
+                    <p className="text-muted-foreground">Alerts fire on state change, not every run.</p>
+                  </div>
+                </AnimatedItem>
+                <AnimatedItem delay={300}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                    <h3 className="text-lg font-semibold mb-3">Missing-run detection</h3>
+                    <p className="text-muted-foreground">If your cron never executes — you still get alerted.</p>
+                  </div>
+                </AnimatedItem>
+              </div>
+              
+              {/* Last item centered */}
+              <div className="flex justify-center">
+                <AnimatedItem delay={400}>
+                  <div className="bg-background border border-border rounded-lg p-6 card-hover w-full max-w-md">
+                    <h3 className="text-lg font-semibold mb-3">Zero custom logic per customer</h3>
+                    <p className="text-muted-foreground">Same payload schema. Same evaluation engine. No support burden.</p>
+                  </div>
+                </AnimatedItem>
+              </div>
             </div>
           </div>
         </section>
@@ -644,136 +661,7 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
         </AnimatedSection>
 
         {/* Pricing */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
-          <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
-            <AnimatedItem delay={0}>
-              <div className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 hover-lift transition-smooth flex flex-col h-full card-hover">
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">Starter</h3>
-              <p className="text-3xl sm:text-4xl font-bold mb-4">
-                $9
-                <span className="text-base sm:text-lg font-normal text-muted-foreground">/month</span>
-              </p>
-              <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  25 monitors
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Min interval: 5 minutes
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Email alerts
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Slack/Discord integrations
-                </li>
-              </ul>
-              <Link
-                href="/auth/signup?plan=starter"
-                className="block w-full bg-primary text-primary-foreground hover:bg-primary/90 text-center px-4 py-3 rounded-md font-medium transition-smooth hover:shadow-lg hover:shadow-primary/20"
-              >
-                Get Started
-              </Link>
-              </div>
-            </AnimatedItem>
-            <AnimatedItem delay={200}>
-              <div className="bg-card border-2 border-primary rounded-lg p-6 sm:p-8 hover-lift transition-smooth relative flex flex-col h-full card-hover hover-glow">
-              <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 animate-pulse-subtle">
-                <span className="bg-primary text-primary-foreground text-xs font-semibold px-2 sm:px-3 py-1 rounded-full shadow-lg">
-                  MOST POPULAR
-                </span>
-              </div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-xl sm:text-2xl font-bold">Pro</h3>
-              </div>
-              <p className="text-3xl sm:text-4xl font-bold mb-4">
-                $29
-                <span className="text-base sm:text-lg font-normal text-muted-foreground">/month</span>
-              </p>
-              <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  100 monitors
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Min interval: 1 minute
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Email alerts
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Slack/Discord integrations
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Up to 3 team members
-                </li>
-              </ul>
-              <Link
-                href="/auth/signup?plan=pro"
-                className="block w-full bg-primary text-primary-foreground hover:bg-primary/90 text-center px-4 py-3 rounded-md font-medium transition-smooth hover:shadow-lg hover:shadow-primary/20"
-              >
-                Get Started
-              </Link>
-              </div>
-            </AnimatedItem>
-            <AnimatedItem delay={400}>
-              <div className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 hover-lift transition-smooth flex flex-col h-full card-hover">
-                <h3 className="text-xl sm:text-2xl font-bold mb-2">Team</h3>
-              <p className="text-3xl sm:text-4xl font-bold mb-4">
-                $79
-                <span className="text-base sm:text-lg font-normal text-muted-foreground">/month</span>
-              </p>
-              <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  500 monitors
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Min interval: 30 seconds
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Email alerts
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Slack/Discord integrations
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Custom webhooks
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  API access
-                </li>
-                <li className="flex items-center text-foreground">
-                  <span className="mr-2 text-success">✓</span>
-                  Up to 10 team members
-                </li>
-              </ul>
-              <Link
-                href="/auth/signup?plan=team"
-                className="block w-full bg-primary text-primary-foreground hover:bg-primary/90 text-center px-4 py-3 rounded-md font-medium transition-smooth"
-              >
-                Get Started
-              </Link>
-              </div>
-            </AnimatedItem>
-          </div>
-        </section>
-        </AnimatedSection>
+        <PricingSection />
 
         {/* Who This Is For */}
         <AnimatedSection>
@@ -792,7 +680,7 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
                 </ul>
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-4 text-muted-foreground">Not for:</h3>
+                <h3 className="text-xl font-semibold mb-4 text-red-500">Not for:</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• realtime apps</li>
                   <li>• error debugging</li>
@@ -832,12 +720,9 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
             <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
               Monitor results, not assumptions.
             </p>
-            <Link
-              href="/auth/signup"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30"
-            >
+            <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
               Get started in 2 minutes
-            </Link>
+            </CTAButton>
           </div>
         </section>
         </AnimatedSection>
