@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { WarningTooltip, InfoTooltip } from './Tooltip'
-import { WarningIcon, InfoIcon, EyeIcon, EyeOffIcon } from './Icons'
+import { InfoTooltip } from './Tooltip'
+import { InfoIcon, EyeIcon, EyeOffIcon } from './Icons'
 import { validatePassword } from '@/lib/password-validator'
 
 interface Profile {
@@ -431,13 +431,6 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
           <div>
             <label htmlFor="slack" className="flex items-center gap-2 text-sm font-medium mb-2">
               Slack Webhook URL
-              {!hasSlackDiscord && (
-                <WarningTooltip content="This feature is available on Starter, Pro, or Team plans. Upgrade your plan to use Slack webhooks.">
-                  <button type="button" className="text-warning hover:text-warning/80 transition-smooth">
-                    <WarningIcon className="w-4 h-4" />
-                  </button>
-                </WarningTooltip>
-              )}
             </label>
             <input
               id="slack"
@@ -472,13 +465,6 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
           <div>
             <label htmlFor="discord" className="flex items-center gap-2 text-sm font-medium mb-2">
               Discord Webhook URL
-              {!hasSlackDiscord && (
-                <WarningTooltip content="This feature is available on Starter, Pro, or Team plans. Upgrade your plan to use Discord webhooks.">
-                  <button type="button" className="text-warning hover:text-warning/80 transition-smooth">
-                    <WarningIcon className="w-4 h-4" />
-                  </button>
-                </WarningTooltip>
-              )}
             </label>
             <input
               id="discord"
@@ -503,13 +489,6 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
           <div>
             <label htmlFor="customWebhook" className="flex items-center gap-2 text-sm font-medium mb-2">
               Custom Webhook URL
-              {!hasCustomWebhook && (
-                <WarningTooltip content="Custom webhooks are only available on Team plan. Upgrade to Team plan to use this feature.">
-                  <button type="button" className="text-warning hover:text-warning/80 transition-smooth">
-                    <WarningIcon className="w-4 h-4" />
-                  </button>
-                </WarningTooltip>
-              )}
             </label>
             <input
               id="customWebhook"
