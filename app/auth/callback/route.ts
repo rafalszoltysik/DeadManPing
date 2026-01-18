@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
               // Ensure cookies are accessible for PKCE
               httpOnly: false, // PKCE code verifier needs to be accessible
               sameSite: 'lax',
-              secure: process.env.NODE_ENV === 'production',
+              secure: requestUrl.protocol === 'https:',
               path: '/',
             })
           })
@@ -62,6 +62,7 @@ export async function GET(request: NextRequest) {
   )
 
   if (code) {
+    console.log('OAuth callback received, exchanging code for session...')
     const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
     if (exchangeError) {
@@ -75,6 +76,8 @@ export async function GET(request: NextRequest) {
       loginUrl.searchParams.set('error', exchangeError.message || 'Failed to complete authentication')
       return NextResponse.redirect(loginUrl)
     }
+
+    console.log('Code exchanged successfully, user:', sessionData?.user?.email || 'no user')
 
     // Get user after session exchange
     // Try to get user from session first, then fallback to getUser

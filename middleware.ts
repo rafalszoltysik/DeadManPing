@@ -30,6 +30,16 @@ export async function middleware(request: NextRequest) {
   // Get user from Supabase session (this also refreshes the session)
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Handle OAuth callback code on homepage - redirect to /auth/callback
+  if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code')) {
+    const callbackUrl = new URL('/auth/callback', request.url)
+    // Copy all search params (code, error, etc.) to callback URL
+    request.nextUrl.searchParams.forEach((value, key) => {
+      callbackUrl.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(callbackUrl)
+  }
+
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
     const url = request.nextUrl.clone()
