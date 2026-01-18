@@ -68,6 +68,7 @@
   - [ ] `checkout.session.completed`
   - [ ] `customer.subscription.updated`
   - [ ] `customer.subscription.deleted`
+  - [ ] `invoice.payment_failed`
 - [ ] Webhook secret jest ustawiony w `STRIPE_WEBHOOK_SECRET`
 - [ ] Przetestowano webhook (użyj Stripe Dashboard → Webhooks → Send test webhook)
 
@@ -89,11 +90,38 @@
 
 ## 🔄 5. Cron Jobs (Vercel)
 
-- [ ] Vercel Cron Jobs są skonfigurowane w `vercel.json`:
+### ⚠️ KRYTYCZNE: Limity Vercel Hobby Plan
+
+**Vercel Hobby plan:**
+- 2 cron jobs na konto
+- **Każdy cron job może być uruchomiony tylko raz dziennie** (nie co minutę!)
+- Aplikacja **wymaga** sprawdzania timeoutów **co minutę** (krytyczne!)
+
+### Rozwiązania:
+
+#### Opcja A: Vercel Pro Plan ($20/miesiąc)
+- [ ] Upgrade do Vercel Pro plan (unlimited cron invocations)
+- [ ] Skonfiguruj 2 cron jobs w `vercel.json`:
   - [ ] `/api/cron/check-timeouts` - co minutę (`* * * * *`)
   - [ ] `/api/cron/check-trial-expiry` - codziennie (`0 0 * * *`)
+
+#### Opcja B: Zewnętrzny serwis cron (dla Hobby plan)
+- [ ] Użyj **cron-job.org** lub **EasyCron** (darmowe, do 2 cron jobs)
+- [ ] Skonfiguruj zewnętrzny cron job:
+  - [ ] URL: `https://yourdomain.com/api/cron/check-timeouts`
+  - [ ] Schedule: `* * * * *` (co minutę)
+  - [ ] Header: `Authorization: Bearer YOUR_CRON_SECRET`
+- [ ] W `vercel.json` zostaw tylko trial expiry:
+  - [ ] `/api/cron/check-trial-expiry` - codziennie (`0 0 * * *`)
+
+#### Opcja C: GitHub Actions (dla public repos)
+- [ ] Utwórz `.github/workflows/cron.yml` (patrz `CRON_SETUP.md`)
+- [ ] Dodaj `CRON_SECRET` do GitHub Secrets
+
+### Wspólne kroki:
 - [ ] `CRON_SECRET` jest ustawiony w Vercel environment variables
-- [ ] Przetestowano czy cron jobs działają (sprawdź Vercel Dashboard → Cron Jobs)
+- [ ] Przetestowano czy cron jobs działają (sprawdź logi)
+- [ ] Sprawdź Vercel Dashboard → Cron Jobs (lub zewnętrzny serwis)
 
 ---
 

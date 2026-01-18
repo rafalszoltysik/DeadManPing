@@ -76,6 +76,7 @@
      - `checkout.session.completed`
      - `customer.subscription.updated`
      - `customer.subscription.deleted`
+     - `invoice.payment_failed`
 4. Kliknij **"Add endpoint"**
 5. **Skopiuj Signing secret** (kliknij na endpoint → "Reveal" → skopiuj `whsec_...`)
 
