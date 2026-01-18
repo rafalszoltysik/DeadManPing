@@ -358,6 +358,7 @@ fi`}</code>
                   </ul>
                 </div>
               </div>
+              </div>
             </AnimatedItem>
 
             <AnimatedItem delay={200}>
