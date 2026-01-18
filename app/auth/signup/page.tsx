@@ -7,12 +7,13 @@ import { validatePassword } from '@/lib/password-validator'
 import { PageNav } from '@/components/PageNav'
 import { createClient } from '@/lib/supabase/client'
 import { InfoTooltip, WarningTooltip } from '@/components/Tooltip'
-import { InfoIcon, WarningIcon } from '@/components/Icons'
+import { InfoIcon, WarningIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 
 export default function SignupPage() {
   const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -226,18 +227,32 @@ export default function SignupPage() {
                     </button>
                   </InfoTooltip>
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  minLength={8}
-                  value={password}
-                  onChange={handlePasswordChange}
-                  className={`block w-full px-3 py-2 bg-background border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth ${
-                    passwordErrors.length > 0 && password.length > 0 ? 'border-error' : 'border-input'
-                  }`}
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    minLength={8}
+                    value={password}
+                    onChange={handlePasswordChange}
+                    className={`block w-full px-3 py-2 pr-10 bg-background border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth ${
+                      passwordErrors.length > 0 && password.length > 0 ? 'border-error' : 'border-input'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
                 {passwordErrors.length > 0 && password.length > 0 && (
                   <ul className="mt-2 text-sm text-error list-disc list-inside">
                     {passwordErrors.map((error, i) => (

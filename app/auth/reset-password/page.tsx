@@ -7,11 +7,13 @@ import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { validatePassword } from '@/lib/password-validator'
 import { InfoTooltip } from '@/components/Tooltip'
-import { InfoIcon } from '@/components/Icons'
+import { InfoIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 
 function ResetPasswordForm() {
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -250,15 +252,29 @@ function ResetPasswordForm() {
                     </button>
                   </InfoTooltip>
                 </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="new-password"
-                  value={password}
-                  onChange={(e) => handlePasswordChange(e.target.value)}
-                  className="block w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={password}
+                    onChange={(e) => handlePasswordChange(e.target.value)}
+                    className="block w-full px-3 py-2 pr-10 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? (
+                      <EyeOffIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
                 {passwordErrors.length > 0 && (
                   <ul className="mt-2 text-sm text-error space-y-1">
                     {passwordErrors.map((err, idx) => (
@@ -271,15 +287,29 @@ function ResetPasswordForm() {
                 <label htmlFor="passwordConfirm" className="block text-sm font-medium mb-2">
                   Confirm New Password
                 </label>
-                <input
-                  id="passwordConfirm"
-                  name="passwordConfirm"
-                  type="password"
-                  autoComplete="new-password"
-                  value={passwordConfirm}
-                  onChange={(e) => setPasswordConfirm(e.target.value)}
-                  className="block w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
-                />
+                <div className="relative">
+                  <input
+                    id="passwordConfirm"
+                    name="passwordConfirm"
+                    type={showPasswordConfirm ? "text" : "password"}
+                    autoComplete="new-password"
+                    value={passwordConfirm}
+                    onChange={(e) => setPasswordConfirm(e.target.value)}
+                    className="block w-full px-3 py-2 pr-10 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-smooth"
+                    aria-label={showPasswordConfirm ? "Hide password" : "Show password"}
+                  >
+                    {showPasswordConfirm ? (
+                      <EyeOffIcon className="w-5 h-5" />
+                    ) : (
+                      <EyeIcon className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
