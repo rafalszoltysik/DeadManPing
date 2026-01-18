@@ -92,10 +92,17 @@ export default function CookiesPage() {
             <p className="text-muted-foreground mb-4">
               If you have questions about our use of cookies, please contact us at:
             </p>
-            <p className="text-muted-foreground">
-              Email: support@deadmanping.com<br />
-              Website: https://deadmanping.com
-            </p>
+            <div className="bg-muted/50 border border-border rounded-lg p-4 mb-4">
+              <p className="text-muted-foreground mb-2">
+              <strong>Business Name:</strong> Rafał Szołtysik<br />
+              <strong>Legal Form:</strong> Sole Proprietorship<br />
+              <strong>Address:</strong> [Adres Twojego wirtualnego biura]<br />
+              <strong>NIP:</strong> 9691672125<br />
+              <strong>REGON:</strong> 541870021<br />
+              <strong>Email:</strong> support@deadmanping.com<br />
+              <strong>Website:</strong> https://deadmanping.com
+              </p>
+            </div>
           </section>
         </div>
       </div>

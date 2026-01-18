@@ -3,12 +3,12 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 
 export const metadata: Metadata = {
-  title: "How to Monitor Cron Jobs | Detect When Cron Jobs Fail | DeadManPing",
-  description: "Learn how to monitor cron jobs and detect failures. Simple dead man switch solution that alerts you when your scheduled tasks don't run. Works with bash, Python, Node.js, and Docker.",
-  keywords: "how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts, monitor cron jobs linux, cron job not running, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron job notification service, monitor cron notification, cron notification system, cron job notification if failed, cron notification when job fails, cron notification if job fails",
+  title: "Monitor Cron Jobs Without Migration | DeadManPing",
+  description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+  keywords: "monitor cron jobs without migration, cron monitoring, how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts, monitor cron jobs linux, cron job not running, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron job notification service, monitor cron notification, cron notification system, cron job notification if failed, cron notification when job fails, cron notification if job fails",
   openGraph: {
-    title: "How to Monitor Cron Jobs | DeadManPing",
-    description: "Learn how to monitor cron jobs and detect failures. Simple dead man switch solution that alerts you when your scheduled tasks don't run.",
+    title: "Monitor Cron Jobs Without Migration | DeadManPing",
+    description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
     type: "article",
   },
   alternates: {
@@ -44,11 +44,10 @@ export default function MonitorCronJobsPage() {
         <article>
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              How to Monitor Cron Jobs and Detect When They Fail
+              Monitor Cron Jobs Without Changing Your Setup
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job stopped running three days ago. You only found out when a user reported missing data. 
-              Here's how to detect cron job failures before they become incidents.
+              Keep your cron. Keep your scripts. Add one curl line. Get instant alerts when jobs fail or return wrong results.
             </p>
           </header>
 
@@ -79,38 +78,58 @@ export default function MonitorCronJobsPage() {
                 Solution: Dead Man Switch Monitoring
               </h2>
               <p className="text-muted-foreground mb-4">
+                <strong>DeadManPing doesn't run your jobs. Your cron does. DeadManPing only observes.</strong>
+              </p>
+              <p className="text-muted-foreground mb-4">
                 A dead man switch works like this: your cron job pings a monitoring service after each successful run. 
                 If the ping doesn't arrive within the expected time window, you get an alert. It's simple, reliable, and 
                 works with any language or environment.
               </p>
               
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
-                Basic Implementation with curl
+                Add One Line to Your Existing Script
               </h3>
               <p className="text-muted-foreground mb-4">
-                The simplest way to add monitoring to any cron job:
+                <strong>Important:</strong> The curl command must be <strong>inside your script</strong>, not in the cron line, because only in the script do you have access to variables from execution results.
               </p>
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">0 3 * * * /path/to/backup.sh && curl -X POST "https://your-domain.com/api/ping/backup-daily"</code>
+                <code className="text-foreground">
+                  <div>#!/bin/bash</div>
+                  <div># Your existing backup script here</div>
+                  <div>./backup.sh</div>
+                  <div></div>
+                  <div># Add this one line at the end</div>
+                  <div>curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>  -H "Content-Type: application/json" \</div>
+                  <div>  -d {"'"}{'{'}`"success": true{'}'}{"'"}</div>
+                </code>
               </div>
               <p className="text-muted-foreground mb-4">
-                The <code className="bg-muted px-1.5 py-0.5 rounded text-sm">&&</code> ensures the ping only happens if the script succeeds. 
-                If <code className="bg-muted px-1.5 py-0.5 rounded text-sm">backup.sh</code> exits with a non-zero code, the curl never runs.
+                In crontab: <code className="bg-muted px-1.5 py-0.5 rounded text-sm">0 3 * * * /path/to/backup.sh</code>
+              </p>
+              <p className="text-muted-foreground mb-4">
+                Your cron runs your script. Your script executes logic. At the end of your script — one curl line with data from execution.
               </p>
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
-                Reporting Failures Explicitly
+                Reporting Failures with Data from Execution
               </h3>
               <p className="text-muted-foreground mb-4">
-                You can also report failures explicitly with a status parameter:
+                You can report failures explicitly and include data from execution:
               </p>
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
                   <div>if ./backup.sh; then</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-daily?s=ok"</div>
+                  <div>  BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)</div>
+                  <div>  curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>    -H "Content-Type: application/json" \</div>
+                  <div>    -d "{'{'}\"success\": true, \"backup_size\": \"$BACKUP_SIZE\"{'}'}"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-daily?s=fail&m=Backup+failed"</div>
+                  <div>  ERROR_MSG=$(./backup.sh 2{'>'}&1 | tail -1)</div>
+                  <div>  curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>    -H "Content-Type: application/json" \</div>
+                  <div>    -d "{'{'}\"success\": false, \"error\": \"$ERROR_MSG\"{'}'}"</div>
                   <div>fi</div>
                 </code>
               </div>

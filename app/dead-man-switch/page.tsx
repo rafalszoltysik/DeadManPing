@@ -4,11 +4,11 @@ import { PageNav } from '@/components/PageNav'
 
 export const metadata: Metadata = {
   title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
-  description: "Dead man switch monitoring for backup jobs. Get instant alerts when your backups fail or stop running. Works with rsync, tar, database dumps, and cloud backups.",
+  description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
   keywords: "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
   openGraph: {
     title: "Dead Man Switch for Backups | DeadManPing",
-    description: "Get instant alerts when your backups fail or stop running. Dead man switch monitoring for backup jobs.",
+    description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
   },
   alternates: {
@@ -42,9 +42,11 @@ export default function DeadManSwitchPage() {
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
               Dead Man Switch for Backups: Never Miss a Failed Backup Again
             </h1>
+            <p className="text-lg sm:text-xl text-muted-foreground mb-4">
+              Dead man switch that doesn't touch your execution.
+            </p>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup job has been failing silently for a week. You discover this when you need to restore. 
-              A dead man switch ensures you know immediately when backups fail.
+              Your backup script runs as before. Just add one curl line at the end.
             </p>
           </header>
 
@@ -76,9 +78,15 @@ export default function DeadManSwitchPage() {
                 How Dead Man Switch Works for Backups
               </h2>
               <p className="text-muted-foreground mb-4">
+                <strong>DeadManPing doesn't run your backups. Your cron does. DeadManPing only observes if the ping arrived.</strong>
+              </p>
+              <p className="text-muted-foreground mb-4">
                 After each successful backup, your script pings a monitoring service. If the ping doesn't arrive 
                 within the expected interval (e.g., daily backups should ping every 24 hours), you get an alert. 
                 It's independent of your backup infrastructure, so it works with any backup method.
+              </p>
+              <p className="text-muted-foreground mb-4">
+                <strong>Important:</strong> The curl command must be <strong>inside your backup script</strong>, not in the cron line, because only in the script do you have access to variables from execution results (e.g., backup file size, success status).
               </p>
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">

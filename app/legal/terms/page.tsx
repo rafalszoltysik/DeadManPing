@@ -120,13 +120,23 @@ export default function TermsPage() {
           </section>
 
           <section className="mb-6 sm:mb-8">
-            <h2 className="text-2xl font-semibold text-foreground mb-4">12. Contact Information</h2>
+            <h2 className="text-2xl font-semibold text-foreground mb-4">12. Service Provider Information</h2>
             <p className="text-muted-foreground mb-4">
-              If you have any questions about these Terms, please contact us at:
+              The Service is provided by:
             </p>
-            <p className="text-muted-foreground">
-              Email: support@deadmanping.com<br />
-              Website: https://deadmanping.com
+            <div className="bg-muted/50 border border-border rounded-lg p-4 mb-4">
+              <p className="text-muted-foreground mb-2">
+              <strong>Business Name:</strong> Rafał Szołtysik<br />
+              <strong>Legal Form:</strong> Sole Proprietorship<br />
+              <strong>Address:</strong> [Adres Twojego wirtualnego biura]<br />
+              <strong>NIP:</strong> 9691672125<br />
+              <strong>REGON:</strong> 541870021<br />
+              <strong>Email:</strong> support@deadmanping.com<br />
+              <strong>Website:</strong> https://deadmanping.com
+              </p>
+            </div>
+            <p className="text-muted-foreground mb-4">
+              If you have any questions about these Terms, please contact us using the information above.
             </p>
           </section>
         </div>

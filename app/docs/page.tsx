@@ -30,6 +30,19 @@ export default function DocsPage() {
             </p>
           </header>
 
+          <div className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold mb-4">Important: What DeadManPing Does</h2>
+            <p className="text-muted-foreground mb-4">
+              <strong>DeadManPing doesn't run your jobs.</strong> It only observes the results.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              Your cron runs your jobs. Your scripts execute your logic. DeadManPing only observes if the ping arrived, when it arrived, and what payload it contained.
+            </p>
+            <p className="text-muted-foreground">
+              Keep your cron. Keep your scripts. Just add one curl line at the end of your existing script.
+            </p>
+          </div>
+
           <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 space-y-8">
             <section>
               <h2 className="text-xl sm:text-2xl font-semibold mb-4">1. Create a Monitor</h2>
@@ -49,7 +62,10 @@ export default function DocsPage() {
             </section>
 
             <section>
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">3. Add to Your Cron Job</h2>
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">3. Add to Your Existing Script</h2>
+              <p className="text-muted-foreground mb-4">
+                <strong>Important:</strong> The curl command must be <strong>inside your script</strong>, not in the cron line, because only in the script do you have access to variables from execution results (e.g., count, file size, duration).
+              </p>
               <p className="text-muted-foreground mb-4">Here are examples for different scenarios:</p>
 
               <div className="space-y-4">
@@ -58,18 +74,42 @@ export default function DocsPage() {
                   <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto">
                     <code className="text-foreground">
                       <div>#!/bin/bash</div>
-                      <div># Your backup script here</div>
+                      <div># Your existing backup script here</div>
                       <div>./backup.sh</div>
-                      <div>curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug"</div>
+                      <div></div>
+                      <div># Add this one line at the end</div>
+                      <div>curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug" \</div>
+                      <div>  -H "Content-Type: application/json" \</div>
+                      <div>  -d {"'"}{'{'}`"success": true{'}'}{"'"}</div>
+                    </code>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">Bash Script with Data from Execution</h3>
+                  <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto">
+                    <code className="text-foreground">
+                      <div>#!/bin/bash</div>
+                      <div>users_synced=$(./sync_users_logic.sh)</div>
+                      <div>if [ $? -eq 0 ]; then</div>
+                      <div>  curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug" \</div>
+                      <div>    -H "Content-Type: application/json" \</div>
+                      <div>    -d "{'{'}\"success\": true, \"count\": $users_synced{'}'}"</div>
+                      <div>else</div>
+                      <div>  curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug" \</div>
+                      <div>    -H "Content-Type: application/json" \</div>
+                      <div>    -d {"'"}{'{'}`"success": false{'}'}{"'"}</div>
+                      <div>fi</div>
                     </code>
                   </div>
                 </div>
 
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold mb-2">Crontab Entry</h3>
+                  <p className="text-sm text-muted-foreground mb-2">Just call your script. The curl is inside the script.</p>
                   <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto">
                     <code className="text-foreground">
-                      <div>0 3 * * * /path/to/backup.sh && curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug"</div>
+                      <div>0 3 * * * /path/to/backup.sh</div>
                     </code>
                   </div>
                 </div>
@@ -79,8 +119,15 @@ export default function DocsPage() {
                   <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto">
                     <code className="text-foreground">
                       <div>import requests</div>
-                      <div># Your script here</div>
-                      <div>requests.post("https://deadmanping.com/api/ping/your-monitor-slug")</div>
+                      <div></div>
+                      <div># Your existing script logic here</div>
+                      <div>records_synced = sync_users()</div>
+                      <div></div>
+                      <div># Add this one line at the end</div>
+                      <div>requests.post(</div>
+                      <div>  "https://deadmanping.com/api/ping/your-monitor-slug",</div>
+                      <div>  json={'{'}"success": True, "count": records_synced{'}'}</div>
+                      <div>)</div>
                     </code>
                   </div>
                 </div>
@@ -90,10 +137,77 @@ export default function DocsPage() {
                   <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto">
                     <code className="text-foreground">
                       <div>const https = require('https');</div>
-                      <div>// Your script here</div>
-                      <div>{`https.request('https://deadmanping.com/api/ping/your-monitor-slug', { method: 'POST' }).end();`}</div>
+                      <div></div>
+                      <div>// Your existing script logic here</div>
+                      <div>const recordsSynced = await syncUsers();</div>
+                      <div></div>
+                      <div>// Add this one line at the end</div>
+                      <div>const payload = JSON.stringify({'{'}"success": true, "count": recordsSynced{'}'});</div>
+                      <div>const req = https.request('https://deadmanping.com/api/ping/your-monitor-slug', {'{'}</div>
+                      <div>  method: 'POST',</div>
+                      <div>  headers: {'{'}'Content-Type': 'application/json'{'}'}</div>
+                      <div>{'}'});</div>
+                      <div>req.write(payload);</div>
+                      <div>req.end();</div>
                     </code>
                   </div>
+                </div>
+              </div>
+            </section>
+
+            <section>
+              <h2 className="text-xl sm:text-2xl font-semibold mb-4">What Can You Monitor?</h2>
+              <p className="text-muted-foreground mb-4">
+                DeadManPing can monitor different types of verification with data from your script execution:
+              </p>
+              <div className="space-y-4">
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <h3 className="text-base font-semibold mb-2">📁 File Verification</h3>
+                  <p className="text-sm text-muted-foreground mb-2">Check if backup file exists and size (GB)</p>
+                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
+                    <code>{`if [ -f "$BACKUP_FILE" ]; then
+  FILE_SIZE_GB=$(du -h "$BACKUP_FILE" | ...)
+  curl ... -d "{\\"file_exists\\": true, \\"size_gb\\": $FILE_SIZE_GB}"
+fi`}</code>
+                  </pre>
+                </div>
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <h3 className="text-base font-semibold mb-2">🔢 Count Verification</h3>
+                  <p className="text-sm text-muted-foreground mb-2">How many records/items were processed</p>
+                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
+                    <code>{`RECORDS_PROCESSED=$(./sync.sh | grep -c "synced")
+curl ... -d "{\\"count\\": $RECORDS_PROCESSED}"`}</code>
+                  </pre>
+                </div>
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <h3 className="text-base font-semibold mb-2">⏱️ Duration Verification</h3>
+                  <p className="text-sm text-muted-foreground mb-2">How long script execution took</p>
+                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
+                    <code>{`START_TIME=$(date +%s)
+./generate_report.sh
+DURATION=$((END_TIME - START_TIME))
+curl ... -d "{\\"duration_seconds\\": $DURATION}"`}</code>
+                  </pre>
+                </div>
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <h3 className="text-base font-semibold mb-2">✅ Status Verification</h3>
+                  <p className="text-sm text-muted-foreground mb-2">Success/failure with context</p>
+                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
+                    <code>{`if ./backup.sh; then
+  curl ... -d "{\\"success\\": true, \\"backup_size\\": \\"$SIZE\\"}"
+else
+  curl ... -d "{\\"success\\": false, \\"error\\": \\"$ERROR\\"}"
+fi`}</code>
+                  </pre>
+                </div>
+                <div className="bg-background border border-border rounded-lg p-4">
+                  <h3 className="text-base font-semibold mb-2">📊 Threshold Verification</h3>
+                  <p className="text-sm text-muted-foreground mb-2">Numeric values (more/less than X)</p>
+                  <pre className="bg-background border border-border rounded p-3 overflow-x-auto text-xs">
+                    <code>{`FILES_DELETED=$(./cleanup.sh | wc -l)
+curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
+# In dashboard: files_deleted >= 10 → OK, < 10 → WARN`}</code>
+                  </pre>
                 </div>
               </div>
             </section>
@@ -125,10 +239,34 @@ export default function DocsPage() {
               <div className="space-y-4">
                 <div>
                   <h3 className="text-base sm:text-lg font-semibold mb-2">
+                    Do I need to migrate my cron jobs?
+                  </h3>
+                  <p className="text-muted-foreground">
+                    <strong>No.</strong> Keep your cron. Keep your scripts. Just add one curl line at the end of your existing script.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">
+                    Does DeadManPing run my jobs?
+                  </h3>
+                  <p className="text-muted-foreground">
+                    <strong>No.</strong> Your cron runs your jobs. DeadManPing only observes the results. DeadManPing doesn't touch execution.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">
+                    Why must curl be inside the script, not in the cron line?
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Because only inside the script do you have access to variables from execution results (e.g., count, file size, duration). Data must come from execution, not be hardcoded.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">
                     What if my job runs less frequently than 5 minutes?
                   </h3>
                   <p className="text-muted-foreground">
-                    The free tier has a minimum interval of 5 minutes. Upgrade to Solo or Agency plan for longer intervals.
+                    The free tier has a minimum interval of 5 minutes. Upgrade to Starter or Pro plan for longer intervals.
                   </p>
                 </div>
                 <div>

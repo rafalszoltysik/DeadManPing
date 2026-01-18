@@ -4,11 +4,11 @@ import { PageNav } from '@/components/PageNav'
 
 export const metadata: Metadata = {
   title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
-  description: "Automated backup monitoring service. Get alerts when your backup jobs fail or stop running. Works with rsync, database dumps, cloud backups, and any backup method.",
+  description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
   keywords: "backup monitoring, backup monitoring service, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert, backup job monitoring",
   openGraph: {
     title: "Backup Monitoring Service | DeadManPing",
-    description: "Automated backup monitoring service. Get alerts when your backup jobs fail or stop running.",
+    description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
   },
   alternates: {
@@ -42,9 +42,11 @@ export default function BackupMonitoringPage() {
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
               Backup Monitoring Service: Never Miss a Failed Backup
             </h1>
+            <p className="text-lg sm:text-xl text-muted-foreground mb-4">
+              Backup monitoring that doesn't touch your execution.
+            </p>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup job has been failing for days, and you only found out when you needed to restore. 
-              Automated backup monitoring detects failures immediately, not when it's too late.
+              Keep your backup scripts. Add one curl line. Get alerts when backups fail.
             </p>
           </header>
 
@@ -76,9 +78,15 @@ export default function BackupMonitoringPage() {
                 How Backup Monitoring Works
               </h2>
               <p className="text-muted-foreground mb-4">
+                <strong>DeadManPing doesn't run your backups. Your cron does. DeadManPing only observes if the ping arrived.</strong>
+              </p>
+              <p className="text-muted-foreground mb-4">
                 A backup monitoring service uses a dead man switch pattern: your backup script pings the monitoring 
                 service after each successful backup. If the ping doesn't arrive within the expected interval, 
                 you get an alert. It's independent of your backup infrastructure, so it works with any backup method.
+              </p>
+              <p className="text-muted-foreground mb-4">
+                <strong>Important:</strong> The curl command must be <strong>inside your backup script</strong>, not in the cron line, because only in the script do you have access to variables from execution results (e.g., backup file size, success status).
               </p>
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">

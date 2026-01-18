@@ -3,10 +3,7 @@ import { validatePayload } from '@/lib/payload-validator'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { parsePayload, extractDeclaredFields } from '@/lib/payload-parser'
 import { errorResponse, successResponse } from '@/lib/api/response'
-
-// Rate limiting: simple in-memory store (for MVP)
-// In production, use Redis or similar
-const rateLimitStore = new Map<string, number>()
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(
   request: NextRequest,
@@ -82,12 +79,11 @@ async function handlePing(
 
     // Rate limiting: max 1 ping per 10 seconds per monitor
     const rateLimitKey = `monitor:${monitor.id}`
-    const lastPing = rateLimitStore.get(rateLimitKey) || 0
-    const now = Date.now()
-    if (now - lastPing < 10000) {
+    const rateLimitResult = await checkRateLimit(rateLimitKey, 10000) // 10 seconds window
+    
+    if (!rateLimitResult.allowed) {
       return errorResponse('Rate limit exceeded', 429)
     }
-    rateLimitStore.set(rateLimitKey, now)
 
     // Parse payload (user can send any JSON)
     const parseResult = await parsePayload(request, method)

@@ -1,6 +1,10 @@
 # DeadManPing
 
-Simple dead-man switch monitoring for cron jobs and scheduled tasks.
+Cron monitoring that observes job results without touching execution.
+
+**Keep your cron. Keep your scripts. We only verify the result.**
+
+DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.
 
 ## Setup
 
