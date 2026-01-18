@@ -38,6 +38,21 @@ cp .env.example .env.local
 npm run dev
 ```
 
+## Deployment
+
+### Vercel Setup
+
+Aby skonfigurować środowiska Production i Development na Vercel z automatycznymi wdrożeniami z Git, zobacz:
+
+📖 **[VERCEL_ENVIRONMENTS_SETUP.md](./VERCEL_ENVIRONMENTS_SETUP.md)** - Kompletny przewodnik konfiguracji środowisk
+
+**Szybki start:**
+1. Połącz projekt z Git w Vercel Dashboard
+2. Ustaw Production Branch na `main`
+3. Dodaj zmienne środowiskowe dla Production i Preview
+4. Push do `main` → automatyczne wdrożenie do Production
+5. Push do `dev` → automatyczne wdrożenie jako Preview
+
 ## Tech Stack
 
 - Next.js 15 (App Router)
