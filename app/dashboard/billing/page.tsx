@@ -190,13 +190,15 @@ function BillingContent() {
         {plans.map((plan) => (
           <div
             key={plan.key}
-            className={`bg-card border shadow-sm rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth flex flex-col h-full ${
+            className={`bg-card border shadow-sm rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth flex flex-col h-full relative ${
               selectedPlan === plan.key ? 'ring-2 ring-primary' : 'border-border'
             } ${plan.key === 'pro' ? 'border-2 border-primary' : ''}`}
           >
             {plan.key === 'pro' && (
-              <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded mb-3 inline-block">
-                MOST POPULAR
+              <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 animate-pulse-subtle">
+                <span className="bg-primary text-primary-foreground text-xs font-semibold px-2 sm:px-3 py-1 rounded-full shadow-lg">
+                  MOST POPULAR
+                </span>
               </div>
             )}
             <h2 className="text-xl sm:text-2xl font-bold mb-2">{plan.name}</h2>
