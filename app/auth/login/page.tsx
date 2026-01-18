@@ -18,6 +18,12 @@ function LoginForm() {
   const supabase = createClient()
 
   useEffect(() => {
+    // #region agent log
+    const accountLinked = searchParams.get('accountLinked')
+    const currentUrl = window.location.href
+    fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/login/page.tsx:20',message:'useEffect triggered on login page',data:{accountLinked,currentUrl,allParams:Object.fromEntries(searchParams.entries())},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+    // #endregion
+    
     // SECURITY: Remove email and password from URL if present (should never be there)
     const emailParam = searchParams.get('email')
     const passwordParam = searchParams.get('password')
@@ -47,6 +53,14 @@ function LoginForm() {
       // Show success message (you could add a success state for this)
       // For now, we'll just clear any errors
       setError(null)
+    }
+    
+    // Check for account linked - this shouldn't be on login page, means callback redirected incorrectly
+    if (accountLinked === 'true') {
+      // #region agent log
+      fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/login/page.tsx:51',message:'accountLinked=true detected on login page - callback issue',data:{redirectParam},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'F'})}).catch(()=>{});
+      // #endregion
+      console.warn('[DEBUG] accountLinked=true on login page - callback may have redirected incorrectly')
     }
   }, [searchParams])
 
@@ -98,6 +112,9 @@ function LoginForm() {
         provider: 'google',
         options: {
           redirectTo: redirectTo,
+          queryParams: {
+            prompt: 'select_account', // Always show account selection screen
+          },
         },
       })
 
@@ -128,7 +145,10 @@ function LoginForm() {
         // #endregion
         return
       } else {
+        // #region agent log
         console.error('No URL in OAuth response:', data)
+        fetch('http://127.0.0.1:7243/ingest/0b50c519-add8-4517-b494-6285eefb8740',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'app/auth/login/page.tsx:130',message:'No URL in OAuth response',data:{data:JSON.stringify(data),hasData:!!data,dataKeys:data?Object.keys(data):[]},timestamp:Date.now(),sessionId:'debug-session',runId:'run1',hypothesisId:'C'})}).catch(()=>{});
+        // #endregion
         setError('Failed to get OAuth URL')
         setLoading(false)
       }

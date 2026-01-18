@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createSession } from '@/lib/auth/session'
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -8,6 +9,10 @@ export async function GET(request: NextRequest) {
   const errorParam = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
   const redirect = requestUrl.searchParams.get('redirect') || '/dashboard'
+  
+  // #region agent log
+  console.log('[CALLBACK] Callback route hit', { code: !!code, errorParam, redirect, fullUrl: requestUrl.toString() })
+  // #endregion
 
   // Check for OAuth errors from provider
   if (errorParam) {
@@ -28,7 +33,9 @@ export async function GET(request: NextRequest) {
   }
 
   // Create response object for setting cookies - will be used for redirect
-  const response = NextResponse.redirect(new URL(redirect, requestUrl.origin))
+  // We'll update the redirect URL later if needed (e.g., for account linking)
+  let finalRedirectUrl = new URL(redirect, requestUrl.origin)
+  const response = NextResponse.redirect(finalRedirectUrl)
 
   // Debug: Log all cookies to see if PKCE code verifier is present
   const allCookies = request.cookies.getAll()
@@ -65,7 +72,14 @@ export async function GET(request: NextRequest) {
   )
 
   if (code) {
+    // #region agent log
+    console.log('[CALLBACK] Exchanging code for session', { codeLength: code.length })
+    // #endregion
     const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
+    // #region agent log
+    console.log('[CALLBACK] Session exchange result', { hasError: !!exchangeError, hasSession: !!sessionData?.session, hasUser: !!sessionData?.user })
+    // #endregion
 
     if (exchangeError) {
       console.error('Error exchanging code for session:', {
@@ -112,6 +126,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(loginUrl)
     }
 
+    // Create JWT session for middleware/auth system
+    // This is required because middleware uses verifySession() which checks for custom JWT session cookie
+    const emailVerified = user.email_confirmed_at ? true : false
+    await createSession(user.id, user.email!, emailVerified)
+    
+    // #region agent log
+    console.log('[CALLBACK] Created JWT session', { userId: user.id, email: user.email, emailVerified })
+    // #endregion
+
     // Create profile if it doesn't exist (for OAuth users)
     // Use service role to bypass RLS for profile creation
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
@@ -133,9 +156,23 @@ export async function GET(request: NextRequest) {
         .single()
 
       // Check if this is account linking (user signed up with email/password, now logging in with Google)
-      // Supabase Auth automatically links accounts with the same email, so if profile exists,
-      // it means the account was created with email/password and is now being linked with Google
-      const isAccountLinking = !!existingProfile && user.email === existingProfile.email
+      // Account linking happens when:
+      // 1. Profile exists (user was created with email/password)
+      // 2. User has 'email' provider in identities (meaning they have a password)
+      // 3. User is now logging in with Google (has 'google' provider)
+      const hasEmailProvider = user.identities?.some((identity: any) => identity.provider === 'email') || false
+      const hasGoogleProvider = user.identities?.some((identity: any) => identity.provider === 'google') || false
+      const isAccountLinking = !!existingProfile && hasEmailProvider && hasGoogleProvider
+      
+      // #region agent log
+      console.log('[CALLBACK] Account linking check', { 
+        hasExistingProfile: !!existingProfile, 
+        hasEmailProvider, 
+        hasGoogleProvider, 
+        isAccountLinking,
+        identities: user.identities?.map((i: any) => i.provider) || []
+      })
+      // #endregion
 
       if (!existingProfile) {
         const { error: profileError } = await serviceClient
@@ -158,9 +195,13 @@ export async function GET(request: NextRequest) {
         }
       } else if (isAccountLinking) {
         // Add account linked parameter to redirect URL
-        const redirectUrl = new URL(redirect, requestUrl.origin)
-        redirectUrl.searchParams.set('accountLinked', 'true')
-        return NextResponse.redirect(redirectUrl)
+        finalRedirectUrl.searchParams.set('accountLinked', 'true')
+        // #region agent log
+        console.log('[CALLBACK] Account linking detected, redirecting to:', finalRedirectUrl.toString())
+        // #endregion
+        // Update response URL (preserving cookies from createSession)
+        response.headers.set('Location', finalRedirectUrl.toString())
+        return response
       }
     } else {
       // Fallback: try with regular client (might fail due to RLS)
@@ -190,7 +231,14 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Return response with cookies already set
+  // Return response with cookies already set (including JWT session from createSession)
+  // Update response URL if it was changed (e.g., for account linking)
+  if (finalRedirectUrl.toString() !== new URL(redirect, requestUrl.origin).toString()) {
+    response.headers.set('Location', finalRedirectUrl.toString())
+  }
+  // #region agent log
+  console.log('[CALLBACK] Returning response, redirecting to:', response.headers.get('Location') || finalRedirectUrl.toString())
+  // #endregion
   return response
 }
 
