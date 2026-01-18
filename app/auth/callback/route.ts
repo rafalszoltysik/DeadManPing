@@ -30,19 +30,34 @@ export async function GET(request: NextRequest) {
   // Create response object for setting cookies - will be used for redirect
   const response = NextResponse.redirect(new URL(redirect, requestUrl.origin))
 
+  // Debug: Log all cookies to see if PKCE code verifier is present
+  const allCookies = request.cookies.getAll()
+  const codeVerifierCookies = allCookies.filter(c => c.name.includes('code-verifier'))
+  console.log('PKCE code verifier cookies found:', codeVerifierCookies.map(c => c.name))
+
   // Create Supabase client with proper cookie handling for route handlers
+  // @supabase/ssr v0.5.2 automatically handles PKCE code verifier when cookies are provided
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
+          // Return all cookies including PKCE code verifier
           return request.cookies.getAll()
         },
         setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+          // Set cookies in both request and response
           cookiesToSet.forEach(({ name, value, options }) => {
             request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
+            response.cookies.set(name, value, {
+              ...options,
+              // Ensure cookies are accessible for PKCE
+              httpOnly: false, // PKCE code verifier needs to be accessible
+              sameSite: 'lax',
+              secure: process.env.NODE_ENV === 'production',
+              path: '/',
+            })
           })
         },
       },
@@ -113,9 +128,14 @@ export async function GET(request: NextRequest) {
 
       const { data: existingProfile } = await serviceClient
         .from('profiles')
-        .select('id')
+        .select('id, email')
         .eq('id', user.id)
         .single()
+
+      // Check if this is account linking (user signed up with email/password, now logging in with Google)
+      // Supabase Auth automatically links accounts with the same email, so if profile exists,
+      // it means the account was created with email/password and is now being linked with Google
+      const isAccountLinking = !!existingProfile && user.email === existingProfile.email
 
       if (!existingProfile) {
         const { error: profileError } = await serviceClient
@@ -136,6 +156,11 @@ export async function GET(request: NextRequest) {
           })
           // Don't block the flow - user is authenticated, profile might be created later
         }
+      } else if (isAccountLinking) {
+        // Add account linked parameter to redirect URL
+        const redirectUrl = new URL(redirect, requestUrl.origin)
+        redirectUrl.searchParams.set('accountLinked', 'true')
+        return NextResponse.redirect(redirectUrl)
       }
     } else {
       // Fallback: try with regular client (might fail due to RLS)

@@ -230,7 +230,7 @@ function NewMonitorForm() {
         {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
       </h1>
 
-      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
+      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6" noValidate>
         {error && (
           <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6">
             {error}
@@ -245,7 +245,6 @@ function NewMonitorForm() {
             <input
               id="name"
               type="text"
-              required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Database Backup"

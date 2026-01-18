@@ -5,6 +5,7 @@ import { MonitorList } from '@/components/MonitorList'
 import { PlusIcon } from '@/components/Icons'
 import { checkMonitorLimitByWorkspace } from '@/lib/limits'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { AccountLinkedBanner } from '@/components/AccountLinkedBanner'
 
 export default async function DashboardPage() {
   const session = await verifySession()
@@ -91,6 +92,7 @@ export default async function DashboardPage() {
 
   return (
     <div>
+      <AccountLinkedBanner />
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold">Monitors</h1>

@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { WarningTooltip } from './Tooltip'
-import { WarningIcon } from './Icons'
+import { WarningTooltip, InfoTooltip } from './Tooltip'
+import { WarningIcon, InfoIcon } from './Icons'
+import { validatePassword } from '@/lib/password-validator'
 
 interface Profile {
   id: string
@@ -36,6 +37,11 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [hasPassword, setHasPassword] = useState<boolean | null>(null)
+  const [passwordLoading, setPasswordLoading] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passwordConfirm, setPasswordConfirm] = useState('')
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const router = useRouter()
   const supabase = createClient()
 
@@ -43,6 +49,85 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const tier = profile.subscription_tier || 'free'
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(tier)
   const hasCustomWebhook = tier === 'team'
+
+  // Check if user has password on mount
+  useEffect(() => {
+    const checkPassword = async () => {
+      try {
+        const response = await fetch('/api/auth/check-password')
+        if (response.ok) {
+          const data = await response.json()
+          setHasPassword(data.hasPassword)
+        }
+      } catch (err) {
+        console.error('Error checking password:', err)
+      }
+    }
+    checkPassword()
+  }, [])
+
+  const handlePasswordChange = (newPassword: string) => {
+    setPassword(newPassword)
+    const validation = validatePassword(newPassword)
+    if (!validation.valid) {
+      setPasswordErrors(validation.errors)
+    } else {
+      setPasswordErrors([])
+    }
+  }
+
+  const handleAddPassword = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setPasswordLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    if (!password) {
+      setError('Password is required')
+      setPasswordLoading(false)
+      return
+    }
+
+    if (password !== passwordConfirm) {
+      setError('Passwords do not match')
+      setPasswordLoading(false)
+      return
+    }
+
+    const validation = validatePassword(password)
+    if (!validation.valid) {
+      setError(validation.errors.join('. '))
+      setPasswordLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('/api/auth/add-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to add password')
+      }
+
+      setSuccess(true)
+      setPassword('')
+      setPasswordConfirm('')
+      setPasswordErrors([])
+      setHasPassword(true)
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => setSuccess(false), 3000)
+    } catch (err: any) {
+      setError(err.message || 'Failed to add password')
+    } finally {
+      setPasswordLoading(false)
+    }
+  }
 
   const handleCurrencySubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -322,7 +407,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
       {/* Integrations Section */}
       <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Alert Integrations</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
           <div>
             <label htmlFor="alertEmail" className="block text-sm font-medium mb-2">
@@ -462,6 +547,99 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             </button>
           </div>
         </form>
+      </div>
+
+      {/* Account Security Section */}
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Account Security</h2>
+        
+        {hasPassword === null ? (
+          <p className="text-sm text-muted-foreground">Checking...</p>
+        ) : hasPassword ? (
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              ✅ You can sign in with your email and password or Google.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              To change your password, please use the password reset feature on the login page.
+            </p>
+          </div>
+        ) : (
+          <form onSubmit={handleAddPassword} className="space-y-4" noValidate>
+            <div>
+              <label htmlFor="password" className="flex items-center gap-2 text-sm font-medium mb-2">
+                Add Password
+                <InfoTooltip 
+                  content={
+                    <div className="space-y-1">
+                      <p className="font-semibold mb-1">Password requirements:</p>
+                      <ul className="list-disc list-inside space-y-0.5 text-xs">
+                        <li>At least 8 characters</li>
+                        <li>One uppercase letter</li>
+                        <li>One lowercase letter</li>
+                        <li>One number</li>
+                        <li>One special character</li>
+                      </ul>
+                    </div>
+                  }
+                  position="right"
+                >
+                  <button type="button" className="text-muted-foreground hover:text-foreground transition-smooth">
+                    <InfoIcon className="w-4 h-4" />
+                  </button>
+                </InfoTooltip>
+              </label>
+              <p className="text-sm text-muted-foreground mb-3">
+                You signed up with Google. Add a password to also sign in with your email and password.
+              </p>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => handlePasswordChange(e.target.value)}
+                placeholder="Enter password"
+                className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+              />
+              {passwordErrors.length > 0 && (
+                <ul className="mt-2 text-sm text-error space-y-1">
+                  {passwordErrors.map((err, idx) => (
+                    <li key={idx}>• {err}</li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            <div>
+              <label htmlFor="passwordConfirm" className="block text-sm font-medium mb-2">
+                Confirm Password
+              </label>
+              <input
+                id="passwordConfirm"
+                type="password"
+                value={passwordConfirm}
+                onChange={(e) => setPasswordConfirm(e.target.value)}
+                placeholder="Confirm password"
+                className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+              />
+            </div>
+            {error && (
+              <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg text-sm">
+                ✅ Password added successfully! You can now sign in with your email and password.
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={passwordLoading || passwordErrors.length > 0 || !password || password !== passwordConfirm}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-smooth hover-lift"
+            >
+              {passwordLoading ? 'Adding Password...' : 'Add Password'}
+            </button>
+          </form>
+        )}
       </div>
     </div>
   )

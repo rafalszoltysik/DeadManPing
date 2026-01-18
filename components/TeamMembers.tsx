@@ -6,12 +6,14 @@ import { useRouter } from 'next/navigation'
 interface Member {
   id: string
   role: 'owner' | 'admin' | 'member'
+  status?: 'pending' | 'accepted'
   invited_at: string
   joined_at: string | null
+  invite_email?: string | null
   profiles: {
     id: string
     email: string
-  }
+  } | null
 }
 
 interface TeamMembersProps {
@@ -154,7 +156,7 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamM
 
       {/* Invite form */}
       {members.length < maxMembers && (
-        <form onSubmit={handleInvite} className="bg-card border border-border rounded-lg p-6">
+        <form onSubmit={handleInvite} className="bg-card border border-border rounded-lg p-6" noValidate>
           <h2 className="text-lg font-semibold mb-4">Invite Team Member</h2>
           <div className="flex gap-3">
             <input
@@ -174,7 +176,7 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamM
             </button>
           </div>
           <p className="text-xs text-muted-foreground mt-2">
-            The user must have an account. They will be added immediately if they exist.
+            If the user has an account, they'll be added immediately. Otherwise, an invitation email will be sent.
           </p>
         </form>
       )}
@@ -190,38 +192,54 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamM
               No members yet. Invite someone to get started!
             </div>
           ) : (
-            members.map((member) => (
-              <div
-                key={member.id}
-                className="p-6 flex items-center justify-between hover:bg-accent/50 transition-smooth"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
-                      {member.profiles.email.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="font-medium">{member.profiles.email}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {getRoleLabel(member.role)}
-                        {member.joined_at && (
-                          <> • Joined {new Date(member.joined_at).toLocaleDateString()}</>
-                        )}
-                      </p>
+            members.map((member) => {
+              const email = member.profiles?.email || member.invite_email || 'Unknown'
+              const isPending = member.status === 'pending'
+              const displayEmail = member.invite_email || member.profiles?.email || 'Unknown'
+
+              return (
+                <div
+                  key={member.id}
+                  className="p-6 flex items-center justify-between hover:bg-accent/50 transition-smooth"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-semibold">
+                        {displayEmail.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{displayEmail}</p>
+                          {isPending && (
+                            <span className="px-2 py-0.5 text-xs bg-warning/20 text-warning rounded-full">
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          {getRoleLabel(member.role)}
+                          {member.joined_at && (
+                            <> • Joined {new Date(member.joined_at).toLocaleDateString()}</>
+                          )}
+                          {isPending && (
+                            <> • Invited {new Date(member.invited_at).toLocaleDateString()}</>
+                          )}
+                        </p>
+                      </div>
                     </div>
                   </div>
+                  {member.role !== 'owner' && (
+                    <button
+                      onClick={() => handleRemove(member.id)}
+                      disabled={removing === member.id}
+                      className="px-4 py-2 text-sm text-error hover:bg-error/10 rounded-lg transition-smooth disabled:opacity-50"
+                    >
+                      {removing === member.id ? 'Removing...' : 'Remove'}
+                    </button>
+                  )}
                 </div>
-                {member.role !== 'owner' && (
-                  <button
-                    onClick={() => handleRemove(member.id)}
-                    disabled={removing === member.id}
-                    className="px-4 py-2 text-sm text-error hover:bg-error/10 rounded-lg transition-smooth disabled:opacity-50"
-                  >
-                    {removing === member.id ? 'Removing...' : 'Remove'}
-                  </button>
-                )}
-              </div>
-            ))
+              )
+            })
           )}
         </div>
       </div>

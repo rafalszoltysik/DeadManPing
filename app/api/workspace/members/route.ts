@@ -34,20 +34,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
-    // Get all members of this workspace
+    // Get all members and pending invitations of this workspace
     const { data: members, error } = await supabaseAdmin
       .from('workspace_members')
       .select(`
         id,
         role,
+        status,
         invited_at,
         joined_at,
+        invite_email,
         profiles:user_id (
           id,
           email
         )
       `)
       .eq('workspace_id', workspace.id)
+      .order('invited_at', { ascending: false })
 
     if (error) {
       console.error('Error fetching members:', error)
@@ -82,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Get user's workspace
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
-      .select('id, subscription_tier')
+      .select('id, name, subscription_tier')
       .eq('owner_id', session.userId)
       .limit(1)
       .single()
@@ -112,57 +115,141 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    const normalizedEmail = email.toLowerCase().trim()
+
+    // Check for existing invitation by invite_email
+    const { data: existingInvitationByEmail } = await supabaseAdmin
+      .from('workspace_members')
+      .select('id, status, user_id, invite_email')
+      .eq('workspace_id', workspace.id)
+      .eq('invite_email', normalizedEmail)
+      .maybeSingle()
+
+    if (existingInvitationByEmail) {
+      if (existingInvitationByEmail.status === 'pending') {
+        return NextResponse.json({ error: 'An invitation has already been sent to this email' }, { status: 400 })
+      }
+      return NextResponse.json({ error: 'User is already a member of this workspace' }, { status: 400 })
+    }
+
     // Find user by email
     const { data: userProfile } = await supabaseAdmin
       .from('profiles')
       .select('id')
-      .eq('email', email.toLowerCase().trim())
-      .single()
-
-    if (!userProfile) {
-      return NextResponse.json({ error: 'User not found. They need to sign up first.' }, { status: 404 })
-    }
-
-    // Check if user is already a member
-    const { data: existingMember } = await supabaseAdmin
-      .from('workspace_members')
-      .select('id')
-      .eq('workspace_id', workspace.id)
-      .eq('user_id', userProfile.id)
+      .eq('email', normalizedEmail)
       .maybeSingle()
 
-    if (existingMember) {
-      return NextResponse.json({ error: 'User is already a member of this workspace' }, { status: 400 })
-    }
+    if (userProfile) {
+      // Check if user is already a member
+      const { data: existingMember } = await supabaseAdmin
+        .from('workspace_members')
+        .select('id')
+        .eq('workspace_id', workspace.id)
+        .eq('user_id', userProfile.id)
+        .maybeSingle()
 
-    // Add member
-    const { data: newMember, error: insertError } = await supabaseAdmin
-      .from('workspace_members')
-      .insert({
-        workspace_id: workspace.id,
-        user_id: userProfile.id,
-        role: 'member',
-        invited_by: session.userId,
-        joined_at: new Date().toISOString(),
-      })
-      .select(`
-        id,
-        role,
-        invited_at,
-        joined_at,
-        profiles:user_id (
+      if (existingMember) {
+        return NextResponse.json({ error: 'User is already a member of this workspace' }, { status: 400 })
+      }
+
+      // User exists - add them immediately
+      const { data: newMember, error: insertError } = await supabaseAdmin
+        .from('workspace_members')
+        .insert({
+          workspace_id: workspace.id,
+          user_id: userProfile.id,
+          role: 'member',
+          status: 'accepted',
+          invited_by: session.userId,
+          joined_at: new Date().toISOString(),
+        })
+        .select(`
           id,
-          email
+          role,
+          status,
+          invited_at,
+          joined_at,
+          profiles:user_id (
+            id,
+            email
+          )
+        `)
+        .single()
+
+      if (insertError) {
+        console.error('Error adding member:', insertError)
+        return NextResponse.json({ error: 'Failed to add member' }, { status: 500 })
+      }
+
+      return NextResponse.json({ member: newMember }, { status: 201 })
+    } else {
+      // User doesn't exist - send invitation via Supabase Auth
+      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://deadmanping.com'
+      const redirectTo = `${siteUrl}/auth/invite/accept?workspace=${workspace.id}`
+
+      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        normalizedEmail,
+        {
+          redirectTo,
+          data: {
+            workspace_id: workspace.id,
+            workspace_name: workspace.name,
+          },
+        }
+      )
+
+      if (inviteError) {
+        console.error('Error sending invitation:', inviteError)
+        return NextResponse.json(
+          { error: inviteError.message || 'Failed to send invitation' },
+          { status: 500 }
         )
-      `)
-      .single()
+      }
 
-    if (insertError) {
-      console.error('Error adding member:', insertError)
-      return NextResponse.json({ error: 'Failed to add member' }, { status: 500 })
+      // Create pending invitation record
+      const { data: newInvitation, error: insertError } = await supabaseAdmin
+        .from('workspace_members')
+        .insert({
+          workspace_id: workspace.id,
+          invite_email: normalizedEmail,
+          role: 'member',
+          status: 'pending',
+          invited_by: session.userId,
+        })
+        .select(`
+          id,
+          role,
+          status,
+          invite_email,
+          invited_at
+        `)
+        .single()
+
+      if (insertError) {
+        console.error('Error creating invitation record:', insertError)
+        // Don't fail if we can't create the record - the invitation email was sent
+        return NextResponse.json(
+          { 
+            member: {
+              id: inviteData.user?.id || 'pending',
+              invite_email: normalizedEmail,
+              status: 'pending',
+              role: 'member',
+            },
+            message: 'Invitation sent successfully'
+          },
+          { status: 201 }
+        )
+      }
+
+      return NextResponse.json(
+        { 
+          member: newInvitation,
+          message: 'Invitation sent successfully'
+        },
+        { status: 201 }
+      )
     }
-
-    return NextResponse.json({ member: newMember }, { status: 201 })
   } catch (error: any) {
     console.error('Error in POST /api/workspace/members:', error)
     return NextResponse.json(
