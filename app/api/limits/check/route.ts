@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMonitorLimit, checkIntervalLimit } from '@/lib/limits'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

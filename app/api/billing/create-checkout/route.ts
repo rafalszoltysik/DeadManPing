@@ -5,6 +5,8 @@ import { createCheckoutSession } from '@/lib/stripe'
 import { getPriceIdForPlan, type PlanKey } from '@/lib/stripe-prices'
 import { type Currency } from '@/lib/currency-detection'
 
+export const dynamic = 'force-dynamic'
+
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,

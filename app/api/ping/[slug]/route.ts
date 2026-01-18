@@ -5,6 +5,8 @@ import { parsePayload, extractDeclaredFields } from '@/lib/payload-parser'
 import { errorResponse, successResponse } from '@/lib/api/response'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

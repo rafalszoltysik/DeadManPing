@@ -14,6 +14,8 @@ import { stripe, PRICING_PLANS } from '@/lib/stripe'
  * 
  * ⚠️ SECURITY: This endpoint is disabled in production
  */
+export const dynamic = 'force-dynamic'
+
 export async function GET() {
   // Block in production
   if (process.env.NODE_ENV === 'production') {
