@@ -560,7 +560,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         ) : hasPassword ? (
           <div className="space-y-2">
             <p className="text-sm text-muted-foreground">
-              ✅ You can sign in with your email and password or Google.
+              You can sign in with your email and password or Google.
             </p>
             <p className="text-xs text-muted-foreground">
               To change your password, please use the password reset feature on the login page.
@@ -658,7 +658,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             )}
             {success && (
               <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg text-sm">
-                ✅ Password added successfully! You can now sign in with your email and password.
+                Password added successfully. You can now sign in with your email and password.
               </div>
             )}
             <button

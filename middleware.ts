@@ -40,6 +40,20 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(callbackUrl)
   }
 
+  // Handle expired OTP token errors from Supabase (redirects to homepage)
+  // Check both error_code and error_description
+  const errorCode = request.nextUrl.searchParams.get('error_code')
+  const errorDescription = request.nextUrl.searchParams.get('error_description')
+  if (request.nextUrl.pathname === '/' && 
+      (errorCode === 'otp_expired' || 
+       errorDescription?.toLowerCase().includes('expired') ||
+       errorDescription?.toLowerCase().includes('invalid'))) {
+    const loginUrl = new URL('/auth/login', request.url)
+    loginUrl.searchParams.set('error', 'verification_link_expired')
+    loginUrl.searchParams.set('action', 'resend_verification')
+    return NextResponse.redirect(loginUrl)
+  }
+
   // Protect dashboard routes
   if (request.nextUrl.pathname.startsWith('/dashboard') && !user) {
     const url = request.nextUrl.clone()
@@ -49,11 +63,14 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect authenticated users away from auth pages
-  // BUT allow API routes, OAuth callbacks, and logout route
+  // BUT allow API routes, OAuth callbacks, logout route, password reset, and forgot password
+  // Password reset and forgot password need to allow authenticated users (they may have a recovery session)
   if (request.nextUrl.pathname.startsWith('/auth') && 
       !request.nextUrl.pathname.startsWith('/api') &&
       request.nextUrl.pathname !== '/auth/logout' &&
       request.nextUrl.pathname !== '/auth/callback' &&
+      request.nextUrl.pathname !== '/auth/reset-password' &&
+      request.nextUrl.pathname !== '/auth/forgot-password' &&
       user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }

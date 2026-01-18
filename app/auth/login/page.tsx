@@ -13,6 +13,10 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [showResendForm, setShowResendForm] = useState(false)
+  const [resendEmail, setResendEmail] = useState('')
   const [redirect, setRedirect] = useState('/dashboard')
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -40,7 +44,26 @@ function LoginForm() {
     // Check for OAuth errors
     const errorParam = searchParams.get('error')
     if (errorParam) {
-      setError(errorParam)
+      if (errorParam === 'verification_link_expired') {
+        setError('The email verification link has expired. Please request a new verification email below.')
+        setShowResendForm(true)
+      } else {
+        // Decode error message if it's URL encoded
+        try {
+          setError(decodeURIComponent(errorParam))
+        } catch {
+          setError(errorParam)
+        }
+      }
+    }
+    
+    // Check for resend verification action
+    const action = searchParams.get('action')
+    if (action === 'resend_verification') {
+      setShowResendForm(true)
+      if (errorParam !== 'verification_link_expired') {
+        setError('The verification link has expired. Please request a new one.')
+      }
     }
     
     // Check for password reset success message
@@ -73,6 +96,36 @@ function LoginForm() {
       router.push(redirect)
       router.refresh()
     }
+  }
+
+  const handleResendVerification = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setResendLoading(true)
+    setError(null)
+    setSuccess(null)
+
+    if (!resendEmail) {
+      setError('Please enter your email address')
+      setResendLoading(false)
+      return
+    }
+
+    const response = await fetch('/api/auth/resend-verification', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: resendEmail }),
+    })
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      setError(data.error || 'Failed to resend verification email')
+    } else {
+      setSuccess(data.message || 'If an account with this email exists and needs verification, a new verification link has been sent.')
+      setResendEmail('')
+    }
+
+    setResendLoading(false)
   }
 
   const handleGoogleLogin = async (e?: React.MouseEvent) => {
@@ -145,12 +198,17 @@ function LoginForm() {
           >
             {searchParams.get('passwordReset') === 'true' && (
               <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-                ✅ Password reset successful! You can now sign in with your new password.
+                Password reset successful. You can now sign in with your new password.
               </div>
             )}
             {error && (
               <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
                 {error}
+              </div>
+            )}
+            {success && (
+              <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
+                {success}
               </div>
             )}
             <div className="space-y-4">
@@ -216,6 +274,43 @@ function LoginForm() {
               </button>
             </div>
           </form>
+
+          {showResendForm && (
+            <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium">Resend verification email</p>
+              <form onSubmit={handleResendVerification} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={resendEmail}
+                  onChange={(e) => setResendEmail(e.target.value)}
+                  className="block w-full px-3 py-2 bg-background border border-input rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                  required
+                />
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={resendLoading}
+                    className="flex-1 py-2 px-4 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth"
+                  >
+                    {resendLoading ? 'Sending...' : 'Send verification email'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowResendForm(false)
+                      setResendEmail('')
+                      setError(null)
+                      setSuccess(null)
+                    }}
+                    className="py-2 px-4 bg-background border border-border rounded-lg text-sm font-medium hover:bg-accent transition-smooth"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           <div className="mt-6 space-y-4">
             <div className="relative">

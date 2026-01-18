@@ -1,16 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 import { checkRateLimit } from '@/lib/rate-limit'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password, redirect = '/dashboard' } = await request.json()
+    
+    // Create response object for setting cookies
+    const response = NextResponse.json({ success: true, redirect })
+    
+    // Create Supabase client with proper cookie handling for route handlers
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, {
+                ...options,
+                httpOnly: options?.httpOnly ?? true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+              })
+            })
+          },
+        },
+      }
+    )
 
     if (!email || !password) {
       return NextResponse.json(
@@ -56,7 +80,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get or create profile
-    const serviceClient = createClient(
+    const serviceClient = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
@@ -109,9 +133,20 @@ export async function POST(request: NextRequest) {
     }
 
     // Supabase Auth automatically creates and manages the session via cookies
-    // No need for custom JWT session - middleware uses Supabase auth directly
-
-    return NextResponse.json({ success: true, redirect })
+    // The response object already has cookies set from the signInWithPassword() call above
+    // Create a new response with JSON body and copy all cookies with their options
+    const finalResponse = NextResponse.json({ success: true, redirect })
+    
+    // Copy all cookies from the original response (they were set by Supabase during signIn)
+    response.cookies.getAll().forEach((cookie) => {
+      finalResponse.cookies.set(cookie.name, cookie.value, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+      })
+    })
+    return finalResponse
   } catch (error: any) {
     console.error('Login error:', error)
     return NextResponse.json(

@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
           {success ? (
             <div className="space-y-4">
               <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-                <p className="font-medium mb-1">✅ Email sent!</p>
+                <p className="font-medium mb-1">Email sent successfully</p>
                 <p className="text-sm">
                   Check your email for a password reset link. The link will expire in 1 hour.
                 </p>

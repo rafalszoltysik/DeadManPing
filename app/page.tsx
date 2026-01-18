@@ -7,6 +7,7 @@ import { DashboardPreview } from '@/components/DashboardPreview'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { PricingSection } from '@/components/PricingSection'
 import { CTAButton } from '@/components/CTAButton'
+import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
@@ -47,6 +48,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen text-foreground relative">
+      <ErrorHandlerWrapper />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

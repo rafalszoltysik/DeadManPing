@@ -18,33 +18,95 @@ function ResetPasswordForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
+  const [hasValidToken, setHasValidToken] = useState<boolean | null>(null) // null = not checked yet
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
 
   useEffect(() => {
-    // Supabase redirects with token in hash (#access_token=...&type=recovery)
-    // We need to check both query params and hash
-    const checkToken = () => {
+    // Check for error params in URL (Supabase redirects with errors)
+    const errorParam = searchParams.get('error')
+    const errorDescription = searchParams.get('error_description')
+    
+    if (errorParam) {
+      // Decode error description if present
+      const decodedError = errorDescription 
+        ? decodeURIComponent(errorDescription.replace(/\+/g, ' '))
+        : 'The password reset link is invalid or has expired.'
+      setError(decodedError)
+      setHasValidToken(false)
+      return
+    }
+
+    // Supabase can use different formats for password reset:
+    // 1. Hash fragment: #access_token=...&type=recovery (most common)
+    // 2. Query param code: ?code=... (needs to be exchanged for session)
+    // 3. Query param token: ?token=...&type=recovery (older format)
+    const checkToken = async () => {
       // Check query params first
       const token = searchParams.get('token')
       const type = searchParams.get('type')
+      const code = searchParams.get('code')
       
-      // Check hash fragment (Supabase uses this for password reset)
+      // Debug: log what we're checking
+      console.log('Reset password check:', {
+        hasToken: !!token,
+        type,
+        hasCode: !!code,
+        fullUrl: window.location.href,
+        hash: window.location.hash.substring(0, 50) + '...' // Only first 50 chars for security
+      })
+      
+      // Check hash fragment (Supabase typically uses this for password reset)
+      // Hash is only available on client side, so we check it here
       const hash = window.location.hash
-      const hashParams = new URLSearchParams(hash.substring(1))
-      const hashToken = hashParams.get('access_token')
-      const hashType = hashParams.get('type')
+      let hashParams: URLSearchParams | null = null
+      let hashToken: string | null = null
+      let hashType: string | null = null
       
-      // If we have token in hash, Supabase will handle it automatically
-      // We just need to verify the user can update password
-      if (!token && !hashToken) {
+      if (hash && hash.length > 1) {
+        try {
+          hashParams = new URLSearchParams(hash.substring(1))
+          hashToken = hashParams.get('access_token')
+          hashType = hashParams.get('type')
+          console.log('Hash parsed:', { hasHashToken: !!hashToken, hashType })
+        } catch (e) {
+          console.error('Error parsing hash:', e)
+        }
+      }
+      
+      // If we have a code, we have a valid reset link
+      // We'll exchange it for a session when user submits the form
+      // This prevents issues with URL cleanup and re-renders
+      if (code) {
+        console.log('Reset code found in URL, allowing password reset form')
+        setHasValidToken(true)
+        // Don't remove code from URL yet - we'll use it in handleSubmit
+        return
+      }
+      
+      // Check if we have a valid token in other formats
+      // Hash fragment is the most common format for Supabase password reset
+      // Even if type is not explicitly 'recovery', if we have access_token in hash, it's likely a reset token
+      const hasHashToken = !!(hashToken)
+      const hasQueryToken = !!(token && type === 'recovery')
+      const hasAnyHash = !!(hash && hash.length > 1 && hash.includes('access_token')) // Hash with access_token
+      
+      // If we have hash with access_token, we can proceed (will be processed on submit)
+      // If we have query token with recovery type, we can proceed
+      if (hasHashToken || hasQueryToken || hasAnyHash) {
+        console.log('Valid token found, allowing password reset')
+        setHasValidToken(true)
+      } else {
+        // No valid token found
+        console.log('No valid token found')
+        setHasValidToken(false)
         setError('Invalid or missing reset token. Please request a new password reset link.')
       }
     }
     
     checkToken()
-  }, [searchParams])
+  }, [searchParams, supabase])
 
   const handlePasswordChange = (newPassword: string) => {
     setPassword(newPassword)
@@ -82,29 +144,68 @@ function ResetPasswordForm() {
     }
 
     try {
-      // First, if we have a hash token, we need to exchange it for a session
-      // Supabase redirects with token in hash fragment (#access_token=...&type=recovery)
-      const hash = window.location.hash
-      if (hash) {
-        const hashParams = new URLSearchParams(hash.substring(1))
-        const accessToken = hashParams.get('access_token')
-        const refreshToken = hashParams.get('refresh_token')
-        
-        if (accessToken && refreshToken) {
-          // Exchange the tokens for a session
-          const { error: sessionError } = await supabase.auth.setSession({
-            access_token: accessToken,
-            refresh_token: refreshToken,
-          })
+      // Check if we already have a session
+      const { data: { session: existingSession } } = await supabase.auth.getSession()
+      
+      if (!existingSession) {
+        // Try to get session from code parameter (password reset code)
+        const code = searchParams.get('code')
+        if (code) {
+          console.log('Exchanging code for session in handleSubmit...')
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
           
-          if (sessionError) {
-            setError('Invalid or expired reset token. Please request a new password reset link.')
+          if (exchangeError) {
+            setError(exchangeError.message || 'Invalid or expired reset code. Please request a new password reset link.')
             setLoading(false)
             return
           }
           
-          // Clear hash from URL after processing
-          window.history.replaceState(null, '', window.location.pathname + window.location.search)
+          if (!data?.session) {
+            setError('Failed to create session from reset code. Please request a new password reset link.')
+            setLoading(false)
+            return
+          }
+          
+          // Clean up URL after successful exchange
+          const newUrl = new URL(window.location.href)
+          newUrl.searchParams.delete('code')
+          window.history.replaceState({}, '', newUrl.toString())
+        } else {
+          // Try to get it from hash fragment
+          // Supabase redirects with token in hash fragment (#access_token=...&type=recovery)
+          const hash = window.location.hash
+          if (hash) {
+            const hashParams = new URLSearchParams(hash.substring(1))
+            const accessToken = hashParams.get('access_token')
+            const refreshToken = hashParams.get('refresh_token')
+            
+            if (accessToken && refreshToken) {
+              // Exchange the tokens for a session
+              const { error: sessionError } = await supabase.auth.setSession({
+                access_token: accessToken,
+                refresh_token: refreshToken,
+              })
+              
+              if (sessionError) {
+                setError('Invalid or expired reset token. Please request a new password reset link.')
+                setLoading(false)
+                return
+              }
+              
+              // Clear hash from URL after processing
+              window.history.replaceState(null, '', window.location.pathname + window.location.search)
+            } else {
+              // No session and no valid tokens - user needs to request a new reset link
+              setError('No active session found. Please request a new password reset link.')
+              setLoading(false)
+              return
+            }
+          } else {
+            // No session and no hash - user needs to request a new reset link
+            setError('No active session found. Please request a new password reset link.')
+            setLoading(false)
+            return
+          }
         }
       }
       
@@ -130,22 +231,29 @@ function ResetPasswordForm() {
     }
   }
 
-  // Check for token in URL (query params or hash)
-  // Supabase uses hash fragment for password reset: #access_token=...&type=recovery
-  const token = searchParams.get('token')
-  const type = searchParams.get('type')
-  const hash = typeof window !== 'undefined' ? window.location.hash : ''
-  const hashParams = hash ? new URLSearchParams(hash.substring(1)) : null
-  const hashToken = hashParams?.get('access_token')
-  const hashType = hashParams?.get('type')
-  
-  // Supabase uses hash fragment for password reset tokens
-  const hasToken = !!(token || (hash && hashToken))
-  const isRecoveryType = type === 'recovery' || hashType === 'recovery' || (hash && hash.includes('type=recovery'))
+  // Show loading state while checking for token (prevents hydration mismatch)
+  if (hasValidToken === null) {
+    return (
+      <div className="min-h-screen text-foreground relative">
+        <PageNav />
+        <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
+          <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center">
+                Verifying Reset Link
+              </h2>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Please wait while we verify your password reset link...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
-  // Show error only if we definitely don't have a token
-  // If hash exists, allow form (token will be processed on submit)
-  if (!hasToken && !hash) {
+  // Show error if we definitely don't have a token
+  if (hasValidToken === false) {
     return (
       <div className="min-h-screen text-foreground relative">
         <PageNav />
@@ -199,7 +307,7 @@ function ResetPasswordForm() {
               </p>
             </div>
             <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-              <p className="font-medium">✅ Password updated successfully!</p>
+              <p className="font-medium">Password updated successfully</p>
             </div>
           </div>
         </div>

@@ -26,12 +26,12 @@ export function AccountLinkedBanner() {
   if (!show) return null
 
   return (
-    <div className="bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 px-4 py-3 rounded-lg mb-6">
+    <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg mb-6">
       <p className="font-medium mb-1">
-        ✅ Accounts linked successfully!
+        Accounts linked successfully
       </p>
       <p className="text-sm">
-        Your Google account has been linked to your existing account. You can now sign in with either your email/password or Google.
+        Your Google account has been linked to your existing account. You can now sign in with either your email and password or Google.
       </p>
     </div>
   )

@@ -17,6 +17,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [requiresEmailConfirmation, setRequiresEmailConfirmation] = useState(false)
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const [mounted, setMounted] = useState(false)
@@ -87,10 +89,23 @@ export default function SignupPage() {
       setLoading(false)
     } else {
       setSuccess(true)
-      setTimeout(() => {
-        router.push(redirect)
-        router.refresh()
-      }, 2000)
+      setRequiresEmailConfirmation(data.requiresEmailConfirmation || false)
+      setUserEmail(data.email || null)
+      
+      // Only redirect if we have a session (email confirmed or auto-confirm enabled)
+      if (!data.requiresEmailConfirmation && data.redirect) {
+        // Refresh the Supabase session to ensure cookies are loaded
+        try {
+          await supabase.auth.getSession()
+        } catch (err) {
+          console.error('Error refreshing session:', err)
+        }
+        
+        // Use window.location for full page reload to ensure cookies are available
+        setTimeout(() => {
+          window.location.href = data.redirect
+        }, 1500)
+      }
     }
   }
 
@@ -144,6 +159,54 @@ export default function SignupPage() {
   }
 
   if (success) {
+    if (requiresEmailConfirmation) {
+      return (
+        <div className="min-h-screen text-foreground relative">
+          <PageNav />
+          <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
+            <div className="max-w-md w-full space-y-6 p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
+              <div className="text-center">
+                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
+                  <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-bold">Check your email</h2>
+                <p className="mt-2 text-muted-foreground">
+                  We've sent a confirmation link to{' '}
+                  <span className="font-semibold text-foreground">{userEmail || 'your email address'}</span>
+                </p>
+              </div>
+              <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
+                <p className="text-sm font-medium text-foreground">Next steps:</p>
+                <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                  <li>Check your inbox (and spam folder)</li>
+                  <li>Click the confirmation link in the email</li>
+                  <li>You'll be automatically signed in</li>
+                </ol>
+              </div>
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">
+                  Didn't receive the email?{' '}
+                  <button
+                    onClick={() => {
+                      setSuccess(false)
+                      setRequiresEmailConfirmation(false)
+                      setUserEmail(null)
+                      setLoading(false)
+                    }}
+                    className="text-primary hover:text-primary/80 font-medium underline"
+                  >
+                    Try again
+                  </button>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    
     return (
       <div className="min-h-screen text-foreground relative">
         <PageNav />

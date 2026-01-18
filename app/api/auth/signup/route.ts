@@ -1,16 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { validatePassword } from '@/lib/password-validator'
 import { checkRateLimit } from '@/lib/rate-limit'
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+import { getAppUrl } from '@/lib/get-app-url'
 
 export async function POST(request: NextRequest) {
   try {
     const { email, password, redirect = '/dashboard' } = await request.json()
+    
+    // Create response object for setting cookies
+    const response = NextResponse.json({ success: true, redirect })
+    
+    // Create Supabase client with proper cookie handling for route handlers
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, {
+                ...options,
+                httpOnly: options?.httpOnly ?? true,
+                sameSite: 'lax',
+                secure: process.env.NODE_ENV === 'production',
+                path: '/',
+              })
+            })
+          },
+        },
+      }
+    )
 
     if (!email || !password) {
       return NextResponse.json(
@@ -52,7 +77,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if email already exists in profiles (from OAuth or previous signup)
-    const serviceClient = createClient(
+    const serviceClient = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
       {
@@ -82,9 +107,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Create user with Supabase auth
+    // Note: signUp() may not return a session if email confirmation is required
+    // But it will still set cookies if auto-confirm is enabled
+    const baseUrl = getAppUrl()
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: email.toLowerCase().trim(),
       password,
+      options: {
+        emailRedirectTo: `${baseUrl}/auth/callback?redirect=${encodeURIComponent(redirect)}`,
+      },
     })
 
     if (authError || !authData.user) {
@@ -92,6 +123,21 @@ export async function POST(request: NextRequest) {
         { error: authError?.message || 'Failed to create account' },
         { status: 400 }
       )
+    }
+
+    // Check if we have a session (may be null if email confirmation is required)
+    const { data: { session } } = await supabase.auth.getSession()
+    const hasSession = !!(session || authData.session)
+    
+    // Debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Signup result:', {
+        hasUser: !!authData.user,
+        hasSession: !!authData.session,
+        hasSessionFromGet: !!session,
+        userId: authData.user?.id,
+        requiresEmailConfirmation: !hasSession,
+      })
     }
 
     const userId = authData.user.id
@@ -142,9 +188,34 @@ export async function POST(request: NextRequest) {
     }
 
     // Supabase Auth automatically creates and manages the session via cookies
-    // No need for custom JWT session - middleware uses Supabase auth directly
-
-    return NextResponse.json({ success: true, redirect })
+    // The response object already has cookies set from the signUp() call above
+    // We need to return the response with the updated JSON body
+    // Create a new response with JSON body and copy all cookies
+    const finalResponse = NextResponse.json({ 
+      success: true, 
+      redirect: hasSession ? redirect : null, // Only redirect if we have a session
+      requiresEmailConfirmation: !hasSession,
+      email: authData.user?.email,
+    })
+    
+    // Copy all cookies from the original response
+    // This is critical - cookies contain the session and must be preserved
+    const allCookies = response.cookies.getAll()
+    allCookies.forEach((cookie) => {
+      finalResponse.cookies.set(cookie.name, cookie.value, {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+        path: '/',
+      })
+    })
+    
+    // Debug: log cookies to verify they're being set
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Signup cookies being set:', allCookies.map(c => c.name))
+    }
+    
+    return finalResponse
   } catch (error: any) {
     console.error('Signup error:', error)
     return NextResponse.json(
