@@ -55,6 +55,16 @@ export default async function SettingsPage() {
   // Check if user has Stripe customer ID (portal URL will be created on-demand via API)
   const hasStripeCustomer = !!profile.stripe_customer_id
 
+  // Get workspace currency preference
+  const { data: workspace } = await supabaseAdmin
+    .from('workspaces')
+    .select('currency')
+    .eq('owner_id', session.userId)
+    .limit(1)
+    .maybeSingle() as { data: { currency?: string } | null }
+  
+  const currency = (workspace?.currency || 'usd') as 'usd' | 'eur' | 'pln'
+
   // Calculate trial days remaining
   let trialDaysRemaining: number | null = null
   let isTrialExpired = false
@@ -108,6 +118,7 @@ export default async function SettingsPage() {
         hasStripeCustomer={hasStripeCustomer}
         trialDaysRemaining={trialDaysRemaining}
         isTrialExpired={isTrialExpired}
+        currency={currency}
       />
     </div>
   )

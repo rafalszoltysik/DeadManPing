@@ -2,7 +2,18 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { PRICING_PLANS } from '@/lib/stripe'
+import { formatPrice } from '@/lib/stripe-prices'
+
+interface Plan {
+  key: string
+  name: string
+  amount: number
+  currency: string
+  priceId: string | null
+  monitors: number
+  minInterval: number
+  maxMembers: number
+}
 
 function BillingContent() {
   const searchParams = useSearchParams()
@@ -10,6 +21,9 @@ function BillingContent() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [plans, setPlans] = useState<Plan[]>([])
+  const [currency, setCurrency] = useState<string>('usd')
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const plan = searchParams.get('plan')
@@ -19,6 +33,25 @@ function BillingContent() {
       setSelectedPlan(null)
     }
   }, [searchParams])
+
+  useEffect(() => {
+    // Pobierz ceny z API
+    fetch('/api/billing/prices')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.plans) {
+          setPlans(data.plans)
+          setCurrency(data.currency || 'usd')
+        }
+      })
+      .catch((err) => {
+        console.error('Error fetching prices:', err)
+        setError('Failed to load pricing. Please refresh the page.')
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
   const handleCheckout = async (plan: 'starter' | 'pro' | 'team') => {
     setLoadingPlan(plan)
@@ -65,6 +98,19 @@ function BillingContent() {
     }
   }
 
+  if (loading) {
+    return (
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Choose Your Plan</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 h-64 animate-pulse"></div>
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 h-64 animate-pulse"></div>
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 h-64 animate-pulse"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-5xl mx-auto">
       <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Choose Your Plan</h1>
@@ -81,21 +127,21 @@ function BillingContent() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 items-stretch">
-        {Object.entries(PRICING_PLANS).map(([key, plan]) => (
+        {plans.map((plan) => (
           <div
-            key={key}
+            key={plan.key}
             className={`bg-card border shadow-sm rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth flex flex-col h-full ${
-              selectedPlan === key ? 'ring-2 ring-primary' : 'border-border'
-            } ${key === 'pro' ? 'border-2 border-primary' : ''}`}
+              selectedPlan === plan.key ? 'ring-2 ring-primary' : 'border-border'
+            } ${plan.key === 'pro' ? 'border-2 border-primary' : ''}`}
           >
-            {key === 'pro' && (
+            {plan.key === 'pro' && (
               <div className="bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded mb-3 inline-block">
                 MOST POPULAR
               </div>
             )}
             <h2 className="text-xl sm:text-2xl font-bold mb-2">{plan.name}</h2>
             <p className="text-2xl sm:text-3xl font-bold mb-4">
-              ${plan.amount / 100}
+              {formatPrice(plan.amount, plan.currency as 'usd' | 'eur' | 'pln')}
               <span className="text-base sm:text-lg font-normal text-muted-foreground">/month</span>
             </p>
             <ul className="space-y-2 mb-6 flex-grow">
@@ -111,13 +157,13 @@ function BillingContent() {
                 <span className="mr-2 text-success">✓</span>
                 Email alerts
               </li>
-              {(key === 'starter' || key === 'pro' || key === 'team') && (
+              {(plan.key === 'starter' || plan.key === 'pro' || plan.key === 'team') && (
                 <li className="flex items-center text-sm sm:text-base text-muted-foreground">
                   <span className="mr-2 text-success">✓</span>
                   Slack/Discord integrations
                 </li>
               )}
-              {key === 'team' && (
+              {plan.key === 'team' && (
                 <>
                   <li className="flex items-center text-sm sm:text-base text-muted-foreground">
                     <span className="mr-2 text-success">✓</span>
@@ -133,7 +179,7 @@ function BillingContent() {
                   </li>
                 </>
               )}
-              {key === 'pro' && (
+              {plan.key === 'pro' && (
                 <li className="flex items-center text-sm sm:text-base text-muted-foreground">
                   <span className="mr-2 text-success">✓</span>
                   Up to {plan.maxMembers} team members
@@ -141,15 +187,15 @@ function BillingContent() {
               )}
             </ul>
             <button
-              onClick={() => handleCheckout(key as 'starter' | 'pro' | 'team')}
-              disabled={loadingPlan !== null}
+              onClick={() => handleCheckout(plan.key as 'starter' | 'pro' | 'team')}
+              disabled={loadingPlan !== null || !plan.priceId}
               className={`w-full px-4 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-smooth disabled:opacity-50 mt-auto ${
-                key === 'pro'
+                plan.key === 'pro'
                   ? 'bg-primary text-primary-foreground hover:bg-primary/90'
                   : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
               }`}
             >
-              {loadingPlan === key ? 'Processing...' : 'Subscribe'}
+              {loadingPlan === plan.key ? 'Processing...' : plan.priceId ? 'Subscribe' : 'Unavailable'}
             </button>
           </div>
         ))}

@@ -5,26 +5,21 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   typescript: true,
 })
 
-export const PRICING_PLANS = {
+// Plan features (nie zmienia się - ceny są teraz pobierane z Stripe API)
+export const PLAN_FEATURES = {
   starter: {
-    priceId: process.env.STRIPE_PRICE_ID_STARTER || 'price_starter',
-    amount: 900, // $9.00 in cents
     name: 'Starter',
     monitors: 25,
     minInterval: 300, // 5 minutes
     maxMembers: 1,
   },
   pro: {
-    priceId: process.env.STRIPE_PRICE_ID_PRO || 'price_pro',
-    amount: 2900, // $29.00 in cents
     name: 'Pro',
     monitors: 100,
     minInterval: 60, // 1 minute
     maxMembers: 3,
   },
   team: {
-    priceId: process.env.STRIPE_PRICE_ID_TEAM || 'price_team',
-    amount: 7900, // $79.00 in cents
     name: 'Team',
     monitors: 500,
     minInterval: 30, // 30 seconds
@@ -32,10 +27,39 @@ export const PRICING_PLANS = {
   },
 } as const
 
-// Legacy support for old plans (solo -> starter, agency -> pro)
+// Legacy support - mapowanie starych planów
 export const LEGACY_PLANS = {
-  solo: PRICING_PLANS.starter,
-  agency: PRICING_PLANS.pro,
+  solo: 'starter',
+  agency: 'pro',
+} as const
+
+// Deprecated: Używaj getCachedPrices() z lib/stripe-prices.ts zamiast tego
+// Zachowane dla backward compatibility
+export const PRICING_PLANS = {
+  starter: {
+    priceId: process.env.STRIPE_PRICE_ID_STARTER || 'price_starter',
+    amount: 900, // $9.00 in cents
+    name: PLAN_FEATURES.starter.name,
+    monitors: PLAN_FEATURES.starter.monitors,
+    minInterval: PLAN_FEATURES.starter.minInterval,
+    maxMembers: PLAN_FEATURES.starter.maxMembers,
+  },
+  pro: {
+    priceId: process.env.STRIPE_PRICE_ID_PRO || 'price_pro',
+    amount: 2900, // $29.00 in cents
+    name: PLAN_FEATURES.pro.name,
+    monitors: PLAN_FEATURES.pro.monitors,
+    minInterval: PLAN_FEATURES.pro.minInterval,
+    maxMembers: PLAN_FEATURES.pro.maxMembers,
+  },
+  team: {
+    priceId: process.env.STRIPE_PRICE_ID_TEAM || 'price_team',
+    amount: 7900, // $79.00 in cents
+    name: PLAN_FEATURES.team.name,
+    monitors: PLAN_FEATURES.team.monitors,
+    minInterval: PLAN_FEATURES.team.minInterval,
+    maxMembers: PLAN_FEATURES.team.maxMembers,
+  },
 } as const
 
 export async function createCheckoutSession(

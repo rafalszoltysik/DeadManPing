@@ -21,13 +21,15 @@ interface SettingsFormProps {
   hasStripeCustomer: boolean
   trialDaysRemaining?: number | null
   isTrialExpired?: boolean
+  currency?: 'usd' | 'eur' | 'pln'
 }
 
-export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, isTrialExpired }: SettingsFormProps) {
+export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, isTrialExpired, currency: initialCurrency = 'usd' }: SettingsFormProps) {
   const [slackWebhook, setSlackWebhook] = useState(profile.slack_webhook_url || '')
   const [discordWebhook, setDiscordWebhook] = useState(profile.discord_webhook_url || '')
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
   const [alertEmail, setAlertEmail] = useState(profile.alert_email || '')
+  const [currency, setCurrency] = useState<'usd' | 'eur' | 'pln'>(initialCurrency)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,6 +41,31 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const tier = profile.subscription_tier || 'free'
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(tier)
   const hasCustomWebhook = tier === 'team'
+
+  const handleCurrencySubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setSuccess(false)
+
+    // Update workspace currency if changed
+    if (currency !== initialCurrency) {
+      const { error: workspaceError } = await supabase
+        .from('workspaces')
+        .update({ currency })
+        .eq('owner_id', profile.id)
+
+      if (workspaceError) {
+        setError(`Failed to update currency: ${workspaceError.message}`)
+        setLoading(false)
+        return
+      }
+    }
+
+    setSuccess(true)
+    setLoading(false)
+    router.refresh()
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -139,6 +166,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
     // Always allow alert_email update
     updateData.alert_email = alertEmail.trim() || null
 
+    // Update profile
     const { error: updateError } = await supabase
       .from('profiles')
       .update(updateData)
@@ -214,6 +242,52 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
   return (
     <div className="space-y-6">
+      {/* Currency Preference Section */}
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
+        <h2 className="text-xl font-semibold mb-4">Currency Preference</h2>
+        <form onSubmit={handleCurrencySubmit} className="space-y-4">
+          {error && (
+            <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
+              Settings saved successfully!
+            </div>
+          )}
+
+          <div>
+            <label htmlFor="currency" className="block text-sm font-medium mb-2">
+              Preferred Currency
+            </label>
+            <select
+              id="currency"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value as 'usd' | 'eur' | 'pln')}
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+            >
+              <option value="usd">USD ($) - US Dollar</option>
+              <option value="eur">EUR (€) - Euro</option>
+              <option value="pln">PLN (zł) - Polish Zloty</option>
+            </select>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Prices will be displayed in your preferred currency. This setting applies to all billing pages.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-end gap-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth hover-lift"
+            >
+              {loading ? 'Saving...' : 'Save Currency'}
+            </button>
+          </div>
+        </form>
+      </div>
+
       {/* Subscription Section */}
       <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Subscription</h2>
@@ -284,16 +358,6 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
       <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-6">
         <h2 className="text-xl font-semibold mb-4">Alert Integrations</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
-              {error}
-            </div>
-          )}
-          {success && (
-            <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-              Settings saved successfully!
-            </div>
-          )}
 
           <div>
             <label htmlFor="alertEmail" className="block text-sm font-medium mb-2">
