@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
+import { Logo } from '@/components/Logo'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
 import { DashboardPreview } from '@/components/DashboardPreview'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
@@ -343,11 +344,11 @@ export default function Home() {
                       <code>{`#!/bin/bash
 users_synced=$(./sync_users_logic.sh)
 if [ $? -eq 0 ]; then
-  curl https://deadmanping.io/ping/abc123 \\
+  curl https://deadmanping.com/ping/abc123 \\
     -H "Content-Type: application/json" \\
     -d "{\\"success\\": true, \\"count\\": $users_synced}"
 else
-  curl https://deadmanping.io/ping/abc123 \\
+  curl https://deadmanping.com/ping/abc123 \\
     -H "Content-Type: application/json" \\
     -d '{"success": false}'
 fi`}</code>
@@ -618,12 +619,12 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
               <AnimatedItem delay={150}>
                 <div className="bg-background border border-border rounded-lg p-6 hover-lift transition-smooth group card-hover">
                   <div className="flex items-center justify-center mb-4">
-                    <div className="bg-[#4A154B]/10 p-4 rounded-lg group-hover:bg-[#4A154B]/20 transition-smooth group-hover:scale-110">
-                      <SlackIcon className="w-8 h-8 text-[#4A154B]" />
+                    <div className="bg-[#4A154B]/10 p-4 rounded-lg group-hover:bg-[#4A154B]/20 transition-smooth group-hover:scale-110 flex items-center justify-center">
+                      <SlackIcon className="w-8 h-8 text-[#4A154B] flex-shrink-0" />
                     </div>
                   </div>
-                  <h3 className="font-semibold mb-2">Slack</h3>
-                  <p className="text-sm text-muted-foreground">Notifications directly in your Slack workspace</p>
+                  <h3 className="font-semibold mb-2 text-center">Slack</h3>
+                  <p className="text-sm text-muted-foreground text-center">Notifications directly in your Slack workspace</p>
                 </div>
               </AnimatedItem>
               <AnimatedItem delay={300}>
@@ -847,9 +848,8 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <MonitorIcon className="w-5 h-5" />
-                <span className="font-mono">DeadManPing</span>
+              <h3 className="text-lg font-semibold mb-4">
+                <Logo showText={true} variant="with-text" className="text-lg" />
               </h3>
               <p className="text-sm text-muted-foreground">
                 Simple monitoring for your cron jobs and scheduled tasks.

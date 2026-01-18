@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export const metadata: Metadata = {
   title: "Monitor Cron Jobs Without Migration | DeadManPing",
@@ -52,10 +53,11 @@ export default function MonitorCronJobsPage() {
           </header>
 
           <div className="space-y-8">
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                The Problem: Silent Cron Job Failures
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  The Problem: Silent Cron Job Failures
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Cron jobs fail silently. If your backup script crashes, your database sync stops, or your cleanup job 
                 never runs, you won't know until it's too late. Common failure scenarios:
@@ -71,12 +73,14 @@ export default function MonitorCronJobsPage() {
                 Traditional monitoring tools (Nagios, Zabbix) require complex setup and don't understand cron semantics. 
                 You need a dead man switch: if your job doesn't ping within the expected interval, you get an alert.
               </p>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Solution: Dead Man Switch Monitoring
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Solution: Dead Man Switch Monitoring
+                </h2>
               <p className="text-muted-foreground mb-4">
                 <strong>DeadManPing doesn't run your jobs. Your cron does. DeadManPing only observes.</strong>
               </p>
@@ -99,7 +103,7 @@ export default function MonitorCronJobsPage() {
                   <div>./backup.sh</div>
                   <div></div>
                   <div># Add this one line at the end</div>
-                  <div>curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
                   <div>  -H "Content-Type: application/json" \</div>
                   <div>  -d {"'"}{'{'}`"success": true{'}'}{"'"}</div>
                 </code>
@@ -122,23 +126,25 @@ export default function MonitorCronJobsPage() {
                   <div>#!/bin/bash</div>
                   <div>if ./backup.sh; then</div>
                   <div>  BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)</div>
-                  <div>  curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>  curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
                   <div>    -H "Content-Type: application/json" \</div>
                   <div>    -d "{'{'}\"success\": true, \"backup_size\": \"$BACKUP_SIZE\"{'}'}"</div>
                   <div>else</div>
                   <div>  ERROR_MSG=$(./backup.sh 2{'>'}&1 | tail -1)</div>
-                  <div>  curl -X POST "https://deadmanping.io/ping/backup-daily" \</div>
+                  <div>  curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
                   <div>    -H "Content-Type: application/json" \</div>
                   <div>    -d "{'{'}\"success\": false, \"error\": \"$ERROR_MSG\"{'}'}"</div>
                   <div>fi</div>
                 </code>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Language-Specific Examples
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Language-Specific Examples
+                </h2>
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Python
@@ -151,9 +157,9 @@ export default function MonitorCronJobsPage() {
                   <div>try:</div>
                   <div>  # Your backup logic here</div>
                   <div>  run_backup()</div>
-                  <div>  requests.post("https://your-domain.com/api/ping/backup-daily?s=ok")</div>
+                  <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
                   <div>except Exception as e:</div>
-                  <div>  requests.post(f"https://your-domain.com/api/ping/backup-daily?s=fail&m={'{'}str(e){'}'}")</div>
+                  <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&m={'{'}str(e){'}'}")</div>
                   <div>  sys.exit(1)</div>
                 </code>
               </div>
@@ -168,10 +174,10 @@ export default function MonitorCronJobsPage() {
                   <div>async function runBackup() {'{'}</div>
                   <div>  try {'{'}</div>
                   <div>    await performBackup();</div>
-                  <div>    https.request('https://your-domain.com/api/ping/backup-daily?s=ok', {'{'} method: 'POST' {'}'}).end();</div>
+                  <div>    https.request('https://deadmanping.com/api/ping/backup-daily?s=ok', {'{'} method: 'POST' {'}'}).end();</div>
                   <div>  {'}'} catch (error) {'{'}</div>
                   <div>    const msg = encodeURIComponent(error.message);</div>
-                  <div>    https.request(`https://your-domain.com/api/ping/backup-daily?s=fail&m=${'{'}msg{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                  <div>    https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=${'{'}msg{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
                   <div>    process.exit(1);</div>
                   <div>  {'}'}</div>
                   <div>{'}'}</div>
@@ -187,15 +193,17 @@ export default function MonitorCronJobsPage() {
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                 <code className="text-foreground">
                   <div>0 3 * * * docker run --rm your-backup-image && \</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-daily"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                 </code>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                What to Monitor
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  What to Monitor
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Prioritize monitoring jobs that have business impact:
               </p>
@@ -206,12 +214,14 @@ export default function MonitorCronJobsPage() {
                 <li><strong>Cleanup jobs</strong> - Disk space issues can cascade</li>
                 <li><strong>Health checks</strong> - Automated system health verification</li>
               </ul>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Cron Notification System: Get Alerts When Jobs Fail
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Cron Notification System: Get Alerts When Jobs Fail
+                </h2>
               <p className="text-muted-foreground mb-4">
                 A reliable cron notification system is essential for detecting when your scheduled tasks stop working. 
                 If your cron job is not working, you need immediate notifications. Our cron job notification service 
@@ -229,9 +239,11 @@ export default function MonitorCronJobsPage() {
                 successfully. This proactive approach to monitor cron notification helps you catch failures 
                 immediately, not days later.
               </p>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
+            <AnimatedSection>
+              <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
               <div className="relative z-10">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">
@@ -248,7 +260,8 @@ export default function MonitorCronJobsPage() {
                   Start Monitoring Free
                 </Link>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
           </div>
         </article>
       </main>

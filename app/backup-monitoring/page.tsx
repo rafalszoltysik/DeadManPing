@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export const metadata: Metadata = {
   title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
@@ -51,10 +52,11 @@ export default function BackupMonitoringPage() {
           </header>
 
           <div className="space-y-8">
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Why You Need Backup Monitoring
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Why You Need Backup Monitoring
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Backups are useless if they fail silently. Without monitoring, you might discover your backups 
                 haven't been running for weeks when you need them most. Common backup failure scenarios:
@@ -69,14 +71,16 @@ export default function BackupMonitoringPage() {
               </ul>
               <p className="text-muted-foreground">
                 Traditional file-based monitoring (checking if backup files exist) doesn't verify they're recent 
-                or complete. You need process-level monitoring that confirms the backup actually ran.
+                or complete.                 You need process-level monitoring that confirms the backup actually ran.
               </p>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                How Backup Monitoring Works
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  How Backup Monitoring Works
+                </h2>
               <p className="text-muted-foreground mb-4">
                 <strong>DeadManPing doesn't run your backups. Your cron does. DeadManPing only observes if the ping arrived.</strong>
               </p>
@@ -101,7 +105,7 @@ export default function BackupMonitoringPage() {
                   <div>#!/bin/bash</div>
                   <div>set -e</div>
                   <div>rsync -avz /data/ user@backup-server:/backups/</div>
-                  <div>curl -X POST "https://your-domain.com/api/ping/backup-rsync?s=ok"</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-rsync?s=ok"</div>
                 </code>
               </div>
 
@@ -114,9 +118,9 @@ export default function BackupMonitoringPage() {
                   <div>BACKUP_FILE="/backups/pg-$(date +%Y%m%d).sql"</div>
                   <div>if pg_dump mydb &gt; "$BACKUP_FILE"; then</div>
                   <div>  gzip "$BACKUP_FILE"</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-postgres?s=ok"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-postgres?s=ok"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-postgres?s=fail&m=pg_dump+failed"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-postgres?s=fail&m=pg_dump+failed"</div>
                   <div>  exit 1</div>
                   <div>fi</div>
                 </code>
@@ -129,9 +133,9 @@ export default function BackupMonitoringPage() {
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
                   <div>if mysqldump mydb &gt; /backups/mysql-$(date +%Y%m%d).sql; then</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-mysql?s=ok"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-mysql?s=ok"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-mysql?s=fail"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-mysql?s=fail"</div>
                   <div>  exit 1</div>
                   <div>fi</div>
                 </code>
@@ -146,19 +150,21 @@ export default function BackupMonitoringPage() {
                   <div>tar -czf backup.tar.gz /data/</div>
                   <div>if aws s3 cp backup.tar.gz s3://my-bucket/backups/; then</div>
                   <div>  rm backup.tar.gz</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-s3?s=ok"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=ok"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-s3?s=fail"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=fail"</div>
                   <div>  exit 1</div>
                   <div>fi</div>
                 </code>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                What to Monitor
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  What to Monitor
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Prioritize monitoring backups that protect critical data:
               </p>
@@ -169,12 +175,14 @@ export default function BackupMonitoringPage() {
                 <li><strong>Incremental backups</strong> - Daily/weekly incremental syncs</li>
                 <li><strong>Offsite backups</strong> - Remote replication jobs</li>
               </ul>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Alert Channels
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Alert Channels
+                </h2>
               <p className="text-muted-foreground mb-4">
                 A good backup monitoring service supports multiple alert channels:
               </p>
@@ -184,9 +192,11 @@ export default function BackupMonitoringPage() {
                 <li><strong>Discord</strong> - Webhook notifications to Discord channels</li>
                 <li><strong>Webhooks</strong> - Custom integrations with PagerDuty, OpsGenie, etc.</li>
               </ul>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
+            <AnimatedSection>
+              <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
               <div className="relative z-10">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">
@@ -204,7 +214,8 @@ export default function BackupMonitoringPage() {
                   Start Free Trial
                 </Link>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
           </div>
         </article>
       </main>

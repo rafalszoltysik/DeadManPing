@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export const metadata: Metadata = {
   title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
@@ -51,10 +52,11 @@ export default function DeadManSwitchPage() {
           </header>
 
           <div className="space-y-8">
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Why Backup Monitoring Matters
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Why Backup Monitoring Matters
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Backups are your last line of defense against data loss. But if your backup job fails silently, 
                 you're left with false confidence. Common backup failure scenarios:
@@ -71,12 +73,14 @@ export default function DeadManSwitchPage() {
                 Traditional monitoring checks if files exist, but doesn't verify they're recent or complete. 
                 A dead man switch confirms the backup process actually ran.
               </p>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                How Dead Man Switch Works for Backups
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  How Dead Man Switch Works for Backups
+                </h2>
               <p className="text-muted-foreground mb-4">
                 <strong>DeadManPing doesn't run your backups. Your cron does. DeadManPing only observes if the ping arrived.</strong>
               </p>
@@ -101,7 +105,7 @@ export default function DeadManSwitchPage() {
                   <div>rsync -avz /data/ user@backup-server:/backups/</div>
                   <div></div>
                   <div># Ping monitoring service</div>
-                  <div>curl -X POST "https://your-domain.com/api/ping/backup-daily?s=ok"</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
                 </code>
               </div>
               <p className="text-muted-foreground mb-4">
@@ -120,9 +124,9 @@ export default function DeadManSwitchPage() {
                   <div></div>
                   <div>if pg_dump mydb &gt; "$BACKUP_FILE"; then</div>
                   <div>  gzip "$BACKUP_FILE"</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-db?s=ok"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-db?s=ok"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-db?s=fail&m=pg_dump+failed"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-db?s=fail&m=pg_dump+failed"</div>
                   <div>  exit 1</div>
                   <div>fi</div>
                 </code>
@@ -141,19 +145,21 @@ export default function DeadManSwitchPage() {
                   <div># Upload to S3</div>
                   <div>if aws s3 cp backup.tar.gz s3://my-bucket/backups/; then</div>
                   <div>  rm backup.tar.gz</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-s3?s=ok"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=ok"</div>
                   <div>else</div>
-                  <div>  curl -X POST "https://your-domain.com/api/ping/backup-s3?s=fail&m=S3+upload+failed"</div>
+                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=fail&m=S3+upload+failed"</div>
                   <div>  exit 1</div>
                   <div>fi</div>
                 </code>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                What Makes a Good Backup Dead Man Switch
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  What Makes a Good Backup Dead Man Switch
+                </h2>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li><strong>Independent infrastructure</strong> - Runs outside your backup system, so it detects failures even if your monitoring is down</li>
                 <li><strong>Simple integration</strong> - Just add a curl command, no agents or complex setup</li>
@@ -161,12 +167,14 @@ export default function DeadManSwitchPage() {
                 <li><strong>Works with any backup method</strong> - rsync, tar, database dumps, cloud sync, etc.</li>
                 <li><strong>Failure reporting</strong> - Can distinguish between "backup didn't run" and "backup failed"</li>
               </ul>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8">
-              <h2 className="text-xl sm:text-2xl font-semibold mb-4">
-                Setting Up Monitoring Intervals
-              </h2>
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Setting Up Monitoring Intervals
+                </h2>
               <p className="text-muted-foreground mb-4">
                 Match your monitoring interval to your backup frequency, with a grace period:
               </p>
@@ -178,9 +186,11 @@ export default function DeadManSwitchPage() {
               <p className="text-muted-foreground">
                 The grace period accounts for slight timing variations and gives you time to respond before it's critical.
               </p>
-            </section>
+              </section>
+            </AnimatedSection>
 
-            <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
+            <AnimatedSection>
+              <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
               <div className="relative z-10">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">
@@ -197,7 +207,8 @@ export default function DeadManSwitchPage() {
                   Start Free Trial
                 </Link>
               </div>
-            </section>
+              </section>
+            </AnimatedSection>
           </div>
         </article>
       </main>
