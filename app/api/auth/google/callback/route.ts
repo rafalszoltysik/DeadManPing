@@ -59,9 +59,19 @@ export async function GET(request: NextRequest) {
 
     let userId: string
     let emailVerified = googleUser.emailVerified
+    let accountLinked = false
 
     if (existingProfile) {
       // Email exists - check if it's from email/password signup (has auth.users entry)
+      // Check if this profile ID exists in auth.users (meaning it's an email/password account)
+      const { data: authUser } = await supabase.auth.admin.getUserById(existingProfile.id)
+      
+      // If auth user exists, this means the account was created with email/password
+      // and we're now linking it with Google OAuth
+      if (authUser?.user) {
+        accountLinked = true
+      }
+      
       // We'll use the existing profile ID and link the accounts
       userId = existingProfile.id
       
@@ -122,7 +132,14 @@ export async function GET(request: NextRequest) {
     await createSession(userId, googleUser.email, emailVerified)
 
     // Redirect to dashboard or specified redirect
-    return NextResponse.redirect(new URL(redirect, requestUrl.origin))
+    const redirectUrl = new URL(redirect, requestUrl.origin)
+    
+    // Add account linked parameter if accounts were linked
+    if (accountLinked) {
+      redirectUrl.searchParams.set('accountLinked', 'true')
+    }
+    
+    return NextResponse.redirect(redirectUrl)
   } catch (error: any) {
     console.error('Google OAuth callback error:', error)
     const loginUrl = new URL('/auth/login', requestUrl.origin)

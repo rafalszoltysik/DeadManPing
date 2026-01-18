@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { generateEmailTemplate, generateEmailText } from '@/lib/email-templates'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -154,7 +155,6 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 
 async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   const subject = getEmailSubject(monitor.name, alertType)
-  const body = getEmailBody(monitor, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
 
   // Use environment variable for from email, or fallback to Resend's default domain for development
@@ -162,25 +162,25 @@ async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   // For development, Resend allows using onboarding@resend.dev
   const fromEmail = process.env.RESEND_FROM_EMAIL || 'DeadManPing <onboarding@resend.dev>'
 
+  // Generate professional email template
+  const templateData = {
+    monitorName: monitor.name,
+    monitorStatus: monitor.status,
+    lastPingAt: monitor.last_ping_at,
+    dashboardUrl,
+    alertType: alertType as 'missing' | 'failed' | 'recovered' | 'warn',
+  }
+
+  const html = generateEmailTemplate(templateData)
+  const text = generateEmailText(templateData)
+
   try {
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: email,
       subject,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: ${getAlertColor(alertType)};">${getAlertEmoji(alertType)} ${subject}</h2>
-          <p>${body}</p>
-          <p><strong>Monitor:</strong> ${monitor.name}</p>
-          <p><strong>Status:</strong> ${monitor.status}</p>
-          ${monitor.last_ping_at ? `<p><strong>Last Ping:</strong> ${new Date(monitor.last_ping_at).toLocaleString()}</p>` : ''}
-          <p style="margin-top: 30px;">
-            <a href="${dashboardUrl}" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              View Monitor
-            </a>
-          </p>
-        </div>
-      `,
+      html,
+      text,
     })
 
     if (error) {

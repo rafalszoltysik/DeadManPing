@@ -325,32 +325,32 @@ Aplikacja **DeadManPing** jest technicznie gotowa do wdrożenia na produkcję. W
    - [ ] Przetestuj czy cron jobs działają
 
 3. **Environment Variables:**
-   - [ ] Ustaw wszystkie wymagane zmienne w Vercel
-   - [ ] Wygeneruj secrets (`JWT_SECRET`, `INTERNAL_API_SECRET`, `CRON_SECRET`)
-   - [ ] Ustaw `NEXT_PUBLIC_APP_URL` na URL produkcji
+   - [ x] Ustaw wszystkie wymagane zmienne w Vercel
+   - [ x] Wygeneruj secrets (`JWT_SECRET`, `INTERNAL_API_SECRET`, `CRON_SECRET`)
+   - [ x] Ustaw `NEXT_PUBLIC_APP_URL` na URL produkcji
 
 4. **Email (Resend):**
    - [ x] Zweryfikuj domenę w Resend
    - [ x] Ustaw `RESEND_FROM_EMAIL` na zweryfikowany email
 
 5. **Database:**
-   - [ ] Uruchom wszystkie 11 migracji w kolejności
-   - [ ] Zweryfikuj RLS policies
+   - [ x] Uruchom wszystkie 11 migracji w kolejności
+   - [ x] Zweryfikuj RLS policies
 
 6. **Google OAuth:**
-   - [ ] Skonfiguruj OAuth w Google Cloud Console
-   - [ ] Dodaj redirect URIs (Supabase + produkcja)
-   - [ ] Skonfiguruj w Supabase Dashboard
+   - [ x] Skonfiguruj OAuth w Google Cloud Console
+   - [ x] Dodaj redirect URIs (Supabase + produkcja)
+   - [ x] Skonfiguruj w Supabase Dashboard
 
 ### ZALECANE:
 
 7. **Monitoring:**
-   - [ ] Skonfiguruj Sentry (opcjonalnie)
-   - [ ] Włącz Vercel Analytics
+   - [ x] Skonfiguruj Sentry (opcjonalnie)
+   - [ x] Włącz Vercel Analytics
    - [ ] Skonfiguruj alerty w Vercel
 
 8. **Rate Limiting:**
-   - [ ] Skonfiguruj Upstash Redis (opcjonalnie, ale zalecane)
+   - [ x] Skonfiguruj Upstash Redis (opcjonalnie, ale zalecane)
 
 ---
 

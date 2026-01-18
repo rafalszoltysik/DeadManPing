@@ -3,6 +3,8 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { TIER_LIMITS } from '@/lib/limits'
+import { WarningTooltip, InfoTooltip } from '@/components/Tooltip'
+import { WarningIcon, InfoIcon } from '@/components/Icons'
 
 function NewMonitorForm() {
   const [name, setName] = useState('')
@@ -553,7 +555,14 @@ function NewMonitorForm() {
                           </div>
                           
                           <div>
-                            <label className="block text-xs font-medium mb-1">Severity</label>
+                            <label className="flex items-center gap-1.5 text-xs font-medium mb-1">
+                              Severity
+                              <InfoTooltip content="Error: Monitor will be marked as FAIL if validation fails. Warning: Monitor stays healthy but shows warning status.">
+                                <button type="button" className="text-muted-foreground hover:text-foreground transition-smooth">
+                                  <InfoIcon className="w-3.5 h-3.5" />
+                                </button>
+                              </InfoTooltip>
+                            </label>
                             <select
                               value={field.severity}
                               onChange={(e) => {

@@ -5,6 +5,8 @@ import { formatDistanceToNow, format } from 'date-fns'
 import Link from 'next/link'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon } from './Icons'
 import { Monitor, Ping, MonitorDetailProps } from '@/lib/types/monitor'
+import { WarningTooltip, InfoTooltip } from './Tooltip'
+import { WarningIcon, InfoIcon } from './Icons'
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -1188,7 +1190,14 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                       </div>
                       
                       <div>
-                        <label className="block text-xs font-medium mb-1">Severity</label>
+                        <label className="flex items-center gap-1.5 text-xs font-medium mb-1">
+                          Severity
+                          <InfoTooltip content="Error: Monitor will be marked as FAIL if validation fails. Warning: Monitor stays healthy but shows warning status.">
+                            <button type="button" className="text-muted-foreground hover:text-foreground transition-smooth">
+                              <InfoIcon className="w-3.5 h-3.5" />
+                            </button>
+                          </InfoTooltip>
+                        </label>
                         <select
                           value={field.severity}
                           onChange={(e) => {
@@ -1259,7 +1268,12 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                       <span className="text-muted-foreground">{field.rule}</span>{' '}
                       <span className="font-mono">{String(field.value)}</span>
                       {field.severity && field.severity !== 'error' && (
-                        <span className="ml-2 text-xs text-warning">({field.severity})</span>
+                        <WarningTooltip content="This is a warning rule. The monitor will stay healthy but show a warning status if validation fails.">
+                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-warning">
+                            <WarningIcon className="w-3 h-3" />
+                            ({field.severity})
+                          </span>
+                        </WarningTooltip>
                       )}
                     </p>
                   </div>
