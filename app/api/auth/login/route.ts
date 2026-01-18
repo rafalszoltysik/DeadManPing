@@ -66,20 +66,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Verify password with Supabase auth
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
-
-    if (authError || !authData.user) {
-      return NextResponse.json(
-        { error: authError?.message || 'Invalid email or password' },
-        { status: 401 }
-      )
-    }
-
-    // Get or create profile
+    // Check if user exists before attempting login
     const serviceClient = createServiceClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -90,6 +77,46 @@ export async function POST(request: NextRequest) {
         },
       }
     )
+
+    // Check if user exists by looking up in profiles table
+    // This is more efficient than querying all users from auth
+    const normalizedEmail = email.toLowerCase().trim()
+    
+    // Check profiles table to see if account exists
+    const { data: existingProfileCheck } = await serviceClient
+      .from('profiles')
+      .select('id')
+      .eq('email', normalizedEmail)
+      .maybeSingle()
+
+    // Verify password with Supabase auth
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (authError || !authData.user) {
+      // Determine if user exists based on profile check
+      // If profile exists, user exists but password is wrong
+      // If profile doesn't exist, account likely doesn't exist
+      if (existingProfileCheck) {
+        // Profile exists, so user exists but password is wrong
+        return NextResponse.json(
+          { error: 'Nieprawidłowe hasło. Sprawdź hasło lub użyj opcji "Zapomniałem hasła".' },
+          { status: 401 }
+        )
+      } else {
+        // No profile found - account likely doesn't exist
+        // Note: There's a small edge case where user exists in auth but not in profiles,
+        // but this is rare and will be handled by creating profile on successful login
+        return NextResponse.json(
+          { error: 'Nie ma takiego konta. Sprawdź adres email lub utwórz nowe konto.' },
+          { status: 401 }
+        )
+      }
+    }
+
+    // Get or create profile (serviceClient already created above)
 
     const { data: existingProfile } = await serviceClient
       .from('profiles')

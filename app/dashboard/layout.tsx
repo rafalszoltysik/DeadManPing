@@ -21,9 +21,9 @@ export default async function DashboardLayout({
   const supabaseAdmin = getSupabaseAdmin()
   const { data: profile } = await supabaseAdmin
     .from('profiles')
-    .select('subscription_status, subscription_tier, created_at, grace_period_ends_at')
+    .select('subscription_status, subscription_tier, created_at, grace_period_ends_at, email_verified')
     .eq('id', user.id)
-    .single() as { data: { subscription_status?: string; subscription_tier?: string; created_at?: string; grace_period_ends_at?: string | null } | null }
+    .single() as { data: { subscription_status?: string; subscription_tier?: string; created_at?: string; grace_period_ends_at?: string | null; email_verified?: boolean } | null }
 
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
@@ -68,6 +68,7 @@ export default async function DashboardLayout({
       isGracePeriodExpired = true
     }
   }
+
 
   return (
     <div className="min-h-screen text-foreground relative">
@@ -121,15 +122,15 @@ export default async function DashboardLayout({
                 <div className="flex-1">
                   {isTrialExpired ? (
                     <p className="text-sm font-medium text-error">
-                      ⚠️ Your free trial has ended. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all features.
+                      Your free trial has ended. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all features.
                     </p>
                   ) : trialDaysRemaining <= 3 ? (
                     <p className="text-sm font-medium text-warning">
-                      ⏰ Your free trial ends in {trialDaysRemaining} {trialDaysRemaining === 1 ? 'day' : 'days'}. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all features.
+                      Your free trial ends in {trialDaysRemaining} {trialDaysRemaining === 1 ? 'day' : 'days'}. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all features.
                     </p>
                   ) : (
                     <p className="text-sm font-medium text-primary">
-                      🎉 Free trial: {trialDaysRemaining} {trialDaysRemaining === 1 ? 'day' : 'days'} remaining. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade</Link> to keep all features after trial.
+                      Free trial: {trialDaysRemaining} {trialDaysRemaining === 1 ? 'day' : 'days'} remaining. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade</Link> to keep all features after trial.
                     </p>
                   )}
                 </div>
@@ -162,15 +163,15 @@ export default async function DashboardLayout({
                 <div className="flex-1">
                   {isGracePeriodExpired ? (
                     <p className="text-sm font-medium text-error">
-                      ⚠️ Grace period ended. Some monitors have been paused. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to reactivate all monitors.
+                      Grace period ended. Some monitors have been paused. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to reactivate all monitors.
                     </p>
                   ) : gracePeriodDaysRemaining <= 2 ? (
                     <p className="text-sm font-medium text-warning">
-                      ⏰ Grace period ends in {gracePeriodDaysRemaining} {gracePeriodDaysRemaining === 1 ? 'day' : 'days'}. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all monitors active.
+                      Grace period ends in {gracePeriodDaysRemaining} {gracePeriodDaysRemaining === 1 ? 'day' : 'days'}. <Link href="/dashboard/billing" className="underline hover:no-underline">Upgrade now</Link> to keep all monitors active.
                     </p>
                   ) : (
                     <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
-                      ⏳ Grace period: {gracePeriodDaysRemaining} {gracePeriodDaysRemaining === 1 ? 'day' : 'days'} remaining. All monitors are active, but you'll need to <Link href="/dashboard/billing" className="underline hover:no-underline">upgrade</Link> to keep them after grace period ends.
+                      Grace period: {gracePeriodDaysRemaining} {gracePeriodDaysRemaining === 1 ? 'day' : 'days'} remaining. All monitors are active, but you'll need to <Link href="/dashboard/billing" className="underline hover:no-underline">upgrade</Link> to keep them after grace period ends.
                     </p>
                   )}
                 </div>

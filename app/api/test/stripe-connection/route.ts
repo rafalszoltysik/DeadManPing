@@ -12,7 +12,7 @@ import { stripe, PRICING_PLANS } from '@/lib/stripe'
  * - If connection to Stripe works
  * - If products/price IDs are configured correctly
  * 
- * ⚠️ SECURITY: This endpoint is disabled in production
+ * SECURITY: This endpoint is disabled in production
  */
 export const dynamic = 'force-dynamic'
 
@@ -62,7 +62,7 @@ export async function GET() {
   } else if (isTestMode) {
     results.push({
       status: 'success',
-      message: '✅ Using TEST mode API keys (safe for testing)',
+      message: 'Using TEST mode API keys (safe for testing)',
       details: {
         keyType: 'test',
         note: 'No real charges will be made',
@@ -71,7 +71,7 @@ export async function GET() {
   } else if (isLiveMode) {
     results.push({
       status: 'warning',
-      message: '⚠️ Using LIVE mode API keys (real charges will be made!)',
+      message: 'Using LIVE mode API keys (real charges will be made!)',
       details: {
         keyType: 'live',
         note: 'Be careful - these keys will charge real money!',
@@ -84,7 +84,7 @@ export async function GET() {
     const account = await stripe.accounts.retrieve()
     results.push({
       status: 'success',
-      message: '✅ Successfully connected to Stripe API',
+      message: 'Successfully connected to Stripe API',
       details: {
         accountId: account.id,
         country: account.country,
@@ -94,7 +94,7 @@ export async function GET() {
   } catch (error: any) {
     results.push({
       status: 'error',
-      message: '❌ Failed to connect to Stripe API',
+      message: 'Failed to connect to Stripe API',
       details: {
         error: error.message,
       },
@@ -126,7 +126,7 @@ export async function GET() {
   if (configuredPrices.length > 0) {
     results.push({
       status: 'success',
-      message: `✅ Configured Price IDs: ${configuredPrices.length}`,
+      message: `Configured Price IDs: ${configuredPrices.length}`,
       details: {
         configured: configuredPrices,
       },
@@ -136,7 +136,7 @@ export async function GET() {
   if (missingPrices.length > 0) {
     results.push({
       status: 'warning',
-      message: `⚠️ Missing Price IDs: ${missingPrices.join(', ')}`,
+      message: `Missing Price IDs: ${missingPrices.join(', ')}`,
       details: {
         missing: missingPrices,
         note: 'Some plans may not work without Price IDs',
@@ -152,7 +152,7 @@ export async function GET() {
         const price = await stripe.prices.retrieve(priceIdToCheck)
         results.push({
           status: 'success',
-          message: `✅ Price ID verified: ${priceIdToCheck}`,
+          message: `Price ID verified: ${priceIdToCheck}`,
           details: {
             priceId: price.id,
             amount: price.unit_amount ? `$${(price.unit_amount / 100).toFixed(2)}` : 'N/A',
@@ -163,7 +163,7 @@ export async function GET() {
       } catch (error: any) {
         results.push({
           status: 'error',
-          message: `❌ Price ID not found in Stripe: ${priceIdToCheck}`,
+          message: `Price ID not found in Stripe: ${priceIdToCheck}`,
           details: {
             error: error.message,
             note: 'Make sure the Price ID exists in your Stripe account (test mode if using test keys)',
@@ -177,12 +177,12 @@ export async function GET() {
   if (process.env.STRIPE_WEBHOOK_SECRET) {
     results.push({
       status: 'success',
-      message: '✅ STRIPE_WEBHOOK_SECRET is configured',
+      message: 'STRIPE_WEBHOOK_SECRET is configured',
     })
   } else {
     results.push({
       status: 'warning',
-      message: '⚠️ STRIPE_WEBHOOK_SECRET is not configured',
+      message: 'STRIPE_WEBHOOK_SECRET is not configured',
       details: {
         note: 'Webhooks will not work without this. Use: stripe listen --forward-to localhost:3000/api/webhooks/stripe',
       },
@@ -217,7 +217,7 @@ export async function GET() {
               'Set up webhook secret for webhook testing',
             ]
           : [
-              '✅ All checks passed! You can now test payments with test cards',
+              'All checks passed! You can now test payments with test cards',
               'Use card: 4242 4242 4242 4242 for successful payments',
               'Run: stripe listen --forward-to localhost:3000/api/webhooks/stripe',
             ],

@@ -11,7 +11,7 @@ import { stripe } from '@/lib/stripe'
  * This will fetch the checkout session and subscription, then manually
  * process the checkout.session.completed event.
  * 
- * ⚠️ SECURITY: This endpoint is disabled in production
+ * SECURITY: This endpoint is disabled in production
  */
 export async function POST(request: NextRequest) {
   // Block in production - check both NODE_ENV and VERCEL_ENV for safety

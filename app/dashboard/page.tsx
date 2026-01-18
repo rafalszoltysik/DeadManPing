@@ -118,7 +118,7 @@ export default async function DashboardPage() {
       {isOverLimit && monitorLimit && (
         <div className="bg-warning/10 border border-warning/20 text-warning px-4 py-3 rounded-lg mb-6">
           <p className="font-medium mb-1">
-            ⚠️ Monitor limit exceeded
+            Monitor limit exceeded
           </p>
           <p className="text-sm">
             You have {monitorLimit.current} monitors, but your {monitorLimit.tier} plan allows only {monitorLimit.limit}. 

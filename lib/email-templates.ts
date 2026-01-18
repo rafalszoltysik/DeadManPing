@@ -25,7 +25,7 @@ function getAlertConfig(alertType: string): AlertConfig {
   switch (alertType) {
     case 'missing':
       return {
-        emoji: '🔴',
+        emoji: '',
         title: "Monitor Didn't Ping",
         message: "Your monitor hasn't sent a ping in the expected time window. This could indicate that your cron job or scheduled task didn't run.",
         color: '#dc2626',
@@ -34,7 +34,7 @@ function getAlertConfig(alertType: string): AlertConfig {
       }
     case 'failed':
       return {
-        emoji: '🔴',
+        emoji: '',
         title: 'Monitor Reported Failure',
         message: 'Your monitor reported a failure status. Please check your job logs and investigate the issue.',
         color: '#dc2626',
@@ -43,7 +43,7 @@ function getAlertConfig(alertType: string): AlertConfig {
       }
     case 'warn':
       return {
-        emoji: '⚠️',
+        emoji: '',
         title: 'Monitor is Late',
         message: 'Your monitor is late - ping not received within expected interval. It\'s still within grace period, but please check your cron job.',
         color: '#f59e0b',
@@ -52,7 +52,7 @@ function getAlertConfig(alertType: string): AlertConfig {
       }
     case 'recovered':
       return {
-        emoji: '🟢',
+        emoji: '',
         title: 'Monitor Recovered',
         message: 'Good news! Your monitor is back online and working correctly.',
         color: '#16a34a',
@@ -61,7 +61,7 @@ function getAlertConfig(alertType: string): AlertConfig {
       }
     default:
       return {
-        emoji: '⚠️',
+        emoji: '',
         title: 'Monitor Alert',
         message: 'You have received an alert for your monitor.',
         color: '#f59e0b',
@@ -85,7 +85,7 @@ export function generateEmailTemplate(data: EmailTemplateData): string {
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="x-apple-disable-message-reformatting">
   <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
-  <title>${config.emoji} ${config.title}: ${data.monitorName}</title>
+  <title>${config.title}: ${data.monitorName}</title>
   <!--[if mso]>
   <noscript>
     <xml>
@@ -146,7 +146,7 @@ export function generateEmailTemplate(data: EmailTemplateData): string {
                 <tr>
                   <td style="padding: 24px 32px; text-align: center;">
                     <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600; line-height: 1.3;">
-                      ${config.emoji} ${config.title}
+                      ${config.title}
                     </h1>
                   </td>
                 </tr>
@@ -305,7 +305,7 @@ export function generateEmailText(data: EmailTemplateData): string {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
   const currentYear = new Date().getFullYear()
 
-  let text = `${config.emoji} ${config.title}\n\n`
+  let text = `${config.title}\n\n`
   text += `${config.message}\n\n`
   text += `Monitor Details:\n`
   text += `  Monitor Name: ${data.monitorName}\n`

@@ -18,8 +18,9 @@ const supabaseAdmin = createClient(
  * 
  * This endpoint should be called daily (e.g., via Vercel Cron Jobs)
  * to automatically:
- * 1. Expire trial periods after 14 days (set grace_period_ends_at to 7 days from now)
- * 2. Block oldest monitors after grace period ends
+ * 1. Delete unverified accounts older than 7 days
+ * 2. Expire trial periods after 14 days (set grace_period_ends_at to 7 days from now)
+ * 3. Block oldest monitors after grace period ends
  * 
  * Usage:
  * GET /api/cron/check-trial-expiry
@@ -39,9 +40,46 @@ export async function GET(request: NextRequest) {
     const fourteenDaysAgo = new Date(now)
     fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14)
     
+    // 14 days ago - for cleaning up unverified accounts
+    const fourteenDaysAgoForUnverified = new Date(now)
+    fourteenDaysAgoForUnverified.setDate(fourteenDaysAgoForUnverified.getDate() - 14)
+    
     // Grace period is 7 days
     const gracePeriodEndsAt = new Date(now)
     gracePeriodEndsAt.setDate(gracePeriodEndsAt.getDate() + 7)
+
+    // ==========================================
+    // PART 0: Delete old unverified accounts (older than 14 days)
+    // ==========================================
+    // Find unverified accounts older than 14 days
+    const { data: unverifiedAccounts, error: unverifiedError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, created_at')
+      .eq('email_verified', false)
+      .lt('created_at', fourteenDaysAgoForUnverified.toISOString())
+
+    let deletedUnverifiedCount = 0
+    if (unverifiedError) {
+      console.error('Error fetching unverified accounts:', unverifiedError)
+    } else if (unverifiedAccounts && unverifiedAccounts.length > 0) {
+      // Delete unverified accounts from auth.users (this will cascade delete profiles)
+      // Note: We need to delete from auth.users first, which will cascade delete profiles
+      for (const account of unverifiedAccounts) {
+        try {
+          // Delete from auth.users - this will cascade delete the profile
+          const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(account.id)
+          
+          if (deleteError) {
+            console.error(`Error deleting unverified account ${account.id}:`, deleteError)
+          } else {
+            deletedUnverifiedCount++
+            console.log(`Deleted unverified account: ${account.email} (created: ${account.created_at})`)
+          }
+        } catch (error: any) {
+          console.error(`Error deleting unverified account ${account.id}:`, error)
+        }
+      }
+    }
 
     // ==========================================
     // PART 1: Expire trials and set grace period
@@ -226,11 +264,12 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
+      unverifiedDeleted: deletedUnverifiedCount,
       checked: expiredTrials?.length || 0,
       expired: expiredCount,
       gracePeriodsChecked: expiredGracePeriods?.length || 0,
       monitorsBlocked: blockedMonitorsCount,
-      message: `Expired ${expiredCount} trial(s), blocked ${blockedMonitorsCount} monitor(s)`,
+      message: `Deleted ${deletedUnverifiedCount} unverified account(s), expired ${expiredCount} trial(s), blocked ${blockedMonitorsCount} monitor(s)`,
     })
   } catch (error: any) {
     console.error('Error in check-trial-expiry:', error)

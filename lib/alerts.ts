@@ -329,28 +329,28 @@ async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, alertTyp
 function getAlertEmoji(alertType: string): string {
   switch (alertType) {
     case 'missing':
-      return '🔴'
+      return ''
     case 'failed':
-      return '🔴'
+      return ''
     case 'warn':
-      return '⚠️'
+      return ''
     case 'recovered':
-      return '🟢'
+      return ''
     default:
-      return '⚠️'
+      return ''
   }
 }
 
 function getEmailSubject(monitorName: string, alertType: string): string {
   switch (alertType) {
     case 'missing':
-      return `🔴 MISSING: ${monitorName} didn't ping`
+      return `MISSING: ${monitorName} didn't ping`
     case 'failed':
-      return `🔴 FAILED: ${monitorName} reported failure`
+      return `FAILED: ${monitorName} reported failure`
     case 'warn':
-      return `⚠️ WARNING: ${monitorName} is late`
+      return `WARNING: ${monitorName} is late`
     case 'recovered':
-      return `🟢 RECOVERED: ${monitorName} is back online`
+      return `RECOVERED: ${monitorName} is back online`
     default:
       return `Alert: ${monitorName}`
   }
@@ -374,13 +374,13 @@ function getEmailBody(monitor: any, alertType: string): string {
 function getAlertMessage(monitor: any, alertType: string): string {
   switch (alertType) {
     case 'missing':
-      return `🔴 MISSING: ${monitor.name} didn't ping`
+      return `MISSING: ${monitor.name} didn't ping`
     case 'failed':
-      return `🔴 FAILED: ${monitor.name} reported failure`
+      return `FAILED: ${monitor.name} reported failure`
     case 'warn':
-      return `⚠️ WARNING: ${monitor.name} is late`
+      return `WARNING: ${monitor.name} is late`
     case 'recovered':
-      return `🟢 RECOVERED: ${monitor.name} is back online`
+      return `RECOVERED: ${monitor.name} is back online`
     default:
       return `Alert: ${monitor.name}`
   }
