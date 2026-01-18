@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -15,6 +16,29 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Email and password are required' },
         { status: 400 }
+      )
+    }
+
+    // Rate limiting: 5 attempts per minute per IP and per email
+    const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
+                     request.headers.get('x-real-ip') || 
+                     'unknown'
+    const ipKey = `login:ip:${clientIp}`
+    const emailKey = `login:email:${email.toLowerCase().trim()}`
+    
+    const ipRateLimit = await checkRateLimit(ipKey, 60000) // 1 minute
+    if (!ipRateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again later.' },
+        { status: 429 }
+      )
+    }
+
+    const emailRateLimit = await checkRateLimit(emailKey, 60000) // 1 minute
+    if (!emailRateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many login attempts for this email. Please try again later.' },
+        { status: 429 }
       )
     }
 

@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get user's workspace
+    // Get user's workspace (check both ownership and membership)
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
@@ -30,7 +30,26 @@ export async function GET(request: NextRequest) {
       .limit(1)
       .single()
 
-    if (!workspace) {
+    // If not owner, check if user is a member
+    let workspaceId: string | null = null
+    if (workspace) {
+      workspaceId = workspace.id
+    } else {
+      // Check if user is a member of any workspace
+      const { data: membership } = await supabaseAdmin
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .eq('status', 'accepted')
+        .limit(1)
+        .single()
+
+      if (membership) {
+        workspaceId = membership.workspace_id
+      }
+    }
+
+    if (!workspaceId) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
@@ -49,7 +68,7 @@ export async function GET(request: NextRequest) {
           email
         )
       `)
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .order('invited_at', { ascending: false })
 
     if (error) {
@@ -82,7 +101,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Email is required' }, { status: 400 })
     }
 
-    // Get user's workspace
+    // Get user's workspace (check both ownership and membership)
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id, name, subscription_tier')
@@ -90,7 +109,35 @@ export async function POST(request: NextRequest) {
       .limit(1)
       .single()
 
-    if (!workspace) {
+    // If not owner, check if user is a member
+    let workspaceId: string | null = null
+    if (workspace) {
+      workspaceId = workspace.id
+    } else {
+      // Check if user is a member of any workspace
+      const { data: membership } = await supabaseAdmin
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .eq('status', 'accepted')
+        .limit(1)
+        .single()
+
+      if (membership) {
+        workspaceId = membership.workspace_id
+        // Get workspace details
+        const { data: memberWorkspace } = await supabaseAdmin
+          .from('workspaces')
+          .select('id, name, subscription_tier')
+          .eq('id', workspaceId)
+          .single()
+        if (memberWorkspace) {
+          Object.assign(workspace || {}, memberWorkspace)
+        }
+      }
+    }
+
+    if (!workspaceId || !workspace) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
@@ -98,7 +145,7 @@ export async function POST(request: NextRequest) {
     const { data: userMembership } = await supabaseAdmin
       .from('workspace_members')
       .select('role')
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .eq('user_id', user.id)
       .single()
 
@@ -121,7 +168,7 @@ export async function POST(request: NextRequest) {
     const { data: existingInvitationByEmail } = await supabaseAdmin
       .from('workspace_members')
       .select('id, status, user_id, invite_email')
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .eq('invite_email', normalizedEmail)
       .maybeSingle()
 
@@ -144,7 +191,7 @@ export async function POST(request: NextRequest) {
       const { data: existingMember } = await supabaseAdmin
         .from('workspace_members')
         .select('id')
-        .eq('workspace_id', workspace.id)
+        .eq('workspace_id', workspaceId)
         .eq('user_id', userProfile.id)
         .maybeSingle()
 
@@ -274,7 +321,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Member ID is required' }, { status: 400 })
     }
 
-    // Get user's workspace
+    // Get user's workspace (check both ownership and membership)
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
       .select('id')
@@ -282,7 +329,26 @@ export async function DELETE(request: NextRequest) {
       .limit(1)
       .single()
 
-    if (!workspace) {
+    // If not owner, check if user is a member
+    let workspaceId: string | null = null
+    if (workspace) {
+      workspaceId = workspace.id
+    } else {
+      // Check if user is a member of any workspace
+      const { data: membership } = await supabaseAdmin
+        .from('workspace_members')
+        .select('workspace_id')
+        .eq('user_id', user.id)
+        .eq('status', 'accepted')
+        .limit(1)
+        .single()
+
+      if (membership) {
+        workspaceId = membership.workspace_id
+      }
+    }
+
+    if (!workspaceId) {
       return NextResponse.json({ error: 'Workspace not found' }, { status: 404 })
     }
 
@@ -290,7 +356,7 @@ export async function DELETE(request: NextRequest) {
     const { data: userMembership } = await supabaseAdmin
       .from('workspace_members')
       .select('role')
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .eq('user_id', user.id)
       .single()
 
@@ -303,7 +369,7 @@ export async function DELETE(request: NextRequest) {
       .from('workspace_members')
       .select('user_id, role')
       .eq('id', memberId)
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
       .single()
 
     if (!member) {
@@ -320,7 +386,7 @@ export async function DELETE(request: NextRequest) {
       const { count } = await supabaseAdmin
         .from('workspace_members')
         .select('*', { count: 'exact', head: true })
-        .eq('workspace_id', workspace.id)
+        .eq('workspace_id', workspaceId)
         .in('role', ['owner', 'admin'])
 
       if ((count || 0) <= 1) {
@@ -333,7 +399,7 @@ export async function DELETE(request: NextRequest) {
       .from('workspace_members')
       .delete()
       .eq('id', memberId)
-      .eq('workspace_id', workspace.id)
+      .eq('workspace_id', workspaceId)
 
     if (deleteError) {
       console.error('Error removing member:', deleteError)

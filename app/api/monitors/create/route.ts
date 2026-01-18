@@ -3,8 +3,10 @@ import { randomBytes } from 'crypto'
 import { checkMonitorLimitByWorkspace, checkIntervalLimitByWorkspace } from '@/lib/limits'
 import { validatePayloadRules } from '@/lib/payload-validator'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { requireAuth } from '@/lib/api/auth'
+import { requireAuth, verifyOrigin } from '@/lib/api/auth'
 import { errorResponse, successResponse, badRequestResponse } from '@/lib/api/response'
+import { validateWebhookUrl, validateCustomWebhookUrl } from '@/lib/webhooks-validator'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function generateSlug(): string {
   return randomBytes(32).toString('hex')
@@ -12,12 +14,27 @@ function generateSlug(): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // CSRF protection: verify origin
+    if (!verifyOrigin(request)) {
+      return errorResponse('Invalid origin', 403)
+    }
+
     const authResult = await requireAuth()
     if (!authResult.success) {
       return authResult.response
     }
 
     const user = authResult.user
+
+    // Rate limiting: 10 monitors per minute per user
+    const rateLimitKey = `monitor:create:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 60000) // 1 minute
+    if (!rateLimit.allowed) {
+      return errorResponse(
+        'Too many monitor creation attempts. Please wait a moment before creating another monitor.',
+        429
+      )
+    }
 
     const body = await request.json()
     const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels } = body
@@ -172,12 +189,24 @@ export async function POST(request: NextRequest) {
         monitorData.alert_email = alertChannels.alertEmail
       }
       if (alertChannels.slackWebhookUrl) {
+        const slackValidation = validateWebhookUrl(alertChannels.slackWebhookUrl, 'slack')
+        if (!slackValidation.valid) {
+          return badRequestResponse(`Invalid Slack webhook URL: ${slackValidation.error}`)
+        }
         monitorData.slack_webhook_url = alertChannels.slackWebhookUrl
       }
       if (alertChannels.discordWebhookUrl) {
+        const discordValidation = validateWebhookUrl(alertChannels.discordWebhookUrl, 'discord')
+        if (!discordValidation.valid) {
+          return badRequestResponse(`Invalid Discord webhook URL: ${discordValidation.error}`)
+        }
         monitorData.discord_webhook_url = alertChannels.discordWebhookUrl
       }
       if (alertChannels.customWebhookUrl) {
+        const customValidation = validateCustomWebhookUrl(alertChannels.customWebhookUrl)
+        if (!customValidation.valid) {
+          return badRequestResponse(`Invalid custom webhook URL: ${customValidation.error}`)
+        }
         monitorData.custom_webhook_url = alertChannels.customWebhookUrl
       }
     }

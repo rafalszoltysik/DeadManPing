@@ -2,9 +2,11 @@ import { NextRequest } from 'next/server'
 import { validatePayloadRules } from '@/lib/payload-validator'
 import { checkIntervalLimitByWorkspace } from '@/lib/limits'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { requireAuth } from '@/lib/api/auth'
+import { requireAuth, verifyOrigin } from '@/lib/api/auth'
 import { verifyMonitorAccessBySlug, checkOptimisticLock } from '@/lib/api/monitors'
 import { errorResponse, successResponse, conflictResponse, badRequestResponse } from '@/lib/api/response'
+import { validateWebhookUrl, validateCustomWebhookUrl } from '@/lib/webhooks-validator'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export async function GET(
   request: NextRequest,
@@ -50,12 +52,28 @@ export async function PUT(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // CSRF protection: verify origin
+    if (!verifyOrigin(request)) {
+      return errorResponse('Invalid origin', 403)
+    }
+
     const authResult = await requireAuth()
     if (!authResult.success) {
       return authResult.response
     }
 
     const { slug } = await params
+    
+    // Rate limiting: 30 updates per minute per user
+    const rateLimitKey = `monitor:update:${authResult.user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 60000) // 1 minute
+    if (!rateLimit.allowed) {
+      return errorResponse(
+        'Too many update attempts. Please wait a moment before updating again.',
+        429
+      )
+    }
+
     const body = await request.json()
     const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status, expectedUpdatedAt } = body
 
@@ -158,13 +176,34 @@ export async function PUT(
           updateData.alert_email = alertChannels.alertEmail || null
         }
         if (alertChannels.slackWebhookUrl !== undefined) {
-          updateData.slack_webhook_url = alertChannels.slackWebhookUrl || null
+          const slackUrl = alertChannels.slackWebhookUrl || null
+          if (slackUrl) {
+            const slackValidation = validateWebhookUrl(slackUrl, 'slack')
+            if (!slackValidation.valid) {
+              return badRequestResponse(`Invalid Slack webhook URL: ${slackValidation.error}`)
+            }
+          }
+          updateData.slack_webhook_url = slackUrl
         }
         if (alertChannels.discordWebhookUrl !== undefined) {
-          updateData.discord_webhook_url = alertChannels.discordWebhookUrl || null
+          const discordUrl = alertChannels.discordWebhookUrl || null
+          if (discordUrl) {
+            const discordValidation = validateWebhookUrl(discordUrl, 'discord')
+            if (!discordValidation.valid) {
+              return badRequestResponse(`Invalid Discord webhook URL: ${discordValidation.error}`)
+            }
+          }
+          updateData.discord_webhook_url = discordUrl
         }
         if (alertChannels.customWebhookUrl !== undefined) {
-          updateData.custom_webhook_url = alertChannels.customWebhookUrl || null
+          const customUrl = alertChannels.customWebhookUrl || null
+          if (customUrl) {
+            const customValidation = validateCustomWebhookUrl(customUrl)
+            if (!customValidation.valid) {
+              return badRequestResponse(`Invalid custom webhook URL: ${customValidation.error}`)
+            }
+          }
+          updateData.custom_webhook_url = customUrl
         }
       }
     }
@@ -257,6 +296,11 @@ export async function DELETE(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    // CSRF protection: verify origin
+    if (!verifyOrigin(request)) {
+      return errorResponse('Invalid origin', 403)
+    }
+
     const authResult = await requireAuth()
     if (!authResult.success) {
       return authResult.response

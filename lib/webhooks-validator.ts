@@ -71,6 +71,56 @@ export function validateWebhookUrl(url: string, type: 'slack' | 'discord'): {
   }
 }
 
+/**
+ * Validate custom webhook URL (Team plan)
+ * Protects against SSRF attacks by blocking private IPs and localhost
+ */
+export function validateCustomWebhookUrl(url: string): { 
+  valid: boolean
+  error?: string 
+} {
+  if (!url) return { valid: true } // Allow empty (means disabled)
+
+  try {
+    const parsed = new URL(url)
+
+    // Check protocol - only HTTPS allowed
+    if (parsed.protocol !== 'https:') {
+      return { valid: false, error: 'Custom webhook URL must use HTTPS' }
+    }
+
+    // Check for blocked hosts (SSRF protection)
+    const hostname = parsed.hostname.toLowerCase()
+    for (const blocked of BLOCKED_HOSTS) {
+      if (hostname.includes(blocked)) {
+        return { valid: false, error: 'Invalid webhook URL hostname (private IPs and localhost are not allowed)' }
+      }
+    }
+
+    // Additional checks for common SSRF vectors
+    // Block IPv6 localhost
+    if (hostname === '::1' || hostname === '[::1]') {
+      return { valid: false, error: 'Invalid webhook URL hostname' }
+    }
+
+    // Block common cloud metadata endpoints
+    const metadataPatterns = [
+      'metadata.google.internal',
+      'metadata.azure.com',
+      '169.254.169.254', // Already in BLOCKED_HOSTS but double-check
+    ]
+    for (const pattern of metadataPatterns) {
+      if (hostname.includes(pattern)) {
+        return { valid: false, error: 'Invalid webhook URL hostname' }
+      }
+    }
+
+    return { valid: true }
+  } catch (e) {
+    return { valid: false, error: 'Invalid URL format' }
+  }
+}
+
 // Optional: Test webhook before saving
 export async function testWebhookUrl(
   url: string, 

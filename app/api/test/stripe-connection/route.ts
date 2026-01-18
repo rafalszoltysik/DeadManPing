@@ -17,11 +17,14 @@ import { stripe, PRICING_PLANS } from '@/lib/stripe'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  // Block in production
-  if (process.env.NODE_ENV === 'production') {
+  // Block in production - check both NODE_ENV and VERCEL_ENV for safety
+  const isProduction = process.env.NODE_ENV === 'production' || 
+                       process.env.VERCEL_ENV === 'production'
+  
+  if (isProduction) {
     return NextResponse.json(
-      { error: 'Test endpoints are disabled in production' },
-      { status: 403 }
+      { error: 'Not found' },
+      { status: 404 } // Return 404 instead of 403 to hide endpoint existence
     )
   }
   const results: {

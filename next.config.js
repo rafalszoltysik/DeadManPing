@@ -16,6 +16,13 @@ const nextConfig = {
   
   // Security headers
   async headers() {
+    // Allow 'unsafe-eval' only in development (needed for webpack HMR and source maps)
+    // In production, this is disabled for security
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const scriptSrc = isDevelopment
+      ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com"
+      : "script-src 'self' 'unsafe-inline' https://js.stripe.com"
+    
     return [
       {
         source: '/(.*)',
@@ -41,16 +48,27 @@ const nextConfig = {
             value: '1; mode=block',
           },
           {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
+              // 'unsafe-eval' only in development (webpack HMR requires it)
+              // 'unsafe-inline' kept only for Stripe compatibility (Stripe.js requires it)
+              // TODO: Consider implementing nonces for better security
+              scriptSrc,
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
               "connect-src 'self' https://*.supabase.co https://api.pwnedpasswords.com https://api.stripe.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'none'",
+              // Additional security
+              "base-uri 'self'",
+              "form-action 'self'",
+              "upgrade-insecure-requests",
             ].join('; '),
           },
         ],

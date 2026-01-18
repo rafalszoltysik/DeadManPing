@@ -1,6 +1,7 @@
 import { Resend } from 'resend'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { generateEmailTemplate, generateEmailText } from '@/lib/email-templates'
+import { validateCustomWebhookUrl } from '@/lib/webhooks-validator'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -60,6 +61,18 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   if ((alert_type === 'missing' || alert_type === 'failed' || alert_type === 'warn') && recentAlerts && recentAlerts.length > 0) {
     console.log('Skipping alert due to recent alert (anti-spam)')
     return { success: false, error: 'Recent alert exists, skipping' }
+  }
+
+  // Global rate limiting: max 10 alerts per hour per monitor (regardless of type)
+  const { count: hourlyAlertCount } = await supabaseAdmin
+    .from('alerts')
+    .select('*', { count: 'exact', head: true })
+    .eq('monitor_id', monitor_id)
+    .gte('sent_at', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+
+  if ((hourlyAlertCount || 0) >= 10) {
+    console.log('Skipping alert due to hourly rate limit (max 10 alerts/hour per monitor)')
+    return { success: false, error: 'Alert rate limit exceeded' }
   }
 
   // Always send recovery alerts
@@ -122,17 +135,24 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 
   // Send custom webhook alert (Team plan only)
   if (customWebhook) {
-    try {
-      const customResult = await sendCustomWebhookAlert(customWebhook, monitorWithProfile, alert_type)
+    // Validate custom webhook URL before sending (SSRF protection)
+    const validation = validateCustomWebhookUrl(customWebhook)
+    if (!validation.valid) {
+      console.error('Invalid custom webhook URL:', validation.error)
+      results.push({ channel: 'custom_webhook', success: false, error: validation.error })
+    } else {
+      try {
+        const customResult = await sendCustomWebhookAlert(customWebhook, monitorWithProfile, alert_type)
       if (customResult.success) {
         channels.push('custom_webhook')
         results.push({ channel: 'custom_webhook', success: true })
       } else {
         results.push({ channel: 'custom_webhook', success: false, error: customResult.error })
       }
-    } catch (error: any) {
-      console.error('Error sending custom webhook alert:', error)
-      results.push({ channel: 'custom_webhook', success: false, error: error.message })
+      } catch (error: any) {
+        console.error('Error sending custom webhook alert:', error)
+        results.push({ channel: 'custom_webhook', success: false, error: error.message })
+      }
     }
   }
 
