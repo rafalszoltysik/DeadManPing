@@ -178,7 +178,15 @@ export async function GET(request: NextRequest) {
         .select('id, created_at, stripe_customer_id, grace_period_ends_at')
         .eq('subscription_status', 'trialing')
         .eq('subscription_tier', 'free')
-        .lt('created_at', fourteenDaysAgo.toISOString())
+        .lt('created_at', fourteenDaysAgo.toISOString()) as { 
+          data: Array<{
+            id: string
+            created_at: string
+            stripe_customer_id: string | null
+            grace_period_ends_at: string | null
+          }> | null
+          error: any
+        }
 
       if (fetchError) {
         console.error('Error fetching expired trials:', fetchError)
@@ -207,8 +215,8 @@ export async function GET(request: NextRequest) {
 
           // Update expired trials to 'free' status and set grace period
           if (userIdsToExpire.length > 0) {
-            const { error: updateError } = await supabaseAdmin
-              .from('profiles')
+            const { error: updateError } = await (supabaseAdmin
+              .from('profiles') as any)
               .update({
                 subscription_status: 'free',
                 grace_period_ends_at: gracePeriodEndsAt.toISOString(),
@@ -223,8 +231,8 @@ export async function GET(request: NextRequest) {
               expiredCount = userIdsToExpire.length
 
               // Also update workspaces
-              await supabaseAdmin
-                .from('workspaces')
+              await (supabaseAdmin
+                .from('workspaces') as any)
                 .update({
                   subscription_status: 'free',
                   grace_period_ends_at: gracePeriodEndsAt.toISOString(),
@@ -233,8 +241,8 @@ export async function GET(request: NextRequest) {
                 .in('owner_id', userIdsToExpire)
 
               // Clean up webhooks for expired trials (Slack/Discord are not available on free tier)
-              await supabaseAdmin
-                .from('profiles')
+              await (supabaseAdmin
+                .from('profiles') as any)
                 .update({
                   slack_webhook_url: null,
                   discord_webhook_url: null,
@@ -247,7 +255,7 @@ export async function GET(request: NextRequest) {
               const { data: workspaces } = await supabaseAdmin
                 .from('workspaces')
                 .select('id')
-                .in('owner_id', userIdsToExpire)
+                .in('owner_id', userIdsToExpire) as { data: Array<{ id: string }> | null }
 
               if (workspaces && workspaces.length > 0) {
                 const workspaceIds = workspaces.map(w => w.id)
@@ -258,7 +266,9 @@ export async function GET(request: NextRequest) {
                   .from('monitors')
                   .select('id, grace_period_seconds')
                   .in('workspace_id', workspaceIds)
-                  .lt('expected_interval_seconds', freeMinInterval)
+                  .lt('expected_interval_seconds', freeMinInterval) as {
+                    data: Array<{ id: string; grace_period_seconds: number | null }> | null
+                  }
 
                 if (monitorsToUpdate && monitorsToUpdate.length > 0) {
                   const currentTime = new Date()
@@ -269,8 +279,8 @@ export async function GET(request: NextRequest) {
                       currentTime.getTime() + freeMinInterval * 1000 + gracePeriod * 1000
                     )
 
-                    await supabaseAdmin
-                      .from('monitors')
+                    await (supabaseAdmin
+                      .from('monitors') as any)
                       .update({
                         expected_interval_seconds: freeMinInterval,
                         next_expected_ping_at: nextExpectedPing.toISOString(),
@@ -291,7 +301,15 @@ export async function GET(request: NextRequest) {
           .not('grace_period_ends_at', 'is', null)
           .lte('grace_period_ends_at', nowISO)
           .eq('subscription_status', 'free')
-          .eq('subscription_tier', 'free')
+          .eq('subscription_tier', 'free') as {
+            data: Array<{
+              id: string
+              owner_id: string
+              subscription_tier: string
+              grace_period_ends_at: string
+            }> | null
+            error: any
+          }
 
         if (gracePeriodError) {
           console.error('Error fetching expired grace periods:', gracePeriodError)
@@ -309,7 +327,10 @@ export async function GET(request: NextRequest) {
               .select('id, created_at')
               .eq('workspace_id', workspace.id)
               .neq('status', 'paused')
-              .order('created_at', { ascending: true }) // Oldest first
+              .order('created_at', { ascending: true }) as {
+                data: Array<{ id: string; created_at: string }> | null
+                error: any
+              }
 
             if (monitorsError) {
               console.error(`Error fetching monitors for workspace ${workspace.id}:`, monitorsError)
@@ -326,8 +347,8 @@ export async function GET(request: NextRequest) {
             const monitorIdsToBlock = monitorsToBlock.map(m => m.id)
 
             if (monitorIdsToBlock.length > 0) {
-              const { error: blockError } = await supabaseAdmin
-                .from('monitors')
+              const { error: blockError } = await (supabaseAdmin
+                .from('monitors') as any)
                 .update({
                   status: 'paused',
                   updated_at: nowISO,
