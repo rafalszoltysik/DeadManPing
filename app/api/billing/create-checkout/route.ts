@@ -86,11 +86,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to get or create workspace' }, { status: 500 })
     }
 
-    // Pobierz walutę z query param lub body
-    const { currency: currencyFromBody } = body
-    const currency = (currencyFromBody && ['usd', 'eur', 'pln'].includes(currencyFromBody))
-      ? currencyFromBody as Currency
-      : 'usd' as Currency
+    // Zawsze używaj USD
+    const currency: Currency = 'usd'
 
     // Pobierz Price ID dla wybranej waluty
     const priceId = await getPriceIdForPlan(plan as PlanKey, currency)

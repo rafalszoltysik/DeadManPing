@@ -22,10 +22,8 @@ function BillingContent() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [plans, setPlans] = useState<Plan[]>([])
-  const [currency, setCurrency] = useState<string>('usd')
-  const [availableCurrencies, setAvailableCurrencies] = useState<string[]>(['usd'])
+  const [currency] = useState<string>('usd')
   const [loading, setLoading] = useState(true)
-  const [loadingPrices, setLoadingPrices] = useState(false)
 
   useEffect(() => {
     const plan = searchParams.get('plan')
@@ -37,13 +35,8 @@ function BillingContent() {
   }, [searchParams])
 
   useEffect(() => {
-    // Pobierz walutę z localStorage (jeśli użytkownik wcześniej wybrał)
-    const savedCurrency = localStorage.getItem('preferred_currency')
-    
-    // Jeśli nie ma zapisanej, API wykryje z kraju. Jeśli jest, użyj jej.
-    const url = savedCurrency 
-      ? `/api/billing/prices?currency=${savedCurrency}`
-      : `/api/billing/prices`
+    // Zawsze używaj USD
+    const url = `/api/billing/prices?currency=usd`
     
     // Pobierz ceny z API
     fetch(url)
@@ -51,8 +44,6 @@ function BillingContent() {
       .then((data) => {
       if (data.plans) {
         setPlans(data.plans)
-        setCurrency(data.currency || 'usd')
-        setAvailableCurrencies(data.availableCurrencies || ['usd'])
       }
       })
       .catch((err) => {
@@ -122,57 +113,11 @@ function BillingContent() {
     )
   }
 
-  const handleCurrencyChange = async (newCurrency: 'usd' | 'eur' | 'pln') => {
-    if (newCurrency === currency) return
-
-    const startTime = Date.now()
-    const minAnimationTime = 500 // Minimalny czas animacji w ms
-
-    try {
-      // Zapisz w localStorage
-      localStorage.setItem('preferred_currency', newCurrency)
-
-      // Przeładuj ceny z nową walutą
-      setLoadingPrices(true)
-      const response = await fetch(`/api/billing/prices?currency=${newCurrency}`)
-      const data = await response.json()
-      
-      if (data.plans) {
-        setPlans(data.plans)
-        setCurrency(data.currency || newCurrency)
-        setAvailableCurrencies(data.availableCurrencies || ['usd'])
-      }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update currency')
-    } finally {
-      const elapsedTime = Date.now() - startTime
-      const remainingTime = Math.max(0, minAnimationTime - elapsedTime)
-      
-      setTimeout(() => {
-        setLoadingPrices(false)
-      }, remainingTime)
-    }
-  }
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-6 gap-4">
+      <div className="mb-4 sm:mb-6">
         <h1 className="text-2xl sm:text-3xl font-bold">Choose Your Plan</h1>
-        <div className="flex items-center gap-2">
-          <label htmlFor="currency-select" className="text-sm font-medium text-muted-foreground">
-            Currency:
-          </label>
-          <select
-            id="currency-select"
-            value={currency}
-            onChange={(e) => handleCurrencyChange(e.target.value as 'usd' | 'eur' | 'pln')}
-            className="px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth text-sm"
-          >
-            <option value="usd">USD ($)</option>
-            <option value="eur">EUR (€)</option>
-            <option value="pln">PLN (zł)</option>
-          </select>
-        </div>
       </div>
 
       {error && (

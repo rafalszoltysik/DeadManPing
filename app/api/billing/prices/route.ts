@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-prices'
 import { PLAN_FEATURES } from '@/lib/stripe'
-import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
+import { type Currency } from '@/lib/currency-detection'
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,17 +12,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Pobierz walutę z query param (preferencja użytkownika) lub wykryj z kraju
-    const { searchParams } = new URL(request.url)
-    const currencyParam = searchParams.get('currency')
-    
-    let currency: Currency
-    if (currencyParam && ['usd', 'eur', 'pln'].includes(currencyParam)) {
-      currency = currencyParam as Currency
-    } else {
-      // Wykryj walutę na podstawie kraju użytkownika
-      currency = getCurrencyFromHeaders(request.headers)
-    }
+    // Zawsze używaj USD
+    const currency: Currency = 'usd'
 
     // Pobierz ceny z Stripe
     let prices: Map<PlanKey, Map<Currency, PriceInfo>>
@@ -40,26 +31,9 @@ export async function GET(request: NextRequest) {
       team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null },
     }
 
-    // Sprawdź które waluty są dostępne
-    const availableCurrencies: Currency[] = []
-    for (const curr of ['usd', 'eur', 'pln'] as Currency[]) {
-      const allPlansHavePrices = (['starter', 'pro', 'team'] as PlanKey[]).every(planKey => {
-        const priceInfo = prices.get(planKey)?.get(curr)
-        if (curr === 'usd') {
-          return true // USD zawsze dostępne (fallback)
-        }
-        return priceInfo && priceInfo.amount > 0 && priceInfo.priceId
-      })
-      
-      if (allPlansHavePrices) {
-        availableCurrencies.push(curr)
-      }
-    }
-
-    // Jeśli wybrana waluta nie jest dostępna, użyj pierwszej dostępnej
-    const finalCurrency = availableCurrencies.includes(currency) 
-      ? currency 
-      : (availableCurrencies.length > 0 ? availableCurrencies[0] : 'usd')
+    // Zawsze używaj USD
+    const finalCurrency: Currency = 'usd'
+    const availableCurrencies: Currency[] = ['usd']
 
     // Zbuduj odpowiedź z planami i cenami
     const plans = (['starter', 'pro', 'team'] as PlanKey[]).map((planKey) => {
