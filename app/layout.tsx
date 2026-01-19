@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CookieBanner } from '@/components/CookieBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
+import { Analytics } from "@vercel/analytics/next"
 
 export const metadata: Metadata = {
   title: "DeadManPing - Monitor Your Cron Jobs",
@@ -39,6 +40,7 @@ export default function RootLayout({
           {children}
           <CookieBanner />
         </ThemeProvider>
+        {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>
   );
