@@ -28,8 +28,8 @@ export function CookieBanner() {
   if (!showBanner) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50 animate-slide-up">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3">
+    <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-card border-t border-border shadow-lg z-50 animate-slide-up">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[20px] sm:py-[24px]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
           <div className="flex-1 min-w-0 w-full sm:w-auto">
             <p className="text-xs sm:text-sm text-foreground leading-relaxed">

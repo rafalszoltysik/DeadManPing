@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMemberLimit } from '@/lib/limits'
+import { getAppUrl } from '@/lib/get-app-url'
 
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -76,7 +77,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch members' }, { status: 500 })
     }
 
-    return NextResponse.json({ members: members || [] })
+    // Transform the data to match the Member interface
+    // Supabase returns profiles as an array, but we need a single object or null
+    const transformedMembers = (members || []).map((member: any) => ({
+      ...member,
+      profiles: Array.isArray(member.profiles) 
+        ? (member.profiles.length > 0 ? member.profiles[0] : null)
+        : member.profiles
+    }))
+
+    return NextResponse.json({ members: transformedMembers })
   } catch (error: any) {
     console.error('Error in GET /api/workspace/members:', error)
     return NextResponse.json(
@@ -228,11 +238,21 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to add member' }, { status: 500 })
       }
 
-      return NextResponse.json({ member: newMember }, { status: 201 })
+      // Transform the data to match the Member interface
+      const transformedMember = {
+        ...newMember,
+        profiles: Array.isArray(newMember?.profiles) 
+          ? (newMember.profiles.length > 0 ? newMember.profiles[0] : null)
+          : newMember?.profiles
+      }
+
+      return NextResponse.json({ member: transformedMember }, { status: 201 })
     } else {
       // User doesn't exist - send invitation via Supabase Auth
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://deadmanping.com'
-      const redirectTo = `${siteUrl}/auth/invite/accept?workspace=${workspace.id}`
+      const appUrl = getAppUrl()
+      // Redirect through callback first to handle token properly, then to set password page
+      // This ensures token from hash fragment is properly processed
+      const redirectTo = `${appUrl}/auth/callback?redirect=${encodeURIComponent(`/auth/invite/set-password?workspace=${workspace.id}${workspace.name ? `&workspace_name=${encodeURIComponent(workspace.name)}` : ''}`)}`
 
       const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
         normalizedEmail,
@@ -253,21 +273,43 @@ export async function POST(request: NextRequest) {
         )
       }
 
-      // Create pending invitation record
+      // Supabase creates a user with UUID when inviting, even if they haven't accepted yet
+      // We can link the user_id immediately
+      const invitedUserId = inviteData.user?.id
+      
+      console.log('Invitation created by Supabase:', {
+        userId: invitedUserId,
+        email: normalizedEmail,
+        workspaceId: workspace.id
+      })
+
+      // Create pending invitation record with user_id if available
+      // If user_id is set, we don't need invite_email (per database constraint)
+      const invitationData: any = {
+        workspace_id: workspace.id,
+        role: 'member',
+        status: 'pending',
+        invited_by: user.id,
+      }
+
+      if (invitedUserId) {
+        // Link user_id immediately - Supabase already created the user
+        invitationData.user_id = invitedUserId
+        // Don't set invite_email when user_id is set (per database constraint)
+      } else {
+        // Fallback: if Supabase didn't return user_id, use invite_email
+        invitationData.invite_email = normalizedEmail
+      }
+
       const { data: newInvitation, error: insertError } = await supabaseAdmin
         .from('workspace_members')
-        .insert({
-          workspace_id: workspace.id,
-          invite_email: normalizedEmail,
-          role: 'member',
-          status: 'pending',
-          invited_by: user.id,
-        })
+        .insert(invitationData)
         .select(`
           id,
           role,
           status,
           invite_email,
+          user_id,
           invited_at
         `)
         .single()
@@ -278,8 +320,9 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { 
             member: {
-              id: inviteData.user?.id || 'pending',
-              invite_email: normalizedEmail,
+              id: invitedUserId || 'pending',
+              invite_email: invitedUserId ? null : normalizedEmail,
+              user_id: invitedUserId || null,
               status: 'pending',
               role: 'member',
             },
@@ -288,6 +331,13 @@ export async function POST(request: NextRequest) {
           { status: 201 }
         )
       }
+
+      console.log('Invitation record created:', {
+        id: newInvitation.id,
+        user_id: newInvitation.user_id,
+        invite_email: newInvitation.invite_email,
+        status: newInvitation.status
+      })
 
       return NextResponse.json(
         { 

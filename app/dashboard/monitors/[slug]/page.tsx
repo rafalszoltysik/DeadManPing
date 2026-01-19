@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { MonitorDetail } from '@/components/MonitorDetail'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { verifyMonitorAccessBySlug } from '@/lib/api/monitors'
+import { AnimatedSection } from '@/components/AnimatedSection'
 
 export default async function MonitorDetailPage(props: {
   params: Promise<{ slug: string }>
@@ -36,16 +37,41 @@ export default async function MonitorDetailPage(props: {
     .order('received_at', { ascending: false })
     .limit(50)
 
+  // Get user tier
+  let userTier = 'free'
+  const { data: workspace } = await supabaseAdmin
+    .from('workspaces')
+    .select('subscription_tier')
+    .eq('owner_id', user.id)
+    .limit(1)
+    .maybeSingle() as { data: { subscription_tier: string } | null }
+
+  if (workspace) {
+    userTier = workspace.subscription_tier
+  } else {
+    // Fallback to profile tier
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('subscription_tier')
+      .eq('id', user.id)
+      .maybeSingle() as { data: { subscription_tier: string } | null }
+    
+    userTier = profile?.subscription_tier || 'free'
+  }
+
   const isOnboarding = resolvedSearchParams.onboarding === 'true'
   const pingUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/ping/${monitor.slug}`
 
   return (
-    <MonitorDetail
-      monitor={monitor}
-      pings={pings || []}
-      pingUrl={pingUrl}
-      isOnboarding={isOnboarding}
-    />
+    <AnimatedSection delay={0} direction="up" duration={800}>
+      <MonitorDetail
+        monitor={monitor}
+        pings={pings || []}
+        pingUrl={pingUrl}
+        isOnboarding={isOnboarding}
+        userTier={userTier}
+      />
+    </AnimatedSection>
   )
 }
 

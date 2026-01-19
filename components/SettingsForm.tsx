@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -25,9 +25,12 @@ interface SettingsFormProps {
   trialDaysRemaining?: number | null
   isTrialExpired?: boolean
   currency?: 'usd' | 'eur' | 'pln'
+  hasPassword?: boolean
+  hasGoogleConnection?: boolean
 }
 
-export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, isTrialExpired, currency: initialCurrency = 'usd' }: SettingsFormProps) {
+export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, isTrialExpired, currency: initialCurrency = 'usd', hasPassword: initialHasPassword = false, hasGoogleConnection: initialHasGoogleConnection = false }: SettingsFormProps) {
+  const [mounted, setMounted] = useState(false)
   const [slackWebhook, setSlackWebhook] = useState(profile.slack_webhook_url || '')
   const [discordWebhook, setDiscordWebhook] = useState(profile.discord_webhook_url || '')
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
@@ -37,60 +40,81 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const [hasPassword, setHasPassword] = useState<boolean | null>(null)
+  const [hasPassword, setHasPassword] = useState<boolean>(initialHasPassword)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
-  const [hasGoogleConnection, setHasGoogleConnection] = useState<boolean | null>(null)
+  const [hasGoogleConnection, setHasGoogleConnection] = useState<boolean>(initialHasGoogleConnection)
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [changePasswordLoading, setChangePasswordLoading] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
   const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [supportSubject, setSupportSubject] = useState('')
+  const [supportMessage, setSupportMessage] = useState('')
+  const [supportLoading, setSupportLoading] = useState(false)
+  const [supportError, setSupportError] = useState<string | null>(null)
+  const [supportSuccess, setSupportSuccess] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  const card1Ref = useRef<HTMLDivElement>(null)
+  const card2Ref = useRef<HTMLDivElement>(null)
+  const card3Ref = useRef<HTMLDivElement>(null)
+  const integrationsRef = useRef<HTMLDivElement>(null)
+  const supportRef = useRef<HTMLDivElement>(null)
+
+  // Set mounted flag after hydration to prevent flickering
+  useEffect(() => {
+    setMounted(true)
+    
+    // Add staggered animations after mount with smooth transitions
+    const timer1 = setTimeout(() => {
+      if (card1Ref.current) {
+        card1Ref.current.classList.add('slide-up')
+      }
+    }, 50)
+    
+    const timer2 = setTimeout(() => {
+      if (card2Ref.current) {
+        card2Ref.current.classList.add('slide-up')
+      }
+    }, 150)
+    
+    const timer3 = setTimeout(() => {
+      if (card3Ref.current) {
+        card3Ref.current.classList.add('slide-up')
+      }
+    }, 250)
+    
+    const timer4 = setTimeout(() => {
+      if (integrationsRef.current) {
+        integrationsRef.current.classList.add('slide-up')
+      }
+    }, 350)
+    
+    const timer5 = setTimeout(() => {
+      if (supportRef.current) {
+        supportRef.current.classList.add('slide-up')
+      }
+    }, 450)
+
+    return () => {
+      clearTimeout(timer1)
+      clearTimeout(timer2)
+      clearTimeout(timer3)
+      clearTimeout(timer4)
+      clearTimeout(timer5)
+    }
+  }, [])
 
   // Check which features are available for this tier
   const tier = profile.subscription_tier || 'free'
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(tier)
   const hasCustomWebhook = tier === 'team'
-
-  // Check if user has password and Google connection on mount
-  useEffect(() => {
-    const checkPassword = async () => {
-      try {
-        const response = await fetch('/api/auth/check-password')
-        if (response.ok) {
-          const data = await response.json()
-          setHasPassword(data.hasPassword)
-        }
-      } catch (err) {
-        console.error('Error checking password:', err)
-      }
-    }
-
-    const checkGoogleConnection = async () => {
-      try {
-        const response = await fetch('/api/auth/check-google-connection')
-        if (response.ok) {
-          const data = await response.json()
-          setHasGoogleConnection(data.hasGoogleConnection)
-        } else {
-          console.error('Error checking Google connection:', response.statusText)
-          setHasGoogleConnection(false)
-        }
-      } catch (err) {
-        console.error('Error checking Google connection:', err)
-        setHasGoogleConnection(false)
-      }
-    }
-
-    checkPassword()
-    checkGoogleConnection()
-  }, [])
 
   const handlePasswordChange = (newPassword: string) => {
     setPassword(newPassword)
@@ -494,12 +518,75 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
     }
   }
 
+  const handleSupportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSupportLoading(true)
+    setSupportError(null)
+    setSupportSuccess(false)
+
+    if (!supportSubject.trim()) {
+      setSupportError('Subject is required')
+      setSupportLoading(false)
+      return
+    }
+
+    if (!supportMessage.trim()) {
+      setSupportError('Message is required')
+      setSupportLoading(false)
+      return
+    }
+
+    try {
+      const response = await fetch('/api/support/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          subject: supportSubject.trim(),
+          message: supportMessage.trim(),
+        }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message')
+      }
+
+      setSupportSuccess(true)
+      setSupportSubject('')
+      setSupportMessage('')
+      
+      // Clear success message after 5 seconds
+      setTimeout(() => setSupportSuccess(false), 5000)
+    } catch (err: any) {
+      setSupportError(err.message || 'Failed to send message')
+    } finally {
+      setSupportLoading(false)
+    }
+  }
+
+  // Prevent rendering before hydration to avoid flickering
+  if (!mounted) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 h-64 animate-pulse" />
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 h-64 animate-pulse" />
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 h-64 animate-pulse" />
+        </div>
+        <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 h-96 animate-pulse" />
+      </div>
+    )
+  }
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6">
       {/* Subscription Section - 3 columns */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
         {/* Column 1: Subscription */}
-        <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover animate-slide-up">
+        <div ref={card1Ref} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover opacity-0 translate-y-4">
           <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Subscription</h2>
           <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
@@ -565,16 +652,14 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         </div>
 
         {/* Column 2: Account Connection */}
-        <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover animate-slide-up" style={{ animationDelay: '100ms' }}>
+        <div ref={card2Ref} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover opacity-0 translate-y-4">
           <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Account Connection</h2>
           
           <div className="space-y-4 sm:space-y-6 flex-1">
             {/* Google Connection */}
             <div>
               <h3 className="text-sm font-medium mb-2">Google Account</h3>
-              {hasGoogleConnection === null ? (
-                <p className="text-sm text-muted-foreground animate-pulse-subtle">Checking...</p>
-              ) : hasGoogleConnection ? (
+              {hasGoogleConnection ? (
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">
                     Your account is connected to Google. You can sign in with Google.
@@ -592,16 +677,14 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             {/* Password Section */}
             <div>
               <h3 className="text-sm font-medium mb-2">Password</h3>
-              {hasPassword === null ? (
-                <p className="text-sm text-muted-foreground animate-pulse-subtle">Checking...</p>
-              ) : hasPassword ? (
+              {hasPassword ? (
                 <div>
                   {!showChangePassword ? (
                     <p className="text-sm text-muted-foreground">
                       You have a password set. You can sign in with your email and password.
                     </p>
                   ) : (
-                    <div className="space-y-4 animate-slide-up">
+                      <div className="space-y-4">
                       <p className="text-sm text-muted-foreground mb-3">
                         Enter your current password and new password.
                       </p>
@@ -713,12 +796,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
                         </div>
                       </div>
                       {error && (
-                        <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                        <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                           {error}
                         </div>
                       )}
                       {success && (
-                        <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                        <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                           Password changed successfully.
                         </div>
                       )}
@@ -811,12 +894,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
                     </div>
                   </div>
                   {error && (
-                    <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                    <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                       {error}
                     </div>
                   )}
                   {success && (
-                    <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                    <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                       Password added successfully. You can now sign in with your email and password.
                     </div>
                   )}
@@ -828,7 +911,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
           {/* Buttons at the bottom */}
           <div className="mt-auto pt-3 sm:pt-4 space-y-2">
             {/* Google Account Button */}
-            {hasGoogleConnection === false && (
+            {!hasGoogleConnection && (
               <button
                 onClick={handleLinkGoogle}
                 className="w-full px-3 sm:px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg text-sm font-medium transition-smooth border border-border active:scale-95 hover:border-primary/20 hover:shadow-sm"
@@ -838,7 +921,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             )}
 
             {/* Password Buttons */}
-            {hasPassword === true && !showChangePassword && (
+            {hasPassword && !showChangePassword && (
               <button
                 onClick={() => setShowChangePassword(true)}
                 className="w-full px-3 sm:px-4 py-2 bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-lg text-sm font-medium transition-smooth border border-border active:scale-95 hover:border-primary/20 hover:shadow-sm"
@@ -847,7 +930,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               </button>
             )}
 
-            {hasPassword === true && showChangePassword && (
+            {hasPassword && showChangePassword && (
               <form onSubmit={handleChangePassword} noValidate>
                 <div className="flex flex-col sm:flex-row gap-2">
                   <button
@@ -876,7 +959,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               </form>
             )}
 
-            {hasPassword === false && (
+            {!hasPassword && (
               <form onSubmit={handleAddPassword} noValidate>
                 <button
                   type="submit"
@@ -891,7 +974,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         </div>
 
         {/* Column 3: Delete Account */}
-        <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover animate-slide-up" style={{ animationDelay: '200ms' }}>
+        <div ref={card3Ref} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 flex flex-col h-full card-hover opacity-0 translate-y-4">
           <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Delete Account</h2>
           <div className="flex-1 flex flex-col">
             <div className="bg-error/10 border border-error/20 rounded-lg p-3 sm:p-4 mb-3 sm:mb-4">
@@ -908,12 +991,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             </div>
             <div className="mt-auto space-y-2 sm:space-y-3">
               {error && (
-                <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                   {error}
                 </div>
               )}
               {success && (
-                <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-slide-up">
+                <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                   <p className="font-medium mb-1">Deletion email sent</p>
                   <p className="text-xs sm:text-sm">
                     Please check your email ({profile.email}) and click the confirmation link to delete your account. The link will expire in 24 hours.
@@ -933,7 +1016,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
       </div>
 
       {/* Integrations Section */}
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 card-hover animate-slide-up" style={{ animationDelay: '300ms' }}>
+      <div ref={integrationsRef} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 card-hover opacity-0 translate-y-4">
         <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Alert Integrations</h2>
         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
 
@@ -1053,6 +1136,74 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               {loading ? 'Saving...' : 'Save Settings'}
             </button>
           </div>
+        </form>
+      </div>
+
+      {/* Support Section */}
+      <div id="support" ref={supportRef} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 card-hover opacity-0 translate-y-4">
+        <h2 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Contact Support</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Have a question or need help? Send us a message and we'll get back to you as soon as possible.
+        </p>
+        <form onSubmit={handleSupportSubmit} className="space-y-4" noValidate>
+          <div>
+            <label htmlFor="supportSubject" className="block text-sm font-medium mb-2">
+              Subject
+            </label>
+            <input
+              id="supportSubject"
+              type="text"
+              value={supportSubject}
+              onChange={(e) => setSupportSubject(e.target.value)}
+              placeholder="What can we help you with?"
+              maxLength={200}
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="supportMessage" className="block text-sm font-medium mb-2">
+              Message
+            </label>
+            <textarea
+              id="supportMessage"
+              value={supportMessage}
+              onChange={(e) => setSupportMessage(e.target.value)}
+              placeholder="Please describe your question or issue in detail..."
+              rows={6}
+              maxLength={5000}
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30 resize-y"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {supportMessage.length}/5000 characters
+            </p>
+          </div>
+
+          {supportError && (
+            <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+              {supportError}
+            </div>
+          )}
+
+          {supportSuccess && (
+            <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+              Your message has been sent successfully. We will get back to you soon at {profile.email}.
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+            <button
+              type="submit"
+              disabled={supportLoading || !supportSubject.trim() || !supportMessage.trim()}
+              className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-smooth hover-lift active:scale-95"
+            >
+              {supportLoading ? 'Sending...' : 'Send Message'}
+            </button>
+          </div>
+
+          <p className="text-xs text-muted-foreground">
+            Your message will be sent to our support inbox. We'll get back to you as soon as possible.
+          </p>
         </form>
       </div>
 

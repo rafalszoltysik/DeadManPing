@@ -2,21 +2,83 @@
 
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
+import { useState, useEffect, useRef } from 'react'
 import { ChevronRightIcon } from './Icons'
 import { MonitorListProps } from '@/lib/types/monitor'
 import { MonitorStatusIcon, MonitorStatus } from './MonitorStatus'
 import { getStatusColor } from '@/lib/monitor-utils'
 
 export function MonitorList({ monitors }: MonitorListProps) {
+  const [mounted, setMounted] = useState(false)
+  const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Animate items after mount and when monitors change
+  useEffect(() => {
+    if (!mounted) return
+
+    const timers: NodeJS.Timeout[] = []
+    
+    // Use requestAnimationFrame to ensure DOM is ready, then add animations
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        itemRefs.current.forEach((ref, index) => {
+          if (ref && !ref.classList.contains('slide-up')) {
+            const timer = setTimeout(() => {
+              ref.classList.add('slide-up')
+            }, 100 + (index * 60))
+            timers.push(timer)
+          }
+        })
+      })
+    })
+    
+    return () => {
+      timers.forEach(timer => clearTimeout(timer))
+    }
+  }, [mounted, monitors.length])
+
+  // Prevent rendering before hydration to avoid flickering
+  if (!mounted) {
+    return (
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-sm">
+        <div className="divide-y divide-border">
+          {monitors.map((_, index) => (
+            <div
+              key={index}
+              className="px-4 sm:px-6 py-3 sm:py-4 animate-pulse"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                  <div className="w-8 h-8 bg-muted rounded-lg" />
+                  <div className="flex-1 min-w-0">
+                    <div className="h-5 bg-muted rounded mb-2 w-3/4" />
+                    <div className="h-4 bg-muted rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="w-16 h-4 bg-muted rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-sm">
       <div className="divide-y divide-border">
         {monitors.map((monitor, index) => (
           <Link
             key={monitor.id}
+            ref={(el) => {
+              itemRefs.current[index] = el
+            }}
             href={`/dashboard/monitors/${monitor.slug}`}
-            className="block hover:bg-accent/50 transition-smooth animate-fade-in group"
-            style={{ animationDelay: `${index * 0.05}s` }}
+            className="block hover:bg-accent/50 transition-smooth group opacity-0 translate-y-4"
           >
             <div className="px-4 sm:px-6 py-3 sm:py-4">
               <div className="flex items-center justify-between gap-3">

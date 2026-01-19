@@ -7,14 +7,8 @@ import { checkMonitorLimitByWorkspace } from '@/lib/limits'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AccountLinkedBanner } from '@/components/AccountLinkedBanner'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
-import { InvitationSuccessBanner } from '@/components/InvitationSuccessBanner'
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ invited?: string; workspace?: string }>
-}) {
-  const params = await searchParams
+export default async function MonitorsPage() {
   const user = await getSupabaseUser()
 
   if (!user) {
@@ -100,9 +94,6 @@ export default async function DashboardPage({
   return (
     <div>
       <AccountLinkedBanner />
-      {params.invited === 'true' && (
-        <InvitationSuccessBanner workspaceName={params.workspace || undefined} />
-      )}
       <AnimatedSection delay={0} direction="up" duration={800}>
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
           <AnimatedItem delay={100} direction="up" duration={700}>
@@ -121,7 +112,7 @@ export default async function DashboardPage({
           <AnimatedItem delay={200} direction="up" duration={700}>
             <Link
               href="/dashboard/monitors/new"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg text-sm font-medium transition-smooth hover-lift-smooth hover-scale flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-3 sm:py-2 rounded-lg text-sm font-medium transition-smooth hover-lift-smooth hover-scale flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px] sm:min-h-0"
             >
               <PlusIcon className="w-4 h-4" />
               <span>New Monitor</span>
@@ -133,7 +124,7 @@ export default async function DashboardPage({
       {/* Warning if over limit */}
       {isOverLimit && monitorLimit && (
         <AnimatedItem delay={300} direction="up" duration={700}>
-          <div className="bg-warning/10 border border-warning/20 text-warning px-4 py-3 rounded-lg mb-6 animate-scale-in">
+          <div className="bg-warning/10 border border-warning/20 text-warning px-4 py-3 rounded-lg mb-6 break-words animate-scale-in">
             <p className="font-medium mb-1">
               Monitor limit exceeded
             </p>
@@ -180,3 +171,4 @@ export default async function DashboardPage({
     </div>
   )
 }
+

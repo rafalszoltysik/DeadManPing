@@ -20,24 +20,19 @@ interface TeamMembersProps {
   workspaceId: string
   subscriptionTier: string
   maxMembers: number
+  initialMembers: Member[]
 }
 
-export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamMembersProps) {
-  const [members, setMembers] = useState<Member[]>([])
-  const [loading, setLoading] = useState(true)
+export function TeamMembers({ workspaceId, subscriptionTier, maxMembers, initialMembers }: TeamMembersProps) {
+  const [members, setMembers] = useState<Member[]>(initialMembers)
   const [error, setError] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviting, setInviting] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
   const router = useRouter()
 
-  useEffect(() => {
-    fetchMembers()
-  }, [])
-
   const fetchMembers = async () => {
     try {
-      setLoading(true)
       const response = await fetch('/api/workspace/members')
       if (!response.ok) {
         throw new Error('Failed to fetch members')
@@ -46,8 +41,6 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamM
       setMembers(data.members || [])
     } catch (err: any) {
       setError(err.message || 'Failed to load members')
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -121,14 +114,6 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers }: TeamM
       default:
         return role
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-muted-foreground">Loading members...</div>
-      </div>
-    )
   }
 
   return (

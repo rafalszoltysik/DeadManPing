@@ -2,6 +2,7 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { SettingsForm } from '@/components/SettingsForm'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export default async function SettingsPage() {
   const user = await getSupabaseUser()
@@ -65,6 +66,20 @@ export default async function SettingsPage() {
   
   const currency = (workspace?.currency || 'usd') as 'usd' | 'eur' | 'pln'
 
+  // Check password and Google connection status
+  // Use admin client to get full user info with identities
+  const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(user.id)
+  
+  // Check if user has password (email provider in identities)
+  const hasPassword = authUser?.user?.identities?.some(
+    (identity: any) => identity.provider === 'email'
+  ) || false
+
+  // Check if user has Google connection
+  const hasGoogleConnection = authUser?.user?.identities?.some(
+    (identity: any) => identity.provider === 'google'
+  ) || false
+
   // Calculate trial days remaining
   let trialDaysRemaining: number | null = null
   let isTrialExpired = false
@@ -106,20 +121,30 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-          Manage your account settings and alert integrations
-        </p>
-      </div>
+      <AnimatedSection delay={0} direction="up" duration={800}>
+        <div className="mb-6 sm:mb-8">
+          <AnimatedItem delay={100} direction="up" duration={700}>
+            <h1 className="text-2xl sm:text-3xl font-bold">Settings</h1>
+          </AnimatedItem>
+          <AnimatedItem delay={200} direction="up" duration={700}>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+              Manage your account settings and alert integrations
+            </p>
+          </AnimatedItem>
+        </div>
+      </AnimatedSection>
 
-      <SettingsForm 
-        profile={profile} 
-        hasStripeCustomer={hasStripeCustomer}
-        trialDaysRemaining={trialDaysRemaining}
-        isTrialExpired={isTrialExpired}
-        currency={currency}
-      />
+      <AnimatedSection delay={300} direction="up" duration={800}>
+        <SettingsForm 
+          profile={profile} 
+          hasStripeCustomer={hasStripeCustomer}
+          trialDaysRemaining={trialDaysRemaining}
+          isTrialExpired={isTrialExpired}
+          currency={currency}
+          hasPassword={hasPassword}
+          hasGoogleConnection={hasGoogleConnection}
+        />
+      </AnimatedSection>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/LogoutButton'
-import { Logo, LogoIcon } from '@/components/Logo'
+import { StaticLogo, StaticLogoIcon } from '@/components/StaticLogo'
 import { DashboardNav, DashboardMobileNav } from '@/components/DashboardNav'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { ActivityMonitor } from '@/components/ActivityMonitor'
@@ -20,6 +20,48 @@ export default async function DashboardLayout({
 
   // Get profile and workspace to check trial status and grace period
   const supabaseAdmin = getSupabaseAdmin()
+  
+  // Auto-accept pending invitations for this user
+  // This handles cases where user logged in normally (not through invitation link)
+  // Search by both user_id (if already linked) and email (if not yet linked)
+  const { data: pendingInvitations } = await supabaseAdmin
+    .from('workspace_members')
+    .select('id, workspace_id, user_id, invite_email')
+    .or(`user_id.eq.${user.id},invite_email.eq.${user.email?.toLowerCase().trim()}`)
+    .eq('status', 'pending') as { data: Array<{ id: string; workspace_id: string; user_id: string | null; invite_email: string | null }> | null }
+  
+  if (pendingInvitations && pendingInvitations.length > 0) {
+    // Accept all pending invitations for this user
+    for (const invitation of pendingInvitations) {
+      const updateData: {
+        status: string
+        joined_at: string
+        user_id?: string
+        invite_email?: string | null
+      } = {
+        status: 'accepted',
+        joined_at: new Date().toISOString(),
+      }
+
+      // If user_id is not set, set it and clear invite_email
+      if (!invitation.user_id) {
+        updateData.user_id = user.id
+        updateData.invite_email = null
+      }
+      // If user_id is already set, just update status
+      
+      const { error: updateError } = await (supabaseAdmin
+        .from('workspace_members') as any)
+        .update(updateData)
+        .eq('id', invitation.id)
+      
+      if (updateError) {
+        console.error('Error auto-accepting invitation:', updateError, { invitationId: invitation.id, userId: user.id })
+      } else {
+        console.log('Auto-accepted pending invitation:', { invitationId: invitation.id, workspaceId: invitation.workspace_id, userId: user.id })
+      }
+    }
+  }
   const { data: profile } = await supabaseAdmin
     .from('profiles')
     .select('subscription_status, subscription_tier, created_at, grace_period_ends_at, email_verified')
@@ -78,7 +120,7 @@ export default async function DashboardLayout({
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col h-full border-r border-border bg-card">
           <Link href="/dashboard" className="flex items-center gap-2 px-6 py-6 border-b border-border flex-shrink-0">
-            <Logo showText={true} variant="with-text" className="text-xl" />
+            <StaticLogo showText={true} variant="with-text" className="text-xl" />
           </Link>
           <DashboardNav subscriptionTier={workspace?.subscription_tier || profile?.subscription_tier || 'free'} />
           <div className="px-4 py-[9px] border-t border-border flex-shrink-0">
@@ -97,7 +139,7 @@ export default async function DashboardLayout({
         <div className="px-4">
           <div className="flex justify-between items-center h-14">
             <Link href="/dashboard" className="flex items-center gap-1.5">
-              <LogoIcon size={24} />
+              <StaticLogoIcon size={24} />
               <span className="text-lg font-bold font-mono">DMP</span>
             </Link>
             <div className="flex items-center gap-1">
@@ -203,6 +245,9 @@ export default async function DashboardLayout({
                 &copy; {new Date().getFullYear()} DeadManPing. All rights reserved.
               </p>
               <div className="flex space-x-6 mt-4 md:mt-0">
+                <Link href="/dashboard/settings#support" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">
+                  Support
+                </Link>
                 <Link href="/legal/terms" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">
                   Terms
                 </Link>
