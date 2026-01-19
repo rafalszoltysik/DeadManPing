@@ -8,6 +8,7 @@ import { PageNav } from '@/components/PageNav'
 import { createClient } from '@/lib/supabase/client'
 import { InfoTooltip, WarningTooltip } from '@/components/Tooltip'
 import { InfoIcon, WarningIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export default function SignupPage() {
   const supabase = createClient()
@@ -172,19 +173,21 @@ export default function SignupPage() {
         <div className="min-h-screen text-foreground relative">
           <PageNav />
           <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
-            <div className="max-w-md w-full space-y-6 p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
-              <div className="text-center">
-                <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4">
-                  <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
+            <AnimatedSection className="max-w-md w-full space-y-6 p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm hover-lift-smooth" delay={0} direction="up" duration={800}>
+              <AnimatedItem delay={100} direction="up" duration={700}>
+                <div className="text-center">
+                  <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 mb-4 animate-pulse-glow">
+                    <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <h2 className="text-2xl font-bold">Check your email</h2>
+                  <p className="mt-2 text-muted-foreground">
+                    We've sent a confirmation link to{' '}
+                    <span className="font-semibold text-foreground">{userEmail || 'your email address'}</span>
+                  </p>
                 </div>
-                <h2 className="text-2xl font-bold">Check your email</h2>
-                <p className="mt-2 text-muted-foreground">
-                  We've sent a confirmation link to{' '}
-                  <span className="font-semibold text-foreground">{userEmail || 'your email address'}</span>
-                </p>
-              </div>
+              </AnimatedItem>
               <div className="bg-primary/5 border border-primary/20 rounded-lg p-4 space-y-2">
                 <p className="text-sm font-medium text-foreground">Next steps:</p>
                 <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
@@ -209,7 +212,7 @@ export default function SignupPage() {
                   </button>
                 </p>
               </div>
-            </div>
+            </AnimatedSection>
           </div>
         </div>
       )
@@ -219,12 +222,14 @@ export default function SignupPage() {
       <div className="min-h-screen text-foreground relative">
         <PageNav />
         <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
-          <div className="max-w-md w-full space-y-8 p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
-            <div className="text-center">
-              <h2 className="text-2xl font-bold">Account created!</h2>
-              <p className="mt-2 text-muted-foreground">Redirecting to dashboard...</p>
-            </div>
-          </div>
+          <AnimatedSection className="max-w-md w-full space-y-8 p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm hover-lift-smooth" delay={0} direction="up" duration={800}>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <div className="text-center">
+                <h2 className="text-2xl font-bold">Account created!</h2>
+                <p className="mt-2 text-muted-foreground">Redirecting to dashboard...</p>
+              </div>
+            </AnimatedItem>
+          </AnimatedSection>
         </div>
       </div>
     )
@@ -234,32 +239,35 @@ export default function SignupPage() {
     <div className="min-h-screen text-foreground relative">
       <PageNav />
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
-        <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-center">
-              Create your account
-            </h2>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              Or{' '}
-              <Link href="/auth/login" className="font-medium text-primary hover:text-primary/80 transition-smooth">
-                sign in to existing account
-              </Link>
-            </p>
-          </div>
-          <form 
-            method="POST" 
-            action="#" 
-            className="mt-8 space-y-6" 
-            onSubmit={(e) => {
-              handleSignup(e)
-            }} 
-            noValidate
-          >
-            {error && (
-              <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
+        <AnimatedSection className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm hover-lift-smooth" delay={0} direction="up" duration={800}>
+          <AnimatedItem delay={100} direction="up" duration={700}>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center">
+                Create your account
+              </h2>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Or{' '}
+                <Link href="/auth/login" className="font-medium text-primary hover:text-primary/80 transition-smooth">
+                  sign in to existing account
+                </Link>
+              </p>
+            </div>
+          </AnimatedItem>
+          <AnimatedItem delay={200} direction="up" duration={700}>
+            <form 
+              method="POST" 
+              action="#" 
+              className="mt-8 space-y-6" 
+              onSubmit={(e) => {
+                handleSignup(e)
+              }} 
+              noValidate
+            >
+              {error && (
+                <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg animate-scale-in">
+                  {error}
+                </div>
+              )}
             <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
@@ -354,18 +362,20 @@ export default function SignupPage() {
               </label>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth"
-              >
-                {loading ? 'Creating account...' : 'Create account'}
-              </button>
-            </div>
-          </form>
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth hover-lift-smooth hover-scale"
+                >
+                  {loading ? 'Creating account...' : 'Create account'}
+                </button>
+              </div>
+            </form>
+          </AnimatedItem>
 
-          <div className="mt-6 space-y-4">
+          <AnimatedItem delay={300} direction="up" duration={700}>
+            <div className="mt-6 space-y-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border" />
@@ -375,20 +385,21 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  handleGoogleSignup(e)
-                }}
-                disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-border rounded-lg shadow-sm text-sm font-medium bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth"
-              >
-                Google
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    handleGoogleSignup(e)
+                  }}
+                  disabled={loading}
+                  className="w-full flex justify-center py-2.5 px-4 border border-border rounded-lg shadow-sm text-sm font-medium bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth hover-lift-smooth hover-scale"
+                >
+                  Google
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          </AnimatedItem>
+        </AnimatedSection>
       </div>
     </div>
   )

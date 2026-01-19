@@ -207,7 +207,65 @@ export async function GET(request: NextRequest) {
     return handleEmailVerification(request, requestUrl, token, redirect)
   }
 
-  if (!code) {
+  // Handle invitation token (from workspace invitation)
+  // Redirect to set password page instead of auto-accepting
+  if (token && type === 'invite') {
+    const workspaceId = requestUrl.searchParams.get('workspace')
+    const setPasswordUrl = new URL('/auth/invite/set-password', requestUrl.origin)
+    if (workspaceId) {
+      setPasswordUrl.searchParams.set('workspace', workspaceId)
+    }
+    setPasswordUrl.searchParams.set('token', token)
+    setPasswordUrl.searchParams.set('type', 'invite')
+    return NextResponse.redirect(setPasswordUrl)
+  }
+
+  // Check if this is an invitation flow (redirect contains /auth/invite/set-password)
+  const redirectParam = requestUrl.searchParams.get('redirect')
+  const isInvitationFlow = redirectParam?.includes('/auth/invite/set-password')
+  
+  // For invitation flow, if we have a code, exchange it and redirect to set-password
+  if (isInvitationFlow && code) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, {
+                ...options,
+                httpOnly: true,
+                sameSite: 'lax',
+                secure: requestUrl.protocol === 'https:',
+                path: '/',
+              })
+            })
+          },
+        },
+      }
+    )
+
+    const { data: sessionData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (exchangeError) {
+      console.error('Error exchanging code for session in invitation flow:', exchangeError)
+      const loginUrl = new URL('/auth/login', requestUrl.origin)
+      loginUrl.searchParams.set('error', 'Invalid or expired invitation code')
+      return NextResponse.redirect(loginUrl)
+    }
+
+    // Redirect to set-password page with session already set
+    if (redirectParam) {
+      return NextResponse.redirect(new URL(redirectParam, requestUrl.origin))
+    }
+  }
+
+  if (!code && !isInvitationFlow) {
     console.error('No OAuth code in callback URL')
     const loginUrl = new URL('/auth/login', requestUrl.origin)
     loginUrl.searchParams.set('error', 'No authentication code received')

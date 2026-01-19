@@ -39,6 +39,7 @@ export interface MonitorDetailProps {
   pings: Ping[]
   pingUrl: string
   isOnboarding?: boolean
+  userTier?: string
 }
 
 export interface MonitorListProps {

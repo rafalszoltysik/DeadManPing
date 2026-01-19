@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect, useRef } from 'react'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, WarningIcon } from './Icons'
 
 const mockMonitors = [
@@ -65,8 +66,50 @@ function getStatusLabel(status: string) {
 }
 
 export function DashboardPreview() {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const hasStartedAnimation = useRef(false)
+
+  useEffect(() => {
+    if (!containerRef.current || hasStartedAnimation.current) return
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasStartedAnimation.current) {
+            hasStartedAnimation.current = true
+            
+            // Animate items one by one
+            mockMonitors.forEach((_, index) => {
+              setTimeout(() => {
+                setVisibleItems(prev => new Set([...prev, index]))
+              }, index * 300)
+            })
+
+            // Unobserve after animation starts
+            setTimeout(() => {
+              if (containerRef.current) {
+                observer.unobserve(containerRef.current)
+              }
+            }, mockMonitors.length * 300 + 100)
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '-200px' }
+    )
+
+    const currentContainerRef = containerRef.current
+    observer.observe(currentContainerRef)
+
+    return () => {
+      if (currentContainerRef) {
+        observer.unobserve(currentContainerRef)
+      }
+    }
+  }, [])
+
   return (
-    <div className="max-w-5xl mx-auto px-4">
+    <div ref={containerRef} className="max-w-5xl mx-auto px-4">
       <div className="text-center mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
         <p className="text-muted-foreground text-base sm:text-lg">
@@ -81,12 +124,17 @@ export function DashboardPreview() {
           </div>
         </div>
         <div className="divide-y divide-border">
-          {mockMonitors.map((monitor, index) => (
-            <div
-              key={index}
-              className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-smooth animate-fade-in"
-              style={{ animationDelay: `${index * 150}ms` }}
-            >
+          {mockMonitors.map((monitor, index) => {
+            const isVisible = visibleItems.has(index)
+            return (
+              <div
+                key={index}
+                className={`px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-all duration-1200 ease-out ${
+                  isVisible 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-4'
+                }`}
+              >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                   <div className={`p-1.5 sm:p-2 rounded-lg border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
@@ -111,7 +159,8 @@ export function DashboardPreview() {
                 </div>
               </div>
             </div>
-          ))}
+          )
+          })}
         </div>
       </div>
     </div>

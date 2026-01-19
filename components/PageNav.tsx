@@ -51,8 +51,8 @@ export function PageNav() {
                     href="/dashboard/settings"
                     className="text-muted-foreground hover:text-foreground px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-smooth"
                   >
-                    <span className="hidden sm:inline">Profil</span>
-                    <span className="sm:hidden">Profil</span>
+                    <span className="hidden sm:inline">Profile</span>
+                    <span className="sm:hidden">Profile</span>
                   </Link>
                 ) : (
                   <>

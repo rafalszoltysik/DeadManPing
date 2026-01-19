@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { EyeIcon, EyeOffIcon } from '@/components/Icons'
+import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 function LoginForm() {
   const [email, setEmail] = useState('')
@@ -35,6 +36,63 @@ function LoginForm() {
       window.history.replaceState({}, '', newUrl.toString())
     }
 
+    // Handle invitation tokens in hash fragment
+    // Supabase sometimes redirects to /auth/login with access_token in hash when invitation link is clicked
+    if (typeof window !== 'undefined' && window.location.hash) {
+      const hashParams = new URLSearchParams(window.location.hash.substring(1))
+      const accessToken = hashParams.get('access_token')
+      const type = hashParams.get('type')
+      const expiresAt = hashParams.get('expires_at')
+      const refreshToken = hashParams.get('refresh_token')
+      
+      if (accessToken && type === 'invite') {
+        // This is an invitation token - set the session and redirect to invite accept
+        const setSession = async () => {
+          try {
+            const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken || '',
+            })
+
+            if (sessionError) {
+              console.error('Error setting invitation session:', sessionError)
+              setError('Failed to process invitation. Please try again.')
+              // Clear hash
+              window.history.replaceState({}, '', window.location.pathname + window.location.search)
+              return
+            }
+
+            if (sessionData?.user) {
+              // Extract workspace_id from user metadata if available
+              const workspaceId = sessionData.user.user_metadata?.workspace_id
+              
+              // Redirect to set password page (user needs to set password first)
+              if (workspaceId) {
+                router.push(`/auth/invite/set-password?workspace=${workspaceId}`)
+              } else {
+                // Try to get workspace from URL or redirect to set password
+                const workspaceParam = searchParams.get('workspace')
+                if (workspaceParam) {
+                  router.push(`/auth/invite/set-password?workspace=${workspaceParam}`)
+                } else {
+                  // No workspace ID - redirect to set password anyway (will handle in set-password page)
+                  router.push('/auth/invite/set-password')
+                }
+              }
+            }
+          } catch (err: any) {
+            console.error('Error processing invitation:', err)
+            setError('Failed to process invitation. Please try again.')
+            // Clear hash
+            window.history.replaceState({}, '', window.location.pathname + window.location.search)
+          }
+        }
+        
+        setSession()
+        return // Don't process other errors if we're handling invitation
+      }
+    }
+
     // Read search params only on client after hydration
     const redirectParam = searchParams.get('redirect')
     if (redirectParam) {
@@ -47,6 +105,19 @@ function LoginForm() {
       if (errorParam === 'verification_link_expired') {
         setError('The email verification link has expired. Please request a new verification email below.')
         setShowResendForm(true)
+      } else if (errorParam === 'invalid_invitation') {
+        // Check if there's an invitation token in the hash
+        if (typeof window !== 'undefined' && window.location.hash) {
+          const hashParams = new URLSearchParams(window.location.hash.substring(1))
+          const accessToken = hashParams.get('access_token')
+          const type = hashParams.get('type')
+          
+          if (accessToken && type === 'invite') {
+            // The token is in the hash, we'll handle it above
+            return
+          }
+        }
+        setError('Invalid or expired invitation link. Please contact the workspace owner for a new invitation.')
       } else {
         // Decode error message if it's URL encoded
         try {
@@ -83,7 +154,7 @@ function LoginForm() {
       newUrl.searchParams.delete('reason')
       window.history.replaceState({}, '', newUrl.toString())
     }
-  }, [searchParams])
+  }, [searchParams, router, supabase.auth])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -185,43 +256,46 @@ function LoginForm() {
     <div className="min-h-screen text-foreground relative">
       <PageNav />
       <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] px-4 py-8">
-        <div className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm">
-          <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-center">
-              Sign in to DeadManPing
-            </h2>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              Or{' '}
-              <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/80 transition-smooth">
-                create a new account
-              </Link>
-            </p>
-          </div>
-          <form 
-            method="POST" 
-            action="#" 
-            className="mt-8 space-y-6" 
-            onSubmit={(e) => {
-              handleLogin(e)
-            }} 
-            noValidate
-          >
-            {searchParams.get('passwordReset') === 'true' && (
-              <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-                Password reset successful. You can now sign in with your new password.
-              </div>
-            )}
-            {error && (
-              <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg">
-                {error}
-              </div>
-            )}
-            {success && (
-              <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg">
-                {success}
-              </div>
-            )}
-            <div className="space-y-4">
+        <AnimatedSection className="max-w-md w-full space-y-8 p-6 sm:p-8 bg-card border border-border rounded-lg sm:rounded-xl shadow-sm hover-lift-smooth" delay={0} direction="up" duration={800}>
+          <AnimatedItem delay={100} direction="up" duration={700}>
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center">
+                Sign in to DeadManPing
+              </h2>
+              <p className="mt-2 text-center text-sm text-muted-foreground">
+                Or{' '}
+                <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/80 transition-smooth">
+                  create a new account
+                </Link>
+              </p>
+            </div>
+          </AnimatedItem>
+          <AnimatedItem delay={200} direction="up" duration={700}>
+            <form 
+              method="POST" 
+              action="#" 
+              className="mt-8 space-y-6" 
+              onSubmit={(e) => {
+                handleLogin(e)
+              }} 
+              noValidate
+            >
+              {searchParams.get('passwordReset') === 'true' && (
+                <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg animate-scale-in">
+                  Password reset successful. You can now sign in with your new password.
+                </div>
+              )}
+              {error && (
+                <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg animate-scale-in">
+                  {error}
+                </div>
+              )}
+              {success && (
+                <div className="bg-success/10 border border-success/20 text-success px-4 py-3 rounded-lg animate-scale-in">
+                  {success}
+                </div>
+              )}
+              <div className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-2">
                   Email address
@@ -274,19 +348,21 @@ function LoginForm() {
               </div>
             </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth"
-              >
-                {loading ? 'Signing in...' : 'Sign in'}
-              </button>
-            </div>
-          </form>
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth hover-lift-smooth hover-scale"
+                >
+                  {loading ? 'Signing in...' : 'Sign in'}
+                </button>
+              </div>
+            </form>
+          </AnimatedItem>
 
           {showResendForm && (
-            <div className="bg-card border border-border rounded-lg p-4 space-y-3">
+            <AnimatedItem delay={0} direction="up" duration={600}>
+              <div className="bg-card border border-border rounded-lg p-4 space-y-3 animate-scale-in">
               <p className="text-sm font-medium">Resend verification email</p>
               <form onSubmit={handleResendVerification} className="space-y-3">
                 <input
@@ -319,10 +395,12 @@ function LoginForm() {
                   </button>
                 </div>
               </form>
-            </div>
+              </div>
+            </AnimatedItem>
           )}
 
-          <div className="mt-6 space-y-4">
+          <AnimatedItem delay={300} direction="up" duration={700}>
+            <div className="mt-6 space-y-4">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-border" />
@@ -332,20 +410,21 @@ function LoginForm() {
               </div>
             </div>
 
-            <div>
-              <button
-                type="button"
-                onClick={(e) => {
-                  handleGoogleLogin(e)
-                }}
-                disabled={loading}
-                className="w-full flex justify-center py-2.5 px-4 border border-border rounded-lg shadow-sm text-sm font-medium bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth"
-              >
-                Google
-              </button>
+              <div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    handleGoogleLogin(e)
+                  }}
+                  disabled={loading}
+                  className="w-full flex justify-center py-2.5 px-4 border border-border rounded-lg shadow-sm text-sm font-medium bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ring disabled:opacity-50 transition-smooth hover-lift-smooth hover-scale"
+                >
+                  Google
+                </button>
+              </div>
             </div>
-          </div>
-        </div>
+          </AnimatedItem>
+        </AnimatedSection>
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import { Monitor, Ping, MonitorDetailProps } from '@/lib/types/monitor'
 import { WarningTooltip, InfoTooltip } from './Tooltip'
 import { WarningIcon, InfoIcon } from './Icons'
 import { captureSoftError } from '@/lib/sentry/client'
+import { TIER_LIMITS } from '@/lib/limits'
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -54,7 +55,7 @@ function getStatusLabel(status: string) {
   }
 }
 
-export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pingUrl, isOnboarding }: MonitorDetailProps) {
+export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pingUrl, isOnboarding, userTier: initialUserTier = 'free' }: MonitorDetailProps) {
   const [monitor, setMonitor] = useState(initialMonitor)
   const [pings, setPings] = useState(initialPings)
   const [copiedUrl, setCopiedUrl] = useState(false)
@@ -75,7 +76,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [slackWebhook, setSlackWebhook] = useState('')
   const [discordWebhook, setDiscordWebhook] = useState('')
   const [customWebhook, setCustomWebhook] = useState('')
-  const [userTier, setUserTier] = useState('free')
+  const [userTier, setUserTier] = useState(initialUserTier)
   const [loading, setLoading] = useState(false)
   const [payloadError, setPayloadError] = useState<string | null>(null)
   const [payloadSuccess, setPayloadSuccess] = useState(false)
@@ -91,12 +92,15 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [intervalSuccess, setIntervalSuccess] = useState(false)
   const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours'>('minutes')
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
-  const [minIntervalMinutes, setMinIntervalMinutes] = useState(5)
+  
+  // Calculate minIntervalMinutes from tier
+  const limit = TIER_LIMITS[userTier as keyof typeof TIER_LIMITS] || TIER_LIMITS.free
+  const minIntervalMinutes = limit.minInterval / 60
   
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(userTier)
   const hasCustomWebhook = userTier === 'team'
 
-  // Fetch user tier
+  // Poll for tier changes (e.g., after subscription upgrade/downgrade)
   useEffect(() => {
     async function fetchUserTier() {
       try {
@@ -105,18 +109,23 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
           const data = await response.json()
           const tier = data.tier || 'free'
           setUserTier(tier)
-          
-          // Set minimum interval based on tier
-          const { TIER_LIMITS } = await import('@/lib/limits')
-          const limit = TIER_LIMITS[tier as keyof typeof TIER_LIMITS] || TIER_LIMITS.free
-          const minMinutes = limit.minInterval / 60
-          setMinIntervalMinutes(minMinutes)
         }
       } catch (err) {
         console.error('Error fetching user tier:', err)
       }
     }
-    fetchUserTier()
+    
+    // Poll for tier changes every 30 seconds
+    const interval = setInterval(fetchUserTier, 30000)
+    
+    // Also check when user returns to tab/window
+    const handleFocus = () => fetchUserTier()
+    window.addEventListener('focus', handleFocus)
+    
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [])
 
   // Convert interval to appropriate unit for display

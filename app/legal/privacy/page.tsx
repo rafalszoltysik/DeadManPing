@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 
 export default function PrivacyPage() {
@@ -174,7 +175,11 @@ export default function PrivacyPage() {
               <li>Withdraw consent where processing is based on consent</li>
             </ul>
             <p className="text-muted-foreground mb-4">
-              To exercise these rights, contact us at support@deadmanping.com.
+              To exercise these rights, please{' '}
+              <Link href="/contact" className="text-primary hover:underline">
+                contact us through our contact form
+              </Link>
+              .
             </p>
           </section>
 
@@ -245,15 +250,23 @@ export default function PrivacyPage() {
               <p className="text-muted-foreground mb-2">
               <strong>Business Name:</strong> Rafał Szołtysik<br />
               <strong>Legal Form:</strong> Sole Proprietorship<br />
-              <strong>Address:</strong> [Adres Twojego wirtualnego biura]<br />
+              <strong>Address:</strong> Wolna 35, 44-187 Wielowieś, Poland<br />
               <strong>NIP:</strong> 9691672125<br />
               <strong>REGON:</strong> 541870021<br />
-              <strong>Email:</strong> support@deadmanping.com<br />
+              <strong>Contact:</strong>{' '}
+              <Link href="/contact" className="text-primary hover:underline">
+                Contact Form
+              </Link>
+              <br />
               <strong>Website:</strong> https://deadmanping.com
               </p>
             </div>
             <p className="text-muted-foreground mb-4">
-              If you have questions about this Privacy Policy or wish to exercise your rights under GDPR, please contact us using the information above.
+              If you have questions about this Privacy Policy or wish to exercise your rights under GDPR, please{' '}
+              <Link href="/contact" className="text-primary hover:underline">
+                contact us through our contact form
+              </Link>
+              .
             </p>
           </section>
         </div>

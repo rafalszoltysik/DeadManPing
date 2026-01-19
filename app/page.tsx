@@ -4,10 +4,10 @@ import { PageNav } from '@/components/PageNav'
 import { Logo } from '@/components/Logo'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
 import { DashboardPreview } from '@/components/DashboardPreview'
-import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { PricingSection } from '@/components/PricingSection'
 import { CTAButton } from '@/components/CTAButton'
 import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
+import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { SiPython, SiNodedotjs, SiRuby, SiGo, SiPhp } from 'react-icons/si'
 import { FaTerminal } from 'react-icons/fa'
 
@@ -62,80 +62,82 @@ export default function Home() {
         {/* Hero Section */}
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <section className="pt-12 sm:pt-20 pb-12 sm:pb-16 text-center">
-          <div className="max-w-4xl mx-auto animate-fade-in">
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight">
-              Keep your cron.<br className="hidden sm:block" />We verify results.
-            </h1>
-            <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-              One curl line. Zero execution changes. Stop writing alert connectors.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
-              <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
-                Start monitoring in 2 minutes
-              </CTAButton>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              14-day free trial · No credit card required
-            </p>
-          </div>
+          <AnimatedSection className="max-w-4xl mx-auto" delay={0} direction="fade" duration={1000}>
+            <AnimatedItem delay={100} direction="up" duration={800}>
+              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight animate-gradient">
+                Keep your cron.<br className="hidden sm:block" />We verify results.
+              </h1>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={800}>
+              <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
+                One curl line. Zero execution changes. Stop writing alert connectors.
+              </p>
+            </AnimatedItem>
+            <AnimatedItem delay={300} direction="up" duration={800}>
+              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
+                <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift-smooth shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover-scale">
+                  Start monitoring in 2 minutes
+                </CTAButton>
+              </div>
+            </AnimatedItem>
+            <AnimatedItem delay={400} direction="up" duration={800}>
+              <p className="text-sm text-muted-foreground">
+                14-day free trial · No credit card required
+              </p>
+            </AnimatedItem>
+          </AnimatedSection>
         </section>
 
         {/* Dashboard Preview */}
-        <section className="py-8 sm:py-12 lg:py-16">
+        <AnimatedSection className="py-8 sm:py-12 lg:py-16" delay={0} direction="up" duration={900}>
           <DashboardPreview />
-        </section>
+        </AnimatedSection>
 
-        {/* Problem Section */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="The problem">
-            <div className="max-w-4xl mx-auto px-4">
+        {/* The uncomfortable truth */}
+        <AnimatedSection className="py-12 sm:py-16 lg:py-20" delay={0} direction="up" duration={800}>
+          <div className="max-w-4xl mx-auto px-4">
+            <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">The uncomfortable truth</h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl text-center mb-8 sm:mb-12 text-muted-foreground">
                 Most cron jobs don't fail loudly.<br />
                 They succeed… incorrectly.
               </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6">
-                <AnimatedItem delay={0}>
-                  <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover">
-                    <p className="text-sm text-muted-foreground">zero rows processed</p>
-                  </div>
-                </AnimatedItem>
-                <AnimatedItem delay={100}>
-                  <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover">
-                    <p className="text-sm text-muted-foreground">partial data</p>
-                  </div>
-                </AnimatedItem>
-                <AnimatedItem delay={200}>
-                  <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover">
-                    <p className="text-sm text-muted-foreground">wrong counts</p>
-                  </div>
-                </AnimatedItem>
-                <AnimatedItem delay={300}>
-                  <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover">
-                    <p className="text-sm text-muted-foreground">outdated results</p>
-                  </div>
-                </AnimatedItem>
-                <AnimatedItem delay={400}>
-                  <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover">
-                    <p className="text-sm text-muted-foreground">skipped logic paths</p>
-                  </div>
-                </AnimatedItem>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6" staggerDelay={80}>
+              <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
+                <p className="text-sm text-muted-foreground">zero rows processed</p>
               </div>
+              <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
+                <p className="text-sm text-muted-foreground">partial data</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
+                <p className="text-sm text-muted-foreground">wrong counts</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
+                <p className="text-sm text-muted-foreground">outdated results</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
+                <p className="text-sm text-muted-foreground">skipped logic paths</p>
+              </div>
+            </StaggerContainer>
+            <AnimatedItem delay={600} direction="up" duration={700}>
               <p className="text-center mt-8 text-lg text-muted-foreground">
                 And no alert fires.
               </p>
-            </div>
-          </section>
+            </AnimatedItem>
+          </div>
         </AnimatedSection>
 
         {/* Why Other Tools Fail */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20" aria-label="Why other tools fail">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Why other tools fail" delay={0} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Why existing monitoring tools fail here</h2>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Why existing monitoring tools fail here</h2>
+            </AnimatedItem>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-              <AnimatedItem delay={0}>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8" staggerDelay={100}>
                 <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover h-full">
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     Plain webhooks (Discord / Slack)
@@ -148,9 +150,7 @@ export default function Home() {
                   DeadManPing = Stop writing connectors. One curl line. Rest in the dashboard.
                 </p>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={150}>
                 <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover h-full">
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     Error monitoring tools
@@ -163,9 +163,7 @@ export default function Home() {
                   If your job returns count = 3 instead of 100, error trackers are silent.
                 </p>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={300}>
                 <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover h-full">
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     Binary ping monitors
@@ -178,9 +176,7 @@ export default function Home() {
                   "The cron ran" is not the same as "The cron did its job."
                 </p>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={450}>
                 <div className="bg-card border border-border rounded-lg p-6 sm:p-8 card-hover h-full">
                   <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
                     Job schedulers
@@ -193,21 +189,20 @@ export default function Home() {
                   DeadManPing works with your existing cron. No migration needed.
                 </p>
                 </div>
-              </AnimatedItem>
-            </div>
+            </StaggerContainer>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* What DeadManPing is NOT */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT" delay={0} direction="up" duration={800}>
             <div className="max-w-4xl mx-auto px-4">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
-                What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> is NOT
-              </h2>
-              <AnimatedItem delay={0}>
-                <div className="bg-background border border-border rounded-lg p-6 sm:p-8 mb-6 card-hover">
+              <AnimatedItem delay={100} direction="up" duration={700}>
+                <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
+                  What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> is NOT
+                </h2>
+              </AnimatedItem>
+              <AnimatedItem delay={200} direction="up" duration={700}>
+                <div className="bg-background border border-border rounded-lg p-6 sm:p-8 mb-6 card-hover hover-lift-smooth">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
                     <div className="flex items-center justify-center gap-3 transition-all duration-300 hover:translate-x-1 hover:text-foreground">
                       <span className="text-muted-foreground/60 text-lg flex-shrink-0 transition-transform duration-300 hover:scale-125">•</span>
@@ -228,8 +223,8 @@ export default function Home() {
                   </div>
                 </div>
               </AnimatedItem>
-              <AnimatedItem delay={150}>
-                <div className="bg-background border border-border rounded-lg p-6 sm:p-8 card-hover">
+              <AnimatedItem delay={300} direction="up" duration={700}>
+                <div className="bg-background border border-border rounded-lg p-6 sm:p-8 card-hover hover-lift-smooth">
                   <div className="flex items-center justify-center gap-4">
                     <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/20 hover:scale-110 hover:rotate-12">
                       <span className="text-primary text-lg sm:text-xl font-bold transition-transform duration-300 hover:scale-125">✓</span>
@@ -246,77 +241,66 @@ export default function Home() {
                 </div>
               </AnimatedItem>
             </div>
-          </section>
-        </AnimatedSection>
+          </AnimatedSection>
 
         {/* What You DON'T Need to Build */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What you don't need to build">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What you don't need to build" delay={0} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You DON'T Need to Build</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8">
-              <AnimatedItem delay={0}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You DON'T Need to Build</h2>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8" staggerDelay={80}>
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     Connectors to Slack/Discord/Email
                   </p>
                   <p className="text-sm text-muted-foreground">Everything is in the dashboard</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={100}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     Logic to check if job executed
                   </p>
                   <p className="text-sm text-muted-foreground">DeadManPing does this automatically</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={200}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     State management
                   </p>
                   <p className="text-sm text-muted-foreground">DeadManPing tracks state changes</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={300}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     Recovery logic
                   </p>
                   <p className="text-sm text-muted-foreground">Alerts only on state change, no spam</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={400}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     Monitoring dashboard
                   </p>
                   <p className="text-sm text-muted-foreground">Everything in one place</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={500}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
                     Payload validation logic
                   </p>
                   <p className="text-sm text-muted-foreground">Rules in UI, not in code</p>
                 </div>
-              </AnimatedItem>
-            </div>
-            <p className="text-center text-lg sm:text-xl font-semibold">
-              Stop writing alert connectors. One curl line. Rest in the dashboard.
-            </p>
+            </StaggerContainer>
+            <AnimatedItem delay={600} direction="up" duration={700}>
+              <p className="text-center text-lg sm:text-xl font-semibold">
+                Stop writing alert connectors. One curl line. Rest in the dashboard.
+              </p>
+            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* How It Works */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works">
-          <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works" delay={0} direction="up" duration={800}>
+          <AnimatedItem delay={100} direction="up" duration={700}>
+            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
+          </AnimatedItem>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8 lg:space-y-12">
-            <AnimatedItem delay={0}>
               <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
@@ -380,9 +364,7 @@ fi`}</code>
                 </div>
               </div>
               </div>
-            </AnimatedItem>
 
-            <AnimatedItem delay={200}>
               <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
@@ -438,9 +420,7 @@ fi`}</code>
                 </div>
               </div>
               </div>
-            </AnimatedItem>
 
-            <AnimatedItem delay={400}>
               <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
                 <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
                   <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
@@ -488,21 +468,21 @@ fi`}</code>
                 </div>
               </div>
               </div>
-            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Real-World Examples */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Real-world examples">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={0} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Real-World Examples</h2>
-            <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
-              Different types of verification that DeadManPing can monitor:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <AnimatedItem delay={0}>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Real-World Examples</h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
+              <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
+                Different types of verification that DeadManPing can monitor:
+              </p>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" staggerDelay={80}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#3776ab]/20 flex items-center justify-center flex-shrink-0 border border-[#3776ab]/30">
@@ -529,9 +509,7 @@ if os.path.exists(backup_file):
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={100}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#339933]/20 flex items-center justify-center flex-shrink-0 border border-[#339933]/30">
@@ -560,9 +538,7 @@ try {
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={200}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#4eaa25]/20 flex items-center justify-center flex-shrink-0 border border-[#4eaa25]/30">
@@ -585,9 +561,7 @@ curl ... -d "{\\"duration_seconds\\": $((END_TIME - START_TIME))}"`}</code>
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={300}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#cc342d]/20 flex items-center justify-center flex-shrink-0 border border-[#cc342d]/30">
@@ -609,9 +583,7 @@ system("curl ... -d '{\\"files_deleted\\": #{files_deleted}}'")
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={400}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#00add8]/20 flex items-center justify-center flex-shrink-0 border border-[#00add8]/30">
@@ -640,9 +612,7 @@ exec.Command("curl", "...", "-d",
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
 
-              <AnimatedItem delay={500}>
                 <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
                   <div className="flex items-center gap-2 mb-3">
                     <div className="w-8 h-8 rounded-lg bg-[#777bb4]/20 flex items-center justify-center flex-shrink-0 border border-[#777bb4]/30">
@@ -669,87 +639,82 @@ if (strpos($output, 'success') !== false) {
                     </div>
                   </div>
                 </div>
-              </AnimatedItem>
-            </div>
-            <p className="text-center text-sm sm:text-base text-muted-foreground mt-8 sm:mt-12">
-              And more... Works with any language that can execute curl.
-            </p>
+            </StaggerContainer>
+            <AnimatedItem delay={600} direction="up" duration={700}>
+              <p className="text-center text-sm sm:text-base text-muted-foreground mt-8 sm:mt-12">
+                And more... Works with any language that can execute curl.
+              </p>
+            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Pricing */}
-        <PricingSection />
+        <AnimatedSection delay={0} direction="up" duration={900}>
+          <PricingSection />
+        </AnimatedSection>
 
         {/* What DeadManPing Does */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20" aria-label="What DeadManPing does">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="What DeadManPing does" delay={0} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> does differently</h2>
-            <p className="text-xl sm:text-2xl mb-4 sm:mb-6 text-muted-foreground">
-              We separate execution from evaluation.
-            </p>
-            <p className="text-lg sm:text-xl mb-8 sm:mb-12">
-              Your cron runs your scripts.<br />
-              Your scripts send facts.<br />
-              We verify if that's OK.
-            </p>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> does differently</h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
+              <p className="text-xl sm:text-2xl mb-4 sm:mb-6 text-muted-foreground">
+                We separate execution from evaluation.
+              </p>
+            </AnimatedItem>
+            <AnimatedItem delay={300} direction="up" duration={700}>
+              <p className="text-lg sm:text-xl mb-8 sm:mb-12">
+                Your cron runs your scripts.<br />
+                Your scripts send facts.<br />
+                We verify if that's OK.
+              </p>
+            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Key Differentiators */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators" delay={0} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Key Differentiators</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-              <AnimatedItem delay={0}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Key Differentiators</h2>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8" staggerDelay={80}>
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Result-aware monitoring</h3>
                   <p className="text-muted-foreground">We monitor outcomes, not just execution.</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={100}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Declarative rules</h3>
                   <p className="text-muted-foreground">Rules live in the UI, not inside scripts.</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={200}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Built-in recovery logic</h3>
                   <p className="text-muted-foreground">Alerts fire on state change, not every run.</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={300}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Missing-run detection</h3>
                   <p className="text-muted-foreground">If your cron never executes — you still get alerted.</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={400}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Zero custom logic per customer</h3>
                   <p className="text-muted-foreground">Same payload schema. Same evaluation engine. No support burden.</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={500}>
-                <div className="bg-background border border-border rounded-lg p-6 card-hover h-full">
+                <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">No-code configuration</h3>
                   <p className="text-muted-foreground">Set up monitoring rules without writing any code or deploying changes.</p>
                 </div>
-              </AnimatedItem>
-            </div>
+            </StaggerContainer>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Feature Comparison Table */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20" aria-label="Feature comparison">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Feature comparison" delay={0} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You Get</h2>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You Get</h2>
+            </AnimatedItem>
             <div className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
@@ -807,19 +772,20 @@ if (strpos($output, 'success') !== false) {
               </div>
             </div>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Integrations Section */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Integrations">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Integrations" delay={0} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto text-center px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Integrate with Your Workflow</h2>
-            <p className="text-muted-foreground mb-8 sm:mb-12 text-base sm:text-lg">
-              Get alerts where your team already works
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <AnimatedItem delay={0}>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Integrate with Your Workflow</h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
+              <p className="text-muted-foreground mb-8 sm:mb-12 text-base sm:text-lg">
+                Get alerts where your team already works
+              </p>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6" staggerDelay={100}>
                 <div className="bg-background border border-border rounded-lg p-6 hover-lift transition-smooth group card-hover">
                   <div className="flex items-center justify-center mb-4">
                     <div className="bg-[#5865F2]/10 p-4 rounded-lg group-hover:bg-[#5865F2]/20 transition-smooth group-hover:scale-110">
@@ -829,8 +795,6 @@ if (strpos($output, 'success') !== false) {
                   <h3 className="font-semibold mb-2">Discord</h3>
                   <p className="text-sm text-muted-foreground">Real-time alerts in your Discord channels</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={150}>
                 <div className="bg-background border border-border rounded-lg p-6 hover-lift transition-smooth group card-hover">
                   <div className="flex items-center justify-center mb-4">
                     <div className="bg-[#4A154B]/10 p-4 rounded-lg group-hover:bg-[#4A154B]/20 transition-smooth group-hover:scale-110 flex items-center justify-center">
@@ -840,8 +804,6 @@ if (strpos($output, 'success') !== false) {
                   <h3 className="font-semibold mb-2 text-center">Slack</h3>
                   <p className="text-sm text-muted-foreground text-center">Notifications directly in your Slack workspace</p>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={300}>
                 <div className="bg-background border border-border rounded-lg p-6 hover-lift transition-smooth group card-hover">
                   <div className="flex items-center justify-center mb-4">
                     <div className="bg-primary/10 p-4 rounded-lg group-hover:bg-primary/20 transition-smooth group-hover:scale-110">
@@ -851,19 +813,17 @@ if (strpos($output, 'success') !== false) {
                   <h3 className="font-semibold mb-2">Email</h3>
                   <p className="text-sm text-muted-foreground">Instant email notifications for critical alerts</p>
                 </div>
-              </AnimatedItem>
-            </div>
+            </StaggerContainer>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Who This Is For */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Who this is for">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Who this is for" delay={0} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
-            <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Who This Is For</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12">
-              <AnimatedItem delay={0}>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Who This Is For</h2>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 mb-8 sm:mb-12" staggerDelay={150}>
                 <div className="bg-background border border-success/30 rounded-lg p-6 sm:p-8 h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-success/50">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
@@ -894,8 +854,6 @@ if (strpos($output, 'success') !== false) {
                     </li>
                   </ul>
                 </div>
-              </AnimatedItem>
-              <AnimatedItem delay={150}>
                 <div className="bg-background border border-error/30 rounded-lg p-6 sm:p-8 h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-error/50">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center flex-shrink-0">
@@ -922,50 +880,52 @@ if (strpos($output, 'success') !== false) {
                     </li>
                   </ul>
                 </div>
+            </StaggerContainer>
+              <AnimatedItem delay={400} direction="up" duration={700}>
+                <div className="bg-background border-2 border-primary/30 rounded-lg p-6 sm:p-8 text-center hover-lift-smooth">
+                  <p className="text-lg sm:text-xl font-semibold mb-2">
+                    It's not an error tracker.
+                  </p>
+                  <p className="text-lg sm:text-xl font-semibold text-primary">
+                    It's a job outcome verifier.
+                  </p>
+                </div>
               </AnimatedItem>
-            </div>
-            <AnimatedItem delay={300}>
-              <div className="bg-background border-2 border-primary/30 rounded-lg p-6 sm:p-8 text-center">
-                <p className="text-lg sm:text-xl font-semibold mb-2">
-                  It's not an error tracker.
-                </p>
-                <p className="text-lg sm:text-xl font-semibold text-primary">
-                  It's a job outcome verifier.
-                </p>
-              </div>
-            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* Positioning One-liner */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Positioning">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Positioning" delay={0} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <p className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed">
-              Error trackers tell you when your job crashed.<br />
-              <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> tells you when it succeeded… incorrectly.
-            </p>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <p className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed">
+                Error trackers tell you when your job crashed.<br />
+                <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> tells you when it succeeded… incorrectly.
+              </p>
+            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
 
         {/* CTA Section */}
-        <AnimatedSection>
-          <section className="py-12 sm:py-16 lg:py-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started">
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started" delay={0} direction="up" duration={900}>
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
           <div className="relative z-10">
-            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-              Stop trusting green checkmarks.
-            </h2>
-            <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
-              Monitor results, not assumptions.
-            </p>
-            <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
-              Get started in 2 minutes
-            </CTAButton>
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                Stop trusting green checkmarks.
+              </h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
+              <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
+                Monitor results, not assumptions.
+              </p>
+            </AnimatedItem>
+            <AnimatedItem delay={300} direction="up" duration={700}>
+              <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift-smooth hover-scale shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
+                Get started in 2 minutes
+              </CTAButton>
+            </AnimatedItem>
           </div>
-        </section>
         </AnimatedSection>
       </main>
 
