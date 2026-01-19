@@ -103,7 +103,7 @@ function SetPasswordForm() {
     }
     
     checkToken()
-  }, [searchParams])
+  }, [searchParams, supabase.auth])
 
   const handlePasswordChange = (newPassword: string) => {
     setPassword(newPassword)

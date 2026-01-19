@@ -98,11 +98,12 @@ export function DashboardPreview() {
       { threshold: 0.1, rootMargin: '-200px' }
     )
 
-    observer.observe(containerRef.current)
+    const currentContainerRef = containerRef.current
+    observer.observe(currentContainerRef)
 
     return () => {
-      if (containerRef.current) {
-        observer.unobserve(containerRef.current)
+      if (currentContainerRef) {
+        observer.unobserve(currentContainerRef)
       }
     }
   }, [])

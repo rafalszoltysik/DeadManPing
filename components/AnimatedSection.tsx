@@ -85,11 +85,12 @@ export function AnimatedSection({
       { threshold: 0.1, rootMargin }
     )
 
-    observer.observe(ref.current)
+    const currentRef = ref.current
+    observer.observe(currentRef)
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [delay, duration, prefersReducedMotion, isMobile])
@@ -213,11 +214,12 @@ export function AnimatedItem({
       { threshold: 0.1, rootMargin }
     )
 
-    observer.observe(ref.current)
+    const currentRef = ref.current
+    observer.observe(currentRef)
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [delay, duration, prefersReducedMotion, isMobile])
@@ -344,11 +346,12 @@ export function StaggerContainer({
       { threshold: 0.1, rootMargin }
     )
 
-    observer.observe(ref.current)
+    const currentRef = ref.current
+    observer.observe(currentRef)
 
     return () => {
-      if (ref.current) {
-        observer.unobserve(ref.current)
+      if (currentRef) {
+        observer.unobserve(currentRef)
       }
     }
   }, [staggerDelay, prefersReducedMotion, isMobile])

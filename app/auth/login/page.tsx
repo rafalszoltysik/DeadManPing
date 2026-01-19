@@ -154,7 +154,7 @@ function LoginForm() {
       newUrl.searchParams.delete('reason')
       window.history.replaceState({}, '', newUrl.toString())
     }
-  }, [searchParams])
+  }, [searchParams, router, supabase.auth])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
