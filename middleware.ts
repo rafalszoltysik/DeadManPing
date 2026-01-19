@@ -28,7 +28,21 @@ export async function middleware(request: NextRequest) {
   )
 
   // Get user from Supabase session (this also refreshes the session)
-  const { data: { user } } = await supabase.auth.getUser()
+  // Ignore expected "no session" errors - they just mean user is not authenticated
+  const { data: { user }, error } = await supabase.auth.getUser()
+  
+  // Only log unexpected auth errors (ignore expected "no session" scenarios)
+  if (error) {
+    const isExpectedNoSessionError = 
+      error.code === 'refresh_token_not_found' ||
+      error.name === 'AuthSessionMissingError' ||
+      (error.message?.toLowerCase().includes('session missing') || 
+       error.message?.toLowerCase().includes('auth session missing'))
+    
+    if (!isExpectedNoSessionError) {
+      console.error('Auth error in middleware:', error)
+    }
+  }
 
   // Handle OAuth callback code on homepage - redirect to /auth/callback
   if (request.nextUrl.pathname === '/' && request.nextUrl.searchParams.has('code')) {

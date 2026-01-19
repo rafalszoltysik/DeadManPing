@@ -2,32 +2,26 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { setPostHogOptOut } from '@/lib/posthog/client'
 
+/**
+ * Informational banner about analytics (non-intrusive)
+ * Analytics are enabled by default as "legitimate interest" (GDPR Art. 6(1)(f))
+ * Users can opt-out via /legal/opt-out page
+ * This banner is shown once and can be dismissed
+ */
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
 
   useEffect(() => {
-    // Check if user has already made a choice about cookies
-    const cookieConsent = localStorage.getItem('cookieConsent')
-    if (!cookieConsent) {
+    // Check if user has already dismissed the banner
+    const bannerDismissed = localStorage.getItem('analyticsBannerDismissed')
+    if (!bannerDismissed) {
       setShowBanner(true)
     }
   }, [])
 
-  const acceptCookies = () => {
-    localStorage.setItem('cookieConsent', 'accepted')
-    // Enable PostHog tracking (opt-in)
-    setPostHogOptOut(false)
-    setShowBanner(false)
-    // Reload page to initialize analytics with consent
-    window.location.reload()
-  }
-
-  const rejectCookies = () => {
-    localStorage.setItem('cookieConsent', 'rejected')
-    // Disable PostHog tracking (opt-out)
-    setPostHogOptOut(true)
+  const dismissBanner = () => {
+    localStorage.setItem('analyticsBannerDismissed', 'true')
     setShowBanner(false)
   }
 
@@ -35,31 +29,27 @@ export function CookieBanner() {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50 animate-slide-up">
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8 py-2 sm:py-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
           <div className="flex-1 min-w-0 w-full sm:w-auto">
             <p className="text-xs sm:text-sm text-foreground leading-relaxed">
-              We use cookies to enhance your experience, analyze site usage, and assist in our marketing efforts.
-              By clicking "Accept All", you consent to our use of cookies.{' '}
+              We use anonymous analytics to improve our service. No cookies are used for tracking.{' '}
+              <Link href="/legal/opt-out" className="text-primary hover:text-primary/80 underline transition-smooth break-words">
+                Opt-out
+              </Link>
+              {' or '}
               <Link href="/legal/cookies" className="text-primary hover:text-primary/80 underline transition-smooth break-words">
                 Learn more
               </Link>
             </p>
           </div>
-          <div className="flex gap-2 sm:gap-3 w-full sm:w-auto">
-            <button
-              onClick={rejectCookies}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-foreground bg-secondary hover:bg-secondary/80 border border-border rounded-md transition-smooth flex-1 sm:flex-initial"
-            >
-              Reject
-            </button>
-            <button
-              onClick={acceptCookies}
-              className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-primary-foreground bg-primary hover:bg-primary/90 rounded-md transition-smooth shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 flex-1 sm:flex-initial"
-            >
-              Accept All
-            </button>
-          </div>
+          <button
+            onClick={dismissBanner}
+            className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:text-foreground/80 transition-smooth flex-shrink-0"
+            aria-label="Dismiss banner"
+          >
+            ✕
+          </button>
         </div>
       </div>
     </div>

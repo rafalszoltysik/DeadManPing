@@ -5,6 +5,7 @@ import { LogoutButton } from '@/components/LogoutButton'
 import { Logo, LogoIcon } from '@/components/Logo'
 import { DashboardNav, DashboardMobileNav } from '@/components/DashboardNav'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
+import { ActivityMonitor } from '@/components/ActivityMonitor'
 
 export default async function DashboardLayout({
   children,
@@ -72,6 +73,7 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen text-foreground relative">
+      <ActivityMonitor timeoutMinutes={30} />
       {/* Sidebar for desktop */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col h-full border-r border-border bg-card">
@@ -209,6 +211,9 @@ export default async function DashboardLayout({
                 </Link>
                 <Link href="/legal/cookies" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">
                   Cookies
+                </Link>
+                <Link href="/legal/opt-out" className="text-sm text-muted-foreground hover:text-foreground transition-smooth">
+                  Opt-Out
                 </Link>
               </div>
             </div>

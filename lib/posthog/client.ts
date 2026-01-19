@@ -10,6 +10,9 @@ import type {
 
 /**
  * Check if PostHog is initialized and opt-out is not set
+ * 
+ * Developers can block analytics by setting: localStorage.setItem('blockAnalytics', 'true')
+ * Users can opt-out via the opt-out page: /legal/opt-out
  */
 export function isPostHogEnabled(): boolean {
   // Disable PostHog in development to avoid sending test data
@@ -17,11 +20,13 @@ export function isPostHogEnabled(): boolean {
   
   if (typeof window === 'undefined') return false
   
-  // Check for developer block cookie (custom cookie to block analytics for developers)
+  // Check for developer block flags (custom localStorage to block analytics for developers)
+  // To disable analytics as a developer: localStorage.setItem('blockAnalytics', 'true')
   const blockAnalytics = localStorage.getItem('blockAnalytics')
-  if (blockAnalytics === 'true') return false
+  const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
+  if (blockAnalytics === 'true' || blockEssentialCookies === 'true') return false
   
-  // Check for opt-out flag
+  // Check for user opt-out flag (users can opt-out via /legal/opt-out page)
   const optOut = localStorage.getItem('posthog_opt_out')
   if (optOut === 'true') return false
   

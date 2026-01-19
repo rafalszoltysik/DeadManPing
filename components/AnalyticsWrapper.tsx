@@ -5,33 +5,50 @@ import { Analytics } from "@vercel/analytics/next"
 import { PostHogPageView } from '@/components/PostHogPageView'
 
 /**
- * Wrapper component that conditionally renders analytics based on cookie consent
- * This ensures GDPR compliance - analytics only load after user consent
+ * Wrapper component that conditionally renders analytics
+ * Analytics (Vercel Analytics and PostHog) are enabled by default as "legitimate interest" (GDPR Art. 6(1)(f))
+ * Both services run in cookieless/anonymized mode and don't require explicit consent
+ * 
+ * Developers can block analytics by setting: localStorage.setItem('blockAnalytics', 'true')
+ * Users can opt-out via the opt-out page: /legal/opt-out
  */
 export function AnalyticsWrapper() {
-  const [hasConsent, setHasConsent] = useState(false)
+  const [shouldRender, setShouldRender] = useState(false)
 
   useEffect(() => {
-    // Check cookie consent on mount
-    const checkConsent = () => {
-      // Check for developer block cookie (custom cookie to block analytics for developers)
+    // Check if analytics should be enabled
+    const checkAnalytics = () => {
+      // Check for developer block flags (custom localStorage to block analytics for developers)
+      // To disable analytics as a developer: localStorage.setItem('blockAnalytics', 'true')
       const blockAnalytics = localStorage.getItem('blockAnalytics')
-      if (blockAnalytics === 'true') {
-        setHasConsent(false)
+      const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
+      
+      if (blockAnalytics === 'true' || blockEssentialCookies === 'true') {
+        setShouldRender(false)
         return
       }
       
-      const cookieConsent = localStorage.getItem('cookieConsent')
-      setHasConsent(cookieConsent === 'accepted')
+      // Check for user opt-out flag (users can opt-out via /legal/opt-out page)
+      const posthogOptOut = localStorage.getItem('posthog_opt_out')
+      if (posthogOptOut === 'true') {
+        // User has opted out of PostHog, but Vercel Analytics is cookieless and doesn't need opt-out
+        // We'll still render Vercel Analytics as it's fully anonymous
+        // PostHog will be blocked by instrumentation-client.ts checking posthog_opt_out
+        setShouldRender(true)
+        return
+      }
+      
+      // Analytics are enabled by default (no consent required - legitimate interest)
+      setShouldRender(true)
     }
     
     // Initial check
-    checkConsent()
+    checkAnalytics()
     
-    // Listen for storage changes (in case consent changes in another tab/window)
+    // Listen for storage changes (in case block flags or opt-out change in another tab/window)
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'cookieConsent' || e.key === 'blockAnalytics') {
-        checkConsent()
+      if (e.key === 'blockAnalytics' || e.key === 'blockEssentialCookies' || e.key === 'posthog_opt_out') {
+        checkAnalytics()
       }
     }
     
@@ -42,9 +59,9 @@ export function AnalyticsWrapper() {
     }
   }, [])
 
-  // Don't render analytics until user has given consent
-  // Also check if we're in production
-  if (!hasConsent || process.env.NODE_ENV !== 'production') {
+  // Don't render analytics in development
+  // Also check if analytics should be blocked
+  if (!shouldRender || process.env.NODE_ENV !== 'production') {
     return null
   }
 
