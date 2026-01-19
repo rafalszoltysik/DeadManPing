@@ -118,15 +118,31 @@ export default function PrivacyPage() {
 
             <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">6.2 Analytics Services</h3>
             <p className="text-muted-foreground mb-4">
-              We use analytics services to understand how users interact with our Service. These services require your consent:
+              We use analytics services to understand how users interact with our Service and to improve performance. 
+              These services are enabled by default based on our legitimate interest (GDPR Article 6(1)(f)) to improve 
+              our service quality and user experience.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              <strong>Privacy-First Configuration:</strong> Our analytics services operate in <strong>cookieless and anonymized mode</strong>. 
+              No cookies are used for tracking, and IP addresses are anonymized before processing. This ensures that no 
+              personally identifiable information is collected.
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li><strong>PostHog:</strong> Product analytics to track user behavior and improve our Service. 
-                We collect page views, button clicks, and user interactions. You can opt-out at any time.
+              <li><strong>PostHog:</strong> Product analytics configured in cookieless mode with anonymized IP addresses. 
+                We collect anonymous page views, button clicks, and user interactions to improve our Service. 
+                No cookies or persistent identifiers are used. You can opt-out at any time via our{' '}
+                <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a>.
                 (<a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
-              <li><strong>Vercel Analytics:</strong> Website usage analytics to measure performance and user experience.
+              <li><strong>Vercel Analytics:</strong> Website usage analytics that is fully anonymous and cookieless by design. 
+                No personal data is collected or stored. This service measures performance and user experience without 
+                tracking individual users.
                 (<a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
             </ul>
+            <p className="text-muted-foreground mb-4">
+              <strong>Your Rights:</strong> Under GDPR Article 21, you have the right to object to processing based on 
+              legitimate interest. You can opt-out of PostHog analytics at any time by visiting our{' '}
+              <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a>.
+            </p>
 
             <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">6.3 Error Tracking</h3>
             <p className="text-muted-foreground mb-4">
@@ -153,6 +169,8 @@ export default function PrivacyPage() {
               <li>Request deletion of your data</li>
               <li>Export your data</li>
               <li>Opt-out of marketing communications</li>
+              <li>Object to processing based on legitimate interest (e.g., analytics) - visit our{' '}
+                <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a></li>
               <li>Withdraw consent where processing is based on consent</li>
             </ul>
             <p className="text-muted-foreground mb-4">
@@ -166,26 +184,30 @@ export default function PrivacyPage() {
               We use cookies and similar technologies for the following purposes:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li><strong>Essential cookies:</strong> Maintain your session and authentication state (required for Service functionality)</li>
-              <li><strong>Analytics cookies:</strong> Analyze usage patterns to improve our Service (require your consent)</li>
+              <li><strong>Essential cookies:</strong> Maintain your session and authentication state (required for Service functionality). 
+                These cookies are enabled by default and cannot be disabled.</li>
+              <li><strong>Analytics (Legitimate Interest):</strong> We use analytics services in cookieless/anonymized mode to analyze 
+                usage patterns and improve our Service. These services are enabled by default based on our legitimate interest 
+                (GDPR Article 6(1)(f)) and do not require explicit consent as they don't use cookies or collect personally 
+                identifiable information.</li>
               <li><strong>Preference cookies:</strong> Remember your preferences and settings</li>
             </ul>
             <p className="text-muted-foreground mb-4">
-              We use a cookie consent banner to obtain your consent before using analytics cookies. You can:
-            </p>
-            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li>Accept all cookies to enable analytics</li>
-              <li>Reject non-essential cookies (analytics will be disabled)</li>
-              <li>Change your preferences at any time through your browser settings</li>
-            </ul>
-            <p className="text-muted-foreground mb-4">
-              For detailed information about the cookies we use, please see our 
-              <a href="/legal/cookies" className="text-primary hover:underline"> Cookie Policy</a>.
+              <strong>Analytics Configuration:</strong> Our analytics services (PostHog and Vercel Analytics) operate in 
+              cookieless and anonymized mode. No cookies are used for tracking, and IP addresses are anonymized before processing. 
+              This means we can use these services without requiring explicit consent, as they don't collect personally 
+              identifiable information.
             </p>
             <p className="text-muted-foreground mb-4">
-              <strong>Opting out of analytics:</strong> You can opt-out of PostHog analytics at any time by rejecting 
-              cookies in our cookie banner or by contacting us. Note that disabling analytics cookies may affect 
-              our ability to improve the Service based on usage data.
+              For detailed information about the cookies and analytics we use, please see our{' '}
+              <a href="/legal/cookies" className="text-primary hover:underline">Cookie Policy</a>.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              <strong>Opting out of analytics:</strong> Under GDPR Article 21, you have the right to object to processing 
+              based on legitimate interest. You can opt-out of PostHog analytics at any time by visiting our{' '}
+              <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a>. 
+              Vercel Analytics is fully anonymous and cookieless, so it doesn't require opt-out, but you can block it using 
+              browser extensions if desired.
             </p>
           </section>
 

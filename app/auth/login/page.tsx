@@ -73,6 +73,16 @@ function LoginForm() {
       // For now, we'll just clear any errors
       setError(null)
     }
+    
+    // Check for inactivity logout reason
+    const reason = searchParams.get('reason')
+    if (reason === 'inactivity') {
+      setError('You have been logged out due to inactivity. Please sign in again.')
+      // Remove reason from URL
+      const newUrl = new URL(window.location.href)
+      newUrl.searchParams.delete('reason')
+      window.history.replaceState({}, '', newUrl.toString())
+    }
   }, [searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {

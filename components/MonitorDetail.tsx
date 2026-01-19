@@ -1105,7 +1105,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Configure fields to validate in your payload. Only declared fields are processed, rest is ignored.
+                Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum 5 fields per monitor. Field names must be 100 characters or less.
               </p>
               
               {payloadFields.length === 0 ? (

@@ -14,9 +14,22 @@ export function init() {
   }
 
   // Initialize Sentry on the client (only in production)
+  // Sentry uses essential cookies that don't require user consent
+  // But developers can block them using blockEssentialCookies flag
   const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN
   if (sentryDsn) {
-    Sentry.init({
+    // Check for developer block flag for essential cookies (only in browser)
+    let shouldInitSentry = true
+    if (typeof window !== 'undefined') {
+      const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
+      if (blockEssentialCookies === 'true') {
+        // Developer has blocked essential cookies, don't initialize Sentry
+        shouldInitSentry = false
+      }
+    }
+    
+    if (shouldInitSentry) {
+      Sentry.init({
       dsn: sentryDsn,
       
       // Adjust this value in production, or use tracesSampler for greater control
@@ -97,10 +110,13 @@ export function init() {
         }),
       ],
     });
+    }
   }
 
   // Initialize PostHog (only in production)
-  // Skip PostHog in development to avoid sending test data
+  // PostHog is configured in cookieless/anonymized mode for GDPR compliance
+  // Analytics are enabled by default as "legitimate interest" (Art. 6(1)(f) GDPR)
+  // Users can opt-out via posthog_opt_out flag, developers can block via blockAnalytics flag
 
   // Check if PostHog is configured
   const apiKey = process.env.NEXT_PUBLIC_POSTHOG_KEY
@@ -111,37 +127,28 @@ export function init() {
     return
   }
 
-  // Check for cookie consent and opt-out flag (only in browser)
+  // Check for developer block flag and user opt-out (only in browser)
   if (typeof window !== 'undefined') {
     // Check for developer block flag (custom localStorage to block analytics for developers)
+    // To disable analytics as a developer: localStorage.setItem('blockAnalytics', 'true')
     const blockAnalytics = localStorage.getItem('blockAnalytics')
-    if (blockAnalytics === 'true') {
+    const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
+    if (blockAnalytics === 'true' || blockEssentialCookies === 'true') {
       // Developer has blocked analytics, don't initialize PostHog
       return
     }
     
-    // Check cookie consent first (GDPR compliance)
-    const cookieConsent = localStorage.getItem('cookieConsent')
-    if (cookieConsent === 'rejected') {
-      // User rejected cookies, don't initialize PostHog
-      localStorage.setItem('posthog_opt_out', 'true')
-      return
-    }
-    
-    // Also check for explicit opt-out flag
+    // Check for user opt-out flag (users can opt-out via /legal/opt-out page)
     const optOut = localStorage.getItem('posthog_opt_out')
     if (optOut === 'true') {
       // User has opted out, don't initialize PostHog
       return
     }
-    
-    // If user accepted cookies, ensure PostHog is not opted out
-    if (cookieConsent === 'accepted') {
-      localStorage.removeItem('posthog_opt_out')
-    }
   }
 
-  // Initialize PostHog
+  // Initialize PostHog in cookieless/anonymized mode
+  // This configuration ensures GDPR compliance without requiring explicit consent
+  // cookieless_mode: "always" - no cookies, no localStorage, fully anonymous tracking
   posthog.init(apiKey, {
     api_host: host,
     // Use defaults for recommended settings
@@ -152,12 +159,13 @@ export function init() {
     capture_pageview: false,
     // Disable session recording (not needed for product analytics)
     disable_session_recording: true,
-    // Disable feature flags (not using them yet)
-    disable_persistence: false,
+    // Cookieless mode - no cookies, no localStorage, fully anonymous
+    // This ensures GDPR compliance without requiring explicit consent
+    cookieless_mode: 'always',
     // Load PostHog asynchronously
     loaded: (posthog) => {
       if (process.env.NODE_ENV === 'development') {
-        console.log('PostHog initialized')
+        console.log('PostHog initialized in cookieless/anonymized mode')
       }
     },
   })

@@ -35,20 +35,33 @@ export default function CookiesPage() {
               These cookies cannot be disabled as they are essential for the Service to work.
             </p>
 
-            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">Analytics Cookies</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">Analytics (Legitimate Interest)</h3>
             <p className="text-muted-foreground mb-4">
-              We use analytics cookies to understand how visitors interact with our Service. This helps us improve
-              the user experience and identify issues. These cookies require your consent and can be disabled.
+              We use analytics services to understand how visitors interact with our Service and to improve performance. 
+              These services are enabled by default based on our legitimate interest (GDPR Article 6(1)(f)) to improve 
+              our service quality and user experience.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              <strong>Important:</strong> Our analytics services operate in <strong>cookieless and anonymized mode</strong>. 
+              No cookies are used for tracking, and IP addresses are anonymized before processing. This means we can 
+              use these services without requiring explicit consent, as they don't collect personally identifiable information.
             </p>
             <p className="text-muted-foreground mb-4">
               We use the following analytics services:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li><strong>PostHog:</strong> Product analytics to understand how users interact with our Service. 
+              <li><strong>PostHog:</strong> Product analytics configured in cookieless mode with anonymized IP addresses. 
+                No cookies or persistent identifiers are used. You can opt-out at any time via our{' '}
+                <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a>.
                 Privacy policy: <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://posthog.com/privacy</a></li>
-              <li><strong>Vercel Analytics:</strong> Website usage analytics to improve performance and user experience.
-                Privacy policy: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://vercel.com/legal/privacy-policy</a></li>
+              <li><strong>Vercel Analytics:</strong> Website usage analytics that is fully anonymous and cookieless by design. 
+                No personal data is collected or stored. Privacy policy: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://vercel.com/legal/privacy-policy</a></li>
             </ul>
+            <p className="text-muted-foreground mb-4">
+              <strong>Your Rights:</strong> Under GDPR Article 21, you have the right to object to processing based on 
+              legitimate interest. You can opt-out of PostHog analytics at any time by visiting our{' '}
+              <a href="/legal/opt-out" className="text-primary hover:underline">opt-out page</a>.
+            </p>
           </section>
 
           <section className="mb-6 sm:mb-8">

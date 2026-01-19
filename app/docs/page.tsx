@@ -321,6 +321,14 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
                     You'll need to upgrade your plan to create more monitors. Existing monitors will continue to work.
                   </p>
                 </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-semibold mb-2">
+                    Are there limits on payload validation fields?
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Yes. Each monitor can have up to 5 payload validation fields. Field names must be 100 characters or less. Only declared fields are processed during validation, any additional fields in the payload are ignored.
+                  </p>
+                </div>
               </div>
               </section>
             </AnimatedSection>

@@ -131,9 +131,9 @@ export function PricingSection() {
           {/* Pro Plan */}
           {proPlan && (
             <AnimatedItem delay={200}>
-              <div className="bg-card border-2 border-primary rounded-lg p-6 sm:p-8 hover-lift transition-smooth relative flex flex-col h-full card-hover hover-glow">
-                <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 animate-pulse-subtle">
-                  <span className="bg-primary text-primary-foreground text-xs font-semibold px-2 sm:px-3 py-1 rounded-full shadow-lg">
+              <div className="bg-card border-2 border-primary rounded-lg p-6 sm:p-8 hover-lift transition-smooth relative flex flex-col h-full hover:border-primary hover-glow group">
+                <div className="absolute -top-3 sm:-top-4 left-1/2 -translate-x-1/2 z-10">
+                  <span className="bg-primary text-primary-foreground text-xs font-semibold px-2 sm:px-3 py-1 rounded-full shadow-lg transition-all duration-300 group-hover:shadow-[0_0_20px_rgba(var(--primary)/0.5)]" style={{ opacity: 1 }}>
                     MOST POPULAR
                   </span>
                 </div>
