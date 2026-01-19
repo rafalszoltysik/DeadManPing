@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels } = body
+    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, scheduleType, cronExpression } = body
 
     // Validate input
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -48,8 +48,32 @@ export async function POST(request: NextRequest) {
       return badRequestResponse('Monitor name must be 100 characters or less')
     }
 
-    if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 60) {
-      return badRequestResponse('Expected interval must be at least 60 seconds (1 minute)')
+    // Validate schedule type
+    const schedule = scheduleType || 'interval'
+    let validatedIntervalSeconds = expectedIntervalSeconds
+    let validatedCronExpression: string | null = null
+
+    if (schedule === 'cron') {
+      if (!cronExpression || typeof cronExpression !== 'string' || cronExpression.trim().length === 0) {
+        return badRequestResponse('Cron expression is required when using cron schedule type')
+      }
+      
+      // Validate cron expression
+      try {
+        const { CronExpressionParser } = await import('cron-parser')
+        CronExpressionParser.parse(cronExpression.trim())
+        validatedCronExpression = cronExpression.trim()
+        // For cron, we still need an expected interval for grace period calculations
+        // Use minimum interval (60 seconds) as default
+        validatedIntervalSeconds = 60
+      } catch (err: any) {
+        return badRequestResponse(`Invalid cron expression: ${err.message || 'Invalid format'}`)
+      }
+    } else {
+      if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 60) {
+        return badRequestResponse('Expected interval must be at least 60 seconds (1 minute)')
+      }
+      validatedIntervalSeconds = expectedIntervalSeconds
     }
 
     const gracePeriod = gracePeriodSeconds || 3600
@@ -127,7 +151,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const intervalLimit = await checkIntervalLimitByWorkspace(workspaceId, expectedIntervalSeconds)
+    const intervalLimit = await checkIntervalLimitByWorkspace(workspaceId, validatedIntervalSeconds)
     if (!intervalLimit.allowed) {
       const minMinutes = intervalLimit.minInterval / 60
       const minSeconds = intervalLimit.minInterval
@@ -166,9 +190,27 @@ export async function POST(request: NextRequest) {
 
     // Calculate next expected ping time
     const currentTime = new Date()
-    const nextExpectedPing = new Date(
-      currentTime.getTime() + expectedIntervalSeconds * 1000 + gracePeriod * 1000
-    )
+    let nextExpectedPing: Date
+    
+    if (schedule === 'cron' && validatedCronExpression) {
+      // Calculate next run from cron expression
+      try {
+        const { CronExpressionParser } = await import('cron-parser')
+        const interval = CronExpressionParser.parse(validatedCronExpression, {
+          currentDate: currentTime,
+        })
+        nextExpectedPing = interval.next().toDate()
+      } catch {
+        // Fallback to interval-based calculation
+        nextExpectedPing = new Date(
+          currentTime.getTime() + validatedIntervalSeconds * 1000 + gracePeriod * 1000
+        )
+      }
+    } else {
+      nextExpectedPing = new Date(
+        currentTime.getTime() + validatedIntervalSeconds * 1000 + gracePeriod * 1000
+      )
+    }
 
     // Prepare monitor data
     const monitorData: any = {
@@ -176,11 +218,12 @@ export async function POST(request: NextRequest) {
       workspace_id: workspaceId,
       name: name.trim(),
       slug,
-      expected_interval_seconds: expectedIntervalSeconds,
+      expected_interval_seconds: validatedIntervalSeconds,
       grace_period_seconds: gracePeriod,
       payload_validation_rules: validatedRules,
       status: 'pending',
       next_expected_ping_at: nextExpectedPing.toISOString(),
+      ...(validatedCronExpression && { cron_expression: validatedCronExpression }),
     }
 
     // Add alert channel overrides if provided

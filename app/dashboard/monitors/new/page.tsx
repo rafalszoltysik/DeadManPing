@@ -2,16 +2,40 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import { TIER_LIMITS } from '@/lib/limits'
 import { WarningTooltip, InfoTooltip } from '@/components/Tooltip'
 import { WarningIcon, InfoIcon } from '@/components/Icons'
+import { CronExpressionParser } from 'cron-parser'
+import { format, addDays, startOfDay, getDaysInMonth, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, addYears } from 'date-fns'
 
 function NewMonitorForm() {
   const [name, setName] = useState('')
   const [userTier, setUserTier] = useState<keyof typeof TIER_LIMITS>('free')
+  const [scheduleType, setScheduleType] = useState<'interval' | 'cron' | 'calendar'>('interval')
   const [minIntervalMinutes, setMinIntervalMinutes] = useState(5) // Default to free tier minimum
   const [intervalMinutes, setIntervalMinutes] = useState(5) // Default to minimum
   const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [cronExpression, setCronExpression] = useState('0 */5 * * * *') // Default: every 5 minutes
+  const [cronError, setCronError] = useState<string | null>(null)
+  const [nextRuns, setNextRuns] = useState<Date[]>([])
+  const [cronInputMode, setCronInputMode] = useState<'visual' | 'manual'>('manual')
+  // Visual cron builder state
+  const [cronMinute, setCronMinute] = useState<string>('*/5')
+  const [cronHour, setCronHour] = useState<string>('*')
+  const [cronDay, setCronDay] = useState<string>('*')
+  const [cronMonth, setCronMonth] = useState<string>('*')
+  const [cronWeekday, setCronWeekday] = useState<string>('*')
+  const [selectedTime, setSelectedTime] = useState({ hour: 0, minute: 0 })
+  const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<number[]>([])
+  const [cronFrequency, setCronFrequency] = useState<'every-minute' | 'every-hour' | 'daily' | 'weekly' | 'monthly' | 'custom'>('every-minute')
+  // Calendar schedule state
+  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), 'yyyy-MM-dd'))
+  const [selectedHour, setSelectedHour] = useState<number>(0)
+  const [selectedMinute, setSelectedMinute] = useState<number>(0)
+  const [repeatType, setRepeatType] = useState<'once' | 'daily' | 'weekly' | 'monthly' | 'yearly'>('daily')
+  const [calendarSelectedDaysOfWeek, setCalendarSelectedDaysOfWeek] = useState<number[]>([])
+  const [calendarSelectedDayOfMonth, setCalendarSelectedDayOfMonth] = useState<number>(1)
   const [gracePeriodHours, setGracePeriodHours] = useState(1)
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
   const [loading, setLoading] = useState(false)
@@ -80,6 +104,73 @@ function NewMonitorForm() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // Generate cron expression from calendar selections
+  useEffect(() => {
+    if (scheduleType === 'calendar') {
+      let generated = '0 * * * * *'
+      
+      switch (repeatType) {
+        case 'once':
+          // Single execution - use the selected date and time
+          const date = new Date(selectedDate)
+          date.setHours(selectedHour, selectedMinute, 0, 0)
+          // For single execution, we'll use a cron that runs once (this is a limitation - cron doesn't support one-time)
+          // We'll use the date components
+          generated = `0 ${selectedMinute} ${selectedHour} ${date.getDate()} ${date.getMonth() + 1} *`
+          break
+        case 'daily':
+          generated = `0 ${selectedMinute} ${selectedHour} * * *`
+          break
+        case 'weekly':
+          if (calendarSelectedDaysOfWeek.length > 0) {
+            const weekday = calendarSelectedDaysOfWeek.sort((a, b) => a - b).join(',')
+            generated = `0 ${selectedMinute} ${selectedHour} * * ${weekday}`
+          } else {
+            // Default to the day of the selected date
+            const date = new Date(selectedDate)
+            generated = `0 ${selectedMinute} ${selectedHour} * * ${getDay(date)}`
+          }
+          break
+        case 'monthly':
+          generated = `0 ${selectedMinute} ${selectedHour} ${calendarSelectedDayOfMonth} * *`
+          break
+        case 'yearly':
+          const yearDate = new Date(selectedDate)
+          generated = `0 ${selectedMinute} ${selectedHour} ${yearDate.getDate()} ${yearDate.getMonth() + 1} *`
+          break
+      }
+      
+      setCronExpression(generated)
+    }
+  }, [scheduleType, repeatType, selectedDate, selectedHour, selectedMinute, calendarSelectedDaysOfWeek, calendarSelectedDayOfMonth])
+
+  // Validate and calculate next runs for cron expression
+  useEffect(() => {
+    if (scheduleType === 'cron' && cronExpression) {
+      try {
+        const interval = CronExpressionParser.parse(cronExpression, {
+          currentDate: new Date(),
+        })
+        const runs: Date[] = []
+        const now = new Date()
+        for (let i = 0; i < 10; i++) {
+          const next = interval.next()
+          if (next.getTime() > now.getTime()) {
+            runs.push(next.toDate())
+          }
+        }
+        setNextRuns(runs)
+        setCronError(null)
+      } catch (err: any) {
+        setCronError(err.message || 'Invalid cron expression')
+        setNextRuns([])
+      }
+    } else {
+      setNextRuns([])
+      setCronError(null)
+    }
+  }, [cronExpression, scheduleType])
+
   // Convert interval to appropriate unit for display
   const getIntervalValue = () => {
     if (intervalUnit === 'hours') {
@@ -123,9 +214,29 @@ function NewMonitorForm() {
       return
     }
 
+    // Validate cron expression if using cron or calendar
+    if (scheduleType === 'cron' || scheduleType === 'calendar') {
+      if (!cronExpression.trim()) {
+        setError('Cron expression is required')
+        setLoading(false)
+        return
+      }
+      if (cronError) {
+        setError(`Invalid cron expression: ${cronError}`)
+        setLoading(false)
+        return
+      }
+      // Additional validation for calendar
+      if (scheduleType === 'calendar' && repeatType === 'weekly' && calendarSelectedDaysOfWeek.length === 0) {
+        setError('Please select at least one day of the week for weekly schedule')
+        setLoading(false)
+        return
+      }
+    }
+
     // Convert to seconds for API
     // intervalMinutes is always stored in minutes (conversion happens in setIntervalValue)
-    const expectedIntervalSeconds = intervalMinutes * 60
+    const expectedIntervalSeconds = scheduleType === 'interval' ? intervalMinutes * 60 : 0
     // gracePeriodHours is always stored in hours (conversion happens in setGraceValue)
     const gracePeriodSeconds = gracePeriodHours * 3600
 
@@ -170,6 +281,8 @@ function NewMonitorForm() {
       name: name.trim(),
       expectedIntervalSeconds,
       gracePeriodSeconds,
+      scheduleType,
+      ...(scheduleType === 'cron' && { cronExpression: cronExpression.trim() }),
     }
 
     // Include payload validation rules if any fields are configured
@@ -225,14 +338,22 @@ function NewMonitorForm() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6">
-        {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
-      </h1>
+    <div className="animate-fade-in">
+      <Link 
+        href="/dashboard/monitors" 
+        className="text-primary hover:text-primary/80 text-xs sm:text-sm mb-4 sm:mb-6 inline-block transition-smooth animate-slide-up flex items-center gap-1.5 group"
+      >
+        <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
+        Back to monitors
+      </Link>
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-6 animate-slide-up" style={{ animationDelay: '50ms' }}>
+          {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
+        </h1>
 
-      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6" noValidate>
+      <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 card-hover animate-slide-up" style={{ animationDelay: '100ms' }} noValidate>
         {error && (
-          <div className="bg-error/10 border border-error/20 text-error px-4 py-3 rounded-lg mb-6">
+          <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6 animate-slide-up text-sm">
             {error}
           </div>
         )}
@@ -248,7 +369,7 @@ function NewMonitorForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Daily Database Backup"
-              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+              className="w-full px-3 py-2 bg-background border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
             />
             <p className="mt-2 text-sm text-muted-foreground">
               A descriptive name for this monitor
@@ -256,80 +377,480 @@ function NewMonitorForm() {
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
-              <label htmlFor="interval" className="block text-sm font-medium">
-                Expected Interval
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
+              <label className="block text-sm font-medium">
+                Schedule Type
               </label>
               <div className="flex gap-1 bg-muted rounded-lg p-1">
                 <button
                   type="button"
-                  onClick={() => setIntervalUnit('minutes')}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
-                    intervalUnit === 'minutes'
+                  onClick={() => setScheduleType('interval')}
+                  className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                    scheduleType === 'interval'
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }`}
                 >
-                  Minutes
+                  Simple Interval
                 </button>
                 <button
                   type="button"
-                  onClick={() => setIntervalUnit('hours')}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
-                    intervalUnit === 'hours'
+                  onClick={() => setScheduleType('cron')}
+                  className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                    scheduleType === 'cron'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Cron Expression
+                </button>
+                {/* Calendar tab - hidden for now */}
+                {/* <button
+                  type="button"
+                  onClick={() => setScheduleType('calendar')}
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition-smooth ${
+                    scheduleType === 'calendar'
                       ? 'bg-primary text-primary-foreground'
                       : 'text-muted-foreground hover:text-foreground'
                   }`}
                 >
-                  Hours
-                </button>
+                  Calendar
+                </button> */}
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
-              <input
-                id="interval"
-                type="range"
-                min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
-                max={intervalUnit === 'hours' ? '24' : '1440'}
-                step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
-                value={getIntervalValue()}
-                onChange={(e) => setIntervalValue(Number(e.target.value))}
-                className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
-              />
-              <input
-                type="number"
-                min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
-                max={intervalUnit === 'hours' ? '24' : '1440'}
-                step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
-                value={getIntervalValue()}
-                onChange={(e) => {
-                  const value = Number(e.target.value)
-                  if (value >= (intervalUnit === 'hours' ? 0.1 : minIntervalMinutes)) {
-                    setIntervalValue(value)
-                  }
-                }}
-                className="w-20 px-2 py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
-              />
-            </div>
+            {scheduleType === 'interval' ? (
+              <>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2">
+                  <label htmlFor="interval" className="block text-sm font-medium">
+                    Expected Interval
+                  </label>
+                  <div className="flex gap-1 bg-muted rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setIntervalUnit('minutes')}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                        intervalUnit === 'minutes'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Minutes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIntervalUnit('hours')}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                        intervalUnit === 'hours'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Hours
+                    </button>
+                  </div>
+                </div>
 
-            <div className="flex justify-between text-xs text-muted-foreground mt-1">
-              <span>
-                {intervalUnit === 'hours' 
-                  ? '0.1 hr' 
-                  : minIntervalMinutes >= 1 
-                    ? `${minIntervalMinutes} min` 
-                    : `${minIntervalMinutes * 60} sec`}
-              </span>
-              <span>24 {intervalUnit === 'hours' ? 'hours' : 'hours'}</span>
-            </div>
-            <p className="mt-2 text-sm text-muted-foreground">
-              How often should this job run?
-            </p>
+                <div className="flex items-center gap-3">
+                  <input
+                    id="interval"
+                    type="range"
+                    min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
+                    max={intervalUnit === 'hours' ? '24' : '1440'}
+                    step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
+                    value={getIntervalValue()}
+                    onChange={(e) => setIntervalValue(Number(e.target.value))}
+                    className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                  />
+                  <input
+                    type="number"
+                    min={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes}
+                    max={intervalUnit === 'hours' ? '24' : '1440'}
+                    step={intervalUnit === 'hours' ? '0.1' : minIntervalMinutes >= 1 ? '1' : '0.5'}
+                    value={getIntervalValue()}
+                    onChange={(e) => {
+                      const value = Number(e.target.value)
+                      if (value >= (intervalUnit === 'hours' ? 0.1 : minIntervalMinutes)) {
+                        setIntervalValue(value)
+                      }
+                    }}
+                    className="w-16 sm:w-20 px-2 py-1 bg-background border border-input rounded text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth focus:scale-[1.02] hover:border-primary/30"
+                  />
+                </div>
+
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>
+                    {intervalUnit === 'hours' 
+                      ? '0.1 hr' 
+                      : minIntervalMinutes >= 1 
+                        ? `${minIntervalMinutes} min` 
+                        : `${minIntervalMinutes * 60} sec`}
+                  </span>
+                  <span>24 {intervalUnit === 'hours' ? 'hours' : 'hours'}</span>
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  How often should this job run?
+                </p>
+              </>
+            ) : scheduleType === 'cron' ? (
+              <div className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-3">
+                  <label className="block text-sm font-medium">
+                    Schedule Configuration
+                  </label>
+                  <div className="flex gap-1 bg-muted rounded-lg p-1">
+                    <button
+                      type="button"
+                      onClick={() => setCronInputMode('visual')}
+                      className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                        cronInputMode === 'visual'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Calendar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCronInputMode('manual')}
+                      className={`px-2 sm:px-3 py-1.5 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                        cronInputMode === 'manual'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Manual
+                    </button>
+                  </div>
+                </div>
+
+                {cronInputMode === 'visual' ? (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">Frequency</label>
+                      <select
+                        value={cronFrequency}
+                        onChange={(e) => setCronFrequency(e.target.value as any)}
+                        className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
+                      >
+                        <option value="every-minute">Every Minute</option>
+                        <option value="every-hour">Every Hour</option>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="custom">Custom</option>
+                      </select>
+                    </div>
+
+                    {(cronFrequency === 'daily' || cronFrequency === 'weekly' || cronFrequency === 'monthly') && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Time</label>
+                        <div className="flex gap-2">
+                          <input
+                            type="number"
+                            min="0"
+                            max="23"
+                            value={selectedTime.hour}
+                            onChange={(e) => setSelectedTime({ ...selectedTime, hour: parseInt(e.target.value) || 0 })}
+                            className="w-16 sm:w-20 px-2 sm:px-3 py-2 bg-background border border-input rounded-lg text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth focus:scale-[1.02] hover:border-primary/30"
+                            placeholder="Hour"
+                          />
+                          <span className="self-center text-muted-foreground">:</span>
+                          <input
+                            type="number"
+                            min="0"
+                            max="59"
+                            value={selectedTime.minute}
+                            onChange={(e) => setSelectedTime({ ...selectedTime, minute: parseInt(e.target.value) || 0 })}
+                            className="w-16 sm:w-20 px-2 sm:px-3 py-2 bg-background border border-input rounded-lg text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth focus:scale-[1.02] hover:border-primary/30"
+                            placeholder="Minute"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {cronFrequency === 'weekly' && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Days of Week</label>
+                        <div className="flex flex-wrap gap-2">
+                          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              onClick={() => {
+                                if (selectedDaysOfWeek.includes(idx)) {
+                                  setSelectedDaysOfWeek(selectedDaysOfWeek.filter(d => d !== idx))
+                                } else {
+                                  setSelectedDaysOfWeek([...selectedDaysOfWeek, idx])
+                                }
+                              }}
+                          className={`flex-1 sm:flex-none px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-smooth active:scale-95 ${
+                            selectedDaysOfWeek.includes(idx)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          }`}
+                            >
+                              {day}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {cronFrequency === 'monthly' && (
+                      <div>
+                        <label className="block text-sm font-medium mb-2">Day of Month</label>
+                        <input
+                          type="number"
+                          min="1"
+                          max="31"
+                          value={cronDay === '*' ? '' : cronDay}
+                          onChange={(e) => setCronDay(e.target.value || '*')}
+                          className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                          placeholder="Day (1-31)"
+                        />
+                      </div>
+                    )}
+
+                    {cronFrequency === 'custom' && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Minute</label>
+                          <input
+                            type="text"
+                            value={cronMinute}
+                            onChange={(e) => setCronMinute(e.target.value)}
+                            placeholder="*/5"
+                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:scale-[1.01] hover:border-primary/30 transition-smooth"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Hour</label>
+                          <input
+                            type="text"
+                            value={cronHour}
+                            onChange={(e) => setCronHour(e.target.value)}
+                            placeholder="*"
+                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:scale-[1.01] hover:border-primary/30 transition-smooth"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Day</label>
+                          <input
+                            type="text"
+                            value={cronDay}
+                            onChange={(e) => setCronDay(e.target.value)}
+                            placeholder="*"
+                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:scale-[1.01] hover:border-primary/30 transition-smooth"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium mb-1">Month</label>
+                          <input
+                            type="text"
+                            value={cronMonth}
+                            onChange={(e) => setCronMonth(e.target.value)}
+                            placeholder="*"
+                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:scale-[1.01] hover:border-primary/30 transition-smooth"
+                          />
+                        </div>
+                        <div className="col-span-2">
+                          <label className="block text-xs font-medium mb-1">Weekday</label>
+                          <input
+                            type="text"
+                            value={cronWeekday}
+                            onChange={(e) => setCronWeekday(e.target.value)}
+                            placeholder="*"
+                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ring focus:scale-[1.01] hover:border-primary/30 transition-smooth"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="p-2 sm:p-3 bg-muted/30 rounded-lg border border-border animate-slide-up">
+                      <p className="text-xs font-medium mb-1">Generated Cron Expression:</p>
+                      <code className="text-xs sm:text-sm font-mono text-primary break-all">{cronExpression}</code>
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <label htmlFor="cronExpression" className="block text-sm font-medium mb-2">
+                      Cron Expression
+                      <InfoTooltip content="Format: second minute hour day month weekday. Example: '0 */5 * * * *' runs every 5 minutes.">
+                        <button type="button" className="ml-1 text-muted-foreground hover:text-foreground transition-smooth">
+                          <InfoIcon className="w-4 h-4 inline" />
+                        </button>
+                      </InfoTooltip>
+                    </label>
+                    <input
+                      id="cronExpression"
+                      type="text"
+                      value={cronExpression}
+                      onChange={(e) => setCronExpression(e.target.value)}
+                      placeholder="0 */5 * * * *"
+                      className={`w-full px-3 py-2 bg-background border rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth ${
+                        cronError ? 'border-error' : 'border-input'
+                      }`}
+                    />
+                    {cronError && (
+                      <p className="mt-1 text-xs text-error">{cronError}</p>
+                    )}
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Format: <code className="px-1 py-0.5 bg-muted rounded">second minute hour day month weekday</code>
+                    </p>
+                    <div className="mt-2 p-2 sm:p-3 bg-muted/50 rounded-lg">
+                      <p className="text-xs font-medium mb-2">Common Examples:</p>
+                      <div className="space-y-1 text-xs font-mono">
+                        <div className="break-all"><code className="text-primary">0 */5 * * * *</code> - Every 5 minutes</div>
+                        <div className="break-all"><code className="text-primary">0 0 * * * *</code> - Every hour</div>
+                        <div className="break-all"><code className="text-primary">0 0 0 * * *</code> - Daily at midnight</div>
+                        <div className="break-all"><code className="text-primary">0 0 9 * * 1-5</code> - Weekdays at 9 AM</div>
+                        <div className="break-all"><code className="text-primary">0 0 0 1 * *</code> - First day of month</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {nextRuns.length > 0 && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">
+                      Next Scheduled Runs
+                    </label>
+                    <div className="bg-background border border-input rounded-lg p-3 max-h-48 overflow-y-auto">
+                      <div className="space-y-1">
+                        {nextRuns.map((date, idx) => (
+                          <div key={idx} className="text-sm font-mono text-muted-foreground">
+                            {format(date, 'yyyy-MM-dd HH:mm:ss')}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Calendar schedule
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Select Date</label>
+                  <input
+                    type="date"
+                    value={selectedDate}
+                    onChange={(e) => setSelectedDate(e.target.value)}
+                    min={format(new Date(), 'yyyy-MM-dd')}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Select Time</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="23"
+                      value={selectedHour}
+                      onChange={(e) => setSelectedHour(parseInt(e.target.value) || 0)}
+                      className="w-16 sm:w-20 px-2 sm:px-3 py-2 bg-background border border-input rounded-lg text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth focus:scale-[1.02] hover:border-primary/30"
+                      placeholder="Hour"
+                    />
+                    <span className="self-center text-muted-foreground">:</span>
+                    <input
+                      type="number"
+                      min="0"
+                      max="59"
+                      value={selectedMinute}
+                      onChange={(e) => setSelectedMinute(parseInt(e.target.value) || 0)}
+                      className="w-16 sm:w-20 px-2 sm:px-3 py-2 bg-background border border-input rounded-lg text-xs sm:text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth focus:scale-[1.02] hover:border-primary/30"
+                      placeholder="Minute"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-2">Repeat</label>
+                  <select
+                    value={repeatType}
+                    onChange={(e) => setRepeatType(e.target.value as any)}
+                    className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                  >
+                    <option value="once">Once (single execution)</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                  </select>
+                </div>
+
+                {repeatType === 'weekly' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Days of Week</label>
+                    <div className="flex flex-wrap gap-2">
+                      {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => {
+                            if (calendarSelectedDaysOfWeek.includes(idx)) {
+                              setCalendarSelectedDaysOfWeek(calendarSelectedDaysOfWeek.filter(d => d !== idx))
+                            } else {
+                              setCalendarSelectedDaysOfWeek([...calendarSelectedDaysOfWeek, idx])
+                            }
+                          }}
+                          className={`flex-1 sm:flex-none px-2 sm:px-3 py-2 sm:py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-smooth active:scale-95 ${
+                            calendarSelectedDaysOfWeek.includes(idx)
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {repeatType === 'monthly' && (
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Day of Month</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="31"
+                      value={calendarSelectedDayOfMonth}
+                      onChange={(e) => setCalendarSelectedDayOfMonth(parseInt(e.target.value) || 1)}
+                      className="w-full px-3 py-2 bg-background border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                    />
+                  </div>
+                )}
+
+                <div className="p-2 sm:p-3 bg-muted/30 rounded-lg border border-border animate-slide-up">
+                  <p className="text-xs font-medium mb-1">Generated Cron Expression:</p>
+                  <code className="text-xs sm:text-sm font-mono text-primary break-all">{cronExpression}</code>
+                </div>
+
+                {nextRuns.length > 0 && (
+                  <div className="animate-slide-up">
+                    <label className="block text-sm font-medium mb-2">
+                      Next Scheduled Runs
+                    </label>
+                    <div className="bg-background border border-input rounded-lg p-2 sm:p-3 max-h-48 overflow-y-auto">
+                      <div className="space-y-1">
+                        {nextRuns.map((date, idx) => (
+                          <div key={idx} className="text-xs sm:text-sm font-mono text-muted-foreground animate-fade-in break-all" style={{ animationDelay: `${idx * 50}ms` }}>
+                            {format(date, 'yyyy-MM-dd HH:mm:ss')}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div>
-            <div className="flex items-center justify-between mb-2">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-0 mb-2">
               <label htmlFor="grace" className="block text-sm font-medium">
                 Grace Period
               </label>
@@ -337,21 +858,21 @@ function NewMonitorForm() {
                 <button
                   type="button"
                   onClick={() => setGraceUnit('minutes')}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
-                    graceUnit === 'minutes'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
+                      className={`px-2 py-1 text-xs font-medium rounded transition-smooth active:scale-95 ${
+                        graceUnit === 'minutes'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
                 >
                   Minutes
                 </button>
                 <button
                   type="button"
                   onClick={() => setGraceUnit('hours')}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                  className={`px-2 py-1 text-xs font-medium rounded transition-smooth active:scale-95 ${
                     graceUnit === 'hours'
                       ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   }`}
                 >
                   Hours
@@ -445,7 +966,7 @@ function NewMonitorForm() {
                   ) : (
                     <div className="space-y-3">
                       {payloadFields.map((field, index) => (
-                        <div key={index} className="bg-background border border-input rounded-lg p-3 space-y-2">
+                        <div key={index} className="bg-background border border-input rounded-lg p-3 space-y-2 animate-slide-up card-hover" style={{ animationDelay: `${index * 50}ms` }}>
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
                             <button
@@ -459,7 +980,7 @@ function NewMonitorForm() {
                             </button>
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
                               <label className="block text-xs font-medium mb-1">Field Name</label>
                               <input
@@ -471,7 +992,7 @@ function NewMonitorForm() {
                                   setPayloadFields(newFields)
                                 }}
                                 placeholder="e.g., count"
-                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth"
                               />
                             </div>
                             
@@ -492,7 +1013,7 @@ function NewMonitorForm() {
                                   }
                                   setPayloadFields(newFields)
                                 }}
-                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth"
                               >
                                 <option value="number">Number</option>
                                 <option value="boolean">Boolean</option>
@@ -501,7 +1022,7 @@ function NewMonitorForm() {
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-2 gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             <div>
                               <label className="block text-xs font-medium mb-1">Rule</label>
                               <select
@@ -511,7 +1032,7 @@ function NewMonitorForm() {
                                   newFields[index].rule = e.target.value as '>' | '<' | '>=' | '<=' | '==' | '!='
                                   setPayloadFields(newFields)
                                 }}
-                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth"
                               >
                                 {field.type === 'number' ? (
                                   <>
@@ -548,7 +1069,7 @@ function NewMonitorForm() {
                                     ? 'true or false'
                                     : 'e.g., "ok"'
                                 }
-                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                                className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth"
                               />
                             </div>
                           </div>
@@ -608,7 +1129,7 @@ function NewMonitorForm() {
             </button>
 
             {showAlertChannels && (
-              <div className="mt-4 space-y-4 pl-4 border-l-2 border-border">
+              <div className="mt-4 space-y-4 pl-4 border-l-2 border-border animate-slide-up">
                 <div>
                   <label htmlFor="alertEmail" className="block text-sm font-medium mb-2">
                     Alert Email Address
@@ -690,20 +1211,21 @@ function NewMonitorForm() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="w-full sm:w-auto px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-accent transition-smooth"
+              className="w-full sm:w-auto px-4 py-2 border border-border rounded-lg text-sm font-medium hover:bg-accent transition-smooth active:scale-95 hover:border-primary/20 hover:shadow-sm"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth"
+              className="w-full sm:w-auto px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth hover-lift active:scale-95"
             >
               {loading ? 'Creating...' : 'Create Monitor'}
             </button>
           </div>
         </div>
       </form>
+      </div>
     </div>
   )
 }
