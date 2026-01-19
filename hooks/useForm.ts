@@ -1,5 +1,6 @@
 import { useState, useCallback, FormEvent } from 'react'
 import { useApi } from './useApi'
+import { captureApiError, captureFrontendError } from '@/lib/sentry/client'
 
 export interface UseFormOptions<T> {
   onSubmit: (data: T) => Promise<Response>
@@ -65,6 +66,17 @@ export function useForm<T = any>(
           }
 
           const errorMessage = responseData.error || 'An error occurred'
+          
+          // Track API errors (4xx/5xx) to Sentry
+          captureApiError(
+            response.url || window.location.pathname,
+            response.status,
+            errorMessage,
+            {
+              action: 'form_submit',
+            }
+          )
+          
           setError(errorMessage)
           setSuccess(false)
           options.onError?.(errorMessage)
@@ -84,6 +96,15 @@ export function useForm<T = any>(
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'An error occurred'
+        
+        // Track network/fetch errors to Sentry
+        if (err instanceof Error) {
+          captureFrontendError(err, {
+            route: window.location.pathname,
+            action: 'form_submit',
+          })
+        }
+        
         setError(errorMessage)
         setSuccess(false)
         options.onError?.(errorMessage)

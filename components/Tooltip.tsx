@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 
 interface TooltipProps {
   content: string | React.ReactNode
@@ -42,7 +42,7 @@ export function Tooltip({
     setIsVisible(false)
   }
 
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (!triggerRef.current || !tooltipRef.current) return
 
     const triggerRect = triggerRef.current.getBoundingClientRect()
@@ -84,7 +84,7 @@ export function Tooltip({
     }
 
     setTooltipPosition({ top, left })
-  }
+  }, [position])
 
   useEffect(() => {
     if (isVisible) {
@@ -98,7 +98,7 @@ export function Tooltip({
         window.removeEventListener('resize', handleResize)
       }
     }
-  }, [isVisible])
+  }, [isVisible, updatePosition])
 
   useEffect(() => {
     return () => {

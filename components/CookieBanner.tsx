@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { setPostHogOptOut } from '@/lib/posthog/client'
 
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
 
   useEffect(() => {
-    // Check if user has already accepted cookies
+    // Check if user has already made a choice about cookies
     const cookieConsent = localStorage.getItem('cookieConsent')
     if (!cookieConsent) {
       setShowBanner(true)
@@ -16,11 +17,17 @@ export function CookieBanner() {
 
   const acceptCookies = () => {
     localStorage.setItem('cookieConsent', 'accepted')
+    // Enable PostHog tracking (opt-in)
+    setPostHogOptOut(false)
     setShowBanner(false)
+    // Reload page to initialize analytics with consent
+    window.location.reload()
   }
 
   const rejectCookies = () => {
     localStorage.setItem('cookieConsent', 'rejected')
+    // Disable PostHog tracking (opt-out)
+    setPostHogOptOut(true)
     setShowBanner(false)
   }
 

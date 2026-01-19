@@ -4,6 +4,8 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { parsePayload, extractDeclaredFields } from '@/lib/payload-parser'
 import { errorResponse, successResponse } from '@/lib/api/response'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { captureFirstSuccessPing, captureHeartbeatRecovered } from '@/lib/posthog/server'
+import { captureBackendError, captureApiError, captureSoftError } from '@/lib/sentry/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -122,6 +124,27 @@ async function handlePing(
         if (monitor.status === 'late' || monitor.status === 'failed') {
           // Recovered from failed/late state (ping received, even if with warnings)
           newStatus = 'healthy'
+          
+          // Track recovery (even with warnings, it's still a recovery)
+          const { data: profile } = await supabaseAdmin
+            .from('profiles')
+            .select('created_at')
+            .eq('id', monitor.user_id)
+            .single() as { data: { created_at: string } | null }
+          
+          if (profile) {
+            const currentTime = new Date()
+            const lastPingAt = monitor.last_ping_at ? new Date(monitor.last_ping_at) : null
+            const expectedAt = monitor.next_expected_ping_at ? new Date(monitor.next_expected_ping_at) : new Date()
+            const downtimeSeconds = lastPingAt 
+              ? Math.floor((currentTime.getTime() - lastPingAt.getTime()) / 1000)
+              : Math.floor((currentTime.getTime() - expectedAt.getTime()) / 1000)
+            
+            await captureHeartbeatRecovered(monitor.user_id, {
+              heartbeat_id: monitor.id,
+              downtime_seconds: downtimeSeconds,
+            })
+          }
         }
         // If already healthy, stay healthy (warnings don't change status)
       }
@@ -137,8 +160,69 @@ async function handlePing(
       // If already healthy and validation passed, stay healthy
     }
 
+    // Track first success ping and recovery events
+    const isFirstSuccessPing = monitor.status === 'pending' && newStatus === 'healthy'
+    const isRecovery = (monitor.status === 'late' || monitor.status === 'failed') && newStatus === 'healthy'
+    
+    if (isFirstSuccessPing || isRecovery) {
+      // Get user's created_at to calculate seconds_from_signup
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('created_at')
+        .eq('id', monitor.user_id)
+        .single() as { data: { created_at: string } | null }
+      
+      if (profile) {
+        const userCreatedAt = new Date(profile.created_at)
+        const currentTime = new Date()
+        const secondsFromSignup = Math.floor((currentTime.getTime() - userCreatedAt.getTime()) / 1000)
+        
+        if (isFirstSuccessPing) {
+          await captureFirstSuccessPing(monitor.user_id, {
+            heartbeat_id: monitor.id,
+            seconds_from_signup: secondsFromSignup,
+          })
+        }
+        
+        if (isRecovery) {
+          // Calculate downtime in seconds
+          const lastPingAt = monitor.last_ping_at ? new Date(monitor.last_ping_at) : null
+          const expectedAt = monitor.next_expected_ping_at ? new Date(monitor.next_expected_ping_at) : new Date()
+          const downtimeSeconds = lastPingAt 
+            ? Math.floor((currentTime.getTime() - lastPingAt.getTime()) / 1000)
+            : Math.floor((currentTime.getTime() - expectedAt.getTime()) / 1000)
+          
+          await captureHeartbeatRecovered(monitor.user_id, {
+            heartbeat_id: monitor.id,
+            downtime_seconds: downtimeSeconds,
+          })
+        }
+      }
+    }
+
     // Calculate next expected ping time
     const currentTime = new Date()
+    
+    // Check if ping is late (soft error - not a bug, but UX issue)
+    if (monitor.last_ping_at) {
+      const lastPingAt = new Date(monitor.last_ping_at)
+      const expectedPingTime = new Date(
+        lastPingAt.getTime() + monitor.expected_interval_seconds * 1000
+      )
+      const delaySeconds = Math.floor((currentTime.getTime() - expectedPingTime.getTime()) / 1000)
+      
+      // If ping is more than 10% late, track as soft error
+      if (delaySeconds > monitor.expected_interval_seconds * 0.1) {
+        captureSoftError('ping_too_late', {
+          userId: monitor.user_id,
+          heartbeatId: monitor.id,
+          monitorId: monitor.id,
+          delaySeconds,
+          expectedIntervalSeconds: monitor.expected_interval_seconds,
+        })
+      }
+    }
+    
     const nextExpectedPing = new Date(
       currentTime.getTime() + monitor.expected_interval_seconds * 1000 + monitor.grace_period_seconds * 1000
     )
@@ -157,6 +241,15 @@ async function handlePing(
 
     if (updateError) {
       console.error('Error updating monitor:', updateError)
+      captureBackendError(updateError, {
+        endpoint: `/api/ping/${slug}`,
+        statusCode: 500,
+        action: 'update_monitor',
+        additionalData: {
+          monitorId: monitor.id,
+          userId: monitor.user_id,
+        },
+      })
       return errorResponse('Failed to update monitor', 500)
     }
 
@@ -196,6 +289,16 @@ async function handlePing(
 
     if (pingError) {
       console.error('Error inserting ping:', pingError)
+      // Track as soft error - ping insert failed but request succeeded
+      captureBackendError(pingError, {
+        endpoint: `/api/ping/${slug}`,
+        statusCode: 500,
+        action: 'insert_ping',
+        userId: monitor.user_id,
+        additionalData: {
+          monitorId: monitor.id,
+        },
+      })
       // Don't fail the request if ping insert fails
     }
 
@@ -255,6 +358,11 @@ async function handlePing(
     })
   } catch (error) {
     console.error('Error handling ping:', error)
+    captureBackendError(error, {
+      endpoint: `/api/ping/${slug}`,
+      statusCode: 500,
+      action: 'handle_ping',
+    })
     return errorResponse('Internal server error', 500)
   }
 }

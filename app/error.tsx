@@ -1,5 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
+import { captureFrontendError } from '@/lib/sentry/client'
+
 export default function Error({
   error,
   reset,
@@ -7,6 +10,17 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  useEffect(() => {
+    // Capture error to Sentry
+    captureFrontendError(error, {
+      route: window.location.pathname,
+      action: 'error_boundary',
+      additionalData: {
+        digest: error.digest,
+      },
+    })
+  }, [error])
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="max-w-md w-full space-y-8 p-8 bg-card border border-border rounded-lg shadow">

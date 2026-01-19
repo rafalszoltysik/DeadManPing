@@ -70,6 +70,10 @@ export default function SignupPage() {
       return
     }
 
+    // Track signup started (email method)
+    const { captureSignupStarted } = await import('@/lib/posthog/client')
+    captureSignupStarted({ method: 'email' })
+
     const plan = typeof window !== 'undefined' 
       ? new URLSearchParams(window.location.search).get('plan')
       : null
@@ -114,6 +118,10 @@ export default function SignupPage() {
       e.preventDefault()
       e.stopPropagation()
     }
+
+    // Track signup started (google method)
+    const { captureSignupStarted } = await import('@/lib/posthog/client')
+    captureSignupStarted({ method: 'google' })
 
     try {
       const plan = typeof window !== 'undefined' 

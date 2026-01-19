@@ -7,6 +7,7 @@ import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon 
 import { Monitor, Ping, MonitorDetailProps } from '@/lib/types/monitor'
 import { WarningTooltip, InfoTooltip } from './Tooltip'
 import { WarningIcon, InfoIcon } from './Icons'
+import { captureSoftError } from '@/lib/sentry/client'
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -251,16 +252,49 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [selectedPlatform, setSelectedPlatform] = useState<'windows' | 'unix'>('unix')
   const curlCommand = curlCommands[selectedPlatform]
 
-  const copyUrlToClipboard = () => {
-    navigator.clipboard.writeText(pingUrl)
-    setCopiedUrl(true)
-    setTimeout(() => setCopiedUrl(false), 2000)
+  const copyUrlToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(pingUrl)
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 2000)
+      
+      // Track heartbeat URL copied (webhook method)
+      const { captureHeartbeatUrlCopied } = await import('@/lib/posthog/client')
+      captureHeartbeatUrlCopied({ method: 'webhook' })
+      
+      // Track soft error: user copied URL, check if no pings after 5 minutes
+      setTimeout(async () => {
+        // After 5 minutes, check if monitor still has no pings
+        if (monitor.status === 'pending' && pings.length === 0) {
+          captureSoftError('url_copied_no_pings', {
+            route: window.location.pathname,
+            action: 'copy_url',
+            heartbeatId: monitor.id,
+            monitorId: monitor.id,
+            minutesSinceCopy: 5,
+          })
+        }
+      }, 5 * 60 * 1000) // 5 minutes
+    } catch (error) {
+      // Track error copying URL (invalid format or clipboard error)
+      captureSoftError('url_copy_failed', {
+        route: window.location.pathname,
+        action: 'copy_url',
+        heartbeatId: monitor.id,
+        monitorId: monitor.id,
+        error: error instanceof Error ? error.message : String(error),
+      })
+    }
   }
 
-  const copyCurlToClipboard = () => {
+  const copyCurlToClipboard = async () => {
     navigator.clipboard.writeText(curlCommands[selectedPlatform])
     setCopiedCurl(true)
     setTimeout(() => setCopiedCurl(false), 2000)
+    
+    // Track heartbeat URL copied (curl method)
+    const { captureHeartbeatUrlCopied } = await import('@/lib/posthog/client')
+    captureHeartbeatUrlCopied({ method: 'curl' })
   }
 
   // Check if monitor should be marked as late or failed based on last_ping_at and expected interval

@@ -38,8 +38,29 @@ export default function CookiesPage() {
             <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">Analytics Cookies</h3>
             <p className="text-muted-foreground mb-4">
               We use analytics cookies to understand how visitors interact with our Service. This helps us improve
-              the user experience and identify issues.
+              the user experience and identify issues. These cookies require your consent and can be disabled.
             </p>
+            <p className="text-muted-foreground mb-4">
+              We use the following analytics services:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li><strong>PostHog:</strong> Product analytics to understand how users interact with our Service. 
+                Privacy policy: <a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://posthog.com/privacy</a></li>
+              <li><strong>Vercel Analytics:</strong> Website usage analytics to improve performance and user experience.
+                Privacy policy: <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://vercel.com/legal/privacy-policy</a></li>
+            </ul>
+          </section>
+
+          <section className="mb-6 sm:mb-8">
+            <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">Error Tracking</h2>
+            <p className="text-muted-foreground mb-4">
+              We use error tracking to identify and fix technical issues. This service does not require explicit consent
+              as it is necessary for the legitimate interest of maintaining service quality and security.
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li><strong>Sentry:</strong> Error tracking and performance monitoring to ensure service reliability.
+                Privacy policy: <a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://sentry.io/privacy/</a></li>
+            </ul>
           </section>
 
           <section className="mb-6 sm:mb-8">
@@ -48,8 +69,8 @@ export default function CookiesPage() {
               Some cookies are placed by third-party services that appear on our pages:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li><strong>Vercel Analytics:</strong> Helps us understand website usage</li>
-              <li><strong>Stripe:</strong> Used for payment processing (only on checkout pages)</li>
+              <li><strong>Stripe:</strong> Used for payment processing (only on checkout pages). 
+                Privacy policy: <a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">https://stripe.com/privacy</a></li>
             </ul>
           </section>
 

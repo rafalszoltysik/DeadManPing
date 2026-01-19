@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { captureCTAClicked } from '@/lib/posthog/client'
 
 interface CTAButtonProps {
   children: React.ReactNode
@@ -22,10 +23,12 @@ export function CTAButton({ children, className = '' }: CTAButtonProps) {
       const { data: { session } } = await supabase.auth.getSession()
 
       if (session) {
-        // Zalogowany - idź do dashboard
+        // Zalogowany - idź do dashboard (intencja: create_heartbeat)
+        captureCTAClicked({ cta: 'create_heartbeat' })
         router.push('/dashboard')
       } else {
         // Niezalogowany - idź do signup
+        captureCTAClicked({ cta: 'signup' })
         router.push('/auth/signup')
       }
     } catch (error) {

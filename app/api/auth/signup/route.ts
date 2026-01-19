@@ -3,7 +3,9 @@ import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { validatePassword } from '@/lib/password-validator'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { captureSignupCompleted, captureSignupFailed } from '@/lib/posthog/server'
 import { getAppUrl } from '@/lib/get-app-url'
+import { captureBackendError, captureApiError } from '@/lib/sentry/server'
 
 export async function POST(request: NextRequest) {
   try {
@@ -119,6 +121,13 @@ export async function POST(request: NextRequest) {
     })
 
     if (authError || !authData.user) {
+      // Track signup failed
+      const userId = authData.user?.id || 'unknown'
+      await captureSignupFailed(userId, {
+        method: 'email',
+        reason: authError?.message?.toLowerCase().includes('validation') ? 'validation' : 'unknown',
+      })
+      
       return NextResponse.json(
         { error: authError?.message || 'Failed to create account' },
         { status: 400 }
@@ -171,6 +180,23 @@ export async function POST(request: NextRequest) {
           userId,
           email: authData.user.email,
         })
+        
+        // Track signup failed
+        await captureSignupFailed(userId, {
+          method: 'email',
+          reason: 'unknown',
+        })
+        
+        captureBackendError(profileError, {
+          endpoint: '/api/auth/signup',
+          statusCode: 500,
+          userId: userId,
+          action: 'create_profile',
+          additionalData: {
+            email: authData.user.email,
+          },
+        })
+        
         // Return error - profile creation is critical
         return NextResponse.json(
           { error: 'Failed to create user profile. Please try again or contact support.' },
@@ -187,6 +213,12 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Track signup completed (after successful profile creation)
+    await captureSignupCompleted(userId, {
+      method: 'email',
+    })
+
+    // Supabase Auth automatically creates and manages the session via cookies
     // Supabase Auth automatically creates and manages the session via cookies
     // The response object already has cookies set from the signUp() call above
     // We need to return the response with the updated JSON body
@@ -218,6 +250,34 @@ export async function POST(request: NextRequest) {
     return finalResponse
   } catch (error: any) {
     console.error('Signup error:', error)
+    
+    // Track signup failed (try to get userId from request if available)
+    try {
+      const body = await request.json().catch(() => ({}))
+      const email = body.email || 'unknown'
+      // Use email as distinctId if we don't have userId
+      await captureSignupFailed(email, {
+        method: 'email',
+        reason: 'unknown',
+      })
+      
+      captureBackendError(error, {
+        endpoint: '/api/auth/signup',
+        statusCode: 500,
+        action: 'signup',
+        additionalData: {
+          email,
+        },
+      })
+    } catch {
+      // Silently fail analytics, but still track error
+      captureBackendError(error, {
+        endpoint: '/api/auth/signup',
+        statusCode: 500,
+        action: 'signup',
+      })
+    }
+    
     return NextResponse.json(
       { error: error.message || 'Signup failed' },
       { status: 500 }

@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
+import { captureSignupCompleted } from '@/lib/posthog/server'
 
 async function handleEmailVerification(
   request: NextRequest,
@@ -376,6 +377,11 @@ export async function GET(request: NextRequest) {
             hint: profileError.hint
           })
           // Don't block the flow - user is authenticated, profile might be created later
+        } else {
+          // Track signup completed for OAuth (new user)
+          await captureSignupCompleted(user.id, {
+            method: 'google',
+          })
         }
       } else if (isFirstTimeAccountLinking) {
         // Add account linked parameter to redirect URL only for first-time linking
@@ -406,6 +412,11 @@ export async function GET(request: NextRequest) {
             code: profileError.code,
             details: profileError.details,
             hint: profileError.hint
+          })
+        } else {
+          // Track signup completed for OAuth (new user, fallback path)
+          await captureSignupCompleted(user.id, {
+            method: 'google',
           })
         }
       }

@@ -328,6 +328,12 @@ export async function DELETE(
       return errorResponse(deleteError.message || 'Failed to delete monitor', 500)
     }
 
+    // Track heartbeat deleted
+    const { captureHeartbeatDeleted } = await import('@/lib/posthog/server')
+    await captureHeartbeatDeleted(authResult.user.id, {
+      heartbeat_id: monitor.id,
+    })
+
     return successResponse({ success: true })
   } catch (error) {
     console.error('Error in delete monitor API:', error)

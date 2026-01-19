@@ -7,6 +7,8 @@ import { requireAuth, verifyOrigin } from '@/lib/api/auth'
 import { errorResponse, successResponse, badRequestResponse } from '@/lib/api/response'
 import { validateWebhookUrl, validateCustomWebhookUrl } from '@/lib/webhooks-validator'
 import { checkRateLimit } from '@/lib/rate-limit'
+import { captureHeartbeatCreated, captureHeartbeatCreateFailed } from '@/lib/posthog/server'
+import { captureBackendError, captureApiError, captureSoftError } from '@/lib/sentry/server'
 
 function generateSlug(): string {
   return randomBytes(32).toString('hex')
@@ -41,10 +43,12 @@ export async function POST(request: NextRequest) {
 
     // Validate input
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
+      await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
       return badRequestResponse('Monitor name is required')
     }
 
     if (name.trim().length > 100) {
+      await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
       return badRequestResponse('Monitor name must be 100 characters or less')
     }
 
@@ -55,6 +59,7 @@ export async function POST(request: NextRequest) {
 
     if (schedule === 'cron') {
       if (!cronExpression || typeof cronExpression !== 'string' || cronExpression.trim().length === 0) {
+        await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
         return badRequestResponse('Cron expression is required when using cron schedule type')
       }
       
@@ -67,10 +72,12 @@ export async function POST(request: NextRequest) {
         // Use minimum interval (60 seconds) as default
         validatedIntervalSeconds = 60
       } catch (err: any) {
+        await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
         return badRequestResponse(`Invalid cron expression: ${err.message || 'Invalid format'}`)
       }
     } else {
       if (!expectedIntervalSeconds || typeof expectedIntervalSeconds !== 'number' || expectedIntervalSeconds < 60) {
+        await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
         return badRequestResponse('Expected interval must be at least 60 seconds (1 minute)')
       }
       validatedIntervalSeconds = expectedIntervalSeconds
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
 
     const gracePeriod = gracePeriodSeconds || 3600
     if (gracePeriod < 0) {
+      await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
       return badRequestResponse('Grace period cannot be negative')
     }
 
@@ -86,6 +94,7 @@ export async function POST(request: NextRequest) {
     if (payloadValidationRules) {
       const validationResult = validatePayloadRules(payloadValidationRules)
       if (!validationResult.valid) {
+        await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
         return badRequestResponse(`Invalid payload validation rules: ${validationResult.error}`)
       }
       validatedRules = validationResult.sanitized || null
@@ -144,6 +153,7 @@ export async function POST(request: NextRequest) {
     // Check limits by workspace
     const monitorLimit = await checkMonitorLimitByWorkspace(workspaceId)
     if (!monitorLimit.allowed) {
+      await captureHeartbeatCreateFailed(user.id, { reason: 'limit' })
       return errorResponse(
         `Monitor limit reached (${monitorLimit.current}/${monitorLimit.limit}). Upgrade your plan to create more monitors.`,
         403,
@@ -153,6 +163,7 @@ export async function POST(request: NextRequest) {
 
     const intervalLimit = await checkIntervalLimitByWorkspace(workspaceId, validatedIntervalSeconds)
     if (!intervalLimit.allowed) {
+      await captureHeartbeatCreateFailed(user.id, { reason: 'limit' })
       const minMinutes = intervalLimit.minInterval / 60
       const minSeconds = intervalLimit.minInterval
       const errorMsg = minMinutes >= 1
@@ -234,6 +245,7 @@ export async function POST(request: NextRequest) {
       if (alertChannels.slackWebhookUrl) {
         const slackValidation = validateWebhookUrl(alertChannels.slackWebhookUrl, 'slack')
         if (!slackValidation.valid) {
+          await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
           return badRequestResponse(`Invalid Slack webhook URL: ${slackValidation.error}`)
         }
         monitorData.slack_webhook_url = alertChannels.slackWebhookUrl
@@ -241,6 +253,7 @@ export async function POST(request: NextRequest) {
       if (alertChannels.discordWebhookUrl) {
         const discordValidation = validateWebhookUrl(alertChannels.discordWebhookUrl, 'discord')
         if (!discordValidation.valid) {
+          await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
           return badRequestResponse(`Invalid Discord webhook URL: ${discordValidation.error}`)
         }
         monitorData.discord_webhook_url = alertChannels.discordWebhookUrl
@@ -248,6 +261,7 @@ export async function POST(request: NextRequest) {
       if (alertChannels.customWebhookUrl) {
         const customValidation = validateCustomWebhookUrl(alertChannels.customWebhookUrl)
         if (!customValidation.valid) {
+          await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
           return badRequestResponse(`Invalid custom webhook URL: ${customValidation.error}`)
         }
         monitorData.custom_webhook_url = alertChannels.customWebhookUrl
@@ -263,12 +277,57 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('Error creating monitor:', insertError)
+      captureBackendError(insertError, {
+        endpoint: '/api/monitors/create',
+        statusCode: 500,
+        userId: user.id,
+        action: 'create_monitor',
+        additionalData: {
+          monitorName: name,
+        },
+      })
+      await captureHeartbeatCreateFailed(user.id, { reason: 'unknown' })
       return errorResponse(insertError.message || 'Failed to create monitor', 500)
     }
+
+    // Track heartbeat created
+    const timeoutMinutes = Math.floor(validatedIntervalSeconds / 60)
+    await captureHeartbeatCreated(user.id, {
+      type: 'cron', // All monitors are cron-based (scheduled)
+      timeout_minutes: timeoutMinutes,
+    })
 
     return successResponse({ monitor }, 201)
   } catch (error) {
     console.error('Error in create monitor API:', error)
+    
+    // Try to track failure (may not have user context)
+    try {
+      const authResult = await requireAuth()
+      if (authResult.success) {
+        await captureHeartbeatCreateFailed(authResult.user.id, { reason: 'unknown' })
+        captureBackendError(error, {
+          endpoint: '/api/monitors/create',
+          statusCode: 500,
+          userId: authResult.user.id,
+          action: 'create_monitor',
+        })
+      } else {
+        captureBackendError(error, {
+          endpoint: '/api/monitors/create',
+          statusCode: 500,
+          action: 'create_monitor',
+        })
+      }
+    } catch {
+      // Silently fail analytics, but still track error
+      captureBackendError(error, {
+        endpoint: '/api/monitors/create',
+        statusCode: 500,
+        action: 'create_monitor',
+      })
+    }
+    
     return errorResponse(
       error instanceof Error ? error.message : 'Internal server error',
       500

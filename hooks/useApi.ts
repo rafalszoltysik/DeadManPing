@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react'
+import { captureApiError } from '@/lib/sentry/client'
 
 export interface UseApiOptions<T> {
   onSuccess?: (data: T) => void
@@ -50,6 +51,17 @@ export function useApi<T = any>(
         if (!response.ok) {
           const errorMessage = responseData.error || 'An error occurred'
           setError(errorMessage)
+          
+          // Track API errors (4xx/5xx) to Sentry
+          captureApiError(
+            url,
+            response.status,
+            errorMessage,
+            {
+              action: 'api_call',
+            }
+          )
+          
           options.onError?.(errorMessage)
           return null
         }
@@ -65,6 +77,19 @@ export function useApi<T = any>(
         const errorMessage =
           err instanceof Error ? err.message : 'An error occurred'
         setError(errorMessage)
+        
+        // Track network/fetch errors to Sentry
+        if (err instanceof Error) {
+          captureApiError(
+            url,
+            0, // Network error, no status code
+            err,
+            {
+              action: 'api_call',
+            }
+          )
+        }
+        
         options.onError?.(errorMessage)
         return null
       } finally {

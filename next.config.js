@@ -1,3 +1,6 @@
+// Injected by Sentry
+const { withSentryConfig } = require('@sentry/nextjs')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
@@ -62,7 +65,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' data:",
-              "connect-src 'self' https://*.supabase.co https://api.pwnedpasswords.com https://api.stripe.com",
+              "connect-src 'self' https://*.supabase.co https://api.pwnedpasswords.com https://api.stripe.com https://*.posthog.com https://eu.i.posthog.com https://us.i.posthog.com https://*.sentry.io https://*.ingest.sentry.io",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'none'",
               // Additional security
@@ -77,5 +80,28 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Dynamic Sentry configuration based on environment
+const isProduction = process.env.NODE_ENV === 'production'
+
+// Wrap with Sentry
+module.exports = withSentryConfig(
+  nextConfig,
+  {
+    // Sentry options
+    silent: true,
+    org: process.env.SENTRY_ORG || 'deadmanping',
+    project: process.env.SENTRY_PROJECT || 'deadmanping',
+    
+    // Only upload source maps in production
+    widenClientFileUpload: isProduction,
+    hideSourceMaps: isProduction,
+    // Disable Sentry plugins in development (faster builds)
+    disableServerWebpackPlugin: !isProduction,
+    disableClientWebpackPlugin: !isProduction,
+  },
+  {
+    // Sentry webpack plugin options
+    hideSourceMaps: isProduction,
+  }
+)
 

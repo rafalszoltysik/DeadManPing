@@ -103,12 +103,42 @@ export default function PrivacyPage() {
           <section className="mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">6. Third-Party Services</h2>
             <p className="text-muted-foreground mb-4">We use the following third-party services:</p>
+            
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">6.1 Core Services</h3>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li><strong>Supabase:</strong> Database and authentication (privacy policy: https://supabase.com/privacy)</li>
-              <li><strong>Stripe:</strong> Payment processing (privacy policy: https://stripe.com/privacy)</li>
-              <li><strong>Resend:</strong> Email delivery (privacy policy: https://resend.com/legal/privacy-policy)</li>
-              <li><strong>Vercel:</strong> Hosting and infrastructure (privacy policy: https://vercel.com/legal/privacy-policy)</li>
+              <li><strong>Supabase:</strong> Database and authentication 
+                (<a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+              <li><strong>Stripe:</strong> Payment processing 
+                (<a href="https://stripe.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+              <li><strong>Resend:</strong> Email delivery 
+                (<a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+              <li><strong>Vercel:</strong> Hosting and infrastructure 
+                (<a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
             </ul>
+
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">6.2 Analytics Services</h3>
+            <p className="text-muted-foreground mb-4">
+              We use analytics services to understand how users interact with our Service. These services require your consent:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li><strong>PostHog:</strong> Product analytics to track user behavior and improve our Service. 
+                We collect page views, button clicks, and user interactions. You can opt-out at any time.
+                (<a href="https://posthog.com/privacy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+              <li><strong>Vercel Analytics:</strong> Website usage analytics to measure performance and user experience.
+                (<a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+            </ul>
+
+            <h3 className="text-lg sm:text-xl font-semibold text-foreground mb-2 sm:mb-3 mt-4 sm:mt-6">6.3 Error Tracking</h3>
+            <p className="text-muted-foreground mb-4">
+              We use error tracking to maintain service quality and security. This is based on legitimate interest:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li><strong>Sentry:</strong> Error tracking and performance monitoring. We collect error logs, stack traces, 
+                and performance data to identify and fix issues. This does not require explicit consent as it is necessary 
+                for service reliability.
+                (<a href="https://sentry.io/privacy/" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">privacy policy</a>)</li>
+            </ul>
+
             <p className="text-muted-foreground mb-4">
               These services have their own privacy policies. We encourage you to read them.
             </p>
@@ -133,15 +163,29 @@ export default function PrivacyPage() {
           <section className="mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-3 sm:mb-4">8. Cookies and Tracking</h2>
             <p className="text-muted-foreground mb-4">
-              We use cookies and similar technologies to:
+              We use cookies and similar technologies for the following purposes:
             </p>
             <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-              <li>Maintain your session and authentication state</li>
-              <li>Remember your preferences</li>
-              <li>Analyze usage patterns</li>
+              <li><strong>Essential cookies:</strong> Maintain your session and authentication state (required for Service functionality)</li>
+              <li><strong>Analytics cookies:</strong> Analyze usage patterns to improve our Service (require your consent)</li>
+              <li><strong>Preference cookies:</strong> Remember your preferences and settings</li>
             </ul>
             <p className="text-muted-foreground mb-4">
-              You can control cookies through your browser settings, but this may affect Service functionality.
+              We use a cookie consent banner to obtain your consent before using analytics cookies. You can:
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
+              <li>Accept all cookies to enable analytics</li>
+              <li>Reject non-essential cookies (analytics will be disabled)</li>
+              <li>Change your preferences at any time through your browser settings</li>
+            </ul>
+            <p className="text-muted-foreground mb-4">
+              For detailed information about the cookies we use, please see our 
+              <a href="/legal/cookies" className="text-primary hover:underline"> Cookie Policy</a>.
+            </p>
+            <p className="text-muted-foreground mb-4">
+              <strong>Opting out of analytics:</strong> You can opt-out of PostHog analytics at any time by rejecting 
+              cookies in our cookie banner or by contacting us. Note that disabling analytics cookies may affect 
+              our ability to improve the Service based on usage data.
             </p>
           </section>
 
