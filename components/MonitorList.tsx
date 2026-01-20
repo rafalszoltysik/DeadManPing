@@ -22,22 +22,40 @@ export function MonitorList({ monitors }: MonitorListProps) {
 
     const timers: NodeJS.Timeout[] = []
     
-    // Use requestAnimationFrame to ensure DOM is ready, then add animations
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        itemRefs.current.forEach((ref, index) => {
-          if (ref && !ref.classList.contains('slide-up')) {
-            const timer = setTimeout(() => {
-              ref.classList.add('slide-up')
-            }, 100 + (index * 60))
-            timers.push(timer)
+    // Fallback timeout to ensure items are visible even if animation fails (especially on mobile)
+    const fallbackTimer = setTimeout(() => {
+      itemRefs.current.forEach((ref) => {
+        if (ref) {
+          // Check if item is still invisible (animation didn't trigger)
+          const computedStyle = window.getComputedStyle(ref)
+          if (computedStyle.opacity === '0' || ref.classList.contains('opacity-0')) {
+            // Force visibility if animation didn't trigger
+            ref.style.opacity = '1'
+            ref.style.transform = 'translateY(0)'
+            ref.classList.remove('opacity-0', 'translate-y-4')
           }
-        })
+        }
       })
-    })
+    }, 1500) // 1.5 second fallback - ensures items show on mobile even if JS is slow
+    
+    // Use a single timeout instead of double requestAnimationFrame for better mobile compatibility
+    const animationTimer = setTimeout(() => {
+      itemRefs.current.forEach((ref, index) => {
+        if (ref && !ref.classList.contains('slide-up')) {
+          const timer = setTimeout(() => {
+            if (ref) {
+              ref.classList.add('slide-up')
+            }
+          }, 100 + (index * 60))
+          timers.push(timer)
+        }
+      })
+    }, 50) // Small delay to ensure DOM is ready
     
     return () => {
       timers.forEach(timer => clearTimeout(timer))
+      clearTimeout(fallbackTimer)
+      clearTimeout(animationTimer)
     }
   }, [mounted, monitors.length])
 

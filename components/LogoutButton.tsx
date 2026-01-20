@@ -3,7 +3,11 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
-export function LogoutButton() {
+interface LogoutButtonProps {
+  variant?: 'default' | 'compact'
+}
+
+export function LogoutButton({ variant = 'default' }: LogoutButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
 
@@ -71,6 +75,19 @@ export function LogoutButton() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (variant === 'compact') {
+    return (
+      <button
+        onClick={handleLogout}
+        disabled={loading}
+        className="text-sm text-muted-foreground hover:text-foreground px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+        title="Logout"
+      >
+        {loading ? '...' : 'Logout'}
+      </button>
+    )
   }
 
   return (

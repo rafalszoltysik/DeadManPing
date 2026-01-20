@@ -70,6 +70,22 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
     const onboarding = searchParams.get('onboarding')
     setIsOnboarding(onboarding === 'true')
   }, [searchParams])
+
+  // Auto-switch to manual mode on mobile (since Calendar button is hidden)
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth < 640 && cronInputMode === 'visual') {
+        setCronInputMode('manual')
+      }
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile)
+    }
+  }, [cronInputMode])
   
   const hasSlackDiscord = ['starter', 'pro', 'team'].includes(userTier)
   const hasCustomWebhook = userTier === 'team'
@@ -512,7 +528,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                     <button
                       type="button"
                       onClick={() => setCronInputMode('visual')}
-                      className={`flex-1 sm:flex-none px-3 sm:px-3 py-2 sm:py-1.5 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                      className={`hidden sm:flex px-3 py-1.5 text-xs font-medium rounded transition-smooth ${
                         cronInputMode === 'visual'
                           ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'

@@ -141,21 +141,21 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers, initial
 
       {/* Invite form */}
       {members.length < maxMembers && (
-        <form onSubmit={handleInvite} className="bg-card border border-border rounded-lg p-6" noValidate>
+        <form onSubmit={handleInvite} className="bg-card border border-border rounded-lg p-4 sm:p-6" noValidate>
           <h2 className="text-lg font-semibold mb-4">Invite Team Member</h2>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <input
               type="email"
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="Enter email address"
-              className="flex-1 px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="flex-1 px-3 sm:px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm sm:text-base min-h-[44px] sm:min-h-0"
               disabled={inviting}
             />
             <button
               type="submit"
               disabled={inviting || !inviteEmail.trim()}
-              className="px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+              className="px-4 sm:px-6 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-smooth disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm sm:text-base whitespace-nowrap min-h-[44px] sm:min-h-0"
             >
               {inviting ? 'Adding...' : 'Add Member'}
             </button>

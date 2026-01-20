@@ -3,21 +3,20 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Logo } from './Logo'
+import { createClient } from '@/lib/supabase/client'
 
 export function PageNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check if user is logged in
+    const supabase = createClient()
+    
+    // Check initial session state
     const checkSession = async () => {
       try {
-        const response = await fetch('/api/auth/user')
-        if (response.ok) {
-          setIsLoggedIn(true)
-        } else {
-          setIsLoggedIn(false)
-        }
+        const { data: { session } } = await supabase.auth.getSession()
+        setIsLoggedIn(!!session)
       } catch (error) {
         setIsLoggedIn(false)
       } finally {
@@ -26,6 +25,17 @@ export function PageNav() {
     }
 
     checkSession()
+
+    // Listen for auth state changes (login/logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session)
+      setLoading(false)
+    })
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   return (

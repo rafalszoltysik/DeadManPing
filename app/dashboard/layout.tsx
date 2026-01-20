@@ -142,8 +142,8 @@ export default async function DashboardLayout({
               <StaticLogoIcon size={24} />
               <span className="text-lg font-bold font-mono">DMP</span>
             </Link>
-            <div className="flex items-center gap-1">
-              {/* Theme toggle removed - dark mode is locked */}
+            <div className="flex items-center gap-2">
+              <LogoutButton variant="compact" />
             </div>
           </div>
         </div>
