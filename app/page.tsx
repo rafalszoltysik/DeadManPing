@@ -10,6 +10,7 @@ import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { SiPython, SiNodedotjs, SiRuby, SiGo, SiPhp } from 'react-icons/si'
 import { FaTerminal } from 'react-icons/fa'
+import PricingSectionClient from '@/components/PricingSectionClient'
 
 // Lazy load heavy components below the fold
 const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
@@ -25,21 +26,6 @@ const DashboardPreview = dynamicImport(() => import('@/components/DashboardPrevi
     </div>
   ),
   ssr: true,
-})
-
-const PricingSection = dynamicImport(() => import('@/components/PricingSection').then(mod => ({ default: mod.PricingSection })), {
-  loading: () => (
-    <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
-      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
-      <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 h-96 animate-pulse"></div>
-        ))}
-      </div>
-    </section>
-  ),
-  ssr: false, // Client-side only since it fetches prices
 })
 
 export const metadata: Metadata = {
@@ -713,7 +699,7 @@ if (strpos($output, 'success') !== false) {
               </div>
             </section>
           }>
-            <PricingSection />
+            <PricingSectionClient />
           </Suspense>
         </AnimatedSection>
 

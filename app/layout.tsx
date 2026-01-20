@@ -1,13 +1,8 @@
 import type { Metadata } from "next";
-import dynamic from 'next/dynamic';
 import "./globals.css";
 import { CookieBanner } from '@/components/CookieBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
-
-// Lazy load AnalyticsWrapper to avoid blocking initial render
-const AnalyticsWrapper = dynamic(() => import('@/components/AnalyticsWrapper').then(mod => ({ default: mod.AnalyticsWrapper })), {
-  ssr: false, // Client-side only since it checks localStorage
-})
+import AnalyticsWrapperClient from '@/components/AnalyticsWrapperClient'
 
 export const metadata: Metadata = {
   title: "DeadManPing - Monitor Your Cron Jobs",
@@ -47,7 +42,7 @@ export default function RootLayout({
           {children}
           <CookieBanner />
         </ThemeProvider>
-        {process.env.NODE_ENV === 'production' && <AnalyticsWrapper />}
+        {process.env.NODE_ENV === 'production' && <AnalyticsWrapperClient />}
       </body>
     </html>
   );
