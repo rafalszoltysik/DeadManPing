@@ -56,6 +56,54 @@ export default function FAQPage() {
           "@type": "Answer",
           "text": "DeadManPing offers a free tier with 10 monitors and 5-minute minimum intervals. Paid plans start at $9/month for Starter (25 monitors), $29/month for Pro (100 monitors), and $79/month for Team (500 monitors). Before purchasing a paid plan, you can try it free for 14 days with no credit card required."
         }
+      },
+      {
+        "@type": "Question",
+        "name": "What alert channels are available?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Free tier includes email alerts. Starter, Pro, and Team plans add Slack and Discord integrations. Team plan also includes custom webhooks for integration with any service."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I send custom data with my pings?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! You can send JSON payloads with any data you want - success status, counts, file sizes, durations, error messages, etc. You can also set up payload validation rules to ensure your jobs are producing the expected results."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What programming languages are supported?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Any language that can make HTTP requests! We provide examples for bash, Python, Node.js, Ruby, Go, PHP, and more. Since it's just a simple HTTP POST request, you can use curl, wget, or any HTTP library in your preferred language."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is there a free trial?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Before purchasing any paid plan, you can try it free for 14 days with no credit card required. During the trial, you get full access to all features of the plan you're trialing. When you purchase a plan, the trial ends and your paid subscription begins. If you don't purchase, you'll automatically move to the free tier after the trial ends."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I monitor backup jobs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! Backup monitoring is one of the most common use cases. You can verify that backups run on schedule, check backup file sizes, and ensure backups complete successfully."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How do I contact support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You can contact support through the contact form or email us directly. Team plan customers get priority support with 24-hour response time."
+        }
       }
     ]
   }
@@ -314,6 +362,22 @@ export default function FAQPage() {
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <AnimatedSection>
+          <div className="mb-6">
+            <Link 
+              href="/" 
+              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth group"
+            >
+              <svg 
+                className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span className="text-sm font-medium">Back to Home</span>
+            </Link>
+          </div>
           <header className="mb-8 sm:mb-12 text-center">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
               Frequently Asked Questions
