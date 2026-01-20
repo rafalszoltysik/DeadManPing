@@ -1,6 +1,30 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Public routes that don't need auth check
+const PUBLIC_ROUTES = [
+  '/',
+  '/faq',
+  '/docs',
+  '/contact',
+  '/dead-man-switch',
+  '/monitor-cron-jobs',
+  '/backup-monitoring',
+  '/cron-job-failed',
+]
+
+const isPublicRoute = (pathname: string): boolean => {
+  // Check exact matches
+  if (PUBLIC_ROUTES.includes(pathname)) {
+    return true
+  }
+  // Check legal routes
+  if (pathname.startsWith('/legal')) {
+    return true
+  }
+  return false
+}
+
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -8,39 +32,51 @@ export async function middleware(request: NextRequest) {
     },
   })
 
-  // Create Supabase client for middleware to refresh session
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
+  const pathname = request.nextUrl.pathname
 
-  // Get user from Supabase session (this also refreshes the session)
-  // Ignore expected "no session" errors - they just mean user is not authenticated
-  const { data: { user }, error } = await supabase.auth.getUser()
-  
-  // Only log unexpected auth errors (ignore expected "no session" scenarios)
-  if (error) {
-    const isExpectedNoSessionError = 
-      error.code === 'refresh_token_not_found' ||
-      error.name === 'AuthSessionMissingError' ||
-      (error.message?.toLowerCase().includes('session missing') || 
-       error.message?.toLowerCase().includes('auth session missing'))
+  // Skip auth check for public routes to improve TTFB
+  const needsAuthCheck = !isPublicRoute(pathname) && 
+    (pathname.startsWith('/dashboard') || pathname.startsWith('/auth'))
+
+  let user = null
+
+  // Only perform auth check if needed
+  if (needsAuthCheck) {
+    // Create Supabase client for middleware to refresh session
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet: Array<{ name: string; value: string; options?: any }>) {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              request.cookies.set(name, value)
+              response.cookies.set(name, value, options)
+            })
+          },
+        },
+      }
+    )
+
+    // Get user from Supabase session (this also refreshes the session)
+    // Ignore expected "no session" errors - they just mean user is not authenticated
+    const { data: { user: authUser }, error } = await supabase.auth.getUser()
+    user = authUser
     
-    if (!isExpectedNoSessionError) {
-      console.error('Auth error in middleware:', error)
+    // Only log unexpected auth errors (ignore expected "no session" scenarios)
+    if (error) {
+      const isExpectedNoSessionError = 
+        error.code === 'refresh_token_not_found' ||
+        error.name === 'AuthSessionMissingError' ||
+        (error.message?.toLowerCase().includes('session missing') || 
+         error.message?.toLowerCase().includes('auth session missing'))
+      
+      if (!isExpectedNoSessionError) {
+        console.error('Auth error in middleware:', error)
+      }
     }
   }
 

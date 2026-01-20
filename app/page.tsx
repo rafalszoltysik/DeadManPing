@@ -1,15 +1,32 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import dynamicImport from 'next/dynamic'
+import { Suspense } from 'react'
 import { PageNav } from '@/components/PageNav'
 import { Logo } from '@/components/Logo'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
-import { DashboardPreview } from '@/components/DashboardPreview'
-import { PricingSection } from '@/components/PricingSection'
 import { CTAButton } from '@/components/CTAButton'
 import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { SiPython, SiNodedotjs, SiRuby, SiGo, SiPhp } from 'react-icons/si'
 import { FaTerminal } from 'react-icons/fa'
+import PricingSectionClient from '@/components/PricingSectionClient'
+
+// Lazy load heavy components below the fold
+const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
+  loading: () => (
+    <div className="max-w-5xl mx-auto px-4">
+      <div className="text-center mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
+        <p className="text-muted-foreground text-base sm:text-lg">
+          Real-time status updates and instant alerts for all your cron jobs
+        </p>
+      </div>
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl animate-pulse h-96"></div>
+    </div>
+  ),
+  ssr: true,
+})
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
@@ -19,25 +36,20 @@ export const metadata: Metadata = {
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
     type: "website",
-    images: [
-      {
-        url: "https://deadmanping.com/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "DeadManPing - Monitor Your Cron Jobs",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
-    images: ["https://deadmanping.com/og-image.png"],
   },
   alternates: {
     canonical: "/",
   },
 }
+
+// Force static generation for better performance
+export const dynamic = 'force-static'
+export const revalidate = 3600 // Revalidate every hour
 
 export default function Home() {
   const structuredData = {
@@ -104,7 +116,19 @@ export default function Home() {
 
         {/* Dashboard Preview */}
         <AnimatedSection className="py-8 sm:py-12 lg:py-16" delay={0} direction="up" duration={900}>
-          <DashboardPreview />
+          <Suspense fallback={
+            <div className="max-w-5xl mx-auto px-4">
+              <div className="text-center mb-6 sm:mb-8">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
+                <p className="text-muted-foreground text-base sm:text-lg">
+                  Real-time status updates and instant alerts for all your cron jobs
+                </p>
+              </div>
+              <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl animate-pulse h-96"></div>
+            </div>
+          }>
+            <DashboardPreview />
+          </Suspense>
         </AnimatedSection>
 
         {/* The uncomfortable truth */}
@@ -664,7 +688,19 @@ if (strpos($output, 'success') !== false) {
 
         {/* Pricing */}
         <AnimatedSection delay={0} direction="up" duration={900}>
-          <PricingSection />
+          <Suspense fallback={
+            <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
+              <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 h-96 animate-pulse"></div>
+                ))}
+              </div>
+            </section>
+          }>
+            <PricingSectionClient />
+          </Suspense>
         </AnimatedSection>
 
         {/* What DeadManPing Does */}

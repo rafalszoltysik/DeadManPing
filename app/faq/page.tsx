@@ -54,7 +54,7 @@ export default function FAQPage() {
         "name": "How much does DeadManPing cost?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "DeadManPing offers a free tier with 10 monitors and 5-minute minimum intervals. Paid plans start at $9/month for Starter (25 monitors), $29/month for Pro (100 monitors), and $79/month for Team (500 monitors). Before purchasing a paid plan, you can try it free for 14 days with no credit card required."
+          "text": "DeadManPing offers a free tier with 20 monitors and 5-minute minimum intervals. Paid plans start at $7/month for Starter (30 monitors), $24/month for Pro (150 monitors), and $79/month for Team (1000 monitors). Before purchasing a paid plan, you can try it free for 14 days with no credit card required."
         }
       },
       {
@@ -144,19 +144,19 @@ export default function FAQPage() {
       items: [
         {
           q: "How much does DeadManPing cost?",
-          a: "DeadManPing offers a free tier with 10 monitors and 5-minute minimum intervals. Paid plans start at $9/month for Starter (25 monitors), $29/month for Pro (100 monitors), and $79/month for Team (500 monitors). Before purchasing a paid plan, you can try it free for 14 days with no credit card required - the trial gives you full access to all plan features."
+          a: "DeadManPing offers a free tier with 20 monitors and 5-minute minimum intervals. Paid plans start at $7/month for Starter (30 monitors), $24/month for Pro (150 monitors), and $79/month for Team (1000 monitors). Before purchasing a paid plan, you can try it free for 14 days with no credit card required - the trial gives you full access to all plan features including Slack/Discord integrations."
         },
         {
           q: "What's included in the free tier?",
-          a: "The free tier includes 10 monitors, 5-minute minimum intervals, email alerts, and single-user access. Perfect for trying out the service or monitoring personal projects."
+          a: "The free tier includes 20 monitors, 5-minute minimum intervals, email alerts, and single-user access. Perfect for trying out the service or monitoring personal projects."
         },
         {
           q: "What's the difference between Starter, Pro, and Team plans?",
-          a: "Starter ($9/month): 25 monitors, 5-minute intervals, email + Slack/Discord alerts. Pro ($29/month): 100 monitors, 1-minute intervals, up to 3 team members. Team ($79/month): 500 monitors, 1-minute intervals, up to 10 team members, custom webhooks, and priority support."
+          a: "Starter ($7/month): 30 monitors, 5-minute intervals, email + Slack/Discord alerts. Pro ($24/month): 150 monitors, 1-minute intervals, up to 3 team members. Team ($79/month): 1000 monitors, 1-minute intervals, up to 10 team members, custom webhooks, and priority support."
         },
         {
           q: "Do you offer annual billing?",
-          a: "Yes! Annual billing saves you money: Starter saves 10% ($97/year), Pro saves 15% ($296/year), and Team saves 20% ($758/year). You can switch between monthly and annual billing anytime."
+          a: "Yes! Annual billing saves you money: Starter saves 10% ($76/year), Pro saves 15% ($245/year), and Team saves 20% ($758/year). You can switch between monthly and annual billing anytime."
         },
         {
           q: "What happens if I exceed my monitor limit?",

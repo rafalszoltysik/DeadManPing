@@ -3,6 +3,9 @@ import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-pric
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { type Currency } from '@/lib/currency-detection'
 
+// This route is dynamic because it uses request.url and request.headers
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Zawsze używaj USD
@@ -18,10 +21,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Fallback prices (USD) jeśli Stripe nie zwraca cen
+    // Note: Update actual prices in Stripe Dashboard - these are fallbacks only
     const FALLBACK_PRICES = {
-      starter: { amount: 900, priceId: process.env.STRIPE_PRICE_ID_STARTER || null },
-      pro: { amount: 2900, priceId: process.env.STRIPE_PRICE_ID_PRO || null },
-      team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null },
+      starter: { amount: 700, priceId: process.env.STRIPE_PRICE_ID_STARTER || null }, // $7.00 (updated from $9)
+      pro: { amount: 2400, priceId: process.env.STRIPE_PRICE_ID_PRO || null }, // $24.00 (updated from $29)
+      team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null }, // $79.00 (unchanged)
     }
 
     // Zawsze używaj USD
@@ -49,11 +53,19 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ 
+    const response = NextResponse.json({ 
       plans, 
       currency: finalCurrency,
       availableCurrencies 
     })
+
+    // Add cache headers for better performance
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=3600, stale-while-revalidate=86400'
+    )
+
+    return response
   } catch (error: any) {
     console.error('Error fetching prices:', error)
     return NextResponse.json(

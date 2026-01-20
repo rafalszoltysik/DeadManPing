@@ -2,22 +2,22 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const TIER_LIMITS = {
   free: {
-    monitors: 10,  // Updated from 3
+    monitors: 20,  // Updated from 10 (Option A: Aggressive pricing)
     minInterval: 300, // 5 minutes
     maxMembers: 1,
   },
   starter: {
-    monitors: 25,
+    monitors: 30,  // Updated from 25
     minInterval: 300, // 5 minutes
     maxMembers: 1,
   },
   pro: {
-    monitors: 100,
+    monitors: 150,  // Updated from 100
     minInterval: 60, // 1 minute
     maxMembers: 3,
   },
   team: {
-    monitors: 500,
+    monitors: 1000,  // Updated from 500
     minInterval: 60, // 1 minute (cron checks every 60s, so 30s interval is not achievable)
     maxMembers: 10,
   },

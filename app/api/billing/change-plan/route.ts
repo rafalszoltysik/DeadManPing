@@ -132,6 +132,9 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
+      automatic_tax: {
+        enabled: true, // Automatically calculate and collect tax based on customer location
+      },
       success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings?upgraded=true`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
       metadata: {

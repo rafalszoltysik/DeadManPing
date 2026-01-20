@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { CookieBanner } from '@/components/CookieBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
-import { AnalyticsWrapper } from '@/components/AnalyticsWrapper'
+import AnalyticsWrapperClient from '@/components/AnalyticsWrapperClient'
 
 export const metadata: Metadata = {
   title: "DeadManPing - Monitor Your Cron Jobs",
@@ -19,17 +19,9 @@ export const metadata: Metadata = {
     type: "website",
     url: "https://deadmanping.com",
     siteName: "DeadManPing",
-    images: [
-      {
-        url: "https://deadmanping.com/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "DeadManPing - Monitor Your Cron Jobs",
-      },
-    ],
   },
   twitter: {
-    card: "summary_large_image",
+    card: "summary",
     title: "DeadManPing - Never Miss a Cron Job Again",
     description: "Simple dead-man switch monitoring for your cron jobs and scheduled tasks.",
   },
@@ -50,7 +42,7 @@ export default function RootLayout({
           {children}
           <CookieBanner />
         </ThemeProvider>
-        {process.env.NODE_ENV === 'production' && <AnalyticsWrapper />}
+        {process.env.NODE_ENV === 'production' && <AnalyticsWrapperClient />}
       </body>
     </html>
   );
