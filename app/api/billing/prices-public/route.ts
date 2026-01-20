@@ -3,6 +3,9 @@ import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-pric
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 
+// Enable ISR - revalidate every hour
+export const revalidate = 3600
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
@@ -72,11 +75,19 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    return NextResponse.json({ 
+    const response = NextResponse.json({ 
       plans, 
       currency: finalCurrency,
       availableCurrencies 
     })
+
+    // Add cache headers for better performance
+    response.headers.set(
+      'Cache-Control',
+      'public, s-maxage=3600, stale-while-revalidate=86400'
+    )
+
+    return response
   } catch (error: any) {
     console.error('Error fetching prices:', error)
     return NextResponse.json(

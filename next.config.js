@@ -5,6 +5,18 @@ const { withSentryConfig } = require('@sentry/nextjs')
 const nextConfig = {
   reactStrictMode: true,
   
+  // Optimize package imports for better tree-shaking
+  experimental: {
+    optimizePackageImports: ['react-icons'],
+  },
+  
+  // Remove console.log in production for smaller bundle
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
+  },
+  
   // Exclude Supabase functions from Next.js build (they use Deno)
   webpack: (config) => {
     config.resolve.alias = {
