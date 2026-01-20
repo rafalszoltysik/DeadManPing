@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Dead Man Switch for Backups | DeadManPing",
+    description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+  },
   alternates: {
     canonical: "/dead-man-switch",
   },

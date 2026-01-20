@@ -17,6 +17,16 @@ export const metadata: Metadata = {
     title: "DeadManPing - Never Miss a Cron Job Again",
     description: "Simple dead-man switch monitoring for your cron jobs and scheduled tasks. Get alerted when your backups, reports, or sync jobs don't run.",
     type: "website",
+    url: "https://deadmanping.com",
+    siteName: "DeadManPing",
+    images: [
+      {
+        url: "https://deadmanping.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "DeadManPing - Monitor Your Cron Jobs",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",

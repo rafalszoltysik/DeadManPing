@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
     type: "article",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Monitor Cron Jobs Without Migration | DeadManPing",
+    description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+  },
   alternates: {
     canonical: "/monitor-cron-jobs",
   },

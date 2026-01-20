@@ -430,6 +430,9 @@ function LoginForm() {
   )
 }
 
+// Note: Metadata is handled by app/auth/layout.tsx
+// This page is a client component, so metadata must be in layout
+
 export default function LoginPage() {
   return (
     <Suspense fallback={(

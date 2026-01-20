@@ -1,0 +1,18 @@
+This file is a placeholder for og-image.png
+
+The OG image should be:
+- Size: 1200x630 pixels
+- Format: PNG or JPG
+- Content: DeadManPing logo/branding with tagline "Monitor Your Cron Jobs"
+- Should be visually appealing and represent the product
+
+To create the OG image:
+1. Use a design tool (Figma, Canva, etc.)
+2. Create a 1200x630px image
+3. Include DeadManPing branding
+4. Add tagline or key message
+5. Export as og-image.png
+6. Place in public/ directory
+
+The image will be automatically served at https://deadmanping.com/og-image.png
+

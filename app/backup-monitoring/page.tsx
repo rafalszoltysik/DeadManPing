@@ -12,6 +12,11 @@ export const metadata: Metadata = {
     description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Backup Monitoring Service | DeadManPing",
+    description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+  },
   alternates: {
     canonical: "/backup-monitoring",
   },
