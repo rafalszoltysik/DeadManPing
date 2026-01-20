@@ -42,8 +42,8 @@ export function PageNav() {
     <nav className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-14 sm:h-16">
-          <div className="flex items-center">
-            <Link href="/" className="hover:opacity-80 transition-smooth">
+          <div className="flex items-center flex-shrink-0 min-w-0">
+            <Link href="/" className="hover:opacity-80 transition-smooth flex-shrink-0">
               <Logo showText={true} variant="with-text" className="text-lg sm:text-xl" />
             </Link>
           </div>
@@ -58,7 +58,7 @@ export function PageNav() {
               <>
                 {isLoggedIn ? (
                   <Link
-                    href="/dashboard/settings"
+                    href="/dashboard"
                     className="text-muted-foreground hover:text-foreground px-2 sm:px-3 py-2 rounded-md text-sm font-medium transition-smooth"
                   >
                     <span className="hidden sm:inline">Profile</span>

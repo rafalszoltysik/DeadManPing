@@ -69,21 +69,39 @@ export function DashboardPreview() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
   const hasStartedAnimation = useRef(false)
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    if (!containerRef.current || hasStartedAnimation.current) return
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || !containerRef.current || hasStartedAnimation.current) return
+
+    // Fallback: show items immediately on mobile if IntersectionObserver fails
+    const isMobile = window.innerWidth < 768
+    const fallbackTimer = setTimeout(() => {
+      if (visibleItems.size === 0) {
+        // If no items are visible after 1 second, show them all (mobile fallback)
+        mockMonitors.forEach((_, index) => {
+          setVisibleItems(prev => new Set([...prev, index]))
+        })
+        hasStartedAnimation.current = true
+      }
+    }, isMobile ? 500 : 2000) // Faster fallback on mobile
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !hasStartedAnimation.current) {
             hasStartedAnimation.current = true
+            clearTimeout(fallbackTimer)
             
             // Animate items one by one
             mockMonitors.forEach((_, index) => {
               setTimeout(() => {
                 setVisibleItems(prev => new Set([...prev, index]))
-              }, index * 300)
+              }, index * (isMobile ? 100 : 300)) // Faster on mobile
             })
 
             // Unobserve after animation starts
@@ -91,22 +109,26 @@ export function DashboardPreview() {
               if (containerRef.current) {
                 observer.unobserve(containerRef.current)
               }
-            }, mockMonitors.length * 300 + 100)
+            }, mockMonitors.length * (isMobile ? 100 : 300) + 100)
           }
         })
       },
-      { threshold: 0.1, rootMargin: '-200px' }
+      { 
+        threshold: 0.1, 
+        rootMargin: isMobile ? '0px' : '-200px' // No negative margin on mobile
+      }
     )
 
     const currentContainerRef = containerRef.current
     observer.observe(currentContainerRef)
 
     return () => {
+      clearTimeout(fallbackTimer)
       if (currentContainerRef) {
         observer.unobserve(currentContainerRef)
       }
     }
-  }, [])
+  }, [mounted, visibleItems.size])
 
   return (
     <div ref={containerRef} className="max-w-5xl mx-auto px-4">
@@ -134,6 +156,7 @@ export function DashboardPreview() {
                     ? 'opacity-100 translate-y-0' 
                     : 'opacity-0 translate-y-4'
                 }`}
+                style={!mounted ? { opacity: 1, transform: 'translateY(0)' } : undefined}
               >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">

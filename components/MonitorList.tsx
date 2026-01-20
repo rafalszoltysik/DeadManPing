@@ -22,23 +22,7 @@ export function MonitorList({ monitors }: MonitorListProps) {
 
     const timers: NodeJS.Timeout[] = []
     
-    // Fallback timeout to ensure items are visible even if animation fails (especially on mobile)
-    const fallbackTimer = setTimeout(() => {
-      itemRefs.current.forEach((ref) => {
-        if (ref) {
-          // Check if item is still invisible (animation didn't trigger)
-          const computedStyle = window.getComputedStyle(ref)
-          if (computedStyle.opacity === '0' || ref.classList.contains('opacity-0')) {
-            // Force visibility if animation didn't trigger
-            ref.style.opacity = '1'
-            ref.style.transform = 'translateY(0)'
-            ref.classList.remove('opacity-0', 'translate-y-4')
-          }
-        }
-      })
-    }, 1500) // 1.5 second fallback - ensures items show on mobile even if JS is slow
-    
-    // Use a single timeout instead of double requestAnimationFrame for better mobile compatibility
+    // Start animations immediately for better mobile experience
     const animationTimer = setTimeout(() => {
       itemRefs.current.forEach((ref, index) => {
         if (ref && !ref.classList.contains('slide-up')) {
@@ -46,11 +30,34 @@ export function MonitorList({ monitors }: MonitorListProps) {
             if (ref) {
               ref.classList.add('slide-up')
             }
-          }, 100 + (index * 60))
+          }, 30 + (index * 30)) // Faster stagger for mobile
           timers.push(timer)
         }
       })
-    }, 50) // Small delay to ensure DOM is ready
+    }, 10) // Small delay to ensure DOM is ready
+    
+    // Fallback timeout to ensure items are visible even if animation fails (especially on mobile)
+    const fallbackTimer = setTimeout(() => {
+      itemRefs.current.forEach((ref) => {
+        if (ref) {
+          // Check if item is still invisible (animation didn't trigger)
+          const computedStyle = window.getComputedStyle(ref)
+          const opacity = computedStyle.opacity
+          const hasOpacity0 = ref.classList.contains('opacity-0')
+          const hasSlideUp = ref.classList.contains('slide-up')
+          
+          // More robust check - handle both string and number comparisons
+          // Only force visibility if animation hasn't started
+          if (!hasSlideUp && (opacity === '0' || parseFloat(opacity) < 0.01 || hasOpacity0)) {
+            // Force visibility if animation didn't trigger
+            ref.style.opacity = '1'
+            ref.style.transform = 'translateY(0)'
+            ref.classList.remove('opacity-0', 'translate-y-4')
+            ref.classList.add('slide-up')
+          }
+        }
+      })
+    }, 600) // Shorter fallback - 600ms for faster mobile experience
     
     return () => {
       timers.forEach(timer => clearTimeout(timer))
@@ -96,7 +103,7 @@ export function MonitorList({ monitors }: MonitorListProps) {
               itemRefs.current[index] = el
             }}
             href={`/dashboard/monitors/${monitor.slug}`}
-            className="block hover:bg-accent/50 transition-smooth group opacity-0 translate-y-4"
+            className="block hover:bg-accent/50 transition-smooth group opacity-0 translate-y-4 will-change-[opacity,transform]"
           >
             <div className="px-4 sm:px-6 py-3 sm:py-4">
               <div className="flex items-center justify-between gap-3">
