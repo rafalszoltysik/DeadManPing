@@ -40,10 +40,34 @@ export function isPostHogEnabled(): boolean {
 export function capturePageView(event: PageViewEvent): void {
   if (!isPostHogEnabled()) return
   
-  posthog.capture('page_view', {
+  // Build properties object with UTM parameters
+  const properties: Record<string, any> = {
     path: event.path,
     referrer: event.referrer,
-  })
+  }
+  
+  // Add UTM parameters if present
+  if (event.utm_source) properties.utm_source = event.utm_source
+  if (event.utm_medium) properties.utm_medium = event.utm_medium
+  if (event.utm_campaign) properties.utm_campaign = event.utm_campaign
+  if (event.utm_term) properties.utm_term = event.utm_term
+  if (event.utm_content) properties.utm_content = event.utm_content
+  
+  // Set UTM parameters as user properties so they persist across sessions
+  // PostHog will automatically track these as $initial_utm_source, etc.
+  if (event.utm_source || event.utm_medium || event.utm_campaign) {
+    const userProperties: Record<string, any> = {}
+    if (event.utm_source) userProperties.$initial_utm_source = event.utm_source
+    if (event.utm_medium) userProperties.$initial_utm_medium = event.utm_medium
+    if (event.utm_campaign) userProperties.$initial_utm_campaign = event.utm_campaign
+    if (event.utm_term) userProperties.$initial_utm_term = event.utm_term
+    if (event.utm_content) userProperties.$initial_utm_content = event.utm_content
+    
+    // Only set if not already set (preserve first touch attribution)
+    posthog.identify(undefined, userProperties, { set_once: true })
+  }
+  
+  posthog.capture('page_view', properties)
 }
 
 /**

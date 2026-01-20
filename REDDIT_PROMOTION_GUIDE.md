@@ -453,25 +453,75 @@ Po publikacji śledź:
 - Jaki feedback otrzymałeś
 - Czy ktoś poprosił o link
 
+### Śledzenie ruchu z Reddita (UTM parametry)
+
+Aby śledzić ile ruchu przychodzi z Reddita, użyj linków z parametrami UTM. Aplikacja automatycznie przechwytuje te parametry i zapisuje je w **Vercel Analytics** (główny tracking) oraz PostHog (dodatkowy tracking).
+
+**Format linku:**
+```
+https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=[nazwa_subreddita]
+```
+
+**Przykłady linków dla różnych subredditów:**
+
+- r/SideProject: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=sideproject`
+- r/indiehackers: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=indiehackers`
+- r/AlphaAndBetaUsers: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=alphabeta`
+- r/microsaas: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=microsaas`
+- r/devops: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=devops`
+- r/sysadmin: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=sysadmin`
+- r/webdev: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=webdev`
+- r/selfhosted: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=selfhosted`
+- r/SaaS: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=saas`
+- r/startups: `https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=startups`
+
+**Jak sprawdzić statystyki w Vercel Analytics:**
+
+1. Zaloguj się do [Vercel Dashboard](https://vercel.com/dashboard)
+2. Wybierz swój projekt
+3. Przejdź do zakładki **"Analytics"**
+4. Vercel Analytics automatycznie zbiera UTM parametry z URL
+5. Możesz filtrować po:
+   - **Referrers** - zobaczysz `reddit.com` jako źródło
+   - **UTM Source** - filtruj po `utm_source=reddit`
+   - **UTM Campaign** - zobaczysz który subreddit (`utm_campaign`) generuje najwięcej ruchu
+   - **Custom Events** - znajdziesz event `page_view_with_utm` z pełnymi danymi UTM
+
+**Dodatkowe parametry UTM (opcjonalne):**
+- `utm_term` - słowa kluczowe (np. `utm_term=cron+monitoring`)
+- `utm_content` - identyfikator konkretnego posta (np. `utm_content=post_123`)
+
+**Przykład z wszystkimi parametrami:**
+```
+https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=sideproject&utm_term=cron+monitoring&utm_content=post_2024_01_15
+```
+
+**Uwaga:** Vercel Analytics automatycznie zbiera UTM parametry z URL, więc nie musisz nic dodatkowo konfigurować. Wszystkie linki z UTM będą automatycznie śledzone w dashboardzie Vercel.
+
 To pomoże Ci zrozumieć, które subreddity i podejścia działają najlepiej.
 
 ---
 
 ## 🔗 PRZYGOTOWANE LINKI (do użycia w komentarzach)
 
-Gdy ktoś poprosi o link, możesz użyć:
+Gdy ktoś poprosi o link, użyj linku z UTM parametrami aby śledzić ruch. Pamiętaj, aby dostosować `utm_campaign` do nazwy subreddita.
 
+**Przykład dla r/SideProject:**
 ```
-Sure! Here's the link: https://deadmanping.com
+Sure! Here's the link: https://deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=sideproject
 
 It's free to try for 14 days, no credit card needed. Let me know if you have any questions!
 ```
 
-Lub bardziej casual:
+**Przykład bardziej casual:**
+```
+Yeah, it's at deadmanping.com?utm_source=reddit&utm_medium=social&utm_campaign=sideproject - 14 day trial if you want to check it out. Happy to answer any questions!
+```
 
-```
-Yeah, it's at deadmanping.com - 14 day trial if you want to check it out. Happy to answer any questions!
-```
+**Uwaga:** 
+- Jeśli link jest zbyt długi, możesz użyć skróconego linku (np. przez bit.ly lub podobny serwis) i ustawić przekierowanie z UTM parametrami
+- Alternatywnie, możesz użyć tylko podstawowych parametrów: `https://deadmanping.com?utm_source=reddit&utm_campaign=sideproject`
+- Vercel Analytics automatycznie zbiera UTM parametry - wszystkie statystyki będą dostępne w dashboardzie Vercel pod zakładką "Analytics"
 
 ---
 

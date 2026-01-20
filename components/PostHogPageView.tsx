@@ -24,9 +24,21 @@ export function PostHogPageView() {
       if (previousPathRef.current !== currentPath) {
         const referrer = typeof document !== 'undefined' ? document.referrer || null : null
         
+        // Extract UTM parameters from URL
+        const utmSource = searchParams.get('utm_source')
+        const utmMedium = searchParams.get('utm_medium')
+        const utmCampaign = searchParams.get('utm_campaign')
+        const utmTerm = searchParams.get('utm_term')
+        const utmContent = searchParams.get('utm_content')
+        
         capturePageView({
           path: currentPath,
           referrer,
+          utm_source: utmSource || null,
+          utm_medium: utmMedium || null,
+          utm_campaign: utmCampaign || null,
+          utm_term: utmTerm || null,
+          utm_content: utmContent || null,
         })
         
         previousPathRef.current = currentPath
