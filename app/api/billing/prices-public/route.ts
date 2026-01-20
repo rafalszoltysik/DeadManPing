@@ -3,8 +3,8 @@ import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-pric
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 
-// Enable ISR - revalidate every hour
-export const revalidate = 3600
+// This route is dynamic because it uses request.url and request.headers
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
