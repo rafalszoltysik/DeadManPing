@@ -11,6 +11,11 @@ export const metadata: Metadata = {
     description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
     type: "article",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cron Job Not Running? How to Detect and Fix",
+    description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
+  },
   alternates: {
     canonical: "/cron-job-failed",
   },

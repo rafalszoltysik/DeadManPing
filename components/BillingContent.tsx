@@ -205,10 +205,6 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
                   </li>
                   <li className="flex items-center text-sm sm:text-base text-muted-foreground">
                     <span className="mr-2 text-success">✓</span>
-                    API access
-                  </li>
-                  <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                    <span className="mr-2 text-success">✓</span>
                     Up to {plan.maxMembers} team members
                   </li>
                 </>

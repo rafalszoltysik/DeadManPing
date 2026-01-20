@@ -14,14 +14,24 @@ export function CookieBanner() {
 
   useEffect(() => {
     // Check if user has already dismissed the banner
-    const bannerDismissed = localStorage.getItem('analyticsBannerDismissed')
-    if (!bannerDismissed) {
+    // Safari in private mode may block localStorage, so wrap in try-catch
+    try {
+      const bannerDismissed = localStorage.getItem('analyticsBannerDismissed')
+      if (!bannerDismissed) {
+        setShowBanner(true)
+      }
+    } catch (error) {
+      // Safari private mode or localStorage disabled - show banner anyway
       setShowBanner(true)
     }
   }, [])
 
   const dismissBanner = () => {
-    localStorage.setItem('analyticsBannerDismissed', 'true')
+    try {
+      localStorage.setItem('analyticsBannerDismissed', 'true')
+    } catch (error) {
+      // Safari private mode or localStorage disabled - ignore error
+    }
     setShowBanner(false)
   }
 

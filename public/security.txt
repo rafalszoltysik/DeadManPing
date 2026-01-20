@@ -1,7 +1,7 @@
-Contact: mailto:security@yourdomain.com
+Contact: mailto:security@deadmanping.com
 Expires: 2027-01-01T00:00:00.000Z
 Preferred-Languages: en, pl
-Canonical: https://yourdomain.com/security.txt
+Canonical: https://deadmanping.com/.well-known/security.txt
 
 # Security Policy
 
@@ -9,7 +9,7 @@ If you discover a security vulnerability in DeadManPing, please report it respon
 
 ## Reporting
 
-Please email security@yourdomain.com with:
+Please email security@deadmanping.com with:
 - Description of the vulnerability
 - Steps to reproduce
 - Potential impact

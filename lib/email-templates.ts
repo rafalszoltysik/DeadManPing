@@ -258,8 +258,7 @@ export function generateEmailTemplate(data: EmailTemplateData): string {
           <tr>
             <td style="background-color: #f9fafb; padding: 24px 32px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.5;">
-                © ${currentYear} DeadManPing. All rights reserved.<br>
-                <a href="${appUrl}/dashboard/settings" style="color: #6b7280; text-decoration: underline;">Manage notification settings</a>
+                © ${currentYear} DeadManPing. All rights reserved.
               </p>
             </td>
           </tr>
@@ -315,8 +314,7 @@ export function generateEmailText(data: EmailTemplateData): string {
   }
   text += `\nView Monitor: ${data.dashboardUrl}\n\n`
   text += `---\n`
-  text += `This is an automated alert from DeadManPing.\n`
-  text += `Manage notification settings: ${appUrl}/dashboard/settings\n\n`
+  text += `This is an automated alert from DeadManPing.\n\n`
   text += `© ${currentYear} DeadManPing. All rights reserved.`
 
   return text

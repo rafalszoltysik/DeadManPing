@@ -12,14 +12,86 @@ export const metadata: Metadata = {
     description: "Complete documentation for DeadManPing cron job monitoring. Quick start guide and API reference.",
     type: "article",
   },
+  twitter: {
+    card: "summary",
+    title: "DeadManPing Documentation",
+    description: "Complete documentation for DeadManPing cron job monitoring. Quick start guide and API reference.",
+  },
   alternates: {
     canonical: "/docs",
   },
 }
 
 export default function DocsPage() {
+  const faqStructuredData = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Do I need to migrate my cron jobs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Keep your cron. Keep your scripts. Just add one curl line at the end of your existing script."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does DeadManPing run my jobs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. Your cron runs your jobs. DeadManPing only observes the results. DeadManPing doesn't touch execution."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Why must curl be inside the script, not in the cron line?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Because only inside the script do you have access to variables from execution results (e.g., count, file size, duration). Data must come from execution, not be hardcoded."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What if my job runs less frequently than 5 minutes?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The free tier has a minimum interval of 5 minutes. Upgrade to Starter or Pro plan for longer intervals."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I monitor jobs that run on different servers?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! As long as the server can make HTTP requests, you can ping from anywhere."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What happens if I exceed my monitor limit?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You'll need to upgrade your plan to create more monitors. Existing monitors will continue to work."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Are there limits on payload validation fields?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Each monitor can have up to 5 payload validation fields. Field names must be 100 characters or less. Only declared fields are processed during validation, any additional fields in the payload are ignored."
+        }
+      }
+    ]
+  }
+
   return (
     <div className="min-h-screen text-foreground relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+      />
       <PageNav />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

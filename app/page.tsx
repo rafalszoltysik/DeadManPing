@@ -19,6 +19,20 @@ export const metadata: Metadata = {
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
     type: "website",
+    images: [
+      {
+        url: "https://deadmanping.com/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "DeadManPing - Monitor Your Cron Jobs",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
+    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    images: ["https://deadmanping.com/og-image.png"],
   },
   alternates: {
     canonical: "/",
@@ -962,6 +976,11 @@ if (strpos($output, 'success') !== false) {
                 <li>
                   <Link href="/backup-monitoring" className="text-muted-foreground hover:text-foreground transition-smooth">
                     Backup Monitoring
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-smooth">
+                    FAQ
                   </Link>
                 </li>
               </ul>
