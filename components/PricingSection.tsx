@@ -297,10 +297,6 @@ export function PricingSection() {
                   </li>
                   <li className="flex items-center text-foreground">
                     <span className="mr-2 text-success">✓</span>
-                    API access
-                  </li>
-                  <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
                     Up to {teamPlan.maxMembers} team members
                   </li>
                 </ul>

@@ -216,6 +216,11 @@ export default function CookiesPage() {
                     Backup Monitoring
                   </Link>
                 </li>
+                <li>
+                  <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-smooth">
+                    FAQ
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>

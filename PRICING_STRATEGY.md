@@ -15,7 +15,6 @@
 | **Slack Integration** | — | ✓ | ✓ | ✓ |
 | **Discord Integration** | — | ✓ | ✓ | ✓ |
 | **Custom Webhooks** | — | — | — | ✓ |
-| **API Access** | — | — | — | ✓ |
 | **Priority Support** | — | — | — | ✓ |
 | **Advanced Analytics** | — | — | — | ✓ |
 | **Annual Discount** | — | 10% off | 15% off | 20% off |
@@ -67,11 +66,9 @@
 - 500 monitors
 - 1-minute minimum interval (same as Pro, but with more monitors and team features)
 - All alert channels: Email, Slack, Discord, Custom Webhooks
-- API access for programmatic monitoring
 - Priority support (24-hour response)
 - Advanced analytics & reporting
 - Custom webhook endpoints
-- Higher rate limits for API calls
 - Up to 10 team members
 - **Annual:** $758/year (save $190, ~20% off)
 
@@ -102,7 +99,7 @@
 2. **Better Free Tier:** 10 monitors (vs 3) is competitive with Healthchecks (20) and better than Cronitor (5)
 3. **Low Entry Point:** $9 Starter plan removes friction vs previous $14 Solo plan
 4. **Feature Differentiation:** Each tier adds meaningful capabilities (channels, speed, scale, collaboration)
-5. **Team Plan Premium:** 30-second intervals, API access, and team collaboration justify the premium
+5. **Team Plan Premium:** Team collaboration and advanced features justify the premium
 6. **Annual Incentives:** Progressive discounts (10%/15%/20%) reward commitment and improve cash flow
 
 ---
@@ -111,7 +108,7 @@
 
 - All plans include the 14-day free trial
 - Annual billing saves customers money and improves MRR predictability
-- Team plan features (API, webhooks, analytics) differentiate it as a premium offering
+- Team plan features (webhooks, analytics) differentiate it as a premium offering
 - 1-minute intervals (same as Pro) with team collaboration for high-frequency monitoring use cases
 
 ## Team Collaboration
