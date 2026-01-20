@@ -88,9 +88,16 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   const slackWebhook = monitorWithProfile.slack_webhook_url || (hasSlackDiscord ? profile.slack_webhook_url : null)
   const discordWebhook = monitorWithProfile.discord_webhook_url || (hasSlackDiscord ? profile.discord_webhook_url : null)
   const customWebhook = monitorWithProfile.custom_webhook_url || (hasCustomWebhook ? profile.custom_webhook_url : null)
+  
+  // Check if email alerts should be disabled (monitor override or profile setting)
+  const disableEmailAlerts = monitorWithProfile.disable_email_alerts ?? profile.disable_email_alerts ?? false
+  const hasAnyWebhook = !!(slackWebhook || discordWebhook || customWebhook)
+  
+  // Only disable email if explicitly disabled AND at least one webhook is configured
+  const shouldSendEmail = emailToUse && (!disableEmailAlerts || !hasAnyWebhook)
 
   // Send email alert
-  if (emailToUse) {
+  if (shouldSendEmail) {
     try {
       const emailResult = await sendEmailAlert(emailToUse, monitorWithProfile, alert_type)
       if (emailResult.success) {

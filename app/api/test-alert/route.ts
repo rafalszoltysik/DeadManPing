@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       slack_webhook_url?: string
       discord_webhook_url?: string
       custom_webhook_url?: string
+      disable_email_alerts?: boolean
     } = {}
     
     try {
@@ -88,6 +89,13 @@ export async function POST(request: NextRequest) {
     const slackWebhook = body.slack_webhook_url?.trim() || (hasSlackDiscord ? profile.slack_webhook_url : null)
     const discordWebhook = body.discord_webhook_url?.trim() || (hasSlackDiscord ? profile.discord_webhook_url : null)
     const customWebhook = body.custom_webhook_url?.trim() || (hasCustomWebhook ? profile.custom_webhook_url : null)
+    
+    // Check if email alerts should be disabled (from form or profile)
+    const disableEmailAlerts = body.disable_email_alerts ?? profile.disable_email_alerts ?? false
+    const hasAnyWebhook = !!(slackWebhook || discordWebhook || customWebhook)
+    
+    // Only disable email if explicitly disabled AND at least one webhook is configured
+    const shouldSendEmail = emailToUse && (!disableEmailAlerts || !hasAnyWebhook)
 
     // Create a test monitor object for the alert
     const testMonitor = {
@@ -106,7 +114,7 @@ export async function POST(request: NextRequest) {
     const results: any[] = []
 
     // Send email alert
-    if (emailToUse) {
+    if (shouldSendEmail) {
       try {
         const emailResult = await sendEmailAlert(emailToUse, testMonitor, 'recovered')
         if (emailResult.success) {

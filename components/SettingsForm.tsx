@@ -17,6 +17,7 @@ interface Profile {
   discord_webhook_url: string | null
   custom_webhook_url: string | null
   alert_email: string | null
+  disable_email_alerts?: boolean
 }
 
 interface SettingsFormProps {
@@ -35,6 +36,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const [discordWebhook, setDiscordWebhook] = useState(profile.discord_webhook_url || '')
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
   const [alertEmail, setAlertEmail] = useState(profile.alert_email || '')
+  const [disableEmailAlerts, setDisableEmailAlerts] = useState(profile.disable_email_alerts || false)
   const [currency, setCurrency] = useState<'usd' | 'eur' | 'pln'>(initialCurrency)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
@@ -391,6 +393,15 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
     // Always allow alert_email update
     updateData.alert_email = alertEmail.trim() || null
+    
+    // Only allow disabling email alerts if at least one webhook is configured
+    const hasAnyWebhook = !!(slackWebhook.trim() || discordWebhook.trim() || customWebhook.trim())
+    if (hasAnyWebhook) {
+      updateData.disable_email_alerts = disableEmailAlerts
+    } else {
+      // If no webhooks, force enable email alerts
+      updateData.disable_email_alerts = false
+    }
 
     // Update profile
     const { error: updateError } = await supabase
@@ -426,6 +437,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
           slack_webhook_url: slackWebhook.trim() || undefined,
           discord_webhook_url: discordWebhook.trim() || undefined,
           custom_webhook_url: customWebhook.trim() || undefined,
+          disable_email_alerts: disableEmailAlerts,
         }),
       })
 
@@ -1140,6 +1152,51 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               )}
             </p>
           </div>
+
+          {/* Disable Email Alerts Option */}
+          {(slackWebhook.trim() || discordWebhook.trim() || customWebhook.trim()) && (
+            <div className="flex items-center gap-3 p-3 sm:p-4 bg-muted/30 border border-border rounded-lg hover:bg-muted/40 transition-smooth">
+              <button
+                type="button"
+                onClick={() => setDisableEmailAlerts(!disableEmailAlerts)}
+                className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
+                style={{
+                  backgroundColor: disableEmailAlerts ? 'rgb(var(--primary))' : 'transparent',
+                  borderColor: disableEmailAlerts ? 'rgb(var(--primary))' : 'rgb(var(--input))',
+                }}
+                aria-label="Disable email alerts"
+              >
+                {disableEmailAlerts && (
+                  <svg
+                    className="absolute inset-0 w-full h-full text-primary-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+              <div className="flex-1">
+                <label
+                  htmlFor="disableEmailAlerts"
+                  onClick={() => setDisableEmailAlerts(!disableEmailAlerts)}
+                  className="text-sm font-medium cursor-pointer block"
+                >
+                  Disable email alerts
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  When enabled, alerts will only be sent via configured webhooks (Slack, Discord, or Custom). Email alerts will be disabled.
+                </p>
+              </div>
+            </div>
+          )}
 
           {(testAlertError || testAlertSuccess || settingsError || settingsSuccess) && (
             <div className="space-y-2">
