@@ -53,16 +53,29 @@ export default async function SettingsPage() {
     redirect('/dashboard')
   }
 
-  // Check if user has Stripe customer ID (portal URL will be created on-demand via API)
-  const hasStripeCustomer = !!profile.stripe_customer_id
-
-  // Get workspace currency preference
+  // Get workspace (for currency, stripe_customer_id, and subscription_tier)
   const { data: workspace } = await supabaseAdmin
     .from('workspaces')
-    .select('currency')
+    .select('currency, stripe_customer_id, subscription_tier')
     .eq('owner_id', user.id)
     .limit(1)
-    .maybeSingle() as { data: { currency?: string } | null }
+    .maybeSingle() as { data: { currency?: string; stripe_customer_id?: string; subscription_tier?: string } | null }
+  
+  // Check if user has Stripe customer ID (from workspace or profile)
+  // Workspace takes priority since subscriptions are now workspace-based
+  const hasStripeCustomer = !!(workspace?.stripe_customer_id || profile.stripe_customer_id)
+  
+  // Use workspace tier if available, otherwise fallback to profile tier
+  const effectiveTier = workspace?.subscription_tier || profile.subscription_tier || 'free'
+  
+  // Update profile tier if workspace has different tier (sync)
+  if (workspace?.subscription_tier && workspace.subscription_tier !== profile.subscription_tier) {
+    await (supabaseAdmin
+      .from('profiles') as any)
+      .update({ subscription_tier: workspace.subscription_tier })
+      .eq('id', user.id)
+    profile.subscription_tier = workspace.subscription_tier
+  }
   
   const currency = (workspace?.currency || 'usd') as 'usd' | 'eur' | 'pln'
 

@@ -138,12 +138,11 @@ export default async function DashboardLayout({
       <nav className="lg:hidden border-b border-border bg-card sticky top-0 z-50">
         <div className="px-4">
           <div className="flex justify-between items-center h-14">
-            <Link href="/dashboard" className="flex items-center gap-1.5">
-              <StaticLogoIcon size={24} />
-              <span className="text-lg font-bold font-mono">DMP</span>
+            <Link href="/dashboard" className="flex items-center gap-1.5 flex-shrink-0 min-w-0">
+              <StaticLogo showText={true} variant="with-text" className="text-base sm:text-lg" />
             </Link>
-            <div className="flex items-center gap-1">
-              {/* Theme toggle removed - dark mode is locked */}
+            <div className="flex items-center gap-2">
+              <LogoutButton variant="compact" />
             </div>
           </div>
         </div>

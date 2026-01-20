@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { Analytics } from "@vercel/analytics/next"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PostHogPageView } from '@/components/PostHogPageView'
 
 /**
@@ -68,6 +69,7 @@ export function AnalyticsWrapper() {
   return (
     <>
       <Analytics />
+      <SpeedInsights />
       <Suspense fallback={null}>
         <PostHogPageView />
       </Suspense>

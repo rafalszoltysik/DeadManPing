@@ -14,7 +14,7 @@ export function StaticLogo({ className = '', showText = true, variant = 'with-te
       />
       
       {showText && variant === 'with-text' && (
-        <span className="font-bold text-lg sm:text-xl">
+        <span className="font-bold text-lg sm:text-xl whitespace-nowrap flex-shrink-0">
           <span className="text-foreground">DeadMan</span>
           <span className="text-primary">Ping</span>
         </span>

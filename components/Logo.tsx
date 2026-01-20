@@ -47,7 +47,7 @@ export function Logo({ className = '', showText = true, variant = 'with-text' }:
       />
       
       {showText && variant === 'with-text' && (
-        <span className="font-bold text-lg sm:text-xl">
+        <span className="font-bold text-lg sm:text-xl whitespace-nowrap flex-shrink-0">
           <span className="text-foreground">DeadMan</span>
           <span className="text-primary">Ping</span>
         </span>

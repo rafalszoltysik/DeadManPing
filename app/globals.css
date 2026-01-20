@@ -168,6 +168,30 @@
     animation: slideUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
+  /* Fallback: ensure items become visible even if animation doesn't trigger (mobile fix) */
+  @keyframes forceVisible {
+    to {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+  }
+
+  @keyframes forceVisibleMobile {
+    to {
+      opacity: 1 !important;
+      transform: translateY(0) !important;
+    }
+  }
+
+  /* Mobile fallback: ensure monitor list items become visible even if JavaScript fails */
+  /* Only applies if slide-up class hasn't been added (checked via :not selector) */
+  @media (max-width: 768px) {
+    .opacity-0.translate-y-4:not(.slide-up) {
+      /* Force visibility after a short delay on mobile if JS hasn't run */
+      animation: forceVisibleMobile 0.1s ease-out 0.8s forwards;
+    }
+  }
+
   /* Animate fade in with slide up - for Tailwind */
   /* Default: hidden, will animate when visible */
   .animate-fade-in {
@@ -454,6 +478,11 @@
       transition-duration: 0.2s;
     }
 
+    /* Faster slide-up animation on mobile */
+    .slide-up {
+      animation-duration: 0.4s;
+    }
+
     /* Lighter hover effects on mobile */
     .hover-lift-smooth:hover {
       transform: translateY(-2px);
@@ -463,6 +492,7 @@
     .card-hover:hover {
       transform: translateY(-1px);
     }
+
   }
 
   /* Respect reduced motion preference */

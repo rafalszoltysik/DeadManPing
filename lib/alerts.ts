@@ -34,18 +34,22 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 
   // Get subscription tier (from workspace or profile)
   let subscriptionTier = profile.subscription_tier || 'free'
+  let subscriptionStatus = profile.subscription_status || 'free'
   if (monitorWithProfile.workspace_id) {
     const { data: workspace } = await supabaseAdmin
       .from('workspaces')
-      .select('subscription_tier')
+      .select('subscription_tier, subscription_status')
       .eq('id', monitorWithProfile.workspace_id)
-      .single() as { data: { subscription_tier?: string } | null }
+      .single() as { data: { subscription_tier?: string; subscription_status?: string } | null }
     if (workspace) {
       subscriptionTier = workspace.subscription_tier || subscriptionTier
+      subscriptionStatus = workspace.subscription_status || subscriptionStatus
     }
   }
   
-  const hasSlackDiscord = ['starter', 'pro', 'team'].includes(subscriptionTier)
+  // During trial (trialing status with free tier), allow Slack/Discord webhooks
+  const isTrial = subscriptionStatus === 'trialing' && subscriptionTier === 'free'
+  const hasSlackDiscord = ['starter', 'pro', 'team'].includes(subscriptionTier) || isTrial
   const hasCustomWebhook = subscriptionTier === 'team'
 
   // Check if we should send alert (anti-spam: max 1 reminder per 24h for same alert type)
@@ -84,9 +88,16 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   const slackWebhook = monitorWithProfile.slack_webhook_url || (hasSlackDiscord ? profile.slack_webhook_url : null)
   const discordWebhook = monitorWithProfile.discord_webhook_url || (hasSlackDiscord ? profile.discord_webhook_url : null)
   const customWebhook = monitorWithProfile.custom_webhook_url || (hasCustomWebhook ? profile.custom_webhook_url : null)
+  
+  // Check if email alerts should be disabled (monitor override or profile setting)
+  const disableEmailAlerts = monitorWithProfile.disable_email_alerts ?? profile.disable_email_alerts ?? false
+  const hasAnyWebhook = !!(slackWebhook || discordWebhook || customWebhook)
+  
+  // Only disable email if explicitly disabled AND at least one webhook is configured
+  const shouldSendEmail = emailToUse && (!disableEmailAlerts || !hasAnyWebhook)
 
   // Send email alert
-  if (emailToUse) {
+  if (shouldSendEmail) {
     try {
       const emailResult = await sendEmailAlert(emailToUse, monitorWithProfile, alert_type)
       if (emailResult.success) {
@@ -173,7 +184,7 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   }
 }
 
-async function sendEmailAlert(email: string, monitor: any, alertType: string) {
+export async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   const subject = getEmailSubject(monitor.name, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
 
@@ -213,7 +224,7 @@ async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   }
 }
 
-async function sendSlackAlert(webhookUrl: string, monitor: any, alertType: string) {
+export async function sendSlackAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const color = getAlertColorHex(alertType)
 
@@ -248,7 +259,7 @@ async function sendSlackAlert(webhookUrl: string, monitor: any, alertType: strin
   }
 }
 
-async function sendDiscordAlert(webhookUrl: string, monitor: any, alertType: string) {
+export async function sendDiscordAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const color = parseInt(getAlertColorHex(alertType).replace('#', ''), 16)
 
@@ -284,7 +295,7 @@ async function sendDiscordAlert(webhookUrl: string, monitor: any, alertType: str
   }
 }
 
-async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, alertType: string) {
+export async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
 

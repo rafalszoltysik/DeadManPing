@@ -17,6 +17,7 @@ interface Profile {
   discord_webhook_url: string | null
   custom_webhook_url: string | null
   alert_email: string | null
+  disable_email_alerts?: boolean
 }
 
 interface SettingsFormProps {
@@ -35,11 +36,19 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const [discordWebhook, setDiscordWebhook] = useState(profile.discord_webhook_url || '')
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
   const [alertEmail, setAlertEmail] = useState(profile.alert_email || '')
+  const [disableEmailAlerts, setDisableEmailAlerts] = useState(profile.disable_email_alerts || false)
   const [currency, setCurrency] = useState<'usd' | 'eur' | 'pln'>(initialCurrency)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  // Separate states for different actions
+  const [testAlertSuccess, setTestAlertSuccess] = useState(false)
+  const [testAlertError, setTestAlertError] = useState<string | null>(null)
+  const [deleteAccountSuccess, setDeleteAccountSuccess] = useState(false)
+  const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null)
+  const [settingsSuccess, setSettingsSuccess] = useState(false)
+  const [settingsError, setSettingsError] = useState<string | null>(null)
   const [hasPassword, setHasPassword] = useState<boolean>(initialHasPassword)
   const [passwordLoading, setPasswordLoading] = useState(false)
   const [password, setPassword] = useState('')
@@ -113,7 +122,9 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
   // Check which features are available for this tier
   const tier = profile.subscription_tier || 'free'
-  const hasSlackDiscord = ['starter', 'pro', 'team'].includes(tier)
+  // During trial (trialing status with free tier), allow Slack/Discord webhooks
+  const isTrial = !isTrialExpired && trialDaysRemaining !== null && profile.subscription_status === 'trialing' && tier === 'free'
+  const hasSlackDiscord = ['starter', 'pro', 'team'].includes(tier) || isTrial
   const hasCustomWebhook = tier === 'team'
 
   const handlePasswordChange = (newPassword: string) => {
@@ -285,8 +296,10 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    setError(null)
-    setSuccess(false)
+    setSettingsError(null)
+    setSettingsSuccess(false)
+    setTestAlertError(null)
+    setTestAlertSuccess(false)
 
     // Validate webhook URLs before saving
     if (slackWebhook) {
@@ -294,12 +307,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         const { validateWebhookUrl } = await import('@/lib/webhooks-validator')
         const validation = validateWebhookUrl(slackWebhook, 'slack')
         if (!validation.valid) {
-          setError(`Slack webhook: ${validation.error}`)
+          setSettingsError(`Slack webhook: ${validation.error}`)
           setLoading(false)
           return
         }
       } catch (err) {
-        setError('Failed to validate Slack webhook URL')
+        setSettingsError('Failed to validate Slack webhook URL')
         setLoading(false)
         return
       }
@@ -310,12 +323,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         const { validateWebhookUrl } = await import('@/lib/webhooks-validator')
         const validation = validateWebhookUrl(discordWebhook, 'discord')
         if (!validation.valid) {
-          setError(`Discord webhook: ${validation.error}`)
+          setSettingsError(`Discord webhook: ${validation.error}`)
           setLoading(false)
           return
         }
       } catch (err) {
-        setError('Failed to validate Discord webhook URL')
+        setSettingsError('Failed to validate Discord webhook URL')
         setLoading(false)
         return
       }
@@ -326,12 +339,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
       try {
         const url = new URL(customWebhook)
         if (!['http:', 'https:'].includes(url.protocol)) {
-          setError('Custom webhook URL must use HTTP or HTTPS')
+          setSettingsError('Custom webhook URL must use HTTP or HTTPS')
           setLoading(false)
           return
         }
       } catch (err) {
-        setError('Invalid custom webhook URL format')
+        setSettingsError('Invalid custom webhook URL format')
         setLoading(false)
         return
       }
@@ -341,7 +354,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
     if (alertEmail && alertEmail.trim()) {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
       if (!emailRegex.test(alertEmail.trim())) {
-        setError('Invalid email address format')
+        setSettingsError('Invalid email address format')
         setLoading(false)
         return
       }
@@ -349,13 +362,13 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
     // Block webhooks if tier doesn't support them
     if (!hasSlackDiscord && (slackWebhook || discordWebhook)) {
-      setError('Slack and Discord webhooks are only available on Starter, Pro, or Team plans. Upgrade your plan to use these features.')
+      setSettingsError('Slack and Discord webhooks are only available on Starter, Pro, or Team plans. Upgrade your plan to use these features.')
       setLoading(false)
       return
     }
 
     if (!hasCustomWebhook && customWebhook) {
-      setError('Custom webhooks are only available on Team plan. Upgrade to Team plan to use this feature.')
+      setSettingsError('Custom webhooks are only available on Team plan. Upgrade to Team plan to use this feature.')
       setLoading(false)
       return
     }
@@ -380,6 +393,15 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
 
     // Always allow alert_email update
     updateData.alert_email = alertEmail.trim() || null
+    
+    // Only allow disabling email alerts if at least one webhook is configured
+    const hasAnyWebhook = !!(slackWebhook.trim() || discordWebhook.trim() || customWebhook.trim())
+    if (hasAnyWebhook) {
+      updateData.disable_email_alerts = disableEmailAlerts
+    } else {
+      // If no webhooks, force enable email alerts
+      updateData.disable_email_alerts = false
+    }
 
     // Update profile
     const { error: updateError } = await supabase
@@ -388,39 +410,51 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
       .eq('id', profile.id)
 
     if (updateError) {
-      setError(updateError.message)
+      setSettingsError(updateError.message)
       setLoading(false)
     } else {
-      setSuccess(true)
+      setSettingsSuccess(true)
       setLoading(false)
+      setTimeout(() => setSettingsSuccess(false), 3000)
       router.refresh()
     }
   }
 
   const handleTestAlert = async () => {
     setLoading(true)
-    setError(null)
+    setTestAlertError(null)
+    setTestAlertSuccess(false)
 
     try {
-      const response = await fetch('/api/internal/send-alert', {
+      // Send current form values (before saving) to test
+      const response = await fetch('/api/test-alert', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          monitor_id: 'test', // This will fail but trigger the test
-          alert_type: 'recovered',
+          alert_email: alertEmail.trim() || undefined,
+          slack_webhook_url: slackWebhook.trim() || undefined,
+          discord_webhook_url: discordWebhook.trim() || undefined,
+          custom_webhook_url: customWebhook.trim() || undefined,
+          disable_email_alerts: disableEmailAlerts,
         }),
       })
 
+      const data = await response.json()
+
       if (!response.ok) {
-        throw new Error('Failed to send test alert')
+        throw new Error(data.error || 'Failed to send test alert')
       }
 
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
+      if (data.success) {
+        setTestAlertSuccess(true)
+        setTimeout(() => setTestAlertSuccess(false), 5000)
+      } else {
+        throw new Error(data.error || 'Failed to send test alert')
+      }
     } catch (err: any) {
-      setError(err.message)
+      setTestAlertError(err.message || 'Failed to send test alert')
     } finally {
       setLoading(false)
     }
@@ -489,8 +523,8 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
     }
 
     setDeleteAccountLoading(true)
-    setError(null)
-    setSuccess(false)
+    setDeleteAccountError(null)
+    setDeleteAccountSuccess(false)
 
     try {
       const response = await fetch('/api/auth/request-delete-account', {
@@ -506,13 +540,13 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         throw new Error(data.error || 'Failed to send deletion email')
       }
 
-      setSuccess(true)
-      setError(null)
+      setDeleteAccountSuccess(true)
+      setDeleteAccountError(null)
       
       // Clear success message after 5 seconds
-      setTimeout(() => setSuccess(false), 5000)
+      setTimeout(() => setDeleteAccountSuccess(false), 5000)
     } catch (err: any) {
-      setError(err.message || 'Failed to send deletion email')
+      setDeleteAccountError(err.message || 'Failed to send deletion email')
     } finally {
       setDeleteAccountLoading(false)
     }
@@ -990,12 +1024,12 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               </p>
             </div>
             <div className="mt-auto space-y-2 sm:space-y-3">
-              {error && (
+              {deleteAccountError && (
                 <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
-                  {error}
+                  {deleteAccountError}
                 </div>
               )}
-              {success && (
+              {deleteAccountSuccess && (
                 <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
                   <p className="font-medium mb-1">Deletion email sent</p>
                   <p className="text-xs sm:text-sm">
@@ -1005,7 +1039,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
               )}
               <button
                 onClick={handleDeleteAccount}
-                disabled={deleteAccountLoading || success}
+                disabled={deleteAccountLoading || deleteAccountSuccess}
                 className="w-full px-3 sm:px-4 py-2 bg-secondary text-secondary-foreground border border-error/20 rounded-lg text-sm font-medium hover:bg-secondary/80 disabled:opacity-50 disabled:cursor-not-allowed transition-smooth active:scale-95 hover:border-error/40 hover:shadow-sm"
               >
                 {deleteAccountLoading ? 'Sending Email...' : 'Delete Account'}
@@ -1119,6 +1153,75 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
             </p>
           </div>
 
+          {/* Disable Email Alerts Option */}
+          {(slackWebhook.trim() || discordWebhook.trim() || customWebhook.trim()) && (
+            <div className="flex items-center gap-3 p-3 sm:p-4 bg-muted/30 border border-border rounded-lg hover:bg-muted/40 transition-smooth">
+              <button
+                type="button"
+                onClick={() => setDisableEmailAlerts(!disableEmailAlerts)}
+                className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
+                style={{
+                  backgroundColor: disableEmailAlerts ? 'rgb(var(--primary))' : 'transparent',
+                  borderColor: disableEmailAlerts ? 'rgb(var(--primary))' : 'rgb(var(--input))',
+                }}
+                aria-label="Disable email alerts"
+              >
+                {disableEmailAlerts && (
+                  <svg
+                    className="absolute inset-0 w-full h-full text-primary-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+              <div className="flex-1">
+                <label
+                  htmlFor="disableEmailAlerts"
+                  onClick={() => setDisableEmailAlerts(!disableEmailAlerts)}
+                  className="text-sm font-medium cursor-pointer block"
+                >
+                  Disable email alerts
+                </label>
+                <p className="text-xs text-muted-foreground mt-1">
+                  When enabled, alerts will only be sent via configured webhooks (Slack, Discord, or Custom). Email alerts will be disabled.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {(testAlertError || testAlertSuccess || settingsError || settingsSuccess) && (
+            <div className="space-y-2">
+              {testAlertError && (
+                <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+                  {testAlertError}
+                </div>
+              )}
+              {testAlertSuccess && (
+                <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+                  Test alert sent successfully! Check your configured integrations (email, Slack, Discord, or custom webhook).
+                </div>
+              )}
+              {settingsError && (
+                <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+                  {settingsError}
+                </div>
+              )}
+              {settingsSuccess && (
+                <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm">
+                  Settings saved successfully!
+                </div>
+              )}
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
             <button
               type="button"
