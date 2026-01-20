@@ -26,10 +26,11 @@ export async function GET(request: NextRequest) {
     }
 
     // Fallback prices (USD) jeśli Stripe nie zwraca cen
+    // Note: Update actual prices in Stripe Dashboard - these are fallbacks only
     const FALLBACK_PRICES = {
-      starter: { amount: 900, priceId: process.env.STRIPE_PRICE_ID_STARTER || null },
-      pro: { amount: 2900, priceId: process.env.STRIPE_PRICE_ID_PRO || null },
-      team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null },
+      starter: { amount: 700, priceId: process.env.STRIPE_PRICE_ID_STARTER || null }, // $7.00 (updated from $9)
+      pro: { amount: 2400, priceId: process.env.STRIPE_PRICE_ID_PRO || null }, // $24.00 (updated from $29)
+      team: { amount: 7900, priceId: process.env.STRIPE_PRICE_ID_TEAM || null }, // $79.00 (unchanged)
     }
 
     // Sprawdź które waluty są dostępne (mają ceny dla wszystkich planów)

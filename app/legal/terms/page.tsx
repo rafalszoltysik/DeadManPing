@@ -82,9 +82,10 @@ export default function TermsPage() {
                   The Service offers both free and paid subscription plans:
                 </p>
                 <ul className="list-disc list-inside text-muted-foreground space-y-2 mb-4">
-                  <li><strong>Free Plan:</strong> Limited to 3 monitors with 5-minute minimum intervals</li>
-                  <li><strong>Solo Plan:</strong> $14/month for 20 monitors</li>
-                  <li><strong>Agency Plan:</strong> $49/month for 100 monitors</li>
+                  <li><strong>Free Plan:</strong> Limited to 20 monitors with 5-minute minimum intervals</li>
+                  <li><strong>Starter Plan:</strong> $7/month for 30 monitors</li>
+                  <li><strong>Pro Plan:</strong> $24/month for 150 monitors</li>
+                  <li><strong>Team Plan:</strong> $79/month for 1000 monitors</li>
                 </ul>
                 <p className="text-muted-foreground mb-4">
                   Subscriptions are billed monthly in advance. You may cancel your subscription at any time.

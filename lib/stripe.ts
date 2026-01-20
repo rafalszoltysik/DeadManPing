@@ -6,22 +6,23 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 // Plan features (nie zmienia się - ceny są teraz pobierane z Stripe API)
+// Updated limits: Option A - Aggressive pricing strategy
 export const PLAN_FEATURES = {
   starter: {
     name: 'Starter',
-    monitors: 25,
+    monitors: 30,  // Updated from 25
     minInterval: 300, // 5 minutes
     maxMembers: 1,
   },
   pro: {
     name: 'Pro',
-    monitors: 100,
+    monitors: 150,  // Updated from 100
     minInterval: 60, // 1 minute
     maxMembers: 3,
   },
   team: {
     name: 'Team',
-    monitors: 500,
+    monitors: 1000,  // Updated from 500
     minInterval: 60, // 1 minute (cron checks every 60s, so 30s interval is not achievable)
     maxMembers: 10,
   },
@@ -38,7 +39,7 @@ export const LEGACY_PLANS = {
 export const PRICING_PLANS = {
   starter: {
     priceId: process.env.STRIPE_PRICE_ID_STARTER || 'price_starter',
-    amount: 900, // $9.00 in cents
+    amount: 700, // $7.00 in cents (updated - change in Stripe Dashboard)
     name: PLAN_FEATURES.starter.name,
     monitors: PLAN_FEATURES.starter.monitors,
     minInterval: PLAN_FEATURES.starter.minInterval,
@@ -46,7 +47,7 @@ export const PRICING_PLANS = {
   },
   pro: {
     priceId: process.env.STRIPE_PRICE_ID_PRO || 'price_pro',
-    amount: 2900, // $29.00 in cents
+    amount: 2400, // $24.00 in cents (updated - change in Stripe Dashboard)
     name: PLAN_FEATURES.pro.name,
     monitors: PLAN_FEATURES.pro.monitors,
     minInterval: PLAN_FEATURES.pro.minInterval,
@@ -79,6 +80,9 @@ export async function createCheckoutSession(
         quantity: 1,
       },
     ],
+    automatic_tax: {
+      enabled: true, // Automatically calculate and collect tax based on customer location
+    },
     success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
     metadata: {
