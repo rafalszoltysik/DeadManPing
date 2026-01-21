@@ -271,6 +271,33 @@ export default function DocsPage() {
                     </div>
                   </div>
                 </AnimatedItem>
+
+                <AnimatedItem delay={500}>
+                  <div className="bg-card border-2 border-primary/20 rounded-lg p-4">
+                    <h3 className="text-base sm:text-lg font-semibold mb-2">
+                      More Examples
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Need more examples? Check out our comprehensive collection with 20+ ready-to-use scripts in Bash, Python, and Node.js:
+                    </p>
+                    <Link
+                      href="https://github.com/DeadManPing/examples"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline inline-flex items-center gap-2 font-medium"
+                    >
+                      View All Examples on GitHub
+                      <svg 
+                        className="w-4 h-4" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </Link>
+                  </div>
+                </AnimatedItem>
               </div>
               </section>
             </AnimatedSection>

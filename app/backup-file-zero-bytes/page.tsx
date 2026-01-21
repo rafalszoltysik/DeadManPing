@@ -152,7 +152,7 @@ export default function BackupFileZeroBytesPage() {
                   See complete, working code examples in our GitHub repository:
                 </p>
                 <Link
-                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  href="https://github.com/DeadManPing/examples"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-primary hover:underline inline-flex items-center gap-2"

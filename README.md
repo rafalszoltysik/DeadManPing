@@ -61,7 +61,7 @@ See the [`examples/`](./examples/) directory for working code examples, bash scr
 - Solution explanation
 - Link to related SEO documentation page
 
-Examples are also available in our public GitHub repository: [deadmanping-examples](https://github.com/BlackPearl02/deadmanping-examples)
+Examples are also available in our public GitHub repository: [examples](https://github.com/DeadManPing/examples)
 
 ## Tech Stack
 
