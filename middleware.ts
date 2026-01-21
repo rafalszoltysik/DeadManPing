@@ -46,6 +46,18 @@ const isPublicRoute = (pathname: string): boolean => {
 }
 
 export async function middleware(request: NextRequest) {
+  // Redirect www to non-www for SEO consistency
+  const hostname = request.headers.get('host') || ''
+  
+  // Check if request is for www subdomain
+  if (hostname.startsWith('www.')) {
+    const url = request.nextUrl.clone()
+    // Remove www from hostname, preserving port if present
+    const newHost = hostname.replace(/^www\./, '')
+    url.host = newHost
+    return NextResponse.redirect(url, 301) // Permanent redirect
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
