@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
-import { Logo } from './Logo'
 import { createClient } from '@/lib/supabase/client'
 
 export function PageNav() {
@@ -44,7 +43,10 @@ export function PageNav() {
         <div className="flex justify-between items-center h-14 sm:h-16">
           <div className="flex items-center flex-shrink-0 min-w-0">
             <Link href="/" className="hover:opacity-80 transition-smooth flex-shrink-0">
-              <Logo showText={true} variant="with-text" className="text-lg sm:text-xl" />
+              <span className="font-bold text-xl sm:text-2xl whitespace-nowrap">
+                <span className="text-foreground">DeadMan</span>
+                <span className="text-primary">Ping</span>
+              </span>
             </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-4">

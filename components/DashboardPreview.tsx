@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, WarningIcon } from './Icons'
+import { StaggerContainer } from './AnimatedSection'
 
 const mockMonitors = [
   // OK: Ping przyszedł + payload poprawny
@@ -67,7 +68,9 @@ function getStatusLabel(status: string) {
 
 export function DashboardPreview() {
   const containerRef = useRef<HTMLDivElement>(null)
-  const [visibleItems, setVisibleItems] = useState<Set<number>>(new Set())
+  const [showTitle, setShowTitle] = useState(false)
+  const [showSubtitle, setShowSubtitle] = useState(false)
+  const [showActiveMonitors, setShowActiveMonitors] = useState(false)
   const hasStartedAnimation = useRef(false)
   const [mounted, setMounted] = useState(false)
 
@@ -78,44 +81,51 @@ export function DashboardPreview() {
   useEffect(() => {
     if (!mounted || !containerRef.current || hasStartedAnimation.current) return
 
-    // Fallback: show items immediately on mobile if IntersectionObserver fails
-    const isMobile = window.innerWidth < 768
-    const fallbackTimer = setTimeout(() => {
-      if (visibleItems.size === 0) {
-        // If no items are visible after 1 second, show them all (mobile fallback)
-        mockMonitors.forEach((_, index) => {
-          setVisibleItems(prev => new Set([...prev, index]))
-        })
-        hasStartedAnimation.current = true
-      }
-    }, isMobile ? 500 : 2000) // Faster fallback on mobile
+    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+    
+    // On mobile, add delay to sync with hero section animation
+    // Hero section last item: delay 400ms + duration 800ms = 1200ms total
+    // We start showing monitors at ~600ms to create cascading effect
+    // On desktop, add delay to ensure hero section appears first
+    const syncDelay = isMobile ? 600 : 800
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting && !hasStartedAnimation.current) {
             hasStartedAnimation.current = true
-            clearTimeout(fallbackTimer)
             
-            // Animate items one by one
-            mockMonitors.forEach((_, index) => {
-              setTimeout(() => {
-                setVisibleItems(prev => new Set([...prev, index]))
-              }, index * (isMobile ? 100 : 300)) // Faster on mobile
-            })
+            // Cascade animation: title -> subtitle -> active monitors
+            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+            const staggerDelay = isMobile ? 150 : 100
+            
+            // 1. Show title first
+            setTimeout(() => {
+              setShowTitle(true)
+            }, syncDelay)
+            
+            // 2. Show subtitle after title
+            setTimeout(() => {
+              setShowSubtitle(true)
+            }, syncDelay + staggerDelay)
+            
+            // 3. Show "Active Monitors" header
+            setTimeout(() => {
+              setShowActiveMonitors(true)
+            }, syncDelay + staggerDelay * 2)
 
-            // Unobserve after animation starts
+            // Unobserve after showing items
             setTimeout(() => {
               if (containerRef.current) {
                 observer.unobserve(containerRef.current)
               }
-            }, mockMonitors.length * (isMobile ? 100 : 300) + 100)
+            }, syncDelay + 100)
           }
         })
       },
       { 
         threshold: 0.1, 
-        rootMargin: isMobile ? '0px' : '-200px' // No negative margin on mobile
+        rootMargin: isMobile ? '-50px' : '-100px'
       }
     )
 
@@ -123,40 +133,57 @@ export function DashboardPreview() {
     observer.observe(currentContainerRef)
 
     return () => {
-      clearTimeout(fallbackTimer)
       if (currentContainerRef) {
         observer.unobserve(currentContainerRef)
       }
     }
-  }, [mounted, visibleItems.size])
+  }, [mounted])
 
   return (
     <div ref={containerRef} className="max-w-5xl mx-auto px-4">
       <div className="text-center mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
-        <p className="text-muted-foreground text-base sm:text-lg">
+        <h2 
+          className={`text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 transition-all duration-700 ease-out ${
+            showTitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
+        >
+          Monitor Everything in One Place
+        </h2>
+        <p 
+          className={`text-muted-foreground text-base sm:text-lg transition-all duration-700 ease-out ${
+            showSubtitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
+        >
           Real-time status updates and instant alerts for all your cron jobs
         </p>
       </div>
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl">
-        <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+      <div 
+        className={`bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl transition-opacity duration-700 ${
+          showActiveMonitors ? 'opacity-100' : 'opacity-0'
+        }`}
+        style={!mounted || !showActiveMonitors ? { opacity: 0, visibility: 'hidden' } : { visibility: 'visible' }}
+      >
+        <div 
+          className={`bg-muted/50 border-b border-border px-4 sm:px-6 py-3 sm:py-4 transition-all duration-700 ease-out ${
+            showActiveMonitors ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+          }`}
+          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
+        >
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-sm sm:text-base">Active Monitors</h3>
             <span className="text-xs sm:text-sm text-muted-foreground">{mockMonitors.length} monitors</span>
           </div>
         </div>
-        <div className="divide-y divide-border">
-          {mockMonitors.map((monitor, index) => {
-            const isVisible = visibleItems.has(index)
-            return (
+        <StaggerContainer 
+          className="divide-y divide-border"
+          staggerDelay={80}
+        >
+          {mockMonitors.map((monitor, index) => (
               <div
                 key={index}
-                className={`px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-all duration-1200 ease-out ${
-                  isVisible 
-                    ? 'opacity-100 translate-y-0' 
-                    : 'opacity-0 translate-y-4'
-                }`}
-                style={!mounted ? { opacity: 1, transform: 'translateY(0)' } : undefined}
+                className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50"
               >
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
@@ -182,9 +209,8 @@ export function DashboardPreview() {
                 </div>
               </div>
             </div>
-          )
-          })}
-        </div>
+          ))}
+        </StaggerContainer>
       </div>
     </div>
   )

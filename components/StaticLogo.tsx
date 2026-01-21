@@ -7,14 +7,14 @@ export function StaticLogo({ className = '', showText = true, variant = 'with-te
       <Image 
         src="/icon.svg" 
         alt="DeadManPing Logo" 
-        width={32}
-        height={32}
+        width={40}
+        height={40}
         className="flex-shrink-0"
         priority
       />
       
       {showText && variant === 'with-text' && (
-        <span className="font-bold text-lg sm:text-xl whitespace-nowrap flex-shrink-0">
+        <span className="font-bold text-xl sm:text-2xl whitespace-nowrap flex-shrink-0">
           <span className="text-foreground">DeadMan</span>
           <span className="text-primary">Ping</span>
         </span>

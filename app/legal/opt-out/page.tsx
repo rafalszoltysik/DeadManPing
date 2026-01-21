@@ -182,7 +182,7 @@ export default function OptOutPage() {
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">
-                <Logo showText={true} variant="with-text" className="text-lg" />
+                <Logo showText={true} variant="with-text" className="text-xl sm:text-2xl" />
               </h3>
               <p className="text-sm text-muted-foreground">
                 Simple monitoring for your cron jobs and scheduled tasks.
