@@ -87,7 +87,7 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
   }
 
 
-  const handleCurrencyChange = async (newCurrency: 'usd' | 'eur' | 'pln') => {
+  const handleCurrencyChange = async (newCurrency: 'usd' | 'eur') => {
     if (newCurrency === currency) return
 
     const startTime = Date.now()
@@ -130,12 +130,11 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
           <select
             id="currency-select"
             value={currency}
-            onChange={(e) => handleCurrencyChange(e.target.value as 'usd' | 'eur' | 'pln')}
+            onChange={(e) => handleCurrencyChange(e.target.value as 'usd' | 'eur')}
             className="px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth text-sm"
           >
             <option value="usd">USD ($)</option>
             <option value="eur">EUR (€)</option>
-            <option value="pln">PLN (zł)</option>
           </select>
         </div>
       </div>
@@ -173,7 +172,7 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
                       key={`${plan.key}-${plan.currency}-${plan.amount}`}
                       className="inline-block animate-priceChange"
                     >
-                      {formatPrice(plan.amount, plan.currency as 'usd' | 'eur' | 'pln')}
+                      {formatPrice(plan.amount, plan.currency as 'usd' | 'eur')}
                     </span>
                   </span>
                   <span className="text-base sm:text-lg font-normal text-muted-foreground">/month</span>

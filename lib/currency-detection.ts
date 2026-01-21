@@ -9,11 +9,11 @@ const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   LV: 'eur', LT: 'eur', LU: 'eur', MT: 'eur', NL: 'eur',
   PT: 'eur', SK: 'eur', SI: 'eur', ES: 'eur', HR: 'eur',
   
-  // PLN countries
-  PL: 'pln',
+  // PLN countries - wyłączone, używamy USD
+  // PL: 'pln', // Wyłączone - używamy USD
   
-  // USD countries (default for most)
-  US: 'usd', GB: 'usd', CA: 'usd', AU: 'usd', NZ: 'usd',
+  // USD countries (default for most, w tym PL)
+  US: 'usd', GB: 'usd', CA: 'usd', AU: 'usd', NZ: 'usd', PL: 'usd',
   // Add more as needed
 }
 

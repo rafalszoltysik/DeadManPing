@@ -25,7 +25,7 @@ interface SettingsFormProps {
   hasStripeCustomer: boolean
   trialDaysRemaining?: number | null
   isTrialExpired?: boolean
-  currency?: 'usd' | 'eur' | 'pln'
+  currency?: 'usd' | 'eur'
   hasPassword?: boolean
   hasGoogleConnection?: boolean
 }
@@ -37,7 +37,7 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
   const [customWebhook, setCustomWebhook] = useState(profile.custom_webhook_url || '')
   const [alertEmail, setAlertEmail] = useState(profile.alert_email || '')
   const [disableEmailAlerts, setDisableEmailAlerts] = useState(profile.disable_email_alerts || false)
-  const [currency, setCurrency] = useState<'usd' | 'eur' | 'pln'>(initialCurrency)
+  const [currency, setCurrency] = useState<'usd' | 'eur'>(initialCurrency)
   const [loading, setLoading] = useState(false)
   const [portalLoading, setPortalLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)

@@ -18,39 +18,73 @@ interface Plan {
 
 export function PricingSection() {
   const [plans, setPlans] = useState<Plan[]>([])
+  const [currency, setCurrency] = useState<Currency>('usd')
+  const [availableCurrencies, setAvailableCurrencies] = useState<Currency[]>(['usd'])
   const [loading, setLoading] = useState(true)
-  const currency: Currency = 'usd'
+  const [loadingPrices, setLoadingPrices] = useState(false)
 
   useEffect(() => {
-    // Zawsze używaj USD
-    const fetchPrices = async () => {
+    // Pobierz walutę z localStorage (jeśli użytkownik wcześniej wybrał)
+    // W przeciwnym razie API wykryje kraj automatycznie
+    const savedCurrency = localStorage.getItem('preferred_currency') as Currency | null
+    
+    if (savedCurrency && ['usd', 'eur'].includes(savedCurrency)) {
+      fetchPrices(savedCurrency, true)
+    } else {
+      // Nie przekazuj currency - pozwól API wykryć z kraju (geo headers)
+      fetchPrices(undefined, true)
+    }
+  }, [])
+
+  const fetchPrices = async (selectedCurrency?: Currency, isInitialLoad = false) => {
+    if (isInitialLoad) {
       setLoading(true)
-      
-      const startTime = Date.now()
-      const minAnimationTime = 500 // Minimalny czas animacji w ms
-      
-      try {
-        const url = `/api/billing/prices-public?currency=usd`
-        const response = await fetch(url)
-        const data = await response.json()
-        
-        if (data.plans) {
-          setPlans(data.plans)
-        }
-      } catch (err) {
-        console.error('Error fetching prices:', err)
-      } finally {
-        const elapsedTime = Date.now() - startTime
-        const remainingTime = Math.max(0, minAnimationTime - elapsedTime)
-        
-        setTimeout(() => {
-          setLoading(false)
-        }, remainingTime)
-      }
+    } else {
+      setLoadingPrices(true)
     }
     
-    fetchPrices()
-  }, [])
+    const startTime = Date.now()
+    const minAnimationTime = 500 // Minimalny czas animacji w ms
+    
+    try {
+      // Jeśli nie ma wybranej waluty, API wykryje z geo headers
+      const url = selectedCurrency 
+        ? `/api/billing/prices-public?currency=${selectedCurrency}`
+        : `/api/billing/prices-public`
+      
+      const response = await fetch(url)
+      const data = await response.json()
+      
+      if (data.plans) {
+        setPlans(data.plans)
+        setCurrency(data.currency || 'usd')
+        setAvailableCurrencies(data.availableCurrencies || ['usd'])
+      }
+    } catch (err) {
+      console.error('Error fetching prices:', err)
+    } finally {
+      const elapsedTime = Date.now() - startTime
+      const remainingTime = Math.max(0, minAnimationTime - elapsedTime)
+      
+      setTimeout(() => {
+        if (isInitialLoad) {
+          setLoading(false)
+        } else {
+          setLoadingPrices(false)
+        }
+      }, remainingTime)
+    }
+  }
+
+  const handleCurrencyChange = (newCurrency: Currency) => {
+    if (newCurrency === currency) return
+    
+    // Zapisz w localStorage
+    localStorage.setItem('preferred_currency', newCurrency)
+    setCurrency(newCurrency)
+    setLoadingPrices(true)
+    fetchPrices(newCurrency)
+  }
 
   const getIntervalText = (seconds: number) => {
     if (seconds >= 60) {
@@ -85,6 +119,38 @@ export function PricingSection() {
       <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
         <p className="text-center text-muted-foreground mb-4 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
+        
+        {/* Currency Selector - tylko jeśli są dostępne inne waluty */}
+        {availableCurrencies.length > 1 && (
+          <div className="flex justify-center mb-8 sm:mb-12">
+            <div className="inline-flex items-center gap-2 bg-card border border-border rounded-lg p-1">
+              {availableCurrencies.includes('usd') && (
+                <button
+                  onClick={() => handleCurrencyChange('usd')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-smooth ${
+                    currency === 'usd'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  USD ($)
+                </button>
+              )}
+              {availableCurrencies.includes('eur') && (
+                <button
+                  onClick={() => handleCurrencyChange('eur')}
+                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-smooth ${
+                    currency === 'eur'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  EUR (€)
+                </button>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
           {/* Starter Plan */}

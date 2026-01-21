@@ -14,7 +14,7 @@ async function BillingPageContent() {
     redirect('/auth/login')
   }
 
-  // Get currency preference - for now, default to USD (can be enhanced with middleware)
+  // Get currency preference - detect from country
   // Client-side will handle localStorage preference
   const headersList = await headers()
   const currency = getCurrencyFromHeaders(headersList)
@@ -37,11 +37,12 @@ async function BillingPageContent() {
 
   // Check which currencies are available
   const availableCurrencies: Currency[] = []
-  for (const curr of ['usd', 'eur', 'pln'] as Currency[]) {
+  for (const curr of ['usd', 'eur'] as Currency[]) {
     const allPlansHavePrices = (['starter', 'pro', 'team'] as PlanKey[]).every(planKey => {
       const priceInfo = prices.get(planKey)?.get(curr)
+      // USD ma fallback z env, EUR musi mieć ceny w Stripe
       if (curr === 'usd') {
-        return true // USD always available (fallback)
+        return true // USD zawsze dostępne (fallback)
       }
       return priceInfo && priceInfo.amount > 0 && priceInfo.priceId
     })
