@@ -1,0 +1,8 @@
+# Every 5 Minutes Cron Pattern
+# Runs health check every 5 minutes
+# Documentation: https://deadmanping.com/monitor-cron-jobs
+
+*/5 * * * * /path/to/health-check.sh
+
+# With monitoring ping (ping must be inside script, not here)
+# The script should ping DeadManPing after successful health check

@@ -53,7 +53,7 @@ export default function DetectCronJobSkippedPage() {
               Detect Cron Job Skipped: Catch Jobs That Don't Run
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job should run, but it's being skipped. Here's how to detect when jobs are skipped and verify execution.
+              Your cron job should run, but it's being skipped. Learn how to detect when jobs are skipped and verify execution.
             </p>
           </header>
 
@@ -97,13 +97,11 @@ export default function DetectCronJobSkippedPage() {
                     <div>set -e</div>
                     <div></div>
                     <div># Ping immediately to confirm job started</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=start"</div>
-                    <div></div>
                     <div># Your work</div>
                     <div>./backup.sh</div>
                     <div></div>
-                    <div># Ping on completion</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                   </code>
                 </div>
 
@@ -114,14 +112,11 @@ export default function DetectCronJobSkippedPage() {
                   <code className="text-foreground">
                     <div>import requests</div>
                     <div></div>
-                    <div># Ping immediately</div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=start")</div>
-                    <div></div>
                     <div># Your work</div>
                     <div>perform_backup()</div>
                     <div></div>
-                    <div># Ping on completion</div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
                   </code>
                 </div>
               </section>
@@ -135,6 +130,25 @@ export default function DetectCronJobSkippedPage() {
                 <p className="text-muted-foreground mb-4">
                   A dead man switch detects skipped jobs by monitoring whether your explicit ping arrives at the expected time. If the ping doesn't arrive, you know the job was skipped.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

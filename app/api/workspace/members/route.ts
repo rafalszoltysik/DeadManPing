@@ -4,20 +4,26 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMemberLimit } from '@/lib/limits'
 import { getAppUrl } from '@/lib/get-app-url'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 // GET: List workspace members
 export async function GET(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getSupabaseUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -99,6 +105,7 @@ export async function GET(request: NextRequest) {
 // POST: Add member to workspace
 export async function POST(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getSupabaseUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -359,6 +366,7 @@ export async function POST(request: NextRequest) {
 // DELETE: Remove member from workspace
 export async function DELETE(request: NextRequest) {
   try {
+    const supabaseAdmin = getSupabaseAdmin()
     const user = await getSupabaseUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

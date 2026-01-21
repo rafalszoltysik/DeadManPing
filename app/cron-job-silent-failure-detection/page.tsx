@@ -53,7 +53,7 @@ export default function CronJobSilentFailureDetectionPage() {
               Cron Job Silent Failure Detection: Catch Failures Without Logs
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job fails silently—no error logs, no exit codes, no notifications. Here's how to detect these silent failures automatically.
+              Your cron job fails silently—no error logs, no exit codes, no notifications. Learn how to detect these silent failures automatically.
             </p>
           </header>
 
@@ -98,15 +98,11 @@ export default function CronJobSilentFailureDetectionPage() {
                     <div>set -e</div>
                     <div>set -o pipefail</div>
                     <div></div>
-                    <div># Trap to catch unexpected exits</div>
-                    <div>trap 'curl -X POST "https://deadmanping.com/api/ping/job-daily?s=fail&m=unexpected+exit"' EXIT</div>
-                    <div></div>
                     <div># Your work</div>
                     <div>./process.sh</div>
                     <div></div>
-                    <div># Explicit success ping</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/job-daily?s=ok"</div>
-                    <div>trap - EXIT</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/job-daily"</div>
                   </code>
                 </div>
 
@@ -118,16 +114,11 @@ export default function CronJobSilentFailureDetectionPage() {
                     <div>import requests</div>
                     <div>import sys</div>
                     <div></div>
-                    <div>success = False</div>
-                    <div>try:</div>
-                    <div>  perform_work()</div>
-                    <div>  success = True</div>
-                    <div>finally:</div>
-                    <div>  if success:</div>
-                    <div>    requests.post("https://deadmanping.com/api/ping/job-daily?s=ok")</div>
-                    <div>  else:</div>
-                    <div>    requests.post("https://deadmanping.com/api/ping/job-daily?s=fail")</div>
-                    <div>    sys.exit(1)</div>
+                    <div># Your work</div>
+                    <div>perform_work()</div>
+                    <div></div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>requests.post("https://deadmanping.com/api/ping/job-daily")</div>
                   </code>
                 </div>
               </section>
@@ -144,6 +135,25 @@ export default function CronJobSilentFailureDetectionPage() {
                 <p className="text-muted-foreground mb-4">
                   This works for all types of silent failures: script crashes, cron daemon stops, permission errors, missing environment variables, and more.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

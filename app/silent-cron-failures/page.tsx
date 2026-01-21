@@ -53,7 +53,7 @@ export default function SilentCronFailuresPage() {
               Silent Cron Failures: Detect Jobs That Fail Without Logging
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job stops working, but there are no error logs, no exit codes, and no notifications. Here's how to detect these silent failures.
+              Your cron job stops working, but there are no error logs, no exit codes, and no notifications. Learn how to detect these silent failures.
             </p>
           </header>
 
@@ -99,18 +99,12 @@ export default function SilentCronFailuresPage() {
                     <div>set -e  # Exit on error</div>
                     <div>set -o pipefail  # Catch pipe failures</div>
                     <div></div>
-                    <div># Trap to ensure ping is sent even on unexpected exit</div>
-                    <div>trap 'curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=unexpected+exit"' EXIT</div>
-                    <div></div>
                     <div># Your actual work</div>
                     <div>./backup.sh</div>
                     <div>./sync.sh</div>
                     <div></div>
-                    <div># Explicit success ping</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
-                    <div></div>
-                    <div># Remove trap on success</div>
-                    <div>trap - EXIT</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                   </code>
                 </div>
 
@@ -122,19 +116,12 @@ export default function SilentCronFailuresPage() {
                     <div>import requests</div>
                     <div>import sys</div>
                     <div></div>
-                    <div>success = False</div>
-                    <div>try:</div>
-                    <div>  # Your actual work</div>
-                    <div>  perform_backup()</div>
-                    <div>  sync_data()</div>
-                    <div>  success = True</div>
-                    <div>finally:</div>
-                    <div>  # Always ping, even on exception</div>
-                    <div>  if success:</div>
-                    <div>    requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
-                    <div>  else:</div>
-                    <div>    requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=exception")</div>
-                    <div>    sys.exit(1)</div>
+                    <div># Your actual work</div>
+                    <div>perform_backup()</div>
+                    <div>sync_data()</div>
+                    <div></div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
                   </code>
                 </div>
 
@@ -145,32 +132,17 @@ export default function SilentCronFailuresPage() {
                   <code className="text-foreground">
                     <div>const https = require('https');</div>
                     <div></div>
-                    <div>let pinged = false;</div>
-                    <div></div>
-                    <div>// Ping on unexpected exit</div>
-                    <div>process.on('exit', (code) =&gt; {'{'}</div>
-                    <div>  if (!pinged) {'{'}</div>
-                    <div>    https.request('https://deadmanping.com/api/ping/backup-daily?s=fail&m=unexpected+exit', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  {'}'}</div>
-                    <div>{'}'});</div>
-                    <div></div>
-                    <div>process.on('uncaughtException', () =&gt; {'{'}</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily?s=fail&m=uncaught+exception', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'});</div>
-                    <div></div>
                     <div>// Your actual work</div>
                     <div>async function run() {'{'}</div>
                     <div>  await performBackup();</div>
                     <div>  await syncData();</div>
                     <div>  </div>
-                    <div>  // Explicit success ping</div>
-                    <div>  pinged = true;</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily?s=ok', {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily', {'{'} method: 'POST' {'}'}).end();</div>
                     <div>{'}'}</div>
                     <div></div>
                     <div>run().catch((err) =&gt; {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=${'{'}encodeURIComponent(err.message){'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>  // If job fails, ping won't arrive - DeadManPing will detect missing ping</div>
                     <div>  process.exit(1);</div>
                     <div>{'}'});</div>
                   </code>
@@ -183,10 +155,16 @@ export default function SilentCronFailuresPage() {
                   <code className="text-foreground">
                     <div>#!/bin/bash</div>
                     <div># Check if cron is running before relying on it</div>
-                    <div>if ! pgrep -x cron &gt; /dev/null && ! pgrep -x crond &gt; /dev/null; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/cron-daemon-check?s=fail&m=cron+not+running"</div>
-                    <div>  exit 1</div>
+                    <div># Check if cron is running</div>
+                    <div>CRON_RUNNING=0</div>
+                    <div>if pgrep -x cron &gt; /dev/null || pgrep -x crond &gt; /dev/null; then</div>
+                    <div>  CRON_RUNNING=1</div>
                     <div>fi</div>
+                    <div></div>
+                    <div># Single ping with cron status in payload</div>
+                    <div># In DeadManPing panel: set validation rule "cron_running" == 1</div>
+                    <div># Panel will automatically detect if cron daemon is not running</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/cron-daemon-check?cron_running=$CRON_RUNNING"</div>
                   </code>
                 </div>
               </section>
@@ -203,6 +181,25 @@ export default function SilentCronFailuresPage() {
                 <p className="text-muted-foreground mb-4">
                   This works for all types of silent failures: script crashes, cron daemon stops, permission errors, missing environment variables, and more. As long as your script sends a ping on success, missing pings indicate failures.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

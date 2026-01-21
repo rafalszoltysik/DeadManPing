@@ -11,7 +11,6 @@ import { InfoIcon, WarningIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 export default function SignupPage() {
-  const supabase = createClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -23,9 +22,15 @@ export default function SignupPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const [mounted, setMounted] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
   const router = useRouter()
 
   useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch (err) {
+      setError('Failed to initialize client')
+    }
     setMounted(true)
     
     // SECURITY: Remove email and password from URL if present (should never be there)
@@ -54,6 +59,11 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!supabase) {
+      setError('Client not initialized')
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setError(null)
 
@@ -135,6 +145,10 @@ export default function SignupPage() {
       const redirectTo = `${appUrl}/auth/callback?redirect=${encodeURIComponent(redirect)}`
       
       // Use Supabase Auth OAuth - automatically links accounts with same email
+      if (!supabase) {
+        setError('Client not initialized')
+        return
+      }
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

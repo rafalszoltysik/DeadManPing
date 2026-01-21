@@ -53,7 +53,7 @@ export default function DetectBackupFileMissingPage() {
               Detect Backup File Missing: Verify Backup Files Exist
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup job completes successfully, but the backup file is missing. Here's how to detect missing backup files automatically.
+              Your backup job completes successfully, but the backup file is missing. Learn how to detect missing backup files automatically.
             </p>
           </header>
 
@@ -99,21 +99,20 @@ export default function DetectBackupFileMissingPage() {
                     <div></div>
                     <div>pg_dump mydb | gzip &gt; "$BACKUP_FILE"</div>
                     <div></div>
-                    <div># Verify file exists</div>
-                    <div>if [ ! -f "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file not created: $BACKUP_FILE"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+missing"</div>
-                    <div>  exit 1</div>
+                    <div># Get file data</div>
+                    <div>FILE_EXISTS=0</div>
+                    <div>FILE_SIZE=0</div>
+                    <div>if [ -f "$BACKUP_FILE" ]; then</div>
+                    <div>  FILE_EXISTS=1</div>
+                    <div>  FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE")</div>
                     <div>fi</div>
                     <div></div>
-                    <div># Verify file is not empty</div>
-                    <div>if [ ! -s "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file is empty"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+empty"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping with file data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "file_exists" == 1</div>
+                    <div>#   - "size" &gt; 0</div>
+                    <div># Panel will automatically detect if file is missing or empty</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?file_exists=$FILE_EXISTS&size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -131,17 +130,16 @@ export default function DetectBackupFileMissingPage() {
                     <div>subprocess.run(["pg_dump", "mydb"], stdout=open(backup_file.replace('.gz', ''), "w"))</div>
                     <div>subprocess.run(["gzip", backup_file.replace('.gz', '')])</div>
                     <div></div>
-                    <div># Verify file exists</div>
-                    <div>if not os.path.exists(backup_file):</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+missing")</div>
-                    <div>  exit(1)</div>
+                    <div># Get file data</div>
+                    <div>file_exists = os.path.exists(backup_file)</div>
+                    <div>file_size = os.path.getsize(backup_file) if file_exists else 0</div>
                     <div></div>
-                    <div># Verify file is not empty</div>
-                    <div>if os.path.getsize(backup_file) == 0:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+empty")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping with file data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "file_exists" == True</div>
+                    <div>#   - "size" &gt; 0</div>
+                    <div># Panel will automatically detect if file is missing or empty</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?file_exists={'{'}file_exists{'}'}&size={'{'}file_size{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -155,6 +153,25 @@ export default function DetectBackupFileMissingPage() {
                 <p className="text-muted-foreground mb-4">
                   After adding file existence checks to your backup script, use a dead man switch to monitor whether the check completed successfully. If your script detects a missing file and exits with error code, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

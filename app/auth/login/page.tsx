@@ -19,10 +19,17 @@ function LoginForm() {
   const [showResendForm, setShowResendForm] = useState(false)
   const [resendEmail, setResendEmail] = useState('')
   const [redirect, setRedirect] = useState('/dashboard')
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const supabase = createClient()
+  useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch (err) {
+      setError('Failed to initialize client')
+    }
+  }, [])
 
   useEffect(() => {
     // SECURITY: Remove email and password from URL if present (should never be there)
@@ -49,6 +56,7 @@ function LoginForm() {
         // This is an invitation token - set the session and redirect to invite accept
         const setSession = async () => {
           try {
+            if (!supabase) return
             const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
               access_token: accessToken,
               refresh_token: refreshToken || '',
@@ -154,7 +162,7 @@ function LoginForm() {
       newUrl.searchParams.delete('reason')
       window.history.replaceState({}, '', newUrl.toString())
     }
-  }, [searchParams, router, supabase.auth])
+  }, [searchParams, router, supabase])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -220,6 +228,10 @@ function LoginForm() {
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000')
       const redirectTo = `${appUrl}/auth/callback?redirect=${encodeURIComponent(redirect)}`
       // Use Supabase Auth OAuth - automatically links accounts with same email
+      if (!supabase) {
+        setError('Client not initialized')
+        return
+      }
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

@@ -53,7 +53,7 @@ export default function DetectCronJobWrongExitCodePage() {
               Detect Cron Job Wrong Exit Code: Validate Exit Codes
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job returns exit code 0 (success) when it should fail, or non-zero when it should succeed. Here's how to detect and handle wrong exit codes.
+              Your cron job returns exit code 0 (success) when it should fail, or non-zero when it should succeed. Learn how to detect and handle wrong exit codes.
             </p>
           </header>
 
@@ -100,20 +100,13 @@ export default function DetectCronJobWrongExitCodePage() {
                     <div>pg_dump mydb &gt; "$BACKUP_FILE"</div>
                     <div>EXIT_CODE=$?</div>
                     <div></div>
-                    <div># Check exit code</div>
-                    <div>if [ $EXIT_CODE -ne 0 ]; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup?s=fail&code=$EXIT_CODE"</div>
-                    <div>  exit $EXIT_CODE</div>
-                    <div>fi</div>
+                    <div># Get backup file size (0 if file doesn't exist or is empty)</div>
+                    <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE" 2&gt;/dev/null || echo 0)</div>
                     <div></div>
-                    <div># Verify backup file exists and has content</div>
-                    <div>if [ ! -f "$BACKUP_FILE" ] || [ ! -s "$BACKUP_FILE" ]; then</div>
-                    <div>  # Exit code was 0 but backup failed</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup?s=fail&m=wrong+exit+code"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup?s=ok"</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
+                    <div># Panel will automatically detect if backup file is empty even though exit code was 0</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup?size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -132,18 +125,13 @@ export default function DetectCronJobWrongExitCodePage() {
                     <div># Run backup</div>
                     <div>result = subprocess.run(['pg_dump', 'mydb'], stdout=open(backup_file, 'w'))</div>
                     <div></div>
-                    <div># Check exit code</div>
-                    <div>if result.returncode != 0:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/backup?s=fail&code={'{'}result.returncode{'}'}")</div>
-                    <div>  sys.exit(result.returncode)</div>
+                    <div># Get backup file size (0 if file doesn't exist or is empty)</div>
+                    <div>file_size = os.path.getsize(backup_file) if os.path.exists(backup_file) else 0</div>
                     <div></div>
-                    <div># Verify backup file</div>
-                    <div>if not os.path.exists(backup_file) or os.path.getsize(backup_file) == 0:</div>
-                    <div>  # Exit code was 0 but backup failed</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup?s=fail&m=wrong+exit+code")</div>
-                    <div>  sys.exit(1)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup?s=ok")</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
+                    <div># Panel will automatically detect if backup file is empty even though exit code was 0</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup?size={'{'}file_size{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -157,6 +145,25 @@ export default function DetectCronJobWrongExitCodePage() {
                 <p className="text-muted-foreground mb-4">
                   After adding result validation to your scripts, use a dead man switch to monitor whether validation completed successfully. If your script detects wrong exit codes and exits with error, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

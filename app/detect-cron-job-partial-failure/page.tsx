@@ -53,7 +53,7 @@ export default function DetectCronJobPartialFailurePage() {
               Detect Cron Job Partial Failure: Verify All Steps Complete
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job runs multiple steps, but some succeed while others fail. Here's how to detect partial failures and ensure all steps complete.
+              Your cron job runs multiple steps, but some succeed while others fail. Learn how to detect partial failures and ensure all steps complete.
             </p>
           </header>
 
@@ -112,14 +112,11 @@ export default function DetectCronJobPartialFailurePage() {
                     <div>  FAILED_STEPS+=("send_report")</div>
                     <div>fi</div>
                     <div></div>
-                    <div># Check if any step failed</div>
-                    <div>if [ ${'{'}#FAILED_STEPS[@]{'}'} -gt 0 ]; then</div>
-                    <div>  FAILED=$(IFS=,; echo "${'{'}FAILED_STEPS[*]{'}'}")</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/multi-step?s=fail&steps=$FAILED"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/multi-step?s=ok"</div>
+                    <div># Single ping with step completion data in payload</div>
+                    <div># In DeadManPing panel: set validation rule "failed_steps_count" == 0</div>
+                    <div># Panel will automatically detect if any steps failed</div>
+                    <div>FAILED_STEPS_COUNT=${'{'}#FAILED_STEPS[@]{'}'}</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/multi-step?failed_steps_count=$FAILED_STEPS_COUNT"</div>
                   </code>
                 </div>
 
@@ -146,11 +143,11 @@ export default function DetectCronJobPartialFailurePage() {
                     <div>if subprocess.run(['./send-report.sh']).returncode != 0:</div>
                     <div>  failed_steps.append('send_report')</div>
                     <div></div>
-                    <div>if failed_steps:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/multi-step?s=fail&steps={'{'}','.join(failed_steps){'}'}")</div>
-                    <div>  sys.exit(1)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/multi-step?s=ok")</div>
+                    <div># Single ping with step completion data in payload</div>
+                    <div># In DeadManPing panel: set validation rule "failed_steps_count" == 0</div>
+                    <div># Panel will automatically detect if any steps failed</div>
+                    <div>failed_steps_count = len(failed_steps)</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/multi-step?failed_steps_count={'{'}failed_steps_count{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -167,6 +164,25 @@ export default function DetectCronJobPartialFailurePage() {
                 <p className="text-muted-foreground mb-4">
                   Include failed step names in your ping payload so you can identify which steps fail most often.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

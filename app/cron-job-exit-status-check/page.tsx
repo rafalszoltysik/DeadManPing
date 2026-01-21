@@ -53,7 +53,7 @@ export default function CronJobExitStatusCheckPage() {
               Cron Job Exit Status Check: Verify Job Completion
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job completes, but did it exit with the correct status? Here's how to check exit status and verify jobs completed successfully.
+              Your cron job completes, but did it exit with the correct status? Learn how to check exit status and verify jobs completed successfully.
             </p>
           </header>
 
@@ -99,14 +99,10 @@ export default function CronJobExitStatusCheckPage() {
                     <div>./backup.sh</div>
                     <div>EXIT_STATUS=$?</div>
                     <div></div>
-                    <div># Check exit status</div>
-                    <div>if [ $EXIT_STATUS -ne 0 ]; then</div>
-                    <div>  echo "Error: Exit status $EXIT_STATUS"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&status=$EXIT_STATUS"</div>
-                    <div>  exit $EXIT_STATUS</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping with exit status in payload</div>
+                    <div># In DeadManPing panel: set validation rule "exit_status" == 0</div>
+                    <div># Panel will automatically detect if exit status is non-zero and alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_status=$EXIT_STATUS"</div>
                   </code>
                 </div>
 
@@ -121,12 +117,10 @@ export default function CronJobExitStatusCheckPage() {
                     <div></div>
                     <div>result = subprocess.run(['./backup.sh'])</div>
                     <div></div>
-                    <div># Check exit status</div>
-                    <div>if result.returncode != 0:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&status={'{'}result.returncode{'}'}")</div>
-                    <div>  sys.exit(result.returncode)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping with exit status in payload</div>
+                    <div># In DeadManPing panel: set validation rule "exit_status" == 0</div>
+                    <div># Panel will automatically detect if exit status is non-zero and alert</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?exit_status={'{'}result.returncode{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -140,6 +134,25 @@ export default function CronJobExitStatusCheckPage() {
                 <p className="text-muted-foreground mb-4">
                   After adding exit status checks to your scripts, use a dead man switch to monitor whether checks completed successfully. If your script detects a non-zero exit status and exits with error, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

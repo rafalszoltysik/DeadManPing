@@ -53,7 +53,7 @@ export default function BackupFileZeroBytesPage() {
               Backup File Zero Bytes: Detect Empty Backup Files
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup job completes, but the backup file is zero bytes. Here's how to detect and prevent zero-byte backup files.
+              Your backup job completes, but the backup file is zero bytes. Learn how to detect and prevent zero-byte backup files.
             </p>
           </header>
 
@@ -97,15 +97,13 @@ export default function BackupFileZeroBytesPage() {
                     <div>BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql.gz"</div>
                     <div>pg_dump mydb | gzip &gt; "$BACKUP_FILE"</div>
                     <div></div>
-                    <div># Check if file is zero bytes</div>
-                    <div>if [ ! -s "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file is zero bytes"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=zero+bytes"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
+                    <div># Get file size</div>
+                    <div>FILE_SIZE=$(stat -c%s "$BACKUP_FILE" 2&gt;/dev/null || echo 0)</div>
                     <div></div>
-                    <div>FILE_SIZE=$(stat -c%s "$BACKUP_FILE")</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok&size=$FILE_SIZE"</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
+                    <div># Panel will automatically detect if size is 0</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -122,13 +120,13 @@ export default function BackupFileZeroBytesPage() {
                     <div>subprocess.run(["pg_dump", "mydb"], stdout=open(backup_file.replace('.gz', ''), "w"))</div>
                     <div>subprocess.run(["gzip", backup_file.replace('.gz', '')])</div>
                     <div></div>
-                    <div># Check if file is zero bytes</div>
-                    <div>if os.path.getsize(backup_file) == 0:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=zero+bytes")</div>
-                    <div>  exit(1)</div>
+                    <div># Get file size</div>
+                    <div>file_size = os.path.getsize(backup_file) if os.path.exists(backup_file) else 0</div>
                     <div></div>
-                    <div>file_size = os.path.getsize(backup_file)</div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=ok&size={'{'}file_size{'}'}")</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
+                    <div># Panel will automatically detect if size is 0</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?size={'{'}file_size{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -142,6 +140,25 @@ export default function BackupFileZeroBytesPage() {
                 <p className="text-muted-foreground mb-4">
                   After adding zero-byte checks to your backup script, use a dead man switch to monitor whether the check completed successfully. If your script detects a zero-byte file and exits with error code, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

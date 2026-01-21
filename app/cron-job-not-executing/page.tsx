@@ -53,7 +53,7 @@ export default function CronJobNotExecutingPage() {
               Cron Job Not Executing: Detect When Jobs Don't Run
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job is scheduled, but it's not executing. Here's how to detect when jobs don't run and verify execution.
+              Your cron job is scheduled, but it's not executing. Learn how to detect when jobs don't run and verify execution.
             </p>
           </header>
 
@@ -99,13 +99,12 @@ export default function CronJobNotExecutingPage() {
                     <div>set -e</div>
                     <div></div>
                     <div># Ping at start to confirm job began</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=start"</div>
                     <div></div>
                     <div># Your actual work</div>
                     <div>./backup.sh</div>
                     <div></div>
-                    <div># Ping at end to confirm job completed</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                   </code>
                 </div>
 
@@ -117,15 +116,11 @@ export default function CronJobNotExecutingPage() {
                     <div>import requests</div>
                     <div>import datetime</div>
                     <div></div>
-                    <div># Ping at start</div>
-                    <div>start_time = datetime.datetime.now().isoformat()</div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=start&t={'{'}start_time{'}'}")</div>
-                    <div></div>
                     <div># Your actual work</div>
                     <div>perform_backup()</div>
                     <div></div>
-                    <div># Ping at end</div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
                   </code>
                 </div>
               </section>
@@ -139,6 +134,25 @@ export default function CronJobNotExecutingPage() {
                 <p className="text-muted-foreground mb-4">
                   A dead man switch detects non-execution by monitoring whether your explicit ping arrives. If the ping doesn't arrive within the expected interval, you know the job didn't execute.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

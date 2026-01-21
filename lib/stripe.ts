@@ -1,8 +1,26 @@
 import Stripe from 'stripe'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia' as any,
-  typescript: true,
+function getStripeClient() {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not configured')
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2024-11-20.acacia' as any,
+    typescript: true,
+  })
+}
+
+// Lazy initialization - create client only when needed
+let stripeClient: Stripe | null = null
+
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    if (!stripeClient) {
+      stripeClient = getStripeClient()
+    }
+    return stripeClient[prop as keyof Stripe]
+  }
 })
 
 // Plan features (nie zmienia się - ceny są teraz pobierane z Stripe API)
@@ -69,6 +87,7 @@ export async function createCheckoutSession(
   workspaceId: string,
   userEmail: string
 ) {
+  const stripe = getStripeClient()
   const session = await stripe.checkout.sessions.create({
     customer: customerId || undefined,
     customer_email: customerId ? undefined : userEmail,
@@ -97,6 +116,8 @@ export async function createCheckoutSession(
 }
 
 export async function createCustomerPortalSession(customerId: string) {
+  const stripe = getStripeClient()
+  
   // Note: Billing Portal dark mode is configured in Stripe Dashboard:
   // Settings > Billing > Customer portal > Appearance > Theme: Dark
   // Stripe Checkout automatically follows user's system dark mode preference

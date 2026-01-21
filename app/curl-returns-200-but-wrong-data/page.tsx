@@ -53,7 +53,7 @@ export default function CurlReturns200ButWrongDataPage() {
               Curl Returns 200 But Wrong Data: Validate API Responses
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your curl command returns HTTP 200, but the response body contains an error or wrong data. Here's how to detect and handle this.
+              Your curl command returns HTTP 200, but the response body contains an error or wrong data. Learn how to detect and handle this.
             </p>
           </header>
 
@@ -93,23 +93,22 @@ export default function CurlReturns200ButWrongDataPage() {
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
                     <div>#!/bin/bash</div>
-                    <div>RESPONSE=$(curl -s -w "\n%{http_code}" "https://api.example.com/data")</div>
+                    <div>RESPONSE=$(curl -s -w &quot;\n%{'{'}http_code{'}'}&quot; &quot;https://api.example.com/data&quot;)</div>
                     <div>HTTP_CODE=$(echo "$RESPONSE" | tail -n1)</div>
                     <div>BODY=$(echo "$RESPONSE" | sed '$d')</div>
                     <div></div>
-                    <div>if [ "$HTTP_CODE" != "200" ]; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/api-check?s=fail&m=http+$HTTP_CODE"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div># Check for errors in JSON</div>
+                    <div># Extract response validation data</div>
+                    <div>HAS_ERROR=0</div>
                     <div>if echo "$BODY" | grep -q '"error"'; then</div>
-                    <div>  ERROR=$(echo "$BODY" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/api-check?s=fail&m=$ERROR"</div>
-                    <div>  exit 1</div>
+                    <div>  HAS_ERROR=1</div>
                     <div>fi</div>
                     <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/api-check?s=ok"</div>
+                    <div># Single ping with response data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "status_code" == 200</div>
+                    <div>#   - "has_error" == 0</div>
+                    <div># Panel will automatically detect violations and alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/api-check?status_code=$HTTP_CODE&has_error=$HAS_ERROR"</div>
                   </code>
                 </div>
 
@@ -123,20 +122,20 @@ export default function CurlReturns200ButWrongDataPage() {
                     <div></div>
                     <div>response = requests.get("https://api.example.com/data")</div>
                     <div></div>
-                    <div>if response.status_code != 200:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/api-check?s=fail&m=http+{'{'}response.status_code{'}'}")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
+                    <div># Extract response data for payload</div>
+                    <div>has_error = False</div>
                     <div>try:</div>
                     <div>  data = response.json()</div>
-                    <div>  if "error" in data:</div>
-                    <div>    requests.post(f"https://deadmanping.com/api/ping/api-check?s=fail&m={'{'}data['error']{'}'}")</div>
-                    <div>    exit(1)</div>
+                    <div>  has_error = "error" in data</div>
                     <div>except json.JSONDecodeError:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/api-check?s=fail&m=invalid+json")</div>
-                    <div>  exit(1)</div>
+                    <div>  has_error = True  # Invalid JSON</div>
                     <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/api-check?s=ok")</div>
+                    <div># Single ping with response data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "status_code" == 200</div>
+                    <div>#   - "has_error" == False</div>
+                    <div># Panel will automatically detect violations and alert</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/api-check?status_code={'{'}response.status_code{'}'}&has_error={'{'}has_error{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -150,6 +149,25 @@ export default function CurlReturns200ButWrongDataPage() {
                 <p className="text-muted-foreground mb-4">
                   After adding response validation to your scripts, use a dead man switch to monitor whether validation completed successfully. If your script detects wrong data and exits with error code, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

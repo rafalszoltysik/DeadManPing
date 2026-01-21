@@ -53,7 +53,7 @@ export default function VerifyCronJobCompletedPage() {
               Verify Cron Job Completed: Confirm Successful Completion
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job is scheduled, but did it actually complete? Here's how to verify job completion and detect when jobs don't finish.
+              Your cron job is scheduled, but did it actually complete? Learn how to verify job completion and detect when jobs don't finish.
             </p>
           </header>
 
@@ -99,8 +99,8 @@ export default function VerifyCronJobCompletedPage() {
                     <div>./backup.sh</div>
                     <div>./sync.sh</div>
                     <div></div>
-                    <div># Explicit completion ping</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                   </code>
                 </div>
 
@@ -115,8 +115,8 @@ export default function VerifyCronJobCompletedPage() {
                     <div>perform_backup()</div>
                     <div>sync_data()</div>
                     <div></div>
-                    <div># Explicit completion ping</div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
                   </code>
                 </div>
               </section>
@@ -130,6 +130,25 @@ export default function VerifyCronJobCompletedPage() {
                 <p className="text-muted-foreground mb-4">
                   A dead man switch verifies completion by monitoring whether your explicit completion ping arrives. If the ping doesn't arrive within the expected interval, you know the job didn't complete.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

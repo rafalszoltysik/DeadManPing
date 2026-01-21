@@ -3,16 +3,21 @@ import { getGoogleUserInfo } from '@/lib/auth/google-oauth'
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
@@ -33,6 +38,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const supabase = getSupabaseClient()
+    
     // Get user info from Google
     const googleUser = await getGoogleUserInfo(code)
 

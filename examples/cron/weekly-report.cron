@@ -1,0 +1,8 @@
+# Weekly Report Cron Pattern
+# Runs report generation every Monday at 2 AM
+# Documentation: https://deadmanping.com/monitor-cron-jobs
+
+0 2 * * 1 /path/to/generate-report.sh
+
+# With monitoring ping (ping must be inside script, not here)
+# The script should ping DeadManPing after successful report generation

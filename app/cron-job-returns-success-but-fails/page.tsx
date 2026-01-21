@@ -53,7 +53,7 @@ export default function CronJobReturnsSuccessButFailsPage() {
               Cron Job Returns Success But Fails: Detect False Success
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job exits with code 0 (success), but it didn't actually complete its work. Here's how to detect false success.
+              Your cron job exits with code 0 (success), but it didn't actually complete its work. Learn how to detect false success.
             </p>
           </header>
 
@@ -100,22 +100,13 @@ export default function CronJobReturnsSuccessButFailsPage() {
                     <div># Run backup (might exit 0 even if it fails)</div>
                     <div>pg_dump mydb &gt; "$BACKUP_FILE"</div>
                     <div></div>
-                    <div># Verify backup actually created file with content</div>
-                    <div>if [ ! -f "$BACKUP_FILE" ] || [ ! -s "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file missing or empty"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=backup+failed"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
+                    <div># Get backup file size (0 if file doesn't exist or is empty)</div>
+                    <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE" 2&gt;/dev/null || echo 0)</div>
                     <div></div>
-                    <div># Verify file size is reasonable</div>
-                    <div>FILE_SIZE=$(stat -c%s "$BACKUP_FILE")</div>
-                    <div>if [ "$FILE_SIZE" -lt 1024 ]; then</div>
-                    <div>  echo "Error: Backup file too small"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+too+small"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok&size=$FILE_SIZE"</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rule "size" &gt; 0 (or &gt;= 1024 for minimum size)</div>
+                    <div># Panel will automatically detect if backup file is empty even though exit code was 0</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -130,23 +121,23 @@ export default function CronJobReturnsSuccessButFailsPage() {
                     <div># API call might return 200 but with error</div>
                     <div>response = requests.get("https://api.example.com/data")</div>
                     <div></div>
-                    <div># Check HTTP status</div>
-                    <div>if response.status_code != 200:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/api-job?s=fail&m=http+{'{'}response.status_code{'}'}")</div>
-                    <div>  sys.exit(1)</div>
+                    <div># Extract response data for payload</div>
+                    <div>has_error = False</div>
+                    <div>data_count = 0</div>
+                    <div>try:</div>
+                    <div>  data = response.json()</div>
+                    <div>  has_error = "error" in data</div>
+                    <div>  data_count = len(data.get("data", []))</div>
+                    <div>except:</div>
+                    <div>  has_error = True</div>
                     <div></div>
-                    <div># Validate response content</div>
-                    <div>data = response.json()</div>
-                    <div>if "error" in data or not data.get("data"):</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/api-job?s=fail&m=invalid+response")</div>
-                    <div>  sys.exit(1)</div>
-                    <div></div>
-                    <div># Verify data count</div>
-                    <div>if len(data.get("data", [])) == 0:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/api-job?s=fail&m=no+data")</div>
-                    <div>  sys.exit(1)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/api-job?s=ok")</div>
+                    <div># Single ping with response data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "status_code" == 200</div>
+                    <div>#   - "has_error" == False</div>
+                    <div>#   - "data_count" &gt; 0</div>
+                    <div># Panel will automatically detect violations and alert</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/api-job?status_code={'{'}response.status_code{'}'}&has_error={'{'}has_error{'}'}&data_count={'{'}data_count{'}'}")</div>
                   </code>
                 </div>
 
@@ -155,7 +146,7 @@ export default function CronJobReturnsSuccessButFailsPage() {
                 </h3>
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
-                    <div>const { execSync } = require('child_process');</div>
+                    <div>const {'{'} execSync {'}'} = require(&apos;child_process&apos;);</div>
                     <div>const https = require('https');</div>
                     <div></div>
                     <div>// Query might succeed but return no rows</div>
@@ -165,19 +156,12 @@ export default function CronJobReturnsSuccessButFailsPage() {
                     <div>const match = output.match(/(\d+)/);</div>
                     <div>const count = match ? parseInt(match[1]) : 0;</div>
                     <div></div>
-                    <div>// Verify we got expected results</div>
-                    <div>if (count === 0) {'{'}</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/db-check?s=fail&m=no+users', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>// Verify count is reasonable</div>
-                    <div>if (count &lt; 10) {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/db-check?s=fail&m=too+few+users+${'{'}count{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>https.request(`https://deadmanping.com/api/ping/db-check?s=ok&count=${'{'}count{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>// Single ping with count in payload</div>
+                    <div>// In DeadManPing panel: set validation rules:</div>
+                    <div>//   - "count" &gt; 0 (to detect empty results)</div>
+                    <div>//   - "count" &gt;= 10 (minimum expected count, optional)</div>
+                    <div>// Panel will automatically detect if count violates rules</div>
+                    <div>https.request(&#96;https://deadmanping.com/api/ping/db-check?count=${'{'}count{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                   </code>
                 </div>
 
@@ -196,15 +180,16 @@ export default function CronJobReturnsSuccessButFailsPage() {
                     <div>REMOTE_COUNT=$(ssh user@server "find /backup -type f | wc -l")</div>
                     <div>LOCAL_COUNT=$(find /data -type f | wc -l)</div>
                     <div></div>
-                    <div># Verify counts match (within tolerance)</div>
+                    <div># Calculate count difference</div>
                     <div>DIFF=$(( LOCAL_COUNT - REMOTE_COUNT ))</div>
-                    <div>if [ ${'{'}DIFF#-{'}'} -gt 5 ]; then</div>
-                    <div>  echo "Error: File count mismatch: local=$LOCAL_COUNT, remote=$REMOTE_COUNT"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/sync-job?s=fail&m=count+mismatch"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
+                    <div>DIFF_ABS=${'{'}DIFF#-{'}'}</div>
                     <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/sync-job?s=ok&files=$LOCAL_COUNT"</div>
+                    <div># Single ping with sync data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "local_count" &gt; 0</div>
+                    <div>#   - "count_diff" &lt;= 5 (tolerance)</div>
+                    <div># Panel will automatically detect if counts don't match</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/sync-job?local_count=$LOCAL_COUNT&remote_count=$REMOTE_COUNT&count_diff=$DIFF_ABS"</div>
                   </code>
                 </div>
               </section>
@@ -221,6 +206,25 @@ export default function CronJobReturnsSuccessButFailsPage() {
                 <p className="text-muted-foreground mb-4">
                   Include validation details in your ping payload (e.g., file sizes, record counts) so you can track result quality over time and detect gradual degradation.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

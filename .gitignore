@@ -35,3 +35,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# examples temporary files
+examples/**/*.log
+examples/**/*.tmp
+examples/temp/
+examples/**/__pycache__/
+examples/**/*.pyc
+

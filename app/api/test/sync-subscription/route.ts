@@ -3,16 +3,21 @@ import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 /**
  * Manually sync subscription from Stripe to database
@@ -27,6 +32,8 @@ const supabaseAdmin = createClient(
  * SECURITY: This endpoint is disabled in production
  */
 export async function POST(request: NextRequest) {
+  const supabaseAdmin = getSupabaseAdmin()
+  
   // Block in production - check both NODE_ENV and VERCEL_ENV for safety
   const isProduction = process.env.NODE_ENV === 'production' || 
                        process.env.VERCEL_ENV === 'production'

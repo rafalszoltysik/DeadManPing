@@ -53,7 +53,7 @@ export default function DetectEmptyBackupFilePage() {
               Detect Empty Backup File: Verify Files Aren't Zero Bytes
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup script completes successfully, but the backup file is empty. Here's how to detect zero-byte backup files automatically.
+              Your backup script completes successfully, but the backup file is empty. Learn how to detect zero-byte backup files automatically.
             </p>
           </header>
 
@@ -98,29 +98,20 @@ export default function DetectEmptyBackupFilePage() {
                     <div>BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql.gz"</div>
                     <div>pg_dump mydb | gzip &gt; "$BACKUP_FILE"</div>
                     <div></div>
-                    <div># Check if file exists</div>
-                    <div>if [ ! -f "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file not created"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+not+created"</div>
-                    <div>  exit 1</div>
+                    <div># Get file data</div>
+                    <div>FILE_EXISTS=0</div>
+                    <div>FILE_SIZE=0</div>
+                    <div>if [ -f "$BACKUP_FILE" ]; then</div>
+                    <div>  FILE_EXISTS=1</div>
+                    <div>  FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE")</div>
                     <div>fi</div>
                     <div></div>
-                    <div># Check if file is empty (zero bytes)</div>
-                    <div>if [ ! -s "$BACKUP_FILE" ]; then</div>
-                    <div>  echo "Error: Backup file is empty"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=empty+file"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div># Get file size and verify minimum size</div>
-                    <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE")</div>
-                    <div>if [ "$FILE_SIZE" -lt 1024 ]; then</div>
-                    <div>  echo "Error: Backup file too small: $FILE_SIZE bytes"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+too+small+$FILE_SIZE"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok&size=$FILE_SIZE"</div>
+                    <div># Single ping with file data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "file_exists" == 1</div>
+                    <div>#   - "size" &gt; 0</div>
+                    <div># Panel will automatically detect if file is missing or empty</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?file_exists=$FILE_EXISTS&size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -137,23 +128,16 @@ export default function DetectEmptyBackupFilePage() {
                     <div>subprocess.run(["pg_dump", "mydb"], stdout=open(backup_file.replace('.gz', ''), "w"))</div>
                     <div>subprocess.run(["gzip", backup_file.replace('.gz', '')])</div>
                     <div></div>
-                    <div># Check file exists</div>
-                    <div>if not os.path.exists(backup_file):</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+not+created")</div>
-                    <div>  exit(1)</div>
+                    <div># Get file data</div>
+                    <div>file_exists = os.path.exists(backup_file)</div>
+                    <div>file_size = os.path.getsize(backup_file) if file_exists else 0</div>
                     <div></div>
-                    <div># Check file size</div>
-                    <div>file_size = os.path.getsize(backup_file)</div>
-                    <div>if file_size == 0:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=fail&m=empty+file")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
-                    <div># Verify minimum size (e.g., 1KB)</div>
-                    <div>if file_size &lt; 1024:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+too+small+{'{'}file_size{'}'}")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=ok&size={'{'}file_size{'}'}")</div>
+                    <div># Single ping with file data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "file_exists" == True</div>
+                    <div>#   - "size" &gt; 0</div>
+                    <div># Panel will automatically detect if file is missing or empty</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?file_exists={'{'}file_exists{'}'}&size={'{'}file_size{'}'}")</div>
                   </code>
                 </div>
 
@@ -163,32 +147,25 @@ export default function DetectEmptyBackupFilePage() {
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
                     <div>const fs = require('fs');</div>
-                    <div>const { execSync } = require('child_process');</div>
+                    <div>const {'{'} execSync {'}'} = require(&apos;child_process&apos;);</div>
                     <div>const https = require('https');</div>
                     <div></div>
                     <div>const backupFile = '/backups/db-backup.sql.gz';</div>
-                    <div>execSync(`pg_dump mydb | gzip &gt; ${'{'}backupFile{'}'}`);</div>
+                    <div>execSync(&#96;pg_dump mydb | gzip &gt; ${'{'}backupFile{'}'}&#96;);</div>
                     <div></div>
-                    <div>// Check file exists</div>
-                    <div>if (!fs.existsSync(backupFile)) {'{'}</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+not+created', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
+                    <div>// Get file data</div>
+                    <div>let fileExists = fs.existsSync(backupFile);</div>
+                    <div>let fileSize = 0;</div>
+                    <div>if (fileExists) {'{'}</div>
+                    <div>  fileSize = fs.statSync(backupFile).size;</div>
                     <div>{'}'}</div>
                     <div></div>
-                    <div>// Check file size</div>
-                    <div>const stats = fs.statSync(backupFile);</div>
-                    <div>if (stats.size === 0) {'{'}</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily?s=fail&m=empty+file', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>// Verify minimum size</div>
-                    <div>if (stats.size &lt; 1024) {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=file+too+small+${'{'}stats.size{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>https.request(`https://deadmanping.com/api/ping/backup-daily?s=ok&size=${'{'}stats.size{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>// Single ping with file data in payload</div>
+                    <div>// In DeadManPing panel: set validation rules:</div>
+                    <div>//   - "file_exists" == true</div>
+                    <div>//   - "size" &gt; 0</div>
+                    <div>// Panel will automatically detect if file is missing or empty</div>
+                    <div>https.request(&#96;https://deadmanping.com/api/ping/backup-daily?file_exists=${'{'}fileExists{'}'}&size=${'{'}fileSize{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                   </code>
                 </div>
               </section>
@@ -205,6 +182,25 @@ export default function DetectEmptyBackupFilePage() {
                 <p className="text-muted-foreground mb-4">
                   Include the file size in your ping payload so you can track backup sizes over time and detect gradual decreases that might indicate problems.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

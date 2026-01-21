@@ -53,7 +53,7 @@ export default function VerifyBackupFileSizePage() {
               Verify Backup File Size: Ensure Backups Are Complete
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your backup completes, but is the file size reasonable? Here's how to verify backup file sizes and detect when backups are too small or suspiciously large.
+              Your backup completes, but is the file size reasonable? Learn how to verify backup file sizes and detect when backups are too small or suspiciously large.
             </p>
           </header>
 
@@ -103,21 +103,12 @@ export default function VerifyBackupFileSizePage() {
                     <div># Get file size</div>
                     <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE")</div>
                     <div></div>
-                    <div># Check minimum size</div>
-                    <div>if [ "$FILE_SIZE" -lt "$MIN_SIZE" ]; then</div>
-                    <div>  echo "Error: Backup too small: $FILE_SIZE bytes (min: $MIN_SIZE)"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=too+small+$FILE_SIZE"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div># Check maximum size</div>
-                    <div>if [ "$FILE_SIZE" -gt "$MAX_SIZE" ]; then</div>
-                    <div>  echo "Error: Backup too large: $FILE_SIZE bytes (max: $MAX_SIZE)"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=too+large+$FILE_SIZE"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok&size=$FILE_SIZE"</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "size" &gt;= 1048576 (1MB minimum)</div>
+                    <div>#   - "size" &lt;= 10737418240 (10GB maximum)</div>
+                    <div># Panel will automatically detect if size is outside range</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?size=$FILE_SIZE"</div>
                   </code>
                 </div>
 
@@ -143,18 +134,12 @@ export default function VerifyBackupFileSizePage() {
                     <div>if len(previous_backups) &gt; 1:</div>
                     <div>  previous_size = os.path.getsize(previous_backups[1])</div>
                     <div>  </div>
-                    <div>  # Check if size changed significantly (more than 50%)</div>
-                    <div>  size_diff = abs(current_size - previous_size) / previous_size</div>
-                    <div>  if size_diff &gt; 0.5:</div>
-                    <div>    requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&m=size+changed+{'{'}size_diff*100:.1f{'}'}%")</div>
-                    <div>    exit(1)</div>
-                    <div></div>
-                    <div># Verify minimum size</div>
-                    <div>if current_size &lt; 1024 * 1024:  # 1MB</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&m=too+small+{'{'}current_size{'}'}")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=ok&size={'{'}current_size{'}'}")</div>
+                    <div># Single ping with file size in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "size" &gt;= 1048576 (1MB minimum)</div>
+                    <div>#   - "size" &lt;= 10737418240 (10GB maximum)</div>
+                    <div># Panel will automatically detect if size is outside range</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?size={'{'}current_size{'}'}")</div>
                   </code>
                 </div>
 
@@ -164,32 +149,24 @@ export default function VerifyBackupFileSizePage() {
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
                     <div>const fs = require('fs');</div>
-                    <div>const { execSync } = require('child_process');</div>
+                    <div>const {'{'} execSync {'}'} = require(&apos;child_process&apos;);</div>
                     <div>const https = require('https');</div>
                     <div></div>
                     <div>const backupFile = '/backups/db-backup.sql.gz';</div>
                     <div>const MIN_SIZE = 1024 * 1024;  // 1MB</div>
                     <div>const MAX_SIZE = 10 * 1024 * 1024 * 1024;  // 10GB</div>
                     <div></div>
-                    <div>execSync(`pg_dump mydb | gzip &gt; ${'{'}backupFile{'}'}`);</div>
+                    <div>execSync(&#96;pg_dump mydb | gzip &gt; ${'{'}backupFile{'}'}&#96;);</div>
                     <div></div>
                     <div>// Get file size</div>
                     <div>const stats = fs.statSync(backupFile);</div>
                     <div></div>
-                    <div>// Check size range</div>
-                    <div>if (stats.size &lt; MIN_SIZE) {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=too+small+${'{'}stats.size{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>if (stats.size &gt; MAX_SIZE) {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=too+large+${'{'}stats.size{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>// Format size for logging</div>
-                    <div>const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);</div>
-                    <div>https.request(`https://deadmanping.com/api/ping/backup-daily?s=ok&size=${'{'}stats.size{'}'}&sizeMB=${'{'}sizeMB{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>// Single ping with file size in payload</div>
+                    <div>// In DeadManPing panel: set validation rules:</div>
+                    <div>//   - "size" &gt;= 1048576 (1MB minimum)</div>
+                    <div>//   - "size" &lt;= 10737418240 (10GB maximum)</div>
+                    <div>// Panel will automatically detect if size is outside range</div>
+                    <div>https.request(&#96;https://deadmanping.com/api/ping/backup-daily?size=${'{'}stats.size{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                   </code>
                 </div>
               </section>
@@ -206,6 +183,25 @@ export default function VerifyBackupFileSizePage() {
                 <p className="text-muted-foreground mb-4">
                   Include file sizes in your ping payload so you can track backup sizes over time and detect gradual changes that might indicate problems.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

@@ -317,13 +317,16 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
 
             <AnimatedSection>
               <section>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-4">4. Report Failures</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">4. Payload Validation</h2>
               <p className="text-muted-foreground mb-4">
-                If your job fails, you can report it by adding <code className="bg-muted px-1.5 py-0.5 rounded text-sm">?s=fail</code> to the URL:
+                Instead of checking conditions in your code, send data in the payload and configure validation rules in the DeadManPing panel. For example, to detect empty backup files:
               </p>
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto card-hover">
-                <code className="text-foreground">curl -X POST "https://deadmanping.com/ping/your-monitor-slug?s=fail&m=Database+connection+error"</code>
+                <code className="text-foreground">curl -X POST "https://deadmanping.com/ping/your-monitor-slug?size=$FILE_SIZE"</code>
               </div>
+              <p className="text-muted-foreground mb-4 mt-4">
+                Then in the DeadManPing panel, set a validation rule: <code className="bg-muted px-1.5 py-0.5 rounded text-sm">size &gt; 0</code>. The panel will automatically detect violations and alert you.
+              </p>
               </section>
             </AnimatedSection>
 

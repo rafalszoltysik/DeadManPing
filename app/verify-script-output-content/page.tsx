@@ -53,7 +53,7 @@ export default function VerifyScriptOutputContentPage() {
               Verify Script Output Content: Validate Output Quality
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your script runs successfully, but you need to verify the output contains expected content. Here's how to validate script output programmatically.
+              Your script runs successfully, but you need to verify the output contains expected content. Learn how to validate script output programmatically.
             </p>
           </header>
 
@@ -96,19 +96,19 @@ export default function VerifyScriptOutputContentPage() {
                     <div>#!/bin/bash</div>
                     <div>OUTPUT=$(./generate-report.sh)</div>
                     <div></div>
-                    <div># Verify output contains expected content</div>
-                    <div>if ! echo "$OUTPUT" | grep -q "Report generated successfully"; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/report-job?s=fail&m=missing+content"</div>
-                    <div>  exit 1</div>
+                    <div># Get output validation data</div>
+                    <div>HAS_EXPECTED_CONTENT=0</div>
+                    <div>OUTPUT_LENGTH=${'{'}#OUTPUT{'}'}</div>
+                    <div>if echo "$OUTPUT" | grep -q "Report generated successfully"; then</div>
+                    <div>  HAS_EXPECTED_CONTENT=1</div>
                     <div>fi</div>
                     <div></div>
-                    <div># Verify output is not empty</div>
-                    <div>if [ -z "$OUTPUT" ]; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/report-job?s=fail&m=empty+output"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/report-job?s=ok"</div>
+                    <div># Single ping with output validation data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "has_expected_content" == 1</div>
+                    <div>#   - "output_length" &gt; 0</div>
+                    <div># Panel will automatically detect if output is invalid</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/report-job?has_expected_content=$HAS_EXPECTED_CONTENT&output_length=$OUTPUT_LENGTH"</div>
                   </code>
                 </div>
 
@@ -124,21 +124,22 @@ export default function VerifyScriptOutputContentPage() {
                     <div>result = subprocess.run(['./api-fetch.sh'], capture_output=True, text=True)</div>
                     <div>output = result.stdout</div>
                     <div></div>
-                    <div># Verify output is valid JSON</div>
+                    <div># Parse output and extract data for payload</div>
+                    <div>is_valid_json = True</div>
+                    <div>has_required_fields = False</div>
                     <div>try:</div>
                     <div>  data = json.loads(output)</div>
+                    <div>  required_fields = ['status', 'data', 'timestamp']</div>
+                    <div>  has_required_fields = all(field in data for field in required_fields)</div>
                     <div>except json.JSONDecodeError:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/api-job?s=fail&m=invalid+json")</div>
-                    <div>  exit(1)</div>
+                    <div>  is_valid_json = False</div>
                     <div></div>
-                    <div># Verify required fields exist</div>
-                    <div>required_fields = ['status', 'data', 'timestamp']</div>
-                    <div>for field in required_fields:</div>
-                    <div>  if field not in data:</div>
-                    <div>    requests.post(f"https://deadmanping.com/api/ping/api-job?s=fail&m=missing+{'{'}field{'}'}")</div>
-                    <div>    exit(1)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/api-job?s=ok")</div>
+                    <div># Single ping with output validation data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "is_valid_json" == True</div>
+                    <div>#   - "has_required_fields" == True</div>
+                    <div># Panel will automatically detect if output is invalid</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/api-job?is_valid_json={'{'}is_valid_json{'}'}&has_required_fields={'{'}has_required_fields{'}'}")</div>
                   </code>
                 </div>
               </section>
@@ -152,6 +153,25 @@ export default function VerifyScriptOutputContentPage() {
                 <p className="text-muted-foreground mb-4">
                   After adding output validation to your scripts, use a dead man switch to monitor whether validation completed successfully. If your script detects invalid output and exits with error code, the ping never arrives, and you get an alert.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

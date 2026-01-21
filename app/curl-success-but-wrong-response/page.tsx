@@ -53,7 +53,7 @@ export default function CurlSuccessButWrongResponsePage() {
               Curl Success But Wrong Response: Validate API Responses
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your curl command returns HTTP 200, but the response body contains an error message. Here's how to detect and handle this.
+              Your curl command returns HTTP 200, but the response body contains an error message. Learn how to detect and handle this.
             </p>
           </header>
 
@@ -94,25 +94,22 @@ export default function CurlSuccessButWrongResponsePage() {
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
                     <div>#!/bin/bash</div>
-                    <div>RESPONSE=$(curl -s -w "\n%{http_code}" "https://api.example.com/data")</div>
+                    <div>RESPONSE=$(curl -s -w &quot;\n%{'{'}http_code{'}'}&quot; &quot;https://api.example.com/data&quot;)</div>
                     <div>HTTP_CODE=$(echo "$RESPONSE" | tail -n1)</div>
                     <div>BODY=$(echo "$RESPONSE" | sed '$d')</div>
                     <div></div>
-                    <div># Check HTTP code</div>
-                    <div>if [ "$HTTP_CODE" != "200" ]; then</div>
-                    <div>  echo "HTTP error: $HTTP_CODE"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/api-check?s=fail&m=http+$HTTP_CODE"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div># Check response body for errors</div>
+                    <div># Extract response validation data</div>
+                    <div>HAS_ERROR=0</div>
                     <div>if echo "$BODY" | grep -q '"error"'; then</div>
-                    <div>  ERROR_MSG=$(echo "$BODY" | grep -o '"error":"[^"]*"' | cut -d'"' -f4)</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/api-check?s=fail&m=$ERROR_MSG"</div>
-                    <div>  exit 1</div>
+                    <div>  HAS_ERROR=1</div>
                     <div>fi</div>
                     <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/api-check?s=ok"</div>
+                    <div># Single ping with response data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "status_code" == 200</div>
+                    <div>#   - "has_error" == 0</div>
+                    <div># Panel will automatically detect violations and alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/api-check?status_code=$HTTP_CODE&has_error=$HAS_ERROR"</div>
                   </code>
                 </div>
 
@@ -126,22 +123,20 @@ export default function CurlSuccessButWrongResponsePage() {
                     <div></div>
                     <div>response = requests.get("https://api.example.com/data")</div>
                     <div></div>
-                    <div># Check HTTP status</div>
-                    <div>if response.status_code != 200:</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/api-check?s=fail&m=http+{'{'}response.status_code{'}'}")</div>
-                    <div>  exit(1)</div>
-                    <div></div>
-                    <div># Parse and validate JSON</div>
+                    <div># Extract response data for payload</div>
+                    <div>has_error = False</div>
                     <div>try:</div>
                     <div>  data = response.json()</div>
-                    <div>  if "error" in data:</div>
-                    <div>    requests.post(f"https://deadmanping.com/api/ping/api-check?s=fail&m={'{'}data['error']{'}'}")</div>
-                    <div>    exit(1)</div>
+                    <div>  has_error = "error" in data</div>
                     <div>except json.JSONDecodeError:</div>
-                    <div>  requests.post("https://deadmanping.com/api/ping/api-check?s=fail&m=invalid+json")</div>
-                    <div>  exit(1)</div>
+                    <div>  has_error = True  # Invalid JSON</div>
                     <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/api-check?s=ok")</div>
+                    <div># Single ping with response data in payload</div>
+                    <div># In DeadManPing panel: set validation rules:</div>
+                    <div>#   - "status_code" == 200</div>
+                    <div>#   - "has_error" == False</div>
+                    <div># Panel will automatically detect violations and alert</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/api-check?status_code={'{'}response.status_code{'}'}&has_error={'{'}has_error{'}'}")</div>
                   </code>
                 </div>
 
@@ -156,25 +151,21 @@ export default function CurlSuccessButWrongResponsePage() {
                     <div>  let data = '';</div>
                     <div>  res.on('data', (chunk) =&gt; data += chunk);</div>
                     <div>  res.on('end', () =&gt; {'{'}</div>
-                    <div>    // Check HTTP status</div>
-                    <div>    if (res.statusCode !== 200) {'{'}</div>
-                    <div>      https.request(`https://deadmanping.com/api/ping/api-check?s=fail&m=http+${'{'}res.statusCode{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>      process.exit(1);</div>
-                    <div>    {'}'}</div>
-                    <div></div>
-                    <div>    // Parse and validate JSON</div>
+                    <div>    // Extract response data for payload</div>
+                    <div>    let hasError = false;</div>
                     <div>    try {'{'}</div>
                     <div>      const json = JSON.parse(data);</div>
-                    <div>      if (json.error) {'{'}</div>
-                    <div>        https.request(`https://deadmanping.com/api/ping/api-check?s=fail&m=${'{'}encodeURIComponent(json.error){'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>        process.exit(1);</div>
-                    <div>      {'}'}</div>
+                    <div>      hasError = !!json.error;</div>
                     <div>    {'}'} catch (e) {'{'}</div>
-                    <div>      https.request("https://deadmanping.com/api/ping/api-check?s=fail&m=invalid+json", {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>      process.exit(1);</div>
+                    <div>      // Invalid JSON</div>
                     <div>    {'}'}</div>
                     <div></div>
-                    <div>    https.request("https://deadmanping.com/api/ping/api-check?s=ok", {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>    // Single ping with response data in payload</div>
+                    <div>    // In DeadManPing panel: set validation rules:</div>
+                    <div>    //   - "status_code" == 200</div>
+                    <div>    //   - "has_error" == false</div>
+                    <div>    // Panel will automatically detect violations and alert</div>
+                    <div>    https.request(&#96;https://deadmanping.com/api/ping/api-check?status_code=${'{'}res.statusCode{'}'}&has_error=${'{'}hasError{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                     <div>  {'}'});</div>
                     <div>{'}'});</div>
                   </code>
@@ -188,16 +179,18 @@ export default function CurlSuccessButWrongResponsePage() {
                     <div>#!/bin/bash</div>
                     <div>RESPONSE=$(curl -s -X POST "https://api.example.com/graphql" \</div>
                     <div>  -H "Content-Type: application/json" \</div>
-                    <div>  -d '{"{"}"query": "{ query { data } }"{"}"}')</div>
+                    <div>  -d &apos;{'{'}"query": "{'{'} query {'{'} data {'}'} {'}'}"{'}'}&apos;)</div>
                     <div></div>
-                    <div># GraphQL always returns 200, check errors array</div>
+                    <div># Extract GraphQL response data</div>
+                    <div>HAS_ERRORS=0</div>
                     <div>if echo "$RESPONSE" | grep -q '"errors"'; then</div>
-                    <div>  ERROR_COUNT=$(echo "$RESPONSE" | grep -o '"errors":\[.*\]' | grep -o '{"{"}"' | wc -l)</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/graphql-check?s=fail&m=graphql+errors"</div>
-                    <div>  exit 1</div>
+                    <div>  HAS_ERRORS=1</div>
                     <div>fi</div>
                     <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/graphql-check?s=ok"</div>
+                    <div># Single ping with GraphQL response data in payload</div>
+                    <div># In DeadManPing panel: set validation rule "has_errors" == 0</div>
+                    <div># Panel will automatically detect if GraphQL response has errors</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/graphql-check?has_errors=$HAS_ERRORS"</div>
                   </code>
                 </div>
               </section>
@@ -214,6 +207,25 @@ export default function CurlSuccessButWrongResponsePage() {
                 <p className="text-muted-foreground mb-4">
                   Include error messages in your ping payload so you can track what types of errors occur and identify patterns.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

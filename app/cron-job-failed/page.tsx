@@ -48,7 +48,7 @@ export default function CronJobFailedPage() {
               Cron Job Not Running? How to Detect and Fix
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              You just discovered your cron job hasn't run in days. Here's how to detect failures immediately 
+              You just discovered your cron job hasn't run in days. Learn how to detect failures immediately 
               and prevent this from happening again.
             </p>
           </header>

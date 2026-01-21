@@ -3,10 +3,16 @@ import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getAppUrl } from '@/lib/get-app-url'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, supabaseKey)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -45,6 +51,7 @@ export async function POST(request: NextRequest) {
 
     // Resend email verification
     // Supabase will send email if account exists and is not verified
+    const supabase = getSupabaseClient()
     const baseUrl = getAppUrl()
     const { error: resendError } = await supabase.auth.resend({
       type: 'signup',

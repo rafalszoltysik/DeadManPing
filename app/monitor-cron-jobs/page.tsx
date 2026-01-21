@@ -159,13 +159,11 @@ export default function MonitorCronJobsPage() {
                   <div>import requests</div>
                   <div>import sys</div>
                   <div></div>
-                  <div>try:</div>
-                  <div>  # Your backup logic here</div>
-                  <div>  run_backup()</div>
-                  <div>  requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
-                  <div>except Exception as e:</div>
-                  <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&m={'{'}str(e){'}'}")</div>
-                  <div>  sys.exit(1)</div>
+                  <div># Your backup logic here</div>
+                  <div>run_backup()</div>
+                  <div></div>
+                  <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                  <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
                 </code>
               </div>
 
@@ -177,15 +175,16 @@ export default function MonitorCronJobsPage() {
                   <div>const https = require('https');</div>
                   <div></div>
                   <div>async function runBackup() {'{'}</div>
-                  <div>  try {'{'}</div>
-                  <div>    await performBackup();</div>
-                  <div>    https.request('https://deadmanping.com/api/ping/backup-daily?s=ok', {'{'} method: 'POST' {'}'}).end();</div>
-                  <div>  {'}'} catch (error) {'{'}</div>
-                  <div>    const msg = encodeURIComponent(error.message);</div>
-                  <div>    https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=${'{'}msg{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                  <div>    process.exit(1);</div>
-                  <div>  {'}'}</div>
+                  <div>  await performBackup();</div>
+                  <div>  </div>
+                  <div>  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                  <div>  https.request('https://deadmanping.com/api/ping/backup-daily', {'{'} method: 'POST' {'}'}).end();</div>
                   <div>{'}'}</div>
+                  <div></div>
+                  <div>runBackup().catch((err) =&gt; {'{'}</div>
+                  <div>  // If job fails, ping won't arrive - DeadManPing will detect missing ping</div>
+                  <div>  process.exit(1);</div>
+                  <div>{'}'});</div>
                 </code>
               </div>
 

@@ -3,7 +3,13 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { generateEmailTemplate, generateEmailText } from '@/lib/email-templates'
 import { validateCustomWebhookUrl } from '@/lib/webhooks-validator'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not configured')
+  }
+  return new Resend(apiKey)
+}
 
 interface AlertData {
   monitor_id: string
@@ -185,6 +191,8 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
 }
 
 export async function sendEmailAlert(email: string, monitor: any, alertType: string) {
+  const resend = getResendClient()
+  
   const subject = getEmailSubject(monitor.name, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
 

@@ -21,7 +21,15 @@ function ResetPasswordForm() {
   const [hasValidToken, setHasValidToken] = useState<boolean | null>(null) // null = not checked yet
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
+
+  useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch (err) {
+      setError('Failed to initialize client')
+    }
+  }, [])
 
   useEffect(() => {
     // Check for error params in URL (Supabase redirects with errors)
@@ -43,6 +51,7 @@ function ResetPasswordForm() {
     // 2. Query param code: ?code=... (needs to be exchanged for session)
     // 3. Query param token: ?token=...&type=recovery (older format)
     const checkToken = async () => {
+      if (!supabase) return
       // Check query params first
       const token = searchParams.get('token')
       const type = searchParams.get('type')
@@ -143,6 +152,12 @@ function ResetPasswordForm() {
       return
     }
 
+    if (!supabase) {
+      setError('Client not initialized')
+      setLoading(false)
+      return
+    }
+
     try {
       // Check if we already have a session
       const { data: { session: existingSession } } = await supabase.auth.getSession()
@@ -211,6 +226,11 @@ function ResetPasswordForm() {
       
       // Now update the password
       // Supabase requires an active session to update password
+      if (!supabase) {
+        setError('Client not initialized')
+        setLoading(false)
+        return
+      }
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       })

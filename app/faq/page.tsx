@@ -148,7 +148,7 @@ export default function FAQPage() {
         },
         {
           q: "What's included in the free tier?",
-          a: "The free tier includes 20 monitors, 5-minute minimum intervals, email alerts, and single-user access. Perfect for trying out the service or monitoring personal projects."
+          a: "The free tier includes 20 monitors, 5-minute minimum intervals, email alerts, and single-user access. Ideal for trying out the service or monitoring personal projects."
         },
         {
           q: "What's the difference between Starter, Pro, and Team plans?",
@@ -205,7 +205,7 @@ export default function FAQPage() {
         },
         {
           q: "What if I need to report a failure?",
-          a: "To report failures, you need to set up payload validation rules in your monitor settings. For example, to detect `{\"success\": false}`: 1) Go to your monitor's settings, 2) Enable 'Payload Validation', 3) Add a field named 'success' with type 'boolean', rule '==' and value 'true'. Now when your job sends `{\"success\": false}`, it will be detected as a failure and trigger alerts. You can also use `?s=fail` in the URL, but you'll need to configure a validation rule for the 's' field (e.g., rule '==' value 'ok') to detect when it's not 'ok'."
+          a: "To detect failures, set up payload validation rules in your monitor settings. For example, to detect empty backup files: 1) Go to your monitor's settings, 2) Enable 'Payload Validation', 3) Add a field named 'size' with type 'number', rule '>' and value '0'. Now when your job sends `?size=0`, it will be detected as a failure and trigger alerts. Always send data in the payload (like `?size=...`, `?count=...`, `?status_code=...`) and configure validation rules in the panel instead of checking conditions in your code."
         }
       ]
     },
@@ -312,7 +312,7 @@ export default function FAQPage() {
         },
         {
           q: "Can I use this as a dead man switch?",
-          a: "Absolutely! That's exactly what DeadManPing is designed for. If you don't ping us within the expected time window, we assume something is wrong and alert you. Perfect for personal safety, server monitoring, or any situation where regular check-ins are critical."
+          a: "Absolutely! That's exactly what DeadManPing is designed for. If you don't ping us within the expected time window, we assume something is wrong and alert you. Suitable for personal safety, server monitoring, or any situation where regular check-ins are critical."
         },
         {
           q: "Can I monitor cron jobs?",

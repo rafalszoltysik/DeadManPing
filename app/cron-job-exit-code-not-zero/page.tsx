@@ -53,7 +53,7 @@ export default function CronJobExitCodeNotZeroPage() {
               Cron Job Exit Code Not Zero: Detect Failures
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job exits with a non-zero exit code, indicating failure. Here's how to detect and handle exit codes properly.
+              Your cron job exits with a non-zero exit code, indicating failure. Learn how to detect and handle exit codes properly.
             </p>
           </header>
 
@@ -102,14 +102,10 @@ export default function CronJobExitCodeNotZeroPage() {
                     <div>./backup.sh</div>
                     <div>EXIT_CODE=$?</div>
                     <div></div>
-                    <div># Check exit code</div>
-                    <div>if [ $EXIT_CODE -ne 0 ]; then</div>
-                    <div>  echo "Error: Script exited with code $EXIT_CODE"</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&code=$EXIT_CODE"</div>
-                    <div>  exit $EXIT_CODE</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping with exit code in payload</div>
+                    <div># In DeadManPing panel: set validation rule "exit_code" == 0</div>
+                    <div># Panel will automatically detect if exit code is non-zero and alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_code=$EXIT_CODE"</div>
                   </code>
                 </div>
 
@@ -126,12 +122,10 @@ export default function CronJobExitCodeNotZeroPage() {
                     <div>./step2.sh || FAILED=1</div>
                     <div>./step3.sh || FAILED=1</div>
                     <div></div>
-                    <div>if [ $FAILED -ne 0 ]; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/multi-step?s=fail"</div>
-                    <div>  exit 1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/multi-step?s=ok"</div>
+                    <div># Single ping with step completion data in payload</div>
+                    <div># In DeadManPing panel: set validation rule "failed_steps_count" == 0</div>
+                    <div># Panel will automatically detect if any steps failed</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/multi-step?failed_steps_count=$FAILED"</div>
                   </code>
                 </div>
 
@@ -147,12 +141,10 @@ export default function CronJobExitCodeNotZeroPage() {
                     <div># Run command and check exit code</div>
                     <div>result = subprocess.run(['./backup.sh'], capture_output=True)</div>
                     <div></div>
-                    <div>if result.returncode != 0:</div>
-                    <div>  error_msg = result.stderr.decode('utf-8')[:100]</div>
-                    <div>  requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=fail&code={'{'}result.returncode{'}'}&m={'{'}error_msg{'}'}")</div>
-                    <div>  sys.exit(result.returncode)</div>
-                    <div></div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily?s=ok")</div>
+                    <div># Single ping with exit code in payload</div>
+                    <div># In DeadManPing panel: set validation rule "exit_code" == 0</div>
+                    <div># Panel will automatically detect if exit code is non-zero and alert</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?exit_code={'{'}result.returncode{'}'}")</div>
                   </code>
                 </div>
 
@@ -161,18 +153,21 @@ export default function CronJobExitCodeNotZeroPage() {
                 </h3>
                 <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                   <code className="text-foreground">
-                    <div>const { execSync } = require('child_process');</div>
+                    <div>const {'{'} execSync {'}'} = require(&apos;child_process&apos;);</div>
                     <div>const https = require('https');</div>
                     <div></div>
+                    <div>let exitCode = 0;</div>
                     <div>try {'{'}</div>
                     <div>  // execSync throws on non-zero exit code</div>
                     <div>  execSync('./backup.sh', {'{'} stdio: 'inherit' {'}'});</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily?s=ok', {'{'} method: 'POST' {'}'}).end();</div>
                     <div>{'}'} catch (error) {'{'}</div>
-                    <div>  const exitCode = error.status || 1;</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&code=${'{'}exitCode{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>  process.exit(exitCode);</div>
+                    <div>  exitCode = error.status || 1;</div>
                     <div>{'}'}</div>
+                    <div></div>
+                    <div>// Single ping with exit code in payload</div>
+                    <div>// In DeadManPing panel: set validation rule "exit_code" == 0</div>
+                    <div>// Panel will automatically detect if exit code is non-zero and alert</div>
+                    <div>https.request(&#96;https://deadmanping.com/api/ping/backup-daily?exit_code=${'{'}exitCode{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                   </code>
                 </div>
 
@@ -188,12 +183,10 @@ export default function CronJobExitCodeNotZeroPage() {
                     <div>pg_dump mydb | gzip &gt; backup.sql.gz</div>
                     <div>EXIT_CODE=$?</div>
                     <div></div>
-                    <div>if [ $EXIT_CODE -ne 0 ]; then</div>
-                    <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&code=$EXIT_CODE"</div>
-                    <div>  exit $EXIT_CODE</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping with exit code in payload</div>
+                    <div># In DeadManPing panel: set validation rule "exit_code" == 0</div>
+                    <div># Panel will automatically detect if exit code is non-zero and alert</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_code=$EXIT_CODE"</div>
                   </code>
                 </div>
               </section>
@@ -210,6 +203,25 @@ export default function CronJobExitCodeNotZeroPage() {
                 <p className="text-muted-foreground mb-4">
                   Include exit codes in your ping payload so you can track what types of failures occur and identify patterns.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

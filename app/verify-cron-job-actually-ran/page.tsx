@@ -53,7 +53,7 @@ export default function VerifyCronJobActuallyRanPage() {
               Verify Cron Job Actually Ran: Confirm Execution
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job is scheduled, but how do you know it actually ran? Here's how to verify job execution and detect when jobs don't execute.
+              Your cron job is scheduled, but how do you know it actually ran? Learn how to verify job execution and detect when jobs don't execute.
             </p>
           </header>
 
@@ -99,14 +99,13 @@ export default function VerifyCronJobActuallyRanPage() {
                     <div>set -e</div>
                     <div></div>
                     <div># Ping at start to confirm job began</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=start"</div>
                     <div></div>
                     <div># Your actual work</div>
                     <div>./backup.sh</div>
                     <div>./sync.sh</div>
                     <div></div>
                     <div># Ping at end to confirm job completed</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                   </code>
                 </div>
 
@@ -118,17 +117,16 @@ export default function VerifyCronJobActuallyRanPage() {
                     <div>import requests</div>
                     <div>import datetime</div>
                     <div></div>
-                    <div># Ping at start with timestamp</div>
-                    <div>start_time = datetime.datetime.now().isoformat()</div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=start&t={'{'}start_time{'}'}")</div>
-                    <div></div>
                     <div># Your actual work</div>
+                    <div>start_time = datetime.datetime.now()</div>
                     <div>perform_backup()</div>
-                    <div></div>
-                    <div># Ping at end with duration</div>
                     <div>end_time = datetime.datetime.now()</div>
-                    <div>duration = (end_time - datetime.datetime.fromisoformat(start_time)).total_seconds()</div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?s=ok&duration={'{'}duration{'}'}")</div>
+                    <div>duration = (end_time - start_time).total_seconds()</div>
+                    <div></div>
+                    <div># Single ping with duration in payload</div>
+                    <div># In DeadManPing panel: set validation rule "duration" &lt; 3600 (e.g., less than 1 hour)</div>
+                    <div># Panel will automatically detect if job takes too long</div>
+                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?duration={'{'}duration{'}'}")</div>
                   </code>
                 </div>
 
@@ -139,21 +137,20 @@ export default function VerifyCronJobActuallyRanPage() {
                   <code className="text-foreground">
                     <div>const https = require('https');</div>
                     <div></div>
-                    <div>// Ping at start</div>
-                    <div>const startTime = Date.now();</div>
-                    <div>https.request('https://deadmanping.com/api/ping/backup-daily?s=start', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div></div>
                     <div>// Your actual work</div>
+                    <div>const startTime = Date.now();</div>
                     <div>async function run() {'{'}</div>
                     <div>  await performBackup();</div>
                     <div>  </div>
-                    <div>  // Ping at end with duration</div>
+                    <div>  // Single ping with duration in payload</div>
+                    <div>  // In DeadManPing panel: set validation rule "duration" &lt; 3600 (e.g., less than 1 hour)</div>
+                    <div>  // Panel will automatically detect if job takes too long</div>
                     <div>  const duration = Math.round((Date.now() - startTime) / 1000);</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=ok&duration=${'{'}duration{'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>  https.request(&#96;https://deadmanping.com/api/ping/backup-daily?duration=${'{'}duration{'}'}&#96;, {'{'} method: &apos;POST&apos; {'}'}).end();</div>
                     <div>{'}'}</div>
                     <div></div>
                     <div>run().catch((err) =&gt; {'{'}</div>
-                    <div>  https.request(`https://deadmanping.com/api/ping/backup-daily?s=fail&m=${'{'}encodeURIComponent(err.message){'}'}`, {'{'} method: 'POST' {'}'}).end();</div>
+                    <div>  // If job fails, ping won't arrive - DeadManPing will detect missing ping</div>
                     <div>  process.exit(1);</div>
                     <div>{'}'});</div>
                   </code>
@@ -174,10 +171,7 @@ export default function VerifyCronJobActuallyRanPage() {
                     <div>  NOW=$(date +%s)</div>
                     <div>  HOURS_SINCE=$(( (NOW - LAST_RUN) / 3600 ))</div>
                     <div>  </div>
-                    <div>  if [ $HOURS_SINCE -gt 25 ]; then</div>
-                    <div>    curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=fail&m=not+run+in+$HOURS_SINCE+h"</div>
-                    <div>    exit 1</div>
-                    <div>  fi</div>
+                    <div>  HOURS_SINCE=$(( (NOW - LAST_RUN) / 3600 ))</div>
                     <div>fi</div>
                     <div></div>
                     <div># Update timestamp</div>
@@ -186,7 +180,10 @@ export default function VerifyCronJobActuallyRanPage() {
                     <div># Your actual work</div>
                     <div>./backup.sh</div>
                     <div></div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?s=ok"</div>
+                    <div># Single ping with hours since last run in payload</div>
+                    <div># In DeadManPing panel: set validation rule "hours_since" &lt; 25</div>
+                    <div># Panel will automatically detect if job hasn't run recently</div>
+                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?hours_since=$HOURS_SINCE"</div>
                   </code>
                 </div>
               </section>
@@ -203,6 +200,25 @@ export default function VerifyCronJobActuallyRanPage() {
                 <p className="text-muted-foreground mb-4">
                   This works for all cases: cron daemon stops, system powered off, job disabled, syntax errors, and more. As long as your script sends a ping when it runs, missing pings indicate the job didn't execute.
                 </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Working Examples
+                </h2>
+                <p className="text-muted-foreground mb-4">
+                  See complete, working code examples in our GitHub repository:
+                </p>
+                <Link
+                  href="https://github.com/BlackPearl02/deadmanping-examples"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-2"
+                >
+                  View Examples on GitHub →
+                </Link>
               </section>
             </AnimatedSection>
 

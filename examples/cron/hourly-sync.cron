@@ -1,0 +1,8 @@
+# Hourly Sync Cron Pattern
+# Runs sync script every hour
+# Documentation: https://deadmanping.com/monitor-cron-jobs
+
+0 * * * * /path/to/sync.sh
+
+# With monitoring ping (ping must be inside script, not here)
+# The script should ping DeadManPing after successful sync

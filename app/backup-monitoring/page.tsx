@@ -110,7 +110,8 @@ export default function BackupMonitoringPage() {
                   <div>#!/bin/bash</div>
                   <div>set -e</div>
                   <div>rsync -avz /data/ user@backup-server:/backups/</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-rsync?s=ok"</div>
+                  <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-rsync"</div>
                 </code>
               </div>
 
@@ -121,13 +122,16 @@ export default function BackupMonitoringPage() {
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
                   <div>BACKUP_FILE="/backups/pg-$(date +%Y%m%d).sql"</div>
-                  <div>if pg_dump mydb &gt; "$BACKUP_FILE"; then</div>
-                  <div>  gzip "$BACKUP_FILE"</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-postgres?s=ok"</div>
-                  <div>else</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-postgres?s=fail&m=pg_dump+failed"</div>
-                  <div>  exit 1</div>
-                  <div>fi</div>
+                  <div>pg_dump mydb &gt; "$BACKUP_FILE"</div>
+                  <div>gzip "$BACKUP_FILE"</div>
+                  <div></div>
+                  <div># Get backup file size</div>
+                  <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE.gz" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE.gz" 2&gt;/dev/null || echo 0)</div>
+                  <div></div>
+                  <div># Single ping with file size in payload</div>
+                  <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
+                  <div># Panel will automatically detect if backup file is empty</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-postgres?size=$FILE_SIZE"</div>
                 </code>
               </div>
 
@@ -137,12 +141,13 @@ export default function BackupMonitoringPage() {
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
-                  <div>if mysqldump mydb &gt; /backups/mysql-$(date +%Y%m%d).sql; then</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-mysql?s=ok"</div>
-                  <div>else</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-mysql?s=fail"</div>
-                  <div>  exit 1</div>
-                  <div>fi</div>
+                  <div>mysqldump mydb &gt; /backups/mysql-$(date +%Y%m%d).sql</div>
+                  <div>DUMP_EXIT_CODE=$?</div>
+                  <div></div>
+                  <div># Single ping with dump exit code in payload</div>
+                  <div># In DeadManPing panel: set validation rule "dump_exit_code" == 0</div>
+                  <div># Panel will automatically detect if mysqldump failed</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-mysql?dump_exit_code=$DUMP_EXIT_CODE"</div>
                 </code>
               </div>
 
@@ -153,13 +158,14 @@ export default function BackupMonitoringPage() {
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
                   <div>tar -czf backup.tar.gz /data/</div>
-                  <div>if aws s3 cp backup.tar.gz s3://my-bucket/backups/; then</div>
-                  <div>  rm backup.tar.gz</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=ok"</div>
-                  <div>else</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-s3?s=fail"</div>
-                  <div>  exit 1</div>
-                  <div>fi</div>
+                  <div>aws s3 cp backup.tar.gz s3://my-bucket/backups/</div>
+                  <div>UPLOAD_EXIT_CODE=$?</div>
+                  <div>rm backup.tar.gz</div>
+                  <div></div>
+                  <div># Single ping with upload exit code in payload</div>
+                  <div># In DeadManPing panel: set validation rule "upload_exit_code" == 0</div>
+                  <div># Panel will automatically detect if S3 upload failed</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-s3?upload_exit_code=$UPLOAD_EXIT_CODE"</div>
                 </code>
               </div>
               </section>
