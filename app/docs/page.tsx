@@ -94,68 +94,6 @@ export default function DocsPage() {
     }
   }
 
-  const faqStructuredData = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "Do I need to migrate my cron jobs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. Keep your cron. Keep your scripts. Just add one curl line at the end of your existing script."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does DeadManPing run my jobs?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "No. Your cron runs your jobs. DeadManPing only observes the results. DeadManPing doesn't touch execution."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Why must curl be inside the script, not in the cron line?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Because only inside the script do you have access to variables from execution results (e.g., count, file size, duration). Data must come from execution, not be hardcoded."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What if my job runs less frequently than 5 minutes?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "The free tier has a minimum interval of 5 minutes. Upgrade to Starter or Pro plan for longer intervals."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can I monitor jobs that run on different servers?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes! As long as the server can make HTTP requests, you can ping from anywhere."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What happens if I exceed my monitor limit?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You'll need to upgrade your plan to create more monitors. Existing monitors will continue to work."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Are there limits on payload validation fields?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. Each monitor can have up to 5 payload validation fields. Field names must be 100 characters or less. Only declared fields are processed during validation, any additional fields in the payload are ignored."
-        }
-      }
-    ]
-  }
 
   return (
     <div className="min-h-screen text-foreground relative">
@@ -167,13 +105,25 @@ export default function DocsPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
-      />
       <PageNav />
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="mb-6">
+          <Link 
+            href="/" 
+            className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth group"
+          >
+            <svg 
+              className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-sm font-medium">Back to Home</span>
+          </Link>
+        </div>
         <article>
           <AnimatedSection>
             <header className="mb-8">
@@ -425,65 +375,14 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
 
             <AnimatedSection>
               <section>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-4">FAQ</h2>
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    Do I need to migrate my cron jobs?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    <strong>No.</strong> Keep your cron. Keep your scripts. Just add one curl line at the end of your existing script.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    Does DeadManPing run my jobs?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    <strong>No.</strong> Your cron runs your jobs. DeadManPing only observes the results. DeadManPing doesn't touch execution.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    Why must curl be inside the script, not in the cron line?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Because only inside the script do you have access to variables from execution results (e.g., count, file size, duration). Data must come from execution, not be hardcoded.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    What if my job runs less frequently than 5 minutes?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    The free tier has a minimum interval of 5 minutes. Upgrade to Starter or Pro plan for longer intervals.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    Can I monitor jobs that run on different servers?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Yes! As long as the server can make HTTP requests, you can ping from anywhere.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    What happens if I exceed my monitor limit?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    You'll need to upgrade your plan to create more monitors. Existing monitors will continue to work.
-                  </p>
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-semibold mb-2">
-                    Are there limits on payload validation fields?
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Yes. Each monitor can have up to 5 payload validation fields. Field names must be 100 characters or less. Only declared fields are processed during validation, any additional fields in the payload are ignored.
-                  </p>
-                </div>
-              </div>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">Have More Questions?</h2>
+                <p className="text-muted-foreground mb-4">
+                  Check out our comprehensive{' '}
+                  <Link href="/faq" className="text-primary hover:underline font-medium">
+                    FAQ page
+                  </Link>
+                  {' '}for answers to common questions about DeadManPing, monitoring setup, pricing, and more.
+                </p>
               </section>
             </AnimatedSection>
           </div>
