@@ -23,7 +23,7 @@
     --success-foreground: 255 255 255;
     --warning: 234 179 8;
     --warning-foreground: 23 23 26;
-    --error: 239 68 68;
+    --error: 200 70 70;
     --error-foreground: 255 255 255;
     --ring: 15 148 134;
   }
@@ -48,7 +48,7 @@
     --success-foreground: 255 255 255;
     --warning: 234 179 8;
     --warning-foreground: 23 23 26;
-    --error: 239 68 68;
+    --error: 220 80 80;
     --error-foreground: 255 255 255;
     --ring: 20 184 166;
   }

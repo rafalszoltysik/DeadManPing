@@ -120,7 +120,7 @@ export default async function DashboardLayout({
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col h-full border-r border-border bg-card">
           <Link href="/dashboard" className="flex items-center gap-2 px-6 py-6 border-b border-border flex-shrink-0">
-            <StaticLogo showText={true} variant="with-text" className="text-xl" />
+            <StaticLogo showText={true} variant="with-text" className="text-2xl" />
           </Link>
           <DashboardNav subscriptionTier={workspace?.subscription_tier || profile?.subscription_tier || 'free'} />
           <div className="px-4 py-[9px] border-t border-border flex-shrink-0">
@@ -139,7 +139,7 @@ export default async function DashboardLayout({
         <div className="px-4">
           <div className="flex justify-between items-center h-14">
             <Link href="/dashboard" className="flex items-center gap-1.5 flex-shrink-0 min-w-0">
-              <StaticLogo showText={true} variant="with-text" className="text-base sm:text-lg" />
+              <StaticLogo showText={true} variant="with-text" className="text-lg sm:text-xl" />
             </Link>
             <div className="flex items-center gap-2">
               <LogoutButton variant="compact" />

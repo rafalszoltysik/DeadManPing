@@ -3,7 +3,13 @@ import { Resend } from 'resend'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkRateLimit } from '@/lib/rate-limit'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not configured')
+  }
+  return new Resend(apiKey)
+}
 
 // Support email - use Resend receiving address (e.g., support@yourdomain.resend.app)
 // Configure this in Resend Dashboard -> Receiving
@@ -178,6 +184,7 @@ This message was sent from the DeadManPing${userId ? ' dashboard' : ' public'} c
 
     // Send email to Resend receiving address
     // This email will appear in Resend Inbox (Receiving section)
+    const resend = getResendClient()
     const { data, error } = await resend.emails.send({
       from: fromEmail,
       to: supportEmail,

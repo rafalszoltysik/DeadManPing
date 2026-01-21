@@ -44,7 +44,7 @@ npm run dev
 
 Aby skonfigurować środowiska Production i Development na Vercel z automatycznymi wdrożeniami z Git, zobacz:
 
-📖 **[VERCEL_ENVIRONMENTS_SETUP.md](./VERCEL_ENVIRONMENTS_SETUP.md)** - Kompletny przewodnik konfiguracji środowisk
+**[VERCEL_ENVIRONMENTS_SETUP.md](./VERCEL_ENVIRONMENTS_SETUP.md)** - Kompletny przewodnik konfiguracji środowisk
 
 **Szybki start:**
 1. Połącz projekt z Git w Vercel Dashboard
@@ -52,6 +52,16 @@ Aby skonfigurować środowiska Production i Development na Vercel z automatyczny
 3. Dodaj zmienne środowiskowe dla Production i Preview
 4. Push do `main` → automatyczne wdrożenie do Production
 5. Push do `dev` → automatyczne wdrożenie jako Preview
+
+## Examples
+
+See the [`examples/`](./examples/) directory for working code examples, bash scripts, cron patterns, and edge cases. Each example includes:
+- Complete, runnable code
+- Problem description
+- Solution explanation
+- Link to related SEO documentation page
+
+Examples are also available in our public GitHub repository: [deadmanping-examples](https://github.com/BlackPearl02/deadmanping-examples)
 
 ## Tech Stack
 

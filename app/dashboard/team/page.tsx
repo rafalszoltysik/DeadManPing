@@ -3,18 +3,24 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { TeamMembers } from '@/components/TeamMembers'
 
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseAdmin() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 async function getWorkspaceMembers(workspaceId: string) {
+  const supabaseAdmin = getSupabaseAdmin()
   const { data: members } = await supabaseAdmin
     .from('workspace_members')
     .select(`
@@ -48,6 +54,8 @@ export default async function TeamPage() {
   if (!user) {
     redirect('/auth/login')
   }
+
+  const supabaseAdmin = getSupabaseAdmin()
 
   // Get user's profile and workspace
   const { data: profile } = await supabaseAdmin

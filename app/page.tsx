@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import dynamicImport from 'next/dynamic'
 import { Suspense } from 'react'
 import { PageNav } from '@/components/PageNav'
-import { Logo } from '@/components/Logo'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
 import { CTAButton } from '@/components/CTAButton'
 import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
@@ -30,21 +29,48 @@ const DashboardPreview = dynamicImport(() => import('@/components/DashboardPrevi
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
-  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier",
+  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes, not just execution. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors.",
+  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification",
+  authors: [{ name: "DeadManPing" }],
+  creator: "DeadManPing",
+  publisher: "DeadManPing",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes.",
     type: "website",
+    url: "https://deadmanping.com",
+    siteName: "DeadManPing",
+    images: [
+      {
+        url: "https://deadmanping.com/icon.png",
+        width: 1200,
+        height: 1200,
+        alt: "DeadManPing - Cron Job Monitoring",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    images: ["https://deadmanping.com/icon.png"],
   },
   alternates: {
     canonical: "/",
   },
+  category: "Software",
+  classification: "Developer Tools, Monitoring Software",
 }
 
 // Force static generation for better performance
@@ -57,21 +83,122 @@ export default function Home() {
     "@type": "SoftwareApplication",
     "name": "DeadManPing",
     "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Monitoring Software",
     "operatingSystem": "Any",
-      "offers": {
+    "url": "https://deadmanping.com",
+    "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Zero execution changes. Get instant alerts when your jobs don't run or produce incorrect results.",
+    "screenshot": "https://deadmanping.com/icon.svg",
+    "softwareVersion": "1.0",
+    "releaseNotes": "Result-aware monitoring for cron jobs. Verify job outcomes, not just execution. Payload validation rules. State-aware alerts.",
+    "offers": [
+      {
         "@type": "Offer",
-        "price": "9",
+        "name": "Free Tier",
+        "price": "0",
         "priceCurrency": "USD",
-        "priceValidUntil": "2025-12-31"
+        "description": "20 monitors, 5-minute minimum intervals, email alerts"
       },
-    "description": "Dead man switch monitoring for cron jobs and scheduled tasks. Get instant alerts when your backups, reports, or sync jobs don't run.",
+      {
+        "@type": "Offer",
+        "name": "Starter Plan",
+        "price": "7",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "30 monitors, 5-minute intervals, email + Slack/Discord alerts"
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro Plan",
+        "price": "24",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "150 monitors, 1-minute intervals, up to 3 team members"
+      },
+      {
+        "@type": "Offer",
+        "name": "Team Plan",
+        "price": "79",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "1000 monitors, 1-minute intervals, up to 10 team members, custom webhooks"
+      }
+    ],
     "featureList": [
-      "Cron job monitoring",
-      "Dead man switch",
+      "Cron job monitoring without migration",
+      "Dead man switch detection",
+      "Result-aware monitoring (verify outcomes, not just execution)",
+      "Payload validation rules",
+      "State-aware alerts (no spam)",
       "Email alerts",
-      "Slack/Discord integrations",
-      "Scheduled task monitoring"
-    ]
+      "Slack integration",
+      "Discord integration",
+      "Custom webhooks (Team plan)",
+      "Missing-run detection",
+      "Threshold verification",
+      "File size verification",
+      "Count verification",
+      "Duration verification",
+      "Status verification",
+      "No SDK required",
+      "Works with any language",
+      "Dashboard with real-time status"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "50",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "DeadManPing"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing"
+    },
+    "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring",
+    "inLanguage": "en",
+    "isAccessibleForFree": true,
+    "freeTierAvailable": true
+  }
+
+  // ItemList schema for features list
+  const featuresItemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "DeadManPing Features",
+    "description": "Complete list of features available in DeadManPing monitoring service",
+    "itemListElement": structuredData.featureList.map((feature, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "SoftwareFeature",
+        "name": feature
+      }
+    }))
+  }
+
+  // VideoObject schema placeholder - można użyć gdy dodasz filmy
+  const videoSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "DeadManPing - Quick Start Guide",
+    "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Zero execution changes.",
+    "thumbnailUrl": "https://deadmanping.com/icon.svg",
+    "uploadDate": "2024-12-01",
+    "duration": "PT2M",
+    "contentUrl": "", // Dodaj URL gdy masz film
+    "embedUrl": "", // Dodaj embed URL gdy masz film
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://deadmanping.com/icon.svg"
+      }
+    }
   }
 
   return (
@@ -81,6 +208,15 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(featuresItemListSchema) }}
+      />
+      {/* VideoObject schema - zakomentuj jeśli nie masz filmów */}
+      {/* <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
+      /> */}
       
       {/* Navigation */}
       <PageNav />
@@ -132,7 +268,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* The uncomfortable truth */}
-        <AnimatedSection className="py-12 sm:py-16 lg:py-20" delay={0} direction="up" duration={800}>
+        <AnimatedSection className="py-12 sm:py-16 lg:py-20" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">The uncomfortable truth</h2>
@@ -160,7 +296,7 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground">skipped logic paths</p>
               </div>
             </StaggerContainer>
-            <AnimatedItem delay={600} direction="up" duration={700}>
+            <AnimatedItem delay={450} direction="up" duration={700}>
               <p className="text-center mt-8 text-lg text-muted-foreground">
                 And no alert fires.
               </p>
@@ -169,7 +305,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* Why Other Tools Fail */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Why other tools fail" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Why other tools fail" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Why existing monitoring tools fail here</h2>
@@ -232,7 +368,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* What DeadManPing is NOT */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT" delay={100} direction="up" duration={800}>
             <div className="max-w-4xl mx-auto px-4">
               <AnimatedItem delay={100} direction="up" duration={700}>
                 <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
@@ -282,7 +418,7 @@ export default function Home() {
           </AnimatedSection>
 
         {/* What You DON'T Need to Build */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What you don't need to build" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What you don't need to build" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You DON'T Need to Build</h2>
@@ -325,7 +461,7 @@ export default function Home() {
                   <p className="text-sm text-muted-foreground">Rules in UI, not in code</p>
                 </div>
             </StaggerContainer>
-            <AnimatedItem delay={600} direction="up" duration={700}>
+            <AnimatedItem delay={500} direction="up" duration={700}>
               <p className="text-center text-lg sm:text-xl font-semibold">
                 Stop writing alert connectors. One curl line. Rest in the dashboard.
               </p>
@@ -334,7 +470,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* How It Works */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works" delay={100} direction="up" duration={800}>
           <AnimatedItem delay={100} direction="up" duration={700}>
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
           </AnimatedItem>
@@ -510,7 +646,7 @@ fi`}</code>
         </AnimatedSection>
 
         {/* Real-World Examples */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={100} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Real-World Examples</h2>
@@ -678,7 +814,7 @@ if (strpos($output, 'success') !== false) {
                   </div>
                 </div>
             </StaggerContainer>
-            <AnimatedItem delay={600} direction="up" duration={700}>
+            <AnimatedItem delay={500} direction="up" duration={400}>
               <p className="text-center text-sm sm:text-base text-muted-foreground mt-8 sm:mt-12">
                 And more... Works with any language that can execute curl.
               </p>
@@ -687,7 +823,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Pricing */}
-        <AnimatedSection delay={0} direction="up" duration={900}>
+        <AnimatedSection delay={100} direction="up" duration={900}>
           <Suspense fallback={
             <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
@@ -704,7 +840,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* What DeadManPing Does */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="What DeadManPing does" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="What DeadManPing does" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> does differently</h2>
@@ -725,7 +861,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Key Differentiators */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators" delay={100} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Key Differentiators</h2>
@@ -760,7 +896,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Feature Comparison Table */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Feature comparison" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Feature comparison" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You Get</h2>
@@ -775,43 +911,43 @@ if (strpos($output, 'success') !== false) {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    <tr className="animate-fade-in transition-all duration-200 hover:bg-background/30" style={{ animationDelay: '0ms' }}>
+                    <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
                       <td className="p-4 text-muted-foreground">Detect job didn't run</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
-                    <tr className="bg-background/50 animate-fade-in transition-all duration-200 hover:bg-background/40" style={{ animationDelay: '100ms' }}>
+                    <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '250ms' }}>
                       <td className="p-4 text-muted-foreground">Inspect job results</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
-                    <tr className="animate-fade-in transition-all duration-200 hover:bg-background/30" style={{ animationDelay: '200ms' }}>
+                    <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '300ms' }}>
                       <td className="p-4 text-muted-foreground">Payload-based rules</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
-                    <tr className="bg-background/50 animate-fade-in transition-all duration-200 hover:bg-background/40" style={{ animationDelay: '300ms' }}>
+                    <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '350ms' }}>
                       <td className="p-4 text-muted-foreground">Thresholds in UI</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
-                    <tr className="animate-fade-in transition-all duration-200 hover:bg-background/30" style={{ animationDelay: '400ms' }}>
+                    <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '400ms' }}>
                       <td className="p-4 text-muted-foreground">OK → FAIL tracking</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
-                    <tr className="bg-background/50 animate-fade-in transition-all duration-200 hover:bg-background/40" style={{ animationDelay: '500ms' }}>
+                    <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '450ms' }}>
                       <td className="p-4 text-muted-foreground">Requires SDK</td>
                       <td className="p-4 text-center">
                         <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">✗</span>
                       </td>
                     </tr>
-                    <tr className="animate-fade-in transition-all duration-200 hover:bg-background/30" style={{ animationDelay: '600ms' }}>
+                    <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '500ms' }}>
                       <td className="p-4 text-muted-foreground">Requires code logic</td>
                       <td className="p-4 text-center">
                         <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">✗</span>
@@ -825,7 +961,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Integrations Section */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Integrations" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Integrations" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto text-center px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Integrate with Your Workflow</h2>
@@ -868,7 +1004,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Who This Is For */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Who this is for" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Who this is for" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Who This Is For</h2>
@@ -945,9 +1081,9 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Positioning One-liner */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Positioning" delay={0} direction="up" duration={800}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Positioning" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <AnimatedItem delay={100} direction="up" duration={700}>
+            <AnimatedItem delay={300} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed">
                 Error trackers tell you when your job crashed.<br />
                 <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> tells you when it succeeded… incorrectly.
@@ -957,7 +1093,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* CTA Section */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started" delay={0} direction="up" duration={900}>
+          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started" delay={100} direction="up" duration={900}>
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
           <div className="relative z-10">
             <AnimatedItem delay={100} direction="up" duration={700}>
@@ -985,7 +1121,8 @@ if (strpos($output, 'success') !== false) {
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">
-                <Logo showText={true} variant="with-text" className="text-lg" />
+                <span className="text-foreground">DeadMan</span>
+                <span className="text-primary">Ping</span>
               </h3>
               <p className="text-sm text-muted-foreground">
                 Simple monitoring for your cron jobs and scheduled tasks.

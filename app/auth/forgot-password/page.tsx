@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -11,8 +11,16 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
   const router = useRouter()
-  const supabase = createClient()
+
+  useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch (err) {
+      setError('Failed to initialize client')
+    }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -22,6 +30,12 @@ export default function ForgotPasswordPage() {
 
     if (!email) {
       setError('Email is required')
+      setLoading(false)
+      return
+    }
+
+    if (!supabase) {
+      setError('Client not initialized')
       setLoading(false)
       return
     }

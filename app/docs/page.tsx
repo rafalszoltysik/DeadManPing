@@ -23,6 +23,77 @@ export const metadata: Metadata = {
 }
 
 export default function DocsPage() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Documentation",
+        "item": `${baseUrl}/docs`
+      }
+    ]
+  }
+
+  const howToSchema = {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    "name": "How to Monitor Cron Jobs with DeadManPing",
+    "description": "Step-by-step guide to set up DeadManPing monitoring for your cron jobs without changing your existing setup.",
+    "step": [
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": "Create a Monitor",
+        "text": "After signing up, create your first monitor. Give it a name and set how often your job should run.",
+        "url": `${baseUrl}/docs#create-monitor`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": "Get Your Ping URL",
+        "text": "Each monitor gets a unique URL. Copy it and add it to your cron job or script.",
+        "url": `${baseUrl}/docs#ping-url`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Add to Your Existing Script",
+        "text": "Add one curl line at the end of your existing script. The curl command must be inside your script, not in the cron line, because only in the script do you have access to variables from execution results.",
+        "url": `${baseUrl}/docs#add-script`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Configure Payload Validation",
+        "text": "Send data in the payload and configure validation rules in the DeadManPing panel. For example, to detect empty backup files, send file size and set a validation rule.",
+        "url": `${baseUrl}/docs#payload-validation`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 5,
+        "name": "Set Up Alerts",
+        "text": "Configure email, Slack, or Discord webhooks in your settings. You'll get instant notifications when your job doesn't ping, reports a failure, or recovers.",
+        "url": `${baseUrl}/docs#alerts`
+      }
+    ],
+    "totalTime": "PT2M",
+    "estimatedCost": {
+      "@type": "MonetaryAmount",
+      "currency": "USD",
+      "value": "0"
+    }
+  }
+
   const faqStructuredData = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -90,6 +161,14 @@ export default function DocsPage() {
     <div className="min-h-screen text-foreground relative">
       <script
         type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+      />
+      <script
+        type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
       />
       <PageNav />
@@ -122,14 +201,14 @@ export default function DocsPage() {
 
           <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 space-y-8">
             <AnimatedSection>
-              <section>
+              <section id="create-monitor">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">1. Create a Monitor</h2>
               <p className="text-muted-foreground mb-4">
                 After signing up, create your first monitor. Give it a name and set how often your job should run.
               </p>
             </section>
 
-            <section>
+            <section id="ping-url">
               <h2 className="text-xl sm:text-2xl font-semibold mb-4">2. Get Your Ping URL</h2>
               <p className="text-muted-foreground mb-4">
                 Each monitor gets a unique URL. Copy it and add it to your cron job or script.
@@ -141,7 +220,7 @@ export default function DocsPage() {
             </AnimatedSection>
 
             <AnimatedSection>
-              <section>
+              <section id="add-script">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">3. Add to Your Existing Script</h2>
               <p className="text-muted-foreground mb-4">
                 <strong>Important:</strong> The curl command must be <strong>inside your script</strong>, not in the cron line, because only in the script do you have access to variables from execution results (e.g., count, file size, duration).
@@ -316,19 +395,22 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
             </AnimatedSection>
 
             <AnimatedSection>
-              <section>
-                <h2 className="text-xl sm:text-2xl font-semibold mb-4">4. Report Failures</h2>
+              <section id="payload-validation">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">4. Payload Validation</h2>
               <p className="text-muted-foreground mb-4">
-                If your job fails, you can report it by adding <code className="bg-muted px-1.5 py-0.5 rounded text-sm">?s=fail</code> to the URL:
+                Instead of checking conditions in your code, send data in the payload and configure validation rules in the DeadManPing panel. For example, to detect empty backup files:
               </p>
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm overflow-x-auto card-hover">
-                <code className="text-foreground">curl -X POST "https://deadmanping.com/ping/your-monitor-slug?s=fail&m=Database+connection+error"</code>
+                <code className="text-foreground">curl -X POST "https://deadmanping.com/ping/your-monitor-slug?size=$FILE_SIZE"</code>
               </div>
+              <p className="text-muted-foreground mb-4 mt-4">
+                Then in the DeadManPing panel, set a validation rule: <code className="bg-muted px-1.5 py-0.5 rounded text-sm">size &gt; 0</code>. The panel will automatically detect violations and alert you.
+              </p>
               </section>
             </AnimatedSection>
 
             <AnimatedSection>
-              <section>
+              <section id="alerts">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">5. Set Up Alerts</h2>
               <p className="text-muted-foreground mb-4">
                 Configure email, Slack, or Discord webhooks in your settings. You'll get instant notifications when:

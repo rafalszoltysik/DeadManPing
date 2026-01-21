@@ -7,16 +7,21 @@ import { type Currency } from '@/lib/currency-detection'
 
 export const dynamic = 'force-dynamic'
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
+function getSupabaseClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!supabaseUrl || !serviceRoleKey) {
+    throw new Error('Supabase environment variables are not configured')
+  }
+
+  return createClient(supabaseUrl, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
     },
-  }
-)
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,6 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get user profile
+    const supabase = getSupabaseClient()
     const { data: profile } = await supabase
       .from('profiles')
       .select('stripe_customer_id, email')

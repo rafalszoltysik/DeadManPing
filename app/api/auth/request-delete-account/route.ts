@@ -4,7 +4,13 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+function getResendClient() {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is not configured')
+  }
+  return new Resend(apiKey)
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -48,6 +54,7 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
     const deleteUrl = `${appUrl}/auth/confirm-delete-account?token=${deleteToken}`
 
+    const resend = getResendClient()
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'DeadManPing <onboarding@resend.dev>'
 
     const { error: emailError } = await resend.emails.send({
@@ -63,13 +70,13 @@ export async function POST(request: NextRequest) {
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
           <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 24px; margin-bottom: 20px;">
-            <h1 style="color: #dc2626; margin-top: 0; font-size: 24px;">⚠️ Confirm Account Deletion</h1>
+            <h1 style="color: #dc2626; margin-top: 0; font-size: 24px;">Confirm Account Deletion</h1>
             <p style="margin: 16px 0; font-size: 16px;">
               You requested to delete your DeadManPing account. We're sorry to see you go!
             </p>
             <div style="background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 16px; margin: 20px 0;">
               <p style="margin: 0 0 12px 0; font-size: 14px; font-weight: 600; color: #1e40af;">
-                💡 Before you go, consider staying...
+                Before you go, consider staying...
               </p>
               <ul style="margin: 0; padding-left: 20px; color: #1e40af; font-size: 14px;">
                 <li style="margin-bottom: 8px;">Reliable monitoring with instant alerts</li>

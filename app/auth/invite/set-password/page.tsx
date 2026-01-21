@@ -23,9 +23,21 @@ function SetPasswordForm() {
   const [workspaceName, setWorkspaceName] = useState<string | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
+  const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
 
   useEffect(() => {
+    try {
+      setSupabase(createClient())
+    } catch (err) {
+      setError('Failed to initialize client')
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) {
+      return
+    }
+
     // Check for error params in URL
     const errorParam = searchParams.get('error')
     const errorDescription = searchParams.get('error_description')
@@ -103,7 +115,7 @@ function SetPasswordForm() {
     }
     
     checkToken()
-  }, [searchParams, supabase.auth])
+  }, [searchParams, supabase])
 
   const handlePasswordChange = (newPassword: string) => {
     setPassword(newPassword)
@@ -136,6 +148,12 @@ function SetPasswordForm() {
     const validation = validatePassword(password)
     if (!validation.valid) {
       setError(validation.errors.join('. '))
+      setLoading(false)
+      return
+    }
+
+    if (!supabase) {
+      setError('Client not initialized')
       setLoading(false)
       return
     }
@@ -206,6 +224,11 @@ function SetPasswordForm() {
       }
       
       // Now update the password
+      if (!supabase) {
+        setError('Client not initialized')
+        setLoading(false)
+        return
+      }
       const { error: updateError } = await supabase.auth.updateUser({
         password: password,
       })
@@ -217,6 +240,11 @@ function SetPasswordForm() {
       }
 
       // Get user ID after password is set
+      if (!supabase) {
+        setError('Client not initialized')
+        setLoading(false)
+        return
+      }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
         setError('Failed to get user information')
