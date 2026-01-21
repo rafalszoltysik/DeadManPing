@@ -2,7 +2,6 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { LogoutButton } from '@/components/LogoutButton'
-import { StaticLogo, StaticLogoIcon } from '@/components/StaticLogo'
 import { DashboardNav, DashboardMobileNav } from '@/components/DashboardNav'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { ActivityMonitor } from '@/components/ActivityMonitor'
@@ -119,8 +118,11 @@ export default async function DashboardLayout({
       {/* Sidebar for desktop */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col h-full border-r border-border bg-card">
-          <Link href="/dashboard" className="flex items-center gap-2 px-6 py-6 border-b border-border flex-shrink-0">
-            <StaticLogo showText={true} variant="with-text" className="text-2xl" />
+          <Link href="/dashboard" className="px-6 py-6 border-b border-border flex-shrink-0">
+            <span className="font-bold text-2xl whitespace-nowrap">
+              <span className="text-foreground">DeadMan</span>
+              <span className="text-primary">Ping</span>
+            </span>
           </Link>
           <DashboardNav subscriptionTier={workspace?.subscription_tier || profile?.subscription_tier || 'free'} />
           <div className="px-4 py-[9px] border-t border-border flex-shrink-0">
@@ -138,8 +140,11 @@ export default async function DashboardLayout({
       <nav className="lg:hidden border-b border-border bg-card sticky top-0 z-50">
         <div className="px-4">
           <div className="flex justify-between items-center h-14">
-            <Link href="/dashboard" className="flex items-center gap-1.5 flex-shrink-0 min-w-0">
-              <StaticLogo showText={true} variant="with-text" className="text-lg sm:text-xl" />
+            <Link href="/dashboard" className="flex items-center flex-shrink-0 min-w-0">
+              <span className="font-bold text-lg sm:text-xl whitespace-nowrap">
+                <span className="text-foreground">DeadMan</span>
+                <span className="text-primary">Ping</span>
+              </span>
             </Link>
             <div className="flex items-center gap-2">
               <LogoutButton variant="compact" />

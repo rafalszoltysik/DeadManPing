@@ -34,6 +34,9 @@ cron monitoring, scheduled tasks, job monitoring, backup monitoring, uptime moni
 **Will be placed in categories:**  
 Developer Tools, System Administration, Monitoring
 
+**Alternative to:**  
+Healthchecks.io, Cronitor, Dead Man's Snitch, UptimeRobot, Pingdom, StatusCake
+
 ## Features
 
 - Dead man switch monitoring
