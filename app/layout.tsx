@@ -23,9 +23,12 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/icon.svg',
-    shortcut: '/icon.svg',
-    apple: '/icon.svg',
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/icon.png', type: 'image/png' },
+    ],
+    shortcut: '/icon.png',
+    apple: '/icon.png',
   },
   openGraph: {
     title: "DeadManPing - Never Miss a Cron Job Again | Result-Aware Monitoring",
@@ -35,9 +38,9 @@ export const metadata: Metadata = {
     siteName: "DeadManPing",
     images: [
       {
-        url: "https://deadmanping.com/icon.svg",
+        url: "https://deadmanping.com/icon.png",
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: "DeadManPing - Cron Job Monitoring",
       },
     ],
@@ -47,7 +50,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DeadManPing - Never Miss a Cron Job Again",
     description: "Dead man switch monitoring for cron jobs. Monitor job outcomes, not just execution. One curl line. Zero execution changes.",
-    images: ["https://deadmanping.com/icon.svg"],
+    images: ["https://deadmanping.com/icon.png"],
   },
   alternates: {
     canonical: "/",

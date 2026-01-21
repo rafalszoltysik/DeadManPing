@@ -54,9 +54,9 @@ export const metadata: Metadata = {
     siteName: "DeadManPing",
     images: [
       {
-        url: "https://deadmanping.com/icon.svg",
+        url: "https://deadmanping.com/icon.png",
         width: 1200,
-        height: 630,
+        height: 1200,
         alt: "DeadManPing - Cron Job Monitoring",
       },
     ],
@@ -65,7 +65,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
-    images: ["https://deadmanping.com/icon.svg"],
+    images: ["https://deadmanping.com/icon.png"],
   },
   alternates: {
     canonical: "/",
