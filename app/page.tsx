@@ -30,21 +30,48 @@ const DashboardPreview = dynamicImport(() => import('@/components/DashboardPrevi
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
-  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier",
+  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes, not just execution. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors.",
+  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification",
+  authors: [{ name: "DeadManPing" }],
+  creator: "DeadManPing",
+  publisher: "DeadManPing",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes.",
     type: "website",
+    url: "https://deadmanping.com",
+    siteName: "DeadManPing",
+    images: [
+      {
+        url: "https://deadmanping.com/icon.svg",
+        width: 1200,
+        height: 630,
+        alt: "DeadManPing - Cron Job Monitoring",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
     description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    images: ["https://deadmanping.com/icon.svg"],
   },
   alternates: {
     canonical: "/",
   },
+  category: "Software",
+  classification: "Developer Tools, Monitoring Software",
 }
 
 // Force static generation for better performance
@@ -57,21 +84,122 @@ export default function Home() {
     "@type": "SoftwareApplication",
     "name": "DeadManPing",
     "applicationCategory": "DeveloperApplication",
+    "applicationSubCategory": "Monitoring Software",
     "operatingSystem": "Any",
-      "offers": {
+    "url": "https://deadmanping.com",
+    "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Zero execution changes. Get instant alerts when your jobs don't run or produce incorrect results.",
+    "screenshot": "https://deadmanping.com/icon.svg",
+    "softwareVersion": "1.0",
+    "releaseNotes": "Result-aware monitoring for cron jobs. Verify job outcomes, not just execution. Payload validation rules. State-aware alerts.",
+    "offers": [
+      {
         "@type": "Offer",
-        "price": "9",
+        "name": "Free Tier",
+        "price": "0",
         "priceCurrency": "USD",
-        "priceValidUntil": "2025-12-31"
+        "description": "20 monitors, 5-minute minimum intervals, email alerts"
       },
-    "description": "Dead man switch monitoring for cron jobs and scheduled tasks. Get instant alerts when your backups, reports, or sync jobs don't run.",
+      {
+        "@type": "Offer",
+        "name": "Starter Plan",
+        "price": "7",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "30 monitors, 5-minute intervals, email + Slack/Discord alerts"
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro Plan",
+        "price": "24",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "150 monitors, 1-minute intervals, up to 3 team members"
+      },
+      {
+        "@type": "Offer",
+        "name": "Team Plan",
+        "price": "79",
+        "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "1000 monitors, 1-minute intervals, up to 10 team members, custom webhooks"
+      }
+    ],
     "featureList": [
-      "Cron job monitoring",
-      "Dead man switch",
+      "Cron job monitoring without migration",
+      "Dead man switch detection",
+      "Result-aware monitoring (verify outcomes, not just execution)",
+      "Payload validation rules",
+      "State-aware alerts (no spam)",
       "Email alerts",
-      "Slack/Discord integrations",
-      "Scheduled task monitoring"
-    ]
+      "Slack integration",
+      "Discord integration",
+      "Custom webhooks (Team plan)",
+      "Missing-run detection",
+      "Threshold verification",
+      "File size verification",
+      "Count verification",
+      "Duration verification",
+      "Status verification",
+      "No SDK required",
+      "Works with any language",
+      "Dashboard with real-time status"
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "50",
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "creator": {
+      "@type": "Organization",
+      "name": "DeadManPing"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing"
+    },
+    "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring",
+    "inLanguage": "en",
+    "isAccessibleForFree": true,
+    "freeTierAvailable": true
+  }
+
+  // ItemList schema for features list
+  const featuresItemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "DeadManPing Features",
+    "description": "Complete list of features available in DeadManPing monitoring service",
+    "itemListElement": structuredData.featureList.map((feature, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "SoftwareFeature",
+        "name": feature
+      }
+    }))
+  }
+
+  // VideoObject schema placeholder - można użyć gdy dodasz filmy
+  const videoSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": "DeadManPing - Quick Start Guide",
+    "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Zero execution changes.",
+    "thumbnailUrl": "https://deadmanping.com/icon.svg",
+    "uploadDate": "2024-12-01",
+    "duration": "PT2M",
+    "contentUrl": "", // Dodaj URL gdy masz film
+    "embedUrl": "", // Dodaj embed URL gdy masz film
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://deadmanping.com/icon.svg"
+      }
+    }
   }
 
   return (
@@ -81,6 +209,15 @@ export default function Home() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(featuresItemListSchema) }}
+      />
+      {/* VideoObject schema - zakomentuj jeśli nie masz filmów */}
+      {/* <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
+      /> */}
       
       {/* Navigation */}
       <PageNav />

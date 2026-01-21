@@ -23,23 +23,63 @@ export const metadata: Metadata = {
 }
 
 export default function SilentCronFailuresPage() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Silent Cron Failures: How to Detect Jobs That Fail Without Logging",
     "description": "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
+    "url": `${baseUrl}/silent-cron-failures`,
+    "datePublished": "2024-12-01",
+    "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": baseUrl
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DeadManPing"
-    }
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/silent-cron-failures`
+    },
+    "articleSection": "Cron Monitoring Guides",
+    "keywords": "silent cron failures, detect silent cron failure, cron job silent failure detection, cron fails silently, detect cron job not running, silent cron job failure",
+    "inLanguage": "en-US"
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Silent Cron Failures",
+        "item": `${baseUrl}/silent-cron-failures`
+      }
+    ]
   }
 
   return (
     <div className="min-h-screen text-foreground relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}

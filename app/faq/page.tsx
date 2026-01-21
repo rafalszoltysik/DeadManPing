@@ -352,8 +352,33 @@ export default function FAQPage() {
 
   let itemIndex = 0
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "FAQ",
+        "item": `${baseUrl}/faq`
+      }
+    ]
+  }
+
   return (
     <div className="min-h-screen text-foreground relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}

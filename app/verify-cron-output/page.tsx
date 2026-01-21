@@ -23,23 +23,63 @@ export const metadata: Metadata = {
 }
 
 export default function VerifyCronOutputPage() {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Verify Cron Output: How to Validate Script Output Content",
     "description": "Complete guide on verifying that cron job scripts produce expected output and detecting when output is missing or incorrect.",
+    "url": `${baseUrl}/verify-cron-output`,
+    "datePublished": "2024-12-01",
+    "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": baseUrl
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DeadManPing"
-    }
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${baseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${baseUrl}/verify-cron-output`
+    },
+    "articleSection": "Cron Monitoring Guides",
+    "keywords": "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
+    "inLanguage": "en-US"
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": baseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Verify Cron Output",
+        "item": `${baseUrl}/verify-cron-output`
+      }
+    ]
   }
 
   return (
     <div className="min-h-screen text-foreground relative">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
