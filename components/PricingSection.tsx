@@ -28,7 +28,7 @@ export function PricingSection() {
     // W przeciwnym razie API wykryje kraj automatycznie
     const savedCurrency = localStorage.getItem('preferred_currency') as Currency | null
     
-    if (savedCurrency) {
+    if (savedCurrency && ['usd', 'eur'].includes(savedCurrency)) {
       fetchPrices(savedCurrency, true)
     } else {
       // Nie przekazuj currency - pozwól API wykryć z kraju (geo headers)
@@ -146,18 +146,6 @@ export function PricingSection() {
                   }`}
                 >
                   EUR (€)
-                </button>
-              )}
-              {availableCurrencies.includes('pln') && (
-                <button
-                  onClick={() => handleCurrencyChange('pln')}
-                  className={`px-3 py-1.5 rounded-md text-sm font-medium transition-smooth ${
-                    currency === 'pln'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  PLN (zł)
                 </button>
               )}
             </div>

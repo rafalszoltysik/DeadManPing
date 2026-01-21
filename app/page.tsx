@@ -29,8 +29,8 @@ const DashboardPreview = dynamicImport(() => import('@/components/DashboardPrevi
 
 export const metadata: Metadata = {
   title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes, not just execution. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors.",
-  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification",
+  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes, not just execution. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors. Multi-currency pricing in USD and EUR.",
+  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
   publisher: "DeadManPing",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes.",
+    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes. Multi-currency pricing in USD and EUR.",
     type: "website",
     url: "https://deadmanping.com",
     siteName: "DeadManPing",
@@ -108,6 +108,14 @@ export default function Home() {
       },
       {
         "@type": "Offer",
+        "name": "Starter Plan",
+        "price": "7",
+        "priceCurrency": "EUR",
+        "priceValidUntil": "2025-12-31",
+        "description": "30 monitors, 5-minute intervals, email + Slack/Discord alerts"
+      },
+      {
+        "@type": "Offer",
         "name": "Pro Plan",
         "price": "24",
         "priceCurrency": "USD",
@@ -116,9 +124,25 @@ export default function Home() {
       },
       {
         "@type": "Offer",
+        "name": "Pro Plan",
+        "price": "24",
+        "priceCurrency": "EUR",
+        "priceValidUntil": "2025-12-31",
+        "description": "150 monitors, 1-minute intervals, up to 3 team members"
+      },
+      {
+        "@type": "Offer",
         "name": "Team Plan",
         "price": "79",
         "priceCurrency": "USD",
+        "priceValidUntil": "2025-12-31",
+        "description": "1000 monitors, 1-minute intervals, up to 10 team members, custom webhooks"
+      },
+      {
+        "@type": "Offer",
+        "name": "Team Plan",
+        "price": "79",
+        "priceCurrency": "EUR",
         "priceValidUntil": "2025-12-31",
         "description": "1000 monitors, 1-minute intervals, up to 10 team members, custom webhooks"
       }
@@ -158,7 +182,7 @@ export default function Home() {
       "@type": "Organization",
       "name": "DeadManPing"
     },
-    "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring",
+    "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring, multi-currency pricing, USD pricing, EUR pricing",
     "inLanguage": "en",
     "isAccessibleForFree": true,
     "freeTierAvailable": true

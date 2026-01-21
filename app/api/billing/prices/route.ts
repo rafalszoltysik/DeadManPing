@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     const currencyParam = searchParams.get('currency')
     
     let currency: Currency
-    if (currencyParam && ['usd', 'eur', 'pln'].includes(currencyParam)) {
+    if (currencyParam && ['usd', 'eur'].includes(currencyParam)) {
       currency = currencyParam as Currency
     } else {
       // Wykryj walutę na podstawie kraju użytkownika
@@ -42,9 +42,10 @@ export async function GET(request: NextRequest) {
 
     // Sprawdź które waluty są dostępne
     const availableCurrencies: Currency[] = []
-    for (const curr of ['usd', 'eur', 'pln'] as Currency[]) {
+    for (const curr of ['usd', 'eur'] as Currency[]) {
       const allPlansHavePrices = (['starter', 'pro', 'team'] as PlanKey[]).every(planKey => {
         const priceInfo = prices.get(planKey)?.get(curr)
+        // USD ma fallback z env, EUR musi mieć ceny w Stripe
         if (curr === 'usd') {
           return true // USD zawsze dostępne (fallback)
         }

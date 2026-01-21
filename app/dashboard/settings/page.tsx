@@ -77,7 +77,7 @@ export default async function SettingsPage() {
     profile.subscription_tier = workspace.subscription_tier
   }
   
-  const currency = (workspace?.currency || 'usd') as 'usd' | 'eur' | 'pln'
+  const currency = (workspace?.currency || 'usd') as 'usd' | 'eur'
 
   // Check password and Google connection status
   // Use admin client to get full user info with identities

@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     // Pobierz walutę z query param lub body
     const { currency: currencyFromBody } = body
-    const currency = (currencyFromBody && ['usd', 'eur', 'pln'].includes(currencyFromBody))
+    const currency = (currencyFromBody && ['usd', 'eur'].includes(currencyFromBody))
       ? currencyFromBody as Currency
       : 'usd' as Currency
 
