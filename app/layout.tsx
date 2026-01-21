@@ -4,7 +4,12 @@ import { CookieBanner } from '@/components/CookieBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import AnalyticsWrapperClient from '@/components/AnalyticsWrapperClient'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+// Ensure baseUrl is without www for consistency
+const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
+  metadataBase: new URL(canonicalBaseUrl),
   title: "DeadManPing - Monitor Your Cron Jobs | Result-Aware Monitoring",
   description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Zero execution changes. Verify backups, reports, and sync jobs produce correct results. Free tier available.",
   keywords: "cron monitoring, dead man switch, job monitoring, scheduled tasks, cron jobs, backup monitoring, result-aware monitoring, payload validation, job outcome verification, cron job alerts, devops monitoring, scheduled task monitoring, silent failure detection",
@@ -34,11 +39,11 @@ export const metadata: Metadata = {
     title: "DeadManPing - Never Miss a Cron Job Again | Result-Aware Monitoring",
     description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Zero execution changes. Verify backups, reports, and sync jobs produce correct results.",
     type: "website",
-    url: "https://deadmanping.com",
+    url: canonicalBaseUrl,
     siteName: "DeadManPing",
     images: [
       {
-        url: "https://deadmanping.com/icon.png",
+        url: `${canonicalBaseUrl}/icon.png`,
         width: 1200,
         height: 1200,
         alt: "DeadManPing - Cron Job Monitoring",
@@ -50,7 +55,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "DeadManPing - Never Miss a Cron Job Again",
     description: "Dead man switch monitoring for cron jobs. Monitor job outcomes, not just execution. One curl line. Zero execution changes.",
-    images: ["https://deadmanping.com/icon.png"],
+    images: [`${canonicalBaseUrl}/icon.png`],
   },
   alternates: {
     canonical: "/",
@@ -65,6 +70,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  // Ensure baseUrl is without www for consistency
+  const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
   const organizationSchema = {
     "@context": "https://schema.org",
