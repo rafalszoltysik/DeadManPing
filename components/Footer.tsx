@@ -1,14 +1,16 @@
 import Link from 'next/link'
-import { StaticLogo } from './StaticLogo'
 
 export function Footer() {
   return (
     <footer className="border-t border-border bg-card/50 mt-12 sm:mt-16 lg:mt-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-6 sm:gap-8">
           <div>
             <h3 className="text-lg font-semibold mb-4">
-              <StaticLogo showText={true} variant="with-text" className="text-xl sm:text-2xl" />
+              <span className="font-bold text-xl sm:text-2xl">
+                <span className="text-foreground">DeadMan</span>
+                <span className="text-primary">Ping</span>
+              </span>
             </h3>
             <p className="text-sm text-muted-foreground">
               Simple monitoring for your cron jobs and scheduled tasks.
@@ -37,11 +39,6 @@ export function Footer() {
                   Backup Monitoring
                 </Link>
               </li>
-              <li>
-                <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-smooth">
-                  FAQ
-                </Link>
-              </li>
             </ul>
           </div>
           <div>
@@ -55,6 +52,21 @@ export function Footer() {
               <li>
                 <Link href="/auth/signup" className="text-muted-foreground hover:text-foreground transition-smooth">
                   Sign Up
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-sm font-semibold mb-4">Contact</h4>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link href="/contact" className="text-muted-foreground hover:text-foreground transition-smooth">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-muted-foreground hover:text-foreground transition-smooth">
+                  FAQ
                 </Link>
               </li>
             </ul>
