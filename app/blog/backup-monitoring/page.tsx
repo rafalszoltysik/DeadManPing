@@ -36,7 +36,7 @@ export default function BackupMonitoringPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative">
+    <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -216,9 +216,8 @@ export default function BackupMonitoringPage() {
               </p>
               <ul className="list-disc list-inside space-y-2 text-muted-foreground">
                 <li><strong>Email</strong> - Immediate notifications to your inbox</li>
-                <li><strong>Slack</strong> - Team notifications in your Slack workspace</li>
-                <li><strong>Discord</strong> - Webhook notifications to Discord channels</li>
-                <li><strong>Webhooks</strong> - Custom integrations with PagerDuty, OpsGenie, etc.</li>
+                <li><strong>Team chat platforms</strong> - Notifications to your team workspace</li>
+                <li><strong>Webhooks</strong> - Custom integrations with your existing tools</li>
               </ul>
               </section>
             </AnimatedSection>

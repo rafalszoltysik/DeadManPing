@@ -4,7 +4,7 @@ Cron monitoring that observes job results without touching execution.
 
 **Keep your cron. Keep your scripts. We only verify the result.**
 
-DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.
+DeadManPing monitors your cron jobs without touching how they run. One curl line. Your job logic stays the same.
 
 ## Setup
 

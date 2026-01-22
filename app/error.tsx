@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 import { captureFrontendError } from '@/lib/sentry/client'
 
 export default function Error({
@@ -22,17 +23,25 @@ export default function Error({
   }, [error])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div className="min-h-screen flex items-center justify-center bg-transparent">
       <div className="max-w-md w-full space-y-8 p-8 bg-card border border-border rounded-lg shadow">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">Something went wrong!</h2>
           <p className="mt-2 text-muted-foreground">{error.message || 'An unexpected error occurred'}</p>
-          <button
-            onClick={reset}
-            className="mt-4 bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-smooth"
-          >
-            Try again
-          </button>
+          <div className="mt-4 flex gap-3 justify-center">
+            <button
+              onClick={reset}
+              className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-2 rounded-md text-sm font-medium transition-smooth"
+            >
+              Try again
+            </button>
+            <Link
+              href="/"
+              className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2 rounded-md text-sm font-medium transition-smooth"
+            >
+              Go Back
+            </Link>
+          </div>
         </div>
       </div>
     </div>

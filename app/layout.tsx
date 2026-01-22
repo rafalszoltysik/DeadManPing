@@ -11,7 +11,7 @@ const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 export const metadata: Metadata = {
   metadataBase: new URL(canonicalBaseUrl),
   title: "DeadManPing - Monitor Your Cron Jobs | Result-Aware Monitoring",
-  description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Zero execution changes. Verify backups, reports, and sync jobs produce correct results. Free tier available. Multi-currency pricing in USD and EUR.",
+  description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Your job logic stays the same. Verify backups, reports, and sync jobs produce correct results. Free tier available. Multi-currency pricing in USD and EUR.",
   keywords: "cron monitoring, dead man switch, job monitoring, scheduled tasks, cron jobs, backup monitoring, result-aware monitoring, payload validation, job outcome verification, cron job alerts, devops monitoring, scheduled task monitoring, silent failure detection, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
@@ -37,7 +37,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "DeadManPing - Never Miss a Cron Job Again | Result-Aware Monitoring",
-    description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Zero execution changes. Verify backups, reports, and sync jobs produce correct results. Multi-currency pricing in USD and EUR.",
+    description: "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution. One curl line. Your job logic stays the same. Verify backups, reports, and sync jobs produce correct results. Multi-currency pricing in USD and EUR.",
     type: "website",
     url: canonicalBaseUrl,
     siteName: "DeadManPing",
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DeadManPing - Never Miss a Cron Job Again",
-    description: "Dead man switch monitoring for cron jobs. Monitor job outcomes, not just execution. One curl line. Zero execution changes.",
+    description: "Dead man switch monitoring for cron jobs. Monitor job outcomes, not just execution. One curl line. Your job logic stays the same.",
     images: [`${canonicalBaseUrl}/icon.png`],
   },
   alternates: {

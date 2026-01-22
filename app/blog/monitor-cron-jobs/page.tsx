@@ -40,7 +40,7 @@ export default function MonitorCronJobsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative">
+    <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -92,7 +92,7 @@ export default function MonitorCronJobsPage() {
                 <li>Cron daemon stops or gets disabled</li>
               </ul>
               <p className="text-muted-foreground">
-                Traditional monitoring tools (Nagios, Zabbix) require complex setup and don't understand cron semantics. 
+                Traditional monitoring solutions require complex setup and don't understand cron semantics. 
                 You need a dead man switch: if your job doesn't ping within the expected interval, you get an alert.
               </p>
               </section>

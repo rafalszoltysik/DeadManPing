@@ -29,8 +29,8 @@ const DashboardPreview = dynamicImport(() => import('@/components/DashboardPrevi
 })
 
 export const metadata: Metadata = {
-  title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-  description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes, not just execution. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors. Multi-currency pricing in USD and EUR.",
+  title: "Never Miss a Cron Job Again | DeadManPing",
+  description: "Never miss a cron job again. DeadManPing monitors your cron jobs without changing your setup. Monitor outcomes, not just execution. One curl line. Your job logic stays the same. Result-aware monitoring that verifies job outcomes. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors. Multi-currency pricing in USD and EUR.",
   keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
@@ -47,8 +47,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes. Result-aware monitoring that verifies job outcomes. Multi-currency pricing in USD and EUR.",
+    title: "Never Miss a Cron Job Again | DeadManPing",
+    description: "Never miss a cron job again. Monitor outcomes, not just execution. DeadManPing monitors your cron jobs without changing your setup. One curl line. Your job logic stays the same. Result-aware monitoring that verifies job outcomes. Multi-currency pricing in USD and EUR.",
     type: "website",
     url: "https://deadmanping.com",
     siteName: "DeadManPing",
@@ -63,8 +63,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Monitoring Without Changing Your Setup | DeadManPing",
-    description: "Keep your cron. Keep your scripts. DeadManPing monitors your cron jobs without touching how they run. One curl line. Zero execution changes.",
+    title: "Never Miss a Cron Job Again | DeadManPing",
+    description: "Never miss a cron job again. Monitor outcomes, not just execution. One curl line. Your job logic stays the same.",
     images: ["https://deadmanping.com/icon.png"],
   },
   alternates: {
@@ -87,7 +87,7 @@ const STRUCTURED_DATA = {
     "applicationSubCategory": "Monitoring Software",
     "operatingSystem": "Any",
     "url": "https://deadmanping.com",
-    "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Zero execution changes. Get instant alerts when your jobs don't run or produce incorrect results.",
+    "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Your job logic stays the same. Get instant alerts when your jobs don't run or produce incorrect results.",
     "screenshot": "https://deadmanping.com/icon.svg",
     "softwareVersion": "1.0",
     "releaseNotes": "Result-aware monitoring for cron jobs. Verify job outcomes, not just execution. Payload validation rules. State-aware alerts.",
@@ -211,7 +211,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     "name": "DeadManPing - Quick Start Guide",
-    "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Zero execution changes.",
+    "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Your job logic stays the same.",
     "thumbnailUrl": "https://deadmanping.com/icon.svg",
     "uploadDate": "2024-12-01",
     "duration": "PT2M",
@@ -255,12 +255,12 @@ export default function Home() {
           <AnimatedSection className="max-w-4xl mx-auto" delay={0} direction="fade" duration={1000}>
             <AnimatedItem delay={100} direction="up" duration={800}>
               <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight animate-gradient">
-                Keep your cron.<br className="hidden sm:block" />We verify results.
+                Never Miss a Cron Job Again
               </h1>
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={800}>
               <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-                One curl line. Zero execution changes. Stop writing alert connectors.
+                Monitor outcomes, not just execution.<br className="hidden sm:block" />One curl line. Your job logic stays the same.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={800}>
@@ -388,7 +388,7 @@ export default function Home() {
                   <li>• Complex setup and maintenance</li>
                 </ul>
                 <p className="text-sm font-medium">
-                  DeadManPing works with your existing cron. No migration needed.
+                  DeadManPing works with your existing cron. No migration needed. Just add one curl line.
                 </p>
                 </div>
             </StaggerContainer>
