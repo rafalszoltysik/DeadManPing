@@ -374,7 +374,7 @@ export default function FAQPage() {
   }
 
   return (
-    <div className="min-h-screen text-foreground relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}

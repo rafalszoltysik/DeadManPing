@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
+import { CTAButton } from '@/components/CTAButton'
+import { Footer } from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: "DeadManPing Documentation | Quick Start Guide | API Reference",
@@ -96,7 +98,7 @@ export default function DocsPage() {
 
 
   return (
-    <div className="min-h-screen text-foreground relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
@@ -412,9 +414,22 @@ curl ... -d "{\\"files_deleted\\": $FILES_DELETED}"
                 </p>
               </section>
             </AnimatedSection>
+
+            <AnimatedSection>
+              <section className="bg-card border-2 border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 mt-8">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">Start Monitoring Your Backups</h2>
+                <p className="text-muted-foreground mb-6">
+                  DeadManPing provides automated backup monitoring with dead man switch technology. Set up monitoring in 2 minutes, works with any backup method, and sends alerts via email, Slack, or Discord.
+                </p>
+                <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium transition-smooth hover-lift">
+                  Start Free Trial
+                </CTAButton>
+              </section>
+            </AnimatedSection>
           </div>
         </article>
       </main>
+      <Footer />
     </div>
   )
 }

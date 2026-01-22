@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
+import { Footer } from '@/components/Footer'
 
 export const metadata: Metadata = {
   title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
@@ -35,7 +36,7 @@ export default function BackupMonitoringPage() {
   }
 
   return (
-    <div className="min-h-screen text-foreground relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
@@ -246,6 +247,7 @@ export default function BackupMonitoringPage() {
           </div>
         </article>
       </main>
+      <Footer />
     </div>
   )
 }

@@ -227,7 +227,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen text-foreground relative">
+    <div className="min-h-screen bg-background text-foreground relative">
       <ErrorHandlerWrapper />
       <script
         type="application/ld+json"
