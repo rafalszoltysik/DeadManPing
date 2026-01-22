@@ -75,3 +75,22 @@ export async function checkRateLimit(
   return { allowed: true, remaining: windowMs }
 }
 
+/**
+ * Clear a rate limit key (useful when an action completes successfully)
+ * 
+ * @param key - The rate limit key to clear
+ */
+export async function clearRateLimit(key: string): Promise<void> {
+  if (redisClient) {
+    try {
+      await redisClient.del(key)
+    } catch (error) {
+      console.error('Redis rate limit clear error:', error)
+      // Fall through to in-memory fallback
+    }
+  }
+  
+  // Also clear from in-memory store
+  inMemoryStore.delete(key)
+}
+

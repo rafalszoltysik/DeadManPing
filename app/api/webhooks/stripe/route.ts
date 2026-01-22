@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { stripe, PRICING_PLANS, LEGACY_PLANS } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import { TIER_LIMITS } from '@/lib/limits'
+import { clearRateLimit } from '@/lib/rate-limit'
 import Stripe from 'stripe'
 
 function getSupabaseAdmin() {
@@ -98,10 +99,10 @@ export async function POST(request: NextRequest) {
         if (workspaceId) {
           console.log(`[Webhook] Updating workspace: ${workspaceId}`)
           
-          // Get old tier before update
+          // Get old tier and owner_id before update
           const { data: oldWorkspace } = await supabaseAdmin
             .from('workspaces')
-            .select('subscription_tier')
+            .select('subscription_tier, owner_id')
             .eq('id', workspaceId)
             .single()
 
@@ -125,6 +126,13 @@ export async function POST(request: NextRequest) {
             console.error(`[Webhook] Error updating workspace:`, updateError)
           } else {
             console.log(`[Webhook] Workspace updated successfully:`, updatedWorkspace)
+            
+            // Clear rate limit for checkout sessions so user can upgrade again later
+            if (oldWorkspace?.owner_id) {
+              const rateLimitKey = `billing:create-checkout:${oldWorkspace.owner_id}`
+              await clearRateLimit(rateLimitKey)
+              console.log(`[Webhook] Cleared checkout rate limit for user: ${oldWorkspace.owner_id}`)
+            }
           }
 
             // Auto-update monitor intervals if tier changed and new minimum is higher

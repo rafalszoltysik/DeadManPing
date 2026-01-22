@@ -5,6 +5,7 @@ import { createCheckoutSession } from '@/lib/stripe'
 import { getPriceIdForPlan, type PlanKey } from '@/lib/stripe-prices'
 import { type Currency } from '@/lib/currency-detection'
 import { checkRateLimit } from '@/lib/rate-limit'
+import Stripe from 'stripe'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,22 +25,86 @@ function getSupabaseClient() {
   })
 }
 
+function getStripeClient() {
+  const secretKey = process.env.STRIPE_SECRET_KEY
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not configured')
+  }
+  return new Stripe(secretKey, {
+    apiVersion: '2024-11-20.acacia' as any,
+    typescript: true,
+  })
+}
+
+/**
+ * Check if user has any incomplete/expired checkout sessions
+ * If they do, we should allow them to create a new one
+ */
+async function hasIncompleteCheckoutSessions(
+  customerId: string | null,
+  customerEmail: string | null,
+  workspaceId: string
+): Promise<boolean> {
+  try {
+    const stripe = getStripeClient()
+    
+    // Check for sessions by customer ID
+    if (customerId) {
+      const sessions = await stripe.checkout.sessions.list({
+        customer: customerId,
+        limit: 10,
+      })
+      
+      // Check if there are any incomplete sessions (open or expired) for this workspace
+      const incompleteSessions = sessions.data.filter(
+        (session) =>
+          session.metadata?.workspaceId === workspaceId &&
+          (session.status === 'open' || session.status === 'expired')
+      )
+      
+      if (incompleteSessions.length > 0) {
+        return true
+      }
+    }
+    
+    // Also check by email if no customer ID
+    // Note: Stripe doesn't support filtering by email directly, so we check recent sessions
+    // This is less efficient but only happens for users without a customer ID yet
+    if (!customerId && customerEmail) {
+      // Check sessions created in the last 24 hours
+      const oneDayAgo = Math.floor(Date.now() / 1000) - 86400
+      const sessions = await stripe.checkout.sessions.list({
+        limit: 100, // Check up to 100 recent sessions
+        created: { gte: oneDayAgo },
+      })
+      
+      // Filter by email and workspace
+      const incompleteSessions = sessions.data.filter(
+        (session) =>
+          session.customer_email === customerEmail &&
+          session.metadata?.workspaceId === workspaceId &&
+          (session.status === 'open' || session.status === 'expired')
+      )
+      
+      if (incompleteSessions.length > 0) {
+        return true
+      }
+    }
+    
+    return false
+  } catch (error) {
+    console.error('Error checking incomplete checkout sessions:', error)
+    // If we can't check, allow the request (fail open)
+    return false
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // Rate limiting: 10 checkout sessions per hour per user
-    const rateLimitKey = `billing:create-checkout:${user.id}`
-    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
-    if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { error: 'Too many checkout session attempts. Please wait before trying again.' },
-        { status: 429 }
-      )
     }
 
     const body = await request.json()
@@ -101,6 +166,26 @@ export async function POST(request: NextRequest) {
 
     if (!workspace) {
       return NextResponse.json({ error: 'Failed to get or create workspace' }, { status: 500 })
+    }
+
+    // Check for incomplete checkout sessions before rate limiting
+    const hasIncomplete = await hasIncompleteCheckoutSessions(
+      profile.stripe_customer_id || null,
+      profile.email || user.email || null,
+      workspace.id
+    )
+
+    // Rate limiting: only apply if there are no incomplete sessions
+    // This allows users to retry if they left the checkout page
+    if (!hasIncomplete) {
+      const rateLimitKey = `billing:create-checkout:${user.id}`
+      const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+      if (!rateLimit.allowed) {
+        return NextResponse.json(
+          { error: 'Too many checkout session attempts. Please wait before trying again.' },
+          { status: 429 }
+        )
+      }
     }
 
     // Pobierz walutę z query param lub body
