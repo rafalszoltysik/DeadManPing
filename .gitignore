@@ -42,4 +42,7 @@ examples/temp/
 examples/**/__pycache__/
 examples/**/*.pyc
 
+# generated social media posts
+social-posts/
+
 icon.af

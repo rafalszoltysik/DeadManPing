@@ -7,6 +7,10 @@ const PUBLIC_ROUTES = [
   '/faq',
   '/docs',
   '/contact',
+]
+
+// Old blog routes that should redirect to /blog/
+const OLD_BLOG_ROUTES = [
   '/dead-man-switch',
   '/monitor-cron-jobs',
   '/backup-monitoring',
@@ -38,6 +42,10 @@ const isPublicRoute = (pathname: string): boolean => {
   if (PUBLIC_ROUTES.includes(pathname)) {
     return true
   }
+  // Check blog routes
+  if (pathname.startsWith('/blog')) {
+    return true
+  }
   // Check legal routes
   if (pathname.startsWith('/legal')) {
     return true
@@ -53,6 +61,17 @@ export async function middleware(request: NextRequest) {
   })
 
   const pathname = request.nextUrl.pathname
+
+  // Redirect old blog routes to /blog/
+  if (OLD_BLOG_ROUTES.includes(pathname)) {
+    const slug = pathname.replace(/^\//, '')
+    const newUrl = new URL(`/blog/${slug}`, request.url)
+    // Preserve query params
+    request.nextUrl.searchParams.forEach((value, key) => {
+      newUrl.searchParams.set(key, value)
+    })
+    return NextResponse.redirect(newUrl, 301) // Permanent redirect for SEO
+  }
 
   // Skip auth check for public routes to improve TTFB
   const needsAuthCheck = !isPublicRoute(pathname) && 
