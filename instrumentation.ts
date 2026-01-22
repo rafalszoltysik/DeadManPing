@@ -35,9 +35,37 @@ export async function register() {
         'ECONNREFUSED',
         'ETIMEDOUT',
         'ENOTFOUND',
+        'refresh_token_not_found',
+        'Invalid Refresh Token',
+        'Refresh Token Not Found',
+        'AuthSessionMissingError',
       ],
       
       beforeSend(event, hint) {
+        // Filter out expected "no session" errors - they're normal for unauthenticated users
+        const errorMessage = event.message || 
+          (hint.originalException && typeof hint.originalException === 'object' && 'message' in hint.originalException
+            ? String(hint.originalException.message)
+            : '')
+        const errorString = String(errorMessage).toLowerCase()
+        
+        const exceptionValue = event.exception?.values?.[0]?.value?.toLowerCase() || ''
+        const isExpectedNoSessionError = 
+          exceptionValue.includes('refresh token not found') ||
+          exceptionValue.includes('invalid refresh token') ||
+          exceptionValue.includes('session missing') ||
+          exceptionValue.includes('auth session missing') ||
+          errorString.includes('refresh token not found') ||
+          errorString.includes('invalid refresh token') ||
+          errorString.includes('session missing') ||
+          errorString.includes('auth session missing') ||
+          event.exception?.values?.[0]?.mechanism?.type === 'refresh_token_not_found'
+        
+        if (isExpectedNoSessionError) {
+          // Don't send expected "no session" errors to Sentry
+          return null
+        }
+        
         // Add context
         if (event.contexts) {
           event.contexts = {

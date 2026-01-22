@@ -107,15 +107,19 @@ export async function middleware(request: NextRequest) {
     
     // Only log unexpected auth errors (ignore expected "no session" scenarios)
     if (error) {
+      const errorMessage = error.message?.toLowerCase() || ''
       const isExpectedNoSessionError = 
         error.code === 'refresh_token_not_found' ||
         error.name === 'AuthSessionMissingError' ||
-        (error.message?.toLowerCase().includes('session missing') || 
-         error.message?.toLowerCase().includes('auth session missing'))
+        errorMessage.includes('refresh token not found') ||
+        errorMessage.includes('invalid refresh token') ||
+        errorMessage.includes('session missing') || 
+        errorMessage.includes('auth session missing')
       
       if (!isExpectedNoSessionError) {
         console.error('Auth error in middleware:', error)
       }
+      // Silently ignore expected "no session" errors - they're normal for unauthenticated users
     }
   }
 

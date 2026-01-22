@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
-import { useState, ReactElement } from 'react'
+import { useState, ReactElement, useMemo } from 'react'
 
 export default function FAQPage() {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set())
@@ -21,7 +21,7 @@ export default function FAQPage() {
     })
   }
 
-  const faqStructuredData = {
+  const faqStructuredData = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "FAQPage",
     "mainEntity": [
@@ -106,7 +106,7 @@ export default function FAQPage() {
         }
       }
     ]
-  }
+  }), [])
 
   const faqSections = [
     {
@@ -354,7 +354,7 @@ export default function FAQPage() {
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
   
-  const breadcrumbSchema = {
+  const breadcrumbSchema = useMemo(() => ({
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": [
@@ -371,17 +371,19 @@ export default function FAQPage() {
         "item": `${baseUrl}/faq`
       }
     ]
-  }
+  }), [baseUrl])
 
   return (
     <div className="min-h-screen bg-background text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+        suppressHydrationWarning
       />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqStructuredData) }}
+        suppressHydrationWarning
       />
       <PageNav />
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { PageNav } from '@/components/PageNav'
 import { setPostHogOptOut, isPostHogOptedOut } from '@/lib/posthog/client'
 import Link from 'next/link'
@@ -13,17 +13,14 @@ export default function OptOutPage() {
 
   useEffect(() => {
     // Check current opt-out status
-    const checkStatus = () => {
-      if (typeof window !== 'undefined') {
-        const optedOut = isPostHogOptedOut()
-        setIsOptedOut(optedOut)
-        setIsLoading(false)
-      }
+    if (typeof window !== 'undefined') {
+      const optedOut = isPostHogOptedOut()
+      setIsOptedOut(optedOut)
+      setIsLoading(false)
     }
-    checkStatus()
   }, [])
 
-  const handleOptOut = () => {
+  const handleOptOut = useCallback(() => {
     if (typeof window === 'undefined') return
     
     setPostHogOptOut(true)
@@ -34,9 +31,9 @@ export default function OptOutPage() {
     setTimeout(() => {
       window.location.reload()
     }, 1000)
-  }
+  }, [])
 
-  const handleOptIn = () => {
+  const handleOptIn = useCallback(() => {
     if (typeof window === 'undefined') return
     
     setPostHogOptOut(false)
@@ -47,7 +44,7 @@ export default function OptOutPage() {
     setTimeout(() => {
       window.location.reload()
     }, 1000)
-  }
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">

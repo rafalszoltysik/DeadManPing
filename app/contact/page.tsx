@@ -5,6 +5,10 @@ import { ContactForm } from './ContactForm'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { Footer } from '@/components/Footer'
 
+// Force static generation for better performance
+export const dynamic = 'force-dynamic' // Keep dynamic because we need user session
+export const revalidate = 60 // Revalidate every minute
+
 export default async function ContactPage() {
   // Get user email server-side so it appears immediately
   const user = await getSupabaseUser()

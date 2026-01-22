@@ -78,8 +78,8 @@ export const metadata: Metadata = {
 export const dynamic = 'force-static'
 export const revalidate = 3600 // Revalidate every hour
 
-export default function Home() {
-  const structuredData = {
+// Move structured data outside component to reduce bundle size and webpack warnings
+const STRUCTURED_DATA = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     "name": "DeadManPing",
@@ -187,24 +187,25 @@ export default function Home() {
     "inLanguage": "en",
     "isAccessibleForFree": true,
     "freeTierAvailable": true
-  }
+} as const
 
-  // ItemList schema for features list
-  const featuresItemListSchema = {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "DeadManPing Features",
-    "description": "Complete list of features available in DeadManPing monitoring service",
-    "itemListElement": structuredData.featureList.map((feature, index) => ({
+// ItemList schema for features list
+const FEATURES_ITEM_LIST_SCHEMA = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "DeadManPing Features",
+  "description": "Complete list of features available in DeadManPing monitoring service",
+  "itemListElement": STRUCTURED_DATA.featureList.map((feature, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
         "@type": "SoftwareFeature",
         "name": feature
-      }
-    }))
-  }
+    }
+  }))
+} as const
 
+export default function Home() {
   // VideoObject schema placeholder - można użyć gdy dodasz filmy
   const videoSchema = {
     "@context": "https://schema.org",
@@ -227,15 +228,17 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative">
+    <div className="min-h-screen text-foreground relative bg-transparent">
       <ErrorHandlerWrapper />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+        suppressHydrationWarning
       />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(featuresItemListSchema) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(FEATURES_ITEM_LIST_SCHEMA) }}
+        suppressHydrationWarning
       />
       {/* VideoObject schema - zakomentuj jeśli nie masz filmów */}
       {/* <script

@@ -62,10 +62,37 @@ export function init() {
         // Common browser issues
         'ResizeObserver loop limit exceeded',
         'Non-Error promise rejection captured',
+        // Expected auth errors (normal for unauthenticated users)
+        'refresh_token_not_found',
+        'Invalid Refresh Token',
+        'Refresh Token Not Found',
+        'AuthSessionMissingError',
       ],
       
-      // Don't send errors from browser extensions
+      // Don't send errors from browser extensions or expected auth errors
       beforeSend(event, hint) {
+        // Filter out expected "no session" errors - they're normal for unauthenticated users
+        const errorMessage = event.message || 
+          (hint.originalException && typeof hint.originalException === 'object' && 'message' in hint.originalException
+            ? String(hint.originalException.message)
+            : '')
+        const errorString = String(errorMessage).toLowerCase()
+        
+        const isExpectedNoSessionError = 
+          event.exception?.values?.[0]?.value?.toLowerCase().includes('refresh token not found') ||
+          event.exception?.values?.[0]?.value?.toLowerCase().includes('invalid refresh token') ||
+          event.exception?.values?.[0]?.value?.toLowerCase().includes('session missing') ||
+          event.exception?.values?.[0]?.value?.toLowerCase().includes('auth session missing') ||
+          errorString.includes('refresh token not found') ||
+          errorString.includes('invalid refresh token') ||
+          errorString.includes('session missing') ||
+          errorString.includes('auth session missing')
+        
+        if (isExpectedNoSessionError) {
+          // Don't send expected "no session" errors to Sentry
+          return null
+        }
+        
         // Filter out errors from browser extensions
         if (event.exception) {
           const error = hint.originalException;
