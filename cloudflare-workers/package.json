@@ -1,0 +1,16 @@
+{
+  "name": "supabase-api-proxy",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker proxy for Supabase Edge Functions",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240117.0",
+    "typescript": "^5.0.0",
+    "wrangler": "^4.60.0"
+  }
+}

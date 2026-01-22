@@ -1,0 +1,24 @@
+# Cloudflare Workers Configuration
+# 
+# This file configures your Cloudflare Worker proxy.
+# Update the route pattern to match your custom domain.
+
+name = "supabase-api-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+# Route configuration
+# Replace 'yourdomain.com' with your actual domain
+# The pattern matches requests to api.yourdomain.com/*
+[[routes]]
+pattern = "api.deadmanping.com/*"
+zone_name = "deadmanping.com"
+
+# Example: If you want to use a different subdomain
+# [[routes]]
+# pattern = "functions.yourdomain.com/*"
+# zone_name = "yourdomain.com"
+
+# Environment variables are set via Wrangler CLI (see README)
+# They are NOT stored in this file for security reasons
+

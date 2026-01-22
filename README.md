@@ -63,6 +63,22 @@ See the [`examples/`](./examples/) directory for working code examples, bash scr
 
 Examples are also available in our public GitHub repository: [examples](https://github.com/DeadManPing/examples)
 
+## Custom Domain for Supabase Edge Functions (Free)
+
+Chcesz używać własnej domeny (np. `api.yourdomain.com`) zamiast domyślnego URL Supabase? Bez płacenia za Supabase Pro ($25/miesiąc)?
+
+Zobacz: **[cloudflare-workers/README.md](./cloudflare-workers/README.md)**
+
+**Szybki start:**
+1. `cd cloudflare-workers && npm install`
+2. `npx wrangler login`
+3. Ustaw sekrety: `npx wrangler secret put SUPABASE_URL` i `SUPABASE_ANON_KEY`
+4. Edytuj `wrangler.toml` z Twoją domeną
+5. Skonfiguruj DNS w Cloudflare (rekord AAAA z proxy ON)
+6. `npm run deploy`
+
+**Koszt:** $0/miesiąc (do 100k requestów/dzień) vs $35/miesiąc za Supabase Pro + custom domain
+
 ## Tech Stack
 
 - Next.js 15 (App Router)
@@ -71,4 +87,5 @@ Examples are also available in our public GitHub repository: [examples](https://
 - Supabase (Database + Auth)
 - Stripe (Billing)
 - Resend (Email)
+- Cloudflare Workers (Proxy dla Supabase Edge Functions)
 
