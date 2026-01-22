@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -27,6 +28,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Rate limiting: 5 acceptances per hour per user
+    const rateLimitKey = `workspace:accept:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many invitation acceptance attempts. Please wait before trying again.' },
+        { status: 429 }
       )
     }
 

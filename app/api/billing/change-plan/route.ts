@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { stripe, PRICING_PLANS } from '@/lib/stripe'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -25,6 +26,16 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting: 5 plan changes per hour per user
+    const rateLimitKey = `billing:change-plan:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many plan change attempts. Please wait before trying again.' },
+        { status: 429 }
+      )
     }
 
     const body = await request.json()

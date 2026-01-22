@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMemberLimit } from '@/lib/limits'
 import { getAppUrl } from '@/lib/get-app-url'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -109,6 +110,16 @@ export async function POST(request: NextRequest) {
     const user = await getSupabaseUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting: 10 invitations per hour per user
+    const rateLimitKey = `workspace:invite:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many invitation attempts. Please wait before trying again.' },
+        { status: 429 }
+      )
     }
 
     const body = await request.json()
@@ -370,6 +381,16 @@ export async function DELETE(request: NextRequest) {
     const user = await getSupabaseUser()
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting: 20 removals per hour per user
+    const rateLimitKey = `workspace:remove:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many removal attempts. Please wait before trying again.' },
+        { status: 429 }
+      )
     }
 
     const { searchParams } = new URL(request.url)

@@ -4,6 +4,7 @@ import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createCheckoutSession } from '@/lib/stripe'
 import { getPriceIdForPlan, type PlanKey } from '@/lib/stripe-prices'
 import { type Currency } from '@/lib/currency-detection'
+import { checkRateLimit } from '@/lib/rate-limit'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +30,16 @@ export async function POST(request: NextRequest) {
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Rate limiting: 10 checkout sessions per hour per user
+    const rateLimitKey = `billing:create-checkout:${user.id}`
+    const rateLimit = await checkRateLimit(rateLimitKey, 3600000) // 1 hour
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { error: 'Too many checkout session attempts. Please wait before trying again.' },
+        { status: 429 }
+      )
     }
 
     const body = await request.json()
