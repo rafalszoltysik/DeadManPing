@@ -73,9 +73,16 @@ export function DashboardPreview() {
   const [showActiveMonitors, setShowActiveMonitors] = useState(false)
   const hasStartedAnimation = useRef(false)
   const [mounted, setMounted] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
   useEffect(() => {
@@ -176,41 +183,53 @@ export function DashboardPreview() {
             <span className="text-xs sm:text-sm text-muted-foreground">{mockMonitors.length} monitors</span>
           </div>
         </div>
-        <StaggerContainer 
-          className="divide-y divide-border"
-          staggerDelay={80}
-        >
-          {mockMonitors.map((monitor, index) => (
+        <div className="divide-y divide-border">
+          {mockMonitors.map((monitor, index) => {
+            const isFirst = index === 0
+            const duration = isMobile ? 500 : 700
+            const staggerDelay = isMobile ? 60 : 80
+            
+            return (
               <div
                 key={index}
-                className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50"
+                className={`px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-all ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  showActiveMonitors
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-4'
+                }`}
+                style={{
+                  transitionDuration: `${duration}ms`,
+                  transitionDelay: isFirst ? '0ms' : `${index * staggerDelay}ms`,
+                  willChange: showActiveMonitors ? 'auto' : 'transform, opacity'
+                }}
               >
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                  <div className={`p-1.5 sm:p-2 rounded-lg border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
-                    {getStatusIcon(monitor.status)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h4 className="font-medium text-sm sm:text-base truncate">{monitor.name}</h4>
-                      <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${getStatusColor(monitor.status)}`}>
-                        {getStatusLabel(monitor.status)}
-                      </span>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                    <div className={`p-1.5 sm:p-2 rounded-lg border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
+                      {getStatusIcon(monitor.status)}
                     </div>
-                    <p className="text-xs sm:text-sm text-muted-foreground">Expected every {monitor.interval}</p>
-                    {monitor.reason && (
-                      <p className="text-xs text-muted-foreground/80 mt-1 font-mono">{monitor.reason}</p>
-                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-medium text-sm sm:text-base truncate">{monitor.name}</h4>
+                        <span className={`text-xs font-semibold px-1.5 py-0.5 rounded ${getStatusColor(monitor.status)}`}>
+                          {getStatusLabel(monitor.status)}
+                        </span>
+                      </div>
+                      <p className="text-xs sm:text-sm text-muted-foreground">Expected every {monitor.interval}</p>
+                      {monitor.reason && (
+                        <p className="text-xs text-muted-foreground/80 mt-1 font-mono">{monitor.reason}</p>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="text-right hidden sm:block flex-shrink-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Last ping</p>
-                  <p className="text-xs sm:text-sm font-mono">{monitor.lastPing}</p>
+                  <div className="text-right hidden sm:block flex-shrink-0">
+                    <p className="text-xs sm:text-sm text-muted-foreground">Last ping</p>
+                    <p className="text-xs sm:text-sm font-mono">{monitor.lastPing}</p>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </StaggerContainer>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

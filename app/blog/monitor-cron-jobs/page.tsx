@@ -125,9 +125,7 @@ export default function MonitorCronJobsPage() {
                   <div>./backup.sh</div>
                   <div></div>
                   <div># Add this one line at the end</div>
-                  <div>curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
-                  <div>  -H "Content-Type: application/json" \</div>
-                  <div>  -d {"'"}{'{'}`"success": true{'}'}{"'"}</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
                 </code>
               </div>
               <p className="text-muted-foreground mb-4">
@@ -138,25 +136,23 @@ export default function MonitorCronJobsPage() {
               </p>
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
-                Reporting Failures with Data from Execution
+                Including Data from Execution
               </h3>
               <p className="text-muted-foreground mb-4">
-                You can report failures explicitly and include data from execution:
+                You can include data from execution using query parameters. Set validation rules in the DeadManPing panel to check these values:
               </p>
               <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
                 <code className="text-foreground">
                   <div>#!/bin/bash</div>
-                  <div>if ./backup.sh; then</div>
-                  <div>  BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)</div>
-                  <div>  curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
-                  <div>    -H "Content-Type: application/json" \</div>
-                  <div>    -d "{'{'}\"success\": true, \"backup_size\": \"$BACKUP_SIZE\"{'}'}"</div>
-                  <div>else</div>
-                  <div>  ERROR_MSG=$(./backup.sh 2{'>'}&1 | tail -1)</div>
-                  <div>  curl -X POST "https://deadmanping.com/ping/backup-daily" \</div>
-                  <div>    -H "Content-Type: application/json" \</div>
-                  <div>    -d "{'{'}\"success\": false, \"error\": \"$ERROR_MSG\"{'}'}"</div>
-                  <div>fi</div>
+                  <div>./backup.sh</div>
+                  <div>EXIT_CODE=$?</div>
+                  <div>BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)</div>
+                  <div></div>
+                  <div># Single ping with data from execution</div>
+                  <div># In DeadManPing panel: set validation rules:</div>
+                  <div>#   - "exit_code" == 0</div>
+                  <div>#   - "backup_size" contains expected pattern</div>
+                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_code=$EXIT_CODE&backup_size=$BACKUP_SIZE"</div>
                 </code>
               </div>
               </section>

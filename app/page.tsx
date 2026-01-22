@@ -254,7 +254,7 @@ export default function Home() {
         <section className="pt-12 sm:pt-20 pb-12 sm:pb-16 text-center">
           <AnimatedSection className="max-w-4xl mx-auto" delay={0} direction="fade" duration={1000}>
             <AnimatedItem delay={100} direction="up" duration={800}>
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight animate-gradient">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight animate-gradient">
                 Never Miss a Cron Job Again
               </h1>
             </AnimatedItem>
@@ -264,22 +264,20 @@ export default function Home() {
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={800}>
-              <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
+              <div className="flex flex-col items-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
                 <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift-smooth shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover-scale">
                   Start monitoring in 2 minutes
                 </CTAButton>
+                <p className="text-sm text-muted-foreground">
+                  14-day free trial · No credit card required
+                </p>
               </div>
-            </AnimatedItem>
-            <AnimatedItem delay={400} direction="up" duration={800}>
-              <p className="text-sm text-muted-foreground">
-                14-day free trial · No credit card required
-              </p>
             </AnimatedItem>
           </AnimatedSection>
         </section>
 
         {/* Dashboard Preview */}
-        <AnimatedSection className="py-8 sm:py-12 lg:py-16" delay={0} direction="up" duration={900}>
+        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-8 sm:pb-12 lg:pb-16" delay={0} direction="up" duration={900}>
           <Suspense fallback={
             <div className="max-w-5xl mx-auto px-4">
               <div className="text-center mb-6 sm:mb-8">
@@ -296,7 +294,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* The uncomfortable truth */}
-        <AnimatedSection className="py-12 sm:py-16 lg:py-20" delay={100} direction="up" duration={800}>
+        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">The uncomfortable truth</h2>
@@ -333,7 +331,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* Why Other Tools Fail */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Why other tools fail" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20" aria-label="Why other tools fail" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Why existing monitoring tools fail here</h2>
@@ -396,7 +394,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* What DeadManPing is NOT */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="What DeadManPing is NOT" delay={100} direction="up" duration={800}>
             <div className="max-w-4xl mx-auto px-4">
               <AnimatedItem delay={100} direction="up" duration={700}>
                 <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">
@@ -446,7 +444,7 @@ export default function Home() {
           </AnimatedSection>
 
         {/* What You DON'T Need to Build */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="What you don't need to build" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="What you don't need to build" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You DON'T Need to Build</h2>
@@ -498,7 +496,7 @@ export default function Home() {
         </AnimatedSection>
 
         {/* How It Works */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="How DeadManPing works" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20" aria-label="How DeadManPing works" delay={100} direction="up" duration={800}>
           <AnimatedItem delay={100} direction="up" duration={700}>
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
           </AnimatedItem>
@@ -528,15 +526,13 @@ export default function Home() {
                     <pre className="bg-background rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm">
                       <code className="break-words text-foreground">{`#!/bin/bash
 users_synced=$(./sync_users_logic.sh)
-if [ $? -eq 0 ]; then
-  curl https://deadmanping.com/ping/abc123 \\
-    -H "Content-Type: application/json" \\
-    -d "{\\"success\\": true, \\"count\\": $users_synced}"
-else
-  curl https://deadmanping.com/ping/abc123 \\
-    -H "Content-Type: application/json" \\
-    -d '{"success": false}'
-fi`}</code>
+EXIT_CODE=$?
+
+# Single ping with data from execution
+# In DeadManPing panel: set validation rules:
+#   - "exit_code" == 0
+#   - "count" >= 1
+curl -X POST "https://deadmanping.com/api/ping/abc123?exit_code=$EXIT_CODE&count=$users_synced"`}</code>
                     </pre>
                     <div className="mt-3 pt-3 border-t border-border">
                       <p className="text-xs sm:text-sm text-muted-foreground font-mono">
@@ -581,7 +577,7 @@ fi`}</code>
                     <div className="flex items-center gap-3 p-3 bg-card rounded border border-border transition-all duration-300 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 opacity-0 animate-fade-in" style={{ animationDelay: '400ms' }}>
                       <div className="flex-1">
                         <div className="text-xs text-muted-foreground mb-1">Condition</div>
-                        <code className="text-sm font-mono transition-colors duration-200">success == true</code>
+                        <code className="text-sm font-mono transition-colors duration-200">exit_code == 0</code>
                       </div>
                       <div className="w-16 text-center">
                         <div className="text-xs text-muted-foreground mb-1">Status</div>
@@ -674,7 +670,7 @@ fi`}</code>
         </AnimatedSection>
 
         {/* Real-World Examples */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={100} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Real-World Examples</h2>
@@ -700,13 +696,16 @@ fi`}</code>
                     <div className="flex-1 overflow-x-auto overflow-y-hidden">
                       <pre className="text-xs">
                         <code className="text-foreground">{`import os
-import subprocess
+import requests
 
-if os.path.exists(backup_file):
-    size_gb = subprocess.check_output(
-        ['du', '-h', backup_file]).decode()
-    subprocess.run(['curl', '...', '-d',
-        f'{{"file_exists": true, "size_gb": "{size_gb}"}}'])`}</code>
+file_exists = os.path.exists(backup_file)
+size = os.path.getsize(backup_file) if file_exists else 0
+
+# Single ping with file data
+# In DeadManPing panel: set validation rules:
+#   - "file_exists" == True
+#   - "size" > 0
+requests.post(f"https://deadmanping.com/api/ping/{MONITOR_ID}?file_exists={file_exists}&size={size}")`}</code>
                       </pre>
                     </div>
                   </div>
@@ -727,15 +726,19 @@ if os.path.exists(backup_file):
                     <div className="flex-1 overflow-x-auto overflow-y-hidden">
                       <pre className="text-xs">
                         <code className="text-foreground">{`const { execSync } = require('child_process');
+const https = require('https');
 
+let exitCode = 0;
 try {
   execSync('./backup.sh');
-  execSync('curl ... -d ' + 
-    JSON.stringify({success: true, backup_size: size}));
 } catch (error) {
-  execSync('curl ... -d ' + 
-    JSON.stringify({success: false}));
-}`}</code>
+  exitCode = error.status || 1;
+}
+
+// Single ping with exit code
+// In DeadManPing panel: set validation rule "exit_code" == 0
+https.request(\`https://deadmanping.com/api/ping/\${MONITOR_ID}?exit_code=\${exitCode}\`, 
+  { method: 'POST' }).end();`}</code>
                       </pre>
                     </div>
                   </div>
@@ -830,13 +833,14 @@ exec.Command("curl", "...", "-d",
                     <div className="flex-1 overflow-x-auto overflow-y-hidden">
                       <pre className="text-xs">
                         <code className="text-foreground">{`$output = shell_exec('./process.sh');
-if (strpos($output, 'success') !== false) {
-  $data = json_encode([
-    'status' => 'ok',
-    'output' => $output
-  ]);
-  shell_exec("curl ... -d '$data'");
-}`}</code>
+$hasExpectedContent = strpos($output, 'success') !== false ? 1 : 0;
+$outputLength = strlen($output);
+
+// Single ping with output validation data
+// In DeadManPing panel: set validation rules:
+//   - "has_expected_content" == 1
+//   - "output_length" > 0
+shell_exec("curl -X POST \"https://deadmanping.com/api/ping/{$MONITOR_ID}?has_expected_content={$hasExpectedContent}&output_length={$outputLength}\"");`}</code>
                       </pre>
                     </div>
                   </div>
@@ -868,7 +872,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* What DeadManPing Does */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="What DeadManPing does" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20" aria-label="What DeadManPing does" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">What <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> does differently</h2>
@@ -889,7 +893,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Key Differentiators */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Key differentiators" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Key differentiators" delay={100} direction="up" duration={800}>
           <div className="max-w-6xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Key Differentiators</h2>
@@ -924,7 +928,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Feature Comparison Table */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20" aria-label="Feature comparison" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20" aria-label="Feature comparison" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">What You Get</h2>
@@ -989,7 +993,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Integrations Section */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Integrations" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Integrations" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto text-center px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Integrate with Your Workflow</h2>
@@ -1032,7 +1036,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Who This Is For */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Who this is for" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Who this is for" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Who This Is For</h2>
@@ -1109,7 +1113,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* Positioning One-liner */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card/50 border-y border-border" aria-label="Positioning" delay={100} direction="up" duration={800}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Positioning" delay={100} direction="up" duration={800}>
           <div className="max-w-4xl mx-auto px-4 text-center">
             <AnimatedItem delay={300} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed">
@@ -1121,7 +1125,7 @@ if (strpos($output, 'success') !== false) {
         </AnimatedSection>
 
         {/* CTA Section */}
-          <AnimatedSection className="py-12 sm:py-16 lg:py-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started" delay={100} direction="up" duration={900}>
+          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" aria-label="Get started" delay={100} direction="up" duration={900}>
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
           <div className="relative z-10">
             <AnimatedItem delay={100} direction="up" duration={700}>
@@ -1135,9 +1139,14 @@ if (strpos($output, 'success') !== false) {
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={700}>
-              <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift-smooth hover-scale shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
-                Get started in 2 minutes
-              </CTAButton>
+              <div className="flex flex-col items-center gap-3 sm:gap-4">
+                <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift-smooth hover-scale shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
+                  Get started in 2 minutes
+                </CTAButton>
+                <p className="text-sm text-muted-foreground">
+                  14-day free trial · No credit card required
+                </p>
+              </div>
             </AnimatedItem>
           </div>
         </AnimatedSection>
