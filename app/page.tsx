@@ -254,7 +254,7 @@ export default function Home() {
         <section className="pt-12 sm:pt-20 pb-12 sm:pb-16 text-center">
           <AnimatedSection className="max-w-4xl mx-auto" delay={0} direction="fade" duration={1000}>
             <AnimatedItem delay={100} direction="up" duration={800}>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-tight animate-gradient">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-relaxed animate-gradient pb-2 overflow-visible">
                 Never Miss a Cron Job Again
               </h1>
             </AnimatedItem>
