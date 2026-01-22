@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 /**
@@ -11,6 +12,11 @@ import Link from 'next/link'
  */
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)
+  const pathname = usePathname()
+  
+  // Check if we're on a dashboard page (has sidebar)
+  // This includes /dashboard, /dashboard/settings, /dashboard/team, /dashboard/monitors, etc.
+  const isDashboard = pathname ? pathname.startsWith('/dashboard') : false
 
   useEffect(() => {
     // Check if user has already dismissed the banner
@@ -38,7 +44,7 @@ export function CookieBanner() {
   if (!showBanner) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-card border-t border-border shadow-lg z-50 animate-slide-up">
+    <div className={`fixed bottom-0 left-0 right-0 ${isDashboard ? 'lg:left-64' : ''} bg-card border-t border-border shadow-lg z-50 animate-slide-up`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-[20px] sm:py-[24px]">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
           <div className="flex-1 min-w-0 w-full sm:w-auto">
