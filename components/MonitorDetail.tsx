@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { formatDistanceToNow, format } from 'date-fns'
 import Link from 'next/link'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon } from './Icons'
@@ -593,9 +594,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
       </div>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 max-w-md w-full">
+      {showDeleteConfirm && typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 backdrop-blur-md flex items-start justify-center z-50 pt-20 sm:pt-24">
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl p-6 max-w-md w-full mx-4">
             <h2 className="text-xl font-semibold mb-2">Delete Monitor</h2>
             <p className="text-muted-foreground mb-6">
               Are you sure you want to delete "{monitor.name}"? This action cannot be undone. All pings and alerts for this monitor will also be deleted.
@@ -641,7 +642,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
               </div>
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {isOnboarding && waitingForPing && (
