@@ -19,7 +19,6 @@ export default function SignupPage() {
   const [success, setSuccess] = useState(false)
   const [requiresEmailConfirmation, setRequiresEmailConfirmation] = useState(false)
   const [userEmail, setUserEmail] = useState<string | null>(null)
-  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [passwordErrors, setPasswordErrors] = useState<string[]>([])
   const [mounted, setMounted] = useState(false)
   const [supabase, setSupabase] = useState<ReturnType<typeof createClient> | null>(null)
@@ -67,11 +66,6 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    if (!acceptedTerms) {
-      setError('You must accept the Terms of Service and Privacy Policy to create an account')
-      setLoading(false)
-      return
-    }
 
     // Validate password strength
     const validation = validatePassword(password)
@@ -356,25 +350,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <div className="flex items-start">
-              <input
-                id="terms"
-                type="checkbox"
-                checked={acceptedTerms}
-                onChange={(e) => setAcceptedTerms(e.target.checked)}
-                className="mt-1 h-4 w-4 text-primary focus:ring-primary border-input rounded"
-              />
-              <label htmlFor="terms" className="ml-2 text-sm text-muted-foreground">
-                I agree to the{' '}
-                <Link href="/legal/terms" target="_blank" className="text-primary hover:text-primary/80 underline transition-smooth">
-                  Terms of Service
-                </Link>
-                {' '}and{' '}
-                <Link href="/legal/privacy" target="_blank" className="text-primary hover:text-primary/80 underline transition-smooth">
-                  Privacy Policy
-                </Link>
-              </label>
-            </div>
 
               <div>
                 <button
@@ -412,6 +387,20 @@ export default function SignupPage() {
                 </button>
               </div>
             </div>
+          </AnimatedItem>
+
+          <AnimatedItem delay={400} direction="up" duration={700}>
+            <p className="mt-4 text-sm text-muted-foreground text-center">
+              By creating an account, you agree to our{' '}
+              <Link href="/legal/terms" target="_blank" className="text-primary hover:text-primary/80 underline transition-smooth">
+                Terms and Conditions
+              </Link>
+              {' '}and{' '}
+              <Link href="/legal/privacy" target="_blank" className="text-primary hover:text-primary/80 underline transition-smooth">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </AnimatedItem>
         </AnimatedSection>
       </div>
