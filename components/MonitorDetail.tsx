@@ -10,6 +10,7 @@ import { WarningTooltip, InfoTooltip } from './Tooltip'
 import { WarningIcon, InfoIcon } from './Icons'
 import { captureSoftError } from '@/lib/sentry/client'
 import { TIER_LIMITS } from '@/lib/limits'
+import { CodeBlock } from './CodeBlock'
 
 function getStatusIcon(status: string) {
   switch (status) {
@@ -56,14 +57,35 @@ function getStatusLabel(status: string) {
   }
 }
 
-export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pingUrl, isOnboarding, userTier: initialUserTier = 'free' }: MonitorDetailProps) {
+function getRuleLabel(rule: string): string {
+  switch (rule) {
+    case '>':
+      return 'greater than'
+    case '<':
+      return 'less than'
+    case '>=':
+      return 'greater than or equal'
+    case '<=':
+      return 'less than or equal'
+    case '==':
+      return 'equal to'
+    case '!=':
+      return 'not equal to'
+    default:
+      return rule
+  }
+}
+
+export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jobRuns: initialJobRuns = [], pingUrl, isOnboarding, userTier: initialUserTier = 'free' }: MonitorDetailProps) {
   const [monitor, setMonitor] = useState(initialMonitor)
   const [pings, setPings] = useState(initialPings)
-  const [copiedUrl, setCopiedUrl] = useState(false)
-  const [copiedCurl, setCopiedCurl] = useState(false)
+  const [jobRuns, setJobRuns] = useState(initialJobRuns)
+  const [pingMethod, setPingMethod] = useState<'simple' | 'job-runs'>('simple')
   const [waitingForPing, setWaitingForPing] = useState(initialMonitor.status === 'pending' && initialPings.length === 0)
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
   const [editingPayloadRules, setEditingPayloadRules] = useState(false)
+  const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null)
+  const [originalEditingField, setOriginalEditingField] = useState<{ name: string; rule: string } | null>(null)
   const [payloadFields, setPayloadFields] = useState<Array<{
     name: string
     type: 'number' | 'boolean' | 'string'
@@ -93,6 +115,13 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [intervalSuccess, setIntervalSuccess] = useState(false)
   const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours'>('minutes')
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
+  const [maxExecutionTimeMinutes, setMaxExecutionTimeMinutes] = useState(
+    monitor.max_execution_time_seconds ? Math.floor(monitor.max_execution_time_seconds / 60) : 0
+  )
+  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [maxExecutionTimeEnabled, setMaxExecutionTimeEnabled] = useState(
+    monitor.max_execution_time_seconds !== null && monitor.max_execution_time_seconds > 0
+  )
   
   // Calculate minIntervalMinutes from tier
   const limit = TIER_LIMITS[userTier as keyof typeof TIER_LIMITS] || TIER_LIMITS.free
@@ -161,6 +190,22 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     }
   }
 
+  // Convert max execution time to appropriate unit for display
+  const getMaxExecutionTimeValue = () => {
+    if (maxExecutionTimeUnit === 'hours') {
+      return Math.round((maxExecutionTimeMinutes / 60) * 10) / 10
+    }
+    return maxExecutionTimeMinutes
+  }
+
+  const setMaxExecutionTimeValue = (value: number) => {
+    if (maxExecutionTimeUnit === 'hours') {
+      setMaxExecutionTimeMinutes(Math.round(value * 60))
+    } else {
+      setMaxExecutionTimeMinutes(Math.round(value))
+    }
+  }
+
   // Load existing payload validation rules when monitor changes
   useEffect(() => {
     if (monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
@@ -177,21 +222,31 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     }
   }, [monitor.payload_validation_rules])
 
-  // Reload payload fields when opening edit mode (in case monitor was updated)
+  // Reload payload fields only when editing a specific field (not when adding new)
   useEffect(() => {
-    if (editingPayloadRules && monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
-      const fields = monitor.payload_validation_rules.fields.map((field: any) => ({
-        name: field.name || '',
-        type: field.type || 'number',
-        rule: field.rule || '>',
-        value: String(field.value ?? ''),
-        severity: field.severity || 'error',
-      }))
-      setPayloadFields(fields)
-    } else if (editingPayloadRules && (!monitor.payload_validation_rules || !monitor.payload_validation_rules.fields)) {
-      setPayloadFields([])
+    if (editingPayloadRules && editingFieldIndex !== null && monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
+      const field = monitor.payload_validation_rules.fields[editingFieldIndex]
+      if (field) {
+        const fieldData = {
+          name: field.name || '',
+          type: field.type || 'number',
+          rule: field.rule || '>',
+          value: String(field.value ?? ''),
+          severity: field.severity || 'error',
+        }
+        setPayloadFields([fieldData])
+        // Store original values for comparison
+        setOriginalEditingField({
+          name: field.name || '',
+          rule: field.rule || '>',
+        })
+      }
+    } else if (editingFieldIndex === null) {
+      // When adding new field, clear original values
+      setOriginalEditingField(null)
     }
-  }, [editingPayloadRules, monitor.payload_validation_rules])
+    // When adding new field (editingFieldIndex === null), the form is initialized with one empty field in the onClick handler
+  }, [editingPayloadRules, editingFieldIndex, monitor.payload_validation_rules])
 
   // Load existing interval settings when editing
   useEffect(() => {
@@ -247,6 +302,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         windows: windowsCommand,
         unix: unixCommand,
         default: unixCommand, // Default for copy
+        examplePayload, // Include payload for reuse
       }
     } else {
       const simpleCommand = `curl -X POST "${pingUrl}"`
@@ -254,6 +310,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         windows: simpleCommand,
         unix: simpleCommand,
         default: simpleCommand,
+        examplePayload: null,
       }
     }
   }
@@ -262,49 +319,25 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
   const [selectedPlatform, setSelectedPlatform] = useState<'windows' | 'unix'>('unix')
   const curlCommand = curlCommands[selectedPlatform]
 
-  const copyUrlToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(pingUrl)
-      setCopiedUrl(true)
-      setTimeout(() => setCopiedUrl(false), 2000)
-      
-      // Track heartbeat URL copied (webhook method)
-      const { captureHeartbeatUrlCopied } = await import('@/lib/posthog/client')
-      captureHeartbeatUrlCopied({ method: 'webhook' })
-      
-      // Track soft error: user copied URL, check if no pings after 5 minutes
-      setTimeout(async () => {
-        // After 5 minutes, check if monitor still has no pings
-        if (monitor.status === 'pending' && pings.length === 0) {
-          captureSoftError('url_copied_no_pings', {
-            route: window.location.pathname,
-            action: 'copy_url',
-            heartbeatId: monitor.id,
-            monitorId: monitor.id,
-            minutesSinceCopy: 5,
-          })
-        }
-      }, 5 * 60 * 1000) // 5 minutes
-    } catch (error) {
-      // Track error copying URL (invalid format or clipboard error)
-      captureSoftError('url_copy_failed', {
-        route: window.location.pathname,
-        action: 'copy_url',
-        heartbeatId: monitor.id,
-        monitorId: monitor.id,
-        error: error instanceof Error ? error.message : String(error),
-      })
-    }
+  const buildStartCurlCommand = () => {
+    return `curl -X POST "${pingUrl}/start" \\
+  -H "Content-Type: application/json" \\
+  -d '{"run_id": "optional-uuid"}'`
   }
 
-  const copyCurlToClipboard = async () => {
-    navigator.clipboard.writeText(curlCommands[selectedPlatform])
-    setCopiedCurl(true)
-    setTimeout(() => setCopiedCurl(false), 2000)
+  const buildCompleteCurlCommand = () => {
+    const curlData = buildCurlCommand()
+    const hasPayload = curlData.examplePayload && Object.keys(curlData.examplePayload).length > 0
+    const payloadJson = hasPayload ? JSON.stringify(curlData.examplePayload) : ''
     
-    // Track heartbeat URL copied (curl method)
-    const { captureHeartbeatUrlCopied } = await import('@/lib/posthog/client')
-    captureHeartbeatUrlCopied({ method: 'curl' })
+    if (hasPayload) {
+      return `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
+  -H "Content-Type: application/json" \\
+  -d '${payloadJson}'`
+    } else {
+      return `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
+  -H "Content-Type: application/json"`
+    }
   }
 
   // Check if monitor should be marked as late or failed based on last_ping_at and expected interval
@@ -421,6 +454,60 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     }
   }, [pings.length, waitingForPing])
 
+  // Check if a rule with the same field name and condition already exists
+  const checkDuplicateRule = (
+    fieldName: string,
+    rule: string,
+    currentFieldIndex: number | null = null
+  ): boolean => {
+    if (!fieldName.trim()) return false
+
+    // When editing, only show validation if values have changed from original
+    if (editingFieldIndex !== null && originalEditingField) {
+      const isSameAsOriginal = 
+        fieldName.trim().toLowerCase() === originalEditingField.name.trim().toLowerCase() &&
+        rule === originalEditingField.rule
+      
+      // If values are the same as original, don't show duplicate validation
+      if (isSameAsOriginal) return false
+    }
+
+    // Check existing rules in monitor (skip the one being edited)
+    if (monitor.payload_validation_rules?.fields) {
+      for (let i = 0; i < monitor.payload_validation_rules.fields.length; i++) {
+        // Skip the field being edited
+        if (editingFieldIndex !== null && i === editingFieldIndex) continue
+        
+        const existingField = monitor.payload_validation_rules.fields[i]
+        if (
+          existingField.name.trim().toLowerCase() === fieldName.trim().toLowerCase() &&
+          existingField.rule === rule
+        ) {
+          return true
+        }
+      }
+    }
+
+    // Check rules in payloadFields (only when adding new fields, not when editing)
+    // When editing, payloadFields contains only the field being edited, so we skip this check
+    if (editingFieldIndex === null) {
+      for (let i = 0; i < payloadFields.length; i++) {
+        // Skip the current field being checked
+        if (currentFieldIndex !== null && i === currentFieldIndex) continue
+        
+        const field = payloadFields[i]
+        if (
+          field.name.trim().toLowerCase() === fieldName.trim().toLowerCase() &&
+          field.rule === rule
+        ) {
+          return true
+        }
+      }
+    }
+
+    return false
+  }
+
   const handleSavePayloadRules = async () => {
     setLoading(true)
     setPayloadError(null)
@@ -460,7 +547,51 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
           })
 
         if (fields.length > 0) {
-          payloadValidationRules = { fields }
+          // Validate for duplicates before saving
+          for (let i = 0; i < fields.length; i++) {
+            const field = fields[i]
+            // When editing, we need to check against existing fields excluding the one being edited
+            // When adding new, we need to check both existing fields and other fields in payloadFields
+            const isDuplicate = checkDuplicateRule(
+              field.name,
+              field.rule,
+              editingFieldIndex !== null ? null : i // Skip current field index when adding new
+            )
+            
+            if (isDuplicate) {
+              throw new Error(
+                `A rule with field name '${field.name}' and condition '${getRuleLabel(field.rule)}' already exists. You can add multiple rules for the same field only if they have different conditions.`
+              )
+            }
+          }
+          
+          // Also check for duplicates within payloadFields itself (when adding multiple new fields)
+          if (editingFieldIndex === null && fields.length > 1) {
+            const seen = new Set<string>()
+            for (const field of fields) {
+              const key = `${field.name.trim().toLowerCase()}:${field.rule}`
+              if (seen.has(key)) {
+                throw new Error(
+                  `Duplicate rule detected: field name '${field.name}' with condition '${getRuleLabel(field.rule)}' appears multiple times. You can add multiple rules for the same field only if they have different conditions.`
+                )
+              }
+              seen.add(key)
+            }
+          }
+
+          // If editing a single field, merge with existing fields
+          if (editingFieldIndex !== null && monitor.payload_validation_rules?.fields) {
+            const existingFields = [...monitor.payload_validation_rules.fields]
+            existingFields[editingFieldIndex] = fields[0]
+            payloadValidationRules = { fields: existingFields }
+          } else {
+            // Adding new field(s) - merge with existing if any
+            if (monitor.payload_validation_rules?.fields) {
+              payloadValidationRules = { fields: [...monitor.payload_validation_rules.fields, ...fields] }
+            } else {
+              payloadValidationRules = { fields }
+            }
+          }
         }
       }
 
@@ -493,6 +624,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
 
       setPayloadSuccess(true)
       setEditingPayloadRules(false)
+      setEditingFieldIndex(null)
+      setOriginalEditingField(null)
+      setPayloadFields([])
       // Refresh monitor data to get latest pings
       await fetchMonitorData()
       setTimeout(() => {
@@ -503,6 +637,55 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleDeletePayloadRule = async (index: number) => {
+    if (!monitor.payload_validation_rules?.fields) return
+    
+    const newFields = [...monitor.payload_validation_rules.fields]
+    newFields.splice(index, 1)
+    
+    const payloadValidationRules = newFields.length > 0 ? { fields: newFields } : null
+    
+    try {
+      const response = await fetch(`/api/monitors/${monitor.slug}/update`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          payloadValidationRules,
+          expectedUpdatedAt: monitor.updated_at,
+        }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to delete rule')
+      }
+
+      const data = await response.json()
+      setMonitor(data.monitor)
+    } catch (err: any) {
+      console.error('Error deleting rule:', err)
+    }
+  }
+
+  const handleEditPayloadRule = (index: number) => {
+    if (!monitor.payload_validation_rules?.fields) return
+    const field = monitor.payload_validation_rules.fields[index]
+    setEditingFieldIndex(index)
+    setPayloadFields([{
+      name: field.name,
+      type: field.type,
+      rule: field.rule,
+      value: String(field.value),
+      severity: field.severity || 'error',
+    }])
+    // Store original values for comparison
+    setOriginalEditingField({
+      name: field.name,
+      rule: field.rule,
+    })
+    setEditingPayloadRules(true)
   }
 
   const handleSaveAlertChannels = async () => {
@@ -681,73 +864,155 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 </button>
               </div>
             )}
-            <div className="bg-background border border-border rounded-lg p-3 sm:p-4 font-mono text-xs sm:text-sm overflow-x-auto">
-              <code className="text-foreground whitespace-pre-wrap break-all">{curlCommand}</code>
-            </div>
+            <CodeBlock
+              code={curlCommand}
+              language="bash"
+            />
           </div>
-            <button
-              onClick={copyCurlToClipboard}
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto"
-            >
-              {copiedCurl ? '✓ Copied!' : 'Copy Command'}
-            </button>
         </div>
       )}
 
       {!isOnboarding && (
         <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
           <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Ping URL</h2>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <code className="flex-1 bg-background border border-border px-3 py-2 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto break-all">{pingUrl}</code>
+          
+          {/* Tabs */}
+          <div className="flex gap-1 bg-muted rounded-lg p-1 mb-4 w-fit mx-auto">
             <button
-              onClick={copyUrlToClipboard}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto flex-shrink-0"
+              type="button"
+              onClick={() => setPingMethod('simple')}
+              className={`flex-1 min-w-[120px] px-10 py-1.5 text-xs sm:text-sm font-medium rounded transition-smooth whitespace-nowrap ${
+                pingMethod === 'simple'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
             >
-              {copiedUrl ? '✓ Copied!' : 'Copy'}
+              Simple Ping
+            </button>
+            <button
+              type="button"
+              onClick={() => setPingMethod('job-runs')}
+              className={`flex-1 min-w-[120px] px-10 py-1.5 text-xs sm:text-sm font-medium rounded transition-smooth whitespace-nowrap ${
+                pingMethod === 'job-runs'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Job Ping
             </button>
           </div>
-          <div className="mt-4">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-xs sm:text-sm text-muted-foreground">Example curl command:</p>
-              {monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0 && (
-                <div className="flex gap-1 bg-muted rounded-lg p-1">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlatform('unix')}
-                    className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
-                      selectedPlatform === 'unix'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    Linux/Mac
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlatform('windows')}
-                    className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
-                      selectedPlatform === 'windows'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    Windows
-                  </button>
+
+          {/* Simple Ping Tab */}
+          {pingMethod === 'simple' && (
+            <>
+              <CodeBlock
+                code={pingUrl}
+                language="text"
+              />
+              <div className="mt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Example curl command:</p>
+                  {monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0 && (
+                    <div className="flex gap-1 bg-muted rounded-lg p-1">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlatform('unix')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          selectedPlatform === 'unix'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Linux/Mac
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlatform('windows')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          selectedPlatform === 'windows'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Windows
+                      </button>
+                    </div>
+                  )}
                 </div>
-              )}
+                <CodeBlock
+                  code={curlCommand}
+                  language="bash"
+                />
+              </div>
+            </>
+          )}
+
+          {/* Job Runs API Tab */}
+          {pingMethod === 'job-runs' && (
+            <div className="space-y-4">
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                Use these endpoints to track individual job executions and detect zombie jobs:
+              </p>
+
+              {/* Start Endpoint */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs sm:text-sm font-medium">1. Start Job:</span>
+                  <div className="flex-1">
+                    <CodeBlock
+                      code={`POST ${pingUrl}/start`}
+                      language="http"
+                      className="[&_pre]:!p-2 [&_pre]:!text-xs [&_pre]:!text-xs"
+                    />
+                  </div>
+                </div>
+                <CodeBlock
+                  code={buildStartCurlCommand()}
+                  language="bash"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Call this at the start of your job. Returns <code className="px-1 py-0.5 bg-muted rounded text-xs">run_id</code> if not provided.
+                </p>
+              </div>
+
+              {/* Completion Endpoint */}
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-xs sm:text-sm font-medium">2. Complete Job:</span>
+                  <div className="flex-1">
+                    <CodeBlock
+                      code={`POST ${pingUrl}?run_id=xxx`}
+                      language="http"
+                      className="[&_pre]:!p-2 [&_pre]:!text-xs [&_pre]:!text-xs"
+                    />
+                  </div>
+                </div>
+                <CodeBlock
+                  code={buildCompleteCurlCommand()}
+                  language="bash"
+                />
+                <p className="text-xs text-muted-foreground mt-2">
+                  Call this when your job completes. Use the <code className="px-1 py-0.5 bg-muted rounded text-xs">run_id</code> from the start endpoint.
+                  {monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0 && (
+                    <> Include payload data for validation.</>
+                  )}
+                </p>
+              </div>
+
+              {/* Example Workflow */}
+              <div>
+                <p className="text-xs sm:text-sm font-medium mb-2">Example workflow:</p>
+                <CodeBlock
+                  code={`# 1. Start job
+RUN_ID=$(curl -X POST "${pingUrl}/start" | jq -r '.run_id')
+# 2. Do your work...
+# 3. Complete job
+curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
+                  language="bash"
+                />
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-              <code className="flex-1 bg-background border border-border px-3 py-2 rounded-lg text-xs sm:text-sm font-mono overflow-x-auto whitespace-pre-wrap break-all">
-                {curlCommand}
-              </code>
-              <button
-                onClick={copyCurlToClipboard}
-                className="bg-secondary text-secondary-foreground hover:bg-secondary/80 px-4 py-2 rounded-lg text-sm font-medium transition-smooth w-full sm:w-auto flex-shrink-0"
-              >
-                {copiedCurl ? '✓ Copied!' : 'Copy'}
-              </button>
-            </div>
-          </div>
+          )}
         </div>
       )}
 
@@ -782,7 +1047,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
           </div>
         )}
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Expected Interval</h3>
             <p className="text-xl sm:text-2xl font-bold font-mono">
@@ -795,12 +1060,20 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
               {Math.floor(monitor.grace_period_seconds / 60)} min
             </p>
           </div>
+          <div>
+            <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Max Execution Time</h3>
+            <p className="text-xl sm:text-2xl font-bold font-mono">
+              {monitor.max_execution_time_seconds 
+                ? `${Math.floor(monitor.max_execution_time_seconds / 60)} min`
+                : 'Disabled'}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Interval Edit Modal */}
-      {editingInterval && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      {editingInterval && typeof window !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-50 flex items-start justify-center p-4 pt-8 sm:pt-16 bg-background/60 backdrop-blur-md overflow-y-auto">
           <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
@@ -812,6 +1085,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                     setIntervalSuccess(false)
                     setIntervalMinutes(Math.floor(monitor.expected_interval_seconds / 60))
                     setGracePeriodMinutes(Math.floor(monitor.grace_period_seconds / 60))
+                    setMaxExecutionTimeMinutes(monitor.max_execution_time_seconds ? Math.floor(monitor.max_execution_time_seconds / 60) : 0)
+                    setMaxExecutionTimeEnabled(monitor.max_execution_time_seconds !== null && monitor.max_execution_time_seconds > 0)
                   }}
                   className="text-muted-foreground hover:text-foreground transition-smooth text-xl"
                 >
@@ -961,6 +1236,127 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                   </p>
                 </div>
 
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label htmlFor="maxExecutionTime" className="block text-sm font-medium">
+                      Max Execution Time (Optional)
+                    </label>
+                    <div className="flex gap-1 bg-muted rounded-lg p-1">
+                      <button
+                        type="button"
+                        onClick={() => setMaxExecutionTimeUnit('minutes')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          maxExecutionTimeUnit === 'minutes'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Minutes
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMaxExecutionTimeUnit('hours')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          maxExecutionTimeUnit === 'hours'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Hours
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 mb-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
+                        if (maxExecutionTimeEnabled) {
+                          setMaxExecutionTimeMinutes(0)
+                        }
+                      }}
+                      className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
+                      style={{
+                        backgroundColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'transparent',
+                        borderColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'rgb(var(--input))',
+                      }}
+                      aria-label="Enable timeout detection"
+                    >
+                      {maxExecutionTimeEnabled && (
+                        <svg
+                          className="absolute inset-0 w-full h-full text-primary-foreground"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                          />
+                        </svg>
+                      )}
+                    </button>
+                    <label 
+                      htmlFor="maxExecutionTimeEnabled" 
+                      className="text-sm text-muted-foreground cursor-pointer"
+                      onClick={() => {
+                        setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
+                        if (maxExecutionTimeEnabled) {
+                          setMaxExecutionTimeMinutes(0)
+                        }
+                      }}
+                    >
+                      Enable timeout detection
+                    </label>
+                  </div>
+
+                  {maxExecutionTimeEnabled && (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <input
+                          id="maxExecutionTime"
+                          type="range"
+                          min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
+                          step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          value={getMaxExecutionTimeValue()}
+                          onChange={(e) => setMaxExecutionTimeValue(Number(e.target.value))}
+                          className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                        />
+                        <input
+                          type="number"
+                          min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
+                          step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          value={getMaxExecutionTimeValue()}
+                          onChange={(e) => {
+                            const value = Number(e.target.value)
+                            if (value >= (maxExecutionTimeUnit === 'hours' ? 0.1 : 1)) {
+                              setMaxExecutionTimeValue(value)
+                            }
+                          }}
+                          className="w-20 px-2 py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth"
+                        />
+                      </div>
+
+                      <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                        <span>
+                          {maxExecutionTimeUnit === 'hours' ? '0.1 hr' : '1 min'}
+                        </span>
+                        <span>{maxExecutionTimeUnit === 'hours' ? '24 hours' : '1440 min'}</span>
+                      </div>
+                    </>
+                  )}
+
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Maximum time a job can run before being marked as timeout. If set, jobs that run longer than this time will trigger an alert.
+                  </p>
+                </div>
+
                 <div className="flex gap-3 pt-4 border-t border-border">
                   <button
                     onClick={async () => {
@@ -971,6 +1367,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                       try {
                         const expectedIntervalSeconds = intervalMinutes * 60
                         const gracePeriodSeconds = gracePeriodMinutes * 60
+                        const maxExecutionTimeSeconds = maxExecutionTimeEnabled && maxExecutionTimeMinutes > 0
+                          ? maxExecutionTimeMinutes * 60
+                          : null
 
                         if (expectedIntervalSeconds < 60) {
                           throw new Error('Expected interval must be at least 60 seconds (1 minute)')
@@ -980,9 +1379,14 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                           throw new Error('Grace period cannot be negative')
                         }
 
+                        if (maxExecutionTimeSeconds !== null && maxExecutionTimeSeconds < 1) {
+                          throw new Error('Max execution time must be at least 1 second')
+                        }
+
                         const requestBody: any = {
                           expectedIntervalSeconds,
                           gracePeriodSeconds,
+                          maxExecutionTimeSeconds,
                           expectedUpdatedAt: monitor.updated_at,
                         }
 
@@ -1040,7 +1444,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
@@ -1056,6 +1461,33 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
           <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Total Pings</h3>
           <p className="text-xl sm:text-2xl font-bold font-mono">{pings.length}</p>
         </div>
+        <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6 hover-lift transition-smooth">
+          <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Last Job Duration</h3>
+          <p className="text-xl sm:text-2xl font-bold font-mono">
+            {(() => {
+              const lastCompletedJob = jobRuns
+                .filter(run => run.status === 'completed' && run.duration_ms !== null)
+                .sort((a, b) => new Date(b.completed_at || b.started_at).getTime() - new Date(a.completed_at || a.started_at).getTime())[0]
+              
+              if (!lastCompletedJob || lastCompletedJob.duration_ms === null) {
+                return 'No jobs yet'
+              }
+              
+              const durationMs = lastCompletedJob.duration_ms
+              const durationSeconds = Math.floor(durationMs / 1000)
+              const minutes = Math.floor(durationSeconds / 60)
+              const seconds = durationSeconds % 60
+              
+              if (minutes > 0) {
+                return `${minutes}m ${seconds}s`
+              } else if (durationSeconds > 0) {
+                return `${durationSeconds}s`
+              } else {
+                return `${durationMs}ms`
+              }
+            })()}
+          </p>
+        </div>
       </div>
 
       {/* Payload Validation Rules Section */}
@@ -1069,10 +1501,21 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
           </div>
           {!editingPayloadRules && (
             <button
-              onClick={() => setEditingPayloadRules(true)}
+              onClick={() => {
+                setEditingFieldIndex(null)
+                setOriginalEditingField(null)
+                setPayloadFields([{
+                  name: '',
+                  type: 'number',
+                  rule: '>',
+                  value: '',
+                  severity: 'error',
+                }])
+                setEditingPayloadRules(true)
+              }}
               className="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-accent transition-smooth"
             >
-              {monitor.payload_validation_rules ? 'Edit' : 'Configure'}
+              Add
             </button>
           )}
         </div>
@@ -1096,24 +1539,26 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 <label className="block text-sm font-medium">
                   Payload Fields
                 </label>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (payloadFields.length < 5) {
-                      setPayloadFields([...payloadFields, {
-                        name: '',
-                        type: 'number',
-                        rule: '>',
-                        value: '',
-                        severity: 'error',
-                      }])
-                    }
-                  }}
-                  disabled={payloadFields.length >= 5}
-                  className="text-xs px-2 py-1 border border-border rounded hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  + Add Field {payloadFields.length >= 5 ? '(max 5)' : ''}
-                </button>
+                {editingFieldIndex === null && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (payloadFields.length < 5) {
+                        setPayloadFields([...payloadFields, {
+                          name: '',
+                          type: 'number',
+                          rule: '>',
+                          value: '',
+                          severity: 'error',
+                        }])
+                      }
+                    }}
+                    disabled={payloadFields.length >= 5}
+                    className="text-xs px-2 py-1 border border-border rounded hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    + Add Field {payloadFields.length >= 5 ? '(max 5)' : ''}
+                  </button>
+                )}
               </div>
               <p className="text-xs text-muted-foreground mb-3">
                 Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum 5 fields per monitor. Field names must be 100 characters or less.
@@ -1124,25 +1569,25 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                   No fields configured. Click "Add Field" to add validation rules.
                 </p>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {payloadFields.map((field, index) => (
-                    <div key={index} className="bg-background border border-input rounded-lg p-3 space-y-2">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
+                    <div key={index} className="bg-card border border-border rounded-lg p-4 sm:p-5 space-y-4">
+                      <div className="flex items-center justify-between pb-3 border-b border-border">
+                        <h4 className="text-sm font-semibold">Field {index + 1}</h4>
                         <button
                           type="button"
                           onClick={() => {
                             setPayloadFields(payloadFields.filter((_, i) => i !== index))
                           }}
-                          className="text-xs px-2 py-1 text-error hover:bg-error/10 rounded transition-smooth"
+                          className="text-xs px-3 py-1.5 text-error hover:bg-error/10 rounded transition-smooth font-medium"
                         >
                           Remove
                         </button>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-medium mb-1">Field Name</label>
+                          <label className="block text-xs font-medium mb-2 text-foreground">Field Name</label>
                           <input
                             type="text"
                             value={field.name}
@@ -1152,12 +1597,21 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                               setPayloadFields(newFields)
                             }}
                             placeholder="e.g., count"
-                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                            className={`w-full px-3 py-2 bg-card border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth ${
+                              field.name.trim() && checkDuplicateRule(field.name, field.rule, editingFieldIndex !== null ? null : index)
+                                ? 'border-error/50 focus:ring-error/50'
+                                : 'border-input'
+                            }`}
                           />
+                          {field.name.trim() && checkDuplicateRule(field.name, field.rule, editingFieldIndex !== null ? null : index) && (
+                            <p className="text-xs text-error mt-1">
+                              A rule with this field name and condition already exists. Use a different condition to add multiple rules for the same field.
+                            </p>
+                          )}
                         </div>
                         
                         <div>
-                          <label className="block text-xs font-medium mb-1">Type</label>
+                          <label className="block text-xs font-medium mb-2 text-foreground">Type</label>
                           <select
                             value={field.type}
                             onChange={(e) => {
@@ -1173,7 +1627,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                               }
                               setPayloadFields(newFields)
                             }}
-                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                            className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                           >
                             <option value="number">Number</option>
                             <option value="boolean">Boolean</option>
@@ -1182,9 +1636,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-medium mb-1">Rule</label>
+                          <label className="block text-xs font-medium mb-2 text-foreground">Rule</label>
                           <select
                             value={field.rule}
                             onChange={(e) => {
@@ -1192,50 +1646,95 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                               newFields[index].rule = e.target.value as '>' | '<' | '>=' | '<=' | '==' | '!='
                               setPayloadFields(newFields)
                             }}
-                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                            className={`w-full px-3 py-2 bg-card border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10 ${
+                              field.name.trim() && checkDuplicateRule(field.name, field.rule, editingFieldIndex !== null ? null : index)
+                                ? 'border-error/50 focus:ring-error/50'
+                                : 'border-input'
+                            }`}
                           >
                             {field.type === 'number' ? (
                               <>
-                                <option value=">">Greater than (&gt;)</option>
-                                <option value="<">Less than (&lt;)</option>
-                                <option value=">=">Greater or equal (&gt;=)</option>
-                                <option value="<=">Less or equal (&lt;=)</option>
-                                <option value="==">Equal (==)</option>
-                                <option value="!=">Not equal (!=)</option>
+                                <option value=">">Greater than</option>
+                                <option value="<">Less than</option>
+                                <option value=">=">Greater than or equal</option>
+                                <option value="<=">Less than or equal</option>
+                                <option value="==">Equal to</option>
+                                <option value="!=">Not equal to</option>
                               </>
                             ) : (
                               <>
-                                <option value="==">Equal (==)</option>
-                                <option value="!=">Not equal (!=)</option>
+                                <option value="==">Equal to</option>
+                                <option value="!=">Not equal to</option>
                               </>
                             )}
                           </select>
+                          {field.name.trim() && checkDuplicateRule(field.name, field.rule, editingFieldIndex !== null ? null : index) && (
+                            <p className="text-xs text-error mt-1">
+                              A rule with this field name and condition already exists. Use a different condition to add multiple rules for the same field.
+                            </p>
+                          )}
                         </div>
                         
                         <div>
-                          <label className="block text-xs font-medium mb-1">Value</label>
-                          <input
-                            type={field.type === 'number' ? 'number' : 'text'}
-                            value={field.value}
-                            onChange={(e) => {
-                              const newFields = [...payloadFields]
-                              newFields[index].value = e.target.value
-                              setPayloadFields(newFields)
-                            }}
-                            placeholder={
-                              field.type === 'number' 
-                                ? 'e.g., 100' 
-                                : field.type === 'boolean'
-                                ? 'true or false'
-                                : 'e.g., "ok"'
-                            }
-                            className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
-                          />
+                          <label className="block text-xs font-medium mb-2 text-foreground">Value</label>
+                          <div className="relative">
+                            <input
+                              type={field.type === 'number' ? 'number' : 'text'}
+                              value={field.value}
+                              onChange={(e) => {
+                                const newFields = [...payloadFields]
+                                newFields[index].value = e.target.value
+                                setPayloadFields(newFields)
+                              }}
+                              placeholder={
+                                field.type === 'number' 
+                                  ? 'e.g., 100' 
+                                  : field.type === 'boolean'
+                                  ? 'true or false'
+                                  : 'e.g., "ok"'
+                              }
+                              className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
+                            />
+                            {field.type === 'number' && (
+                              <div className="absolute right-2 top-0 bottom-0 flex flex-col justify-center gap-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newFields = [...payloadFields]
+                                    const currentValue = Number(newFields[index].value) || 0
+                                    newFields[index].value = String(currentValue + 1)
+                                    setPayloadFields(newFields)
+                                  }}
+                                  className="w-5 h-3 flex items-center justify-center text-muted-foreground hover:text-foreground transition-smooth rounded-t"
+                                  tabIndex={-1}
+                                >
+                                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 0L10 6H0L5 0Z" fill="currentColor"/>
+                                  </svg>
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newFields = [...payloadFields]
+                                    const currentValue = Number(newFields[index].value) || 0
+                                    newFields[index].value = String(Math.max(0, currentValue - 1))
+                                    setPayloadFields(newFields)
+                                  }}
+                                  className="w-5 h-3 flex items-center justify-center text-muted-foreground hover:text-foreground transition-smooth rounded-b"
+                                  tabIndex={-1}
+                                >
+                                  <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M5 6L0 0H10L5 6Z" fill="currentColor"/>
+                                  </svg>
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                       
                       <div>
-                        <label className="flex items-center gap-1.5 text-xs font-medium mb-1">
+                        <label className="flex items-center gap-1.5 text-xs font-medium mb-2 text-foreground">
                           Severity
                           <InfoTooltip content="Error: Monitor will be marked as FAIL if validation fails. Warning: Monitor stays healthy but shows warning status.">
                             <button type="button" className="text-muted-foreground hover:text-foreground transition-smooth">
@@ -1250,7 +1749,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                             newFields[index].severity = e.target.value as 'warn' | 'error'
                             setPayloadFields(newFields)
                           }}
-                          className="w-full px-2 py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
+                          className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                         >
                           <option value="error">Error (mark as FAIL)</option>
                           <option value="warn">Warning</option>
@@ -1261,10 +1760,15 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 </div>
               )}
               
-              <p className="mt-3 text-xs text-muted-foreground">
-                Example: Validate that <code className="px-1 py-0.5 bg-muted rounded">count</code> field is greater than 100.
-                Your cron job should send: <code className="px-1 py-0.5 bg-muted rounded">{"{ \"count\": 120 }"}</code>
-              </p>
+              {payloadFields.length > 0 && (
+                <div className="mt-4 p-3 bg-muted/30 border border-border rounded-lg">
+                  <p className="text-xs font-medium mb-1.5 text-foreground">Example:</p>
+                  <p className="text-xs text-muted-foreground">
+                    Validate that <code className="px-1.5 py-0.5 bg-background border border-border rounded text-xs font-mono">count</code> field is greater than 100.
+                    Your cron job should send: <code className="px-1.5 py-0.5 bg-background border border-border rounded text-xs font-mono">{"{ \"count\": 120 }"}</code>
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 pt-4 border-t border-border">
@@ -1274,12 +1778,15 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 disabled={loading}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-smooth"
               >
-                {loading ? 'Saving...' : 'Save Rules'}
+                {loading ? 'Saving...' : editingFieldIndex !== null ? 'Save Changes' : 'Add Rule'}
               </button>
               <button
                 type="button"
                 onClick={() => {
                   setEditingPayloadRules(false)
+                  setEditingFieldIndex(null)
+                  setOriginalEditingField(null)
+                  setPayloadFields([])
                   setPayloadError(null)
                   setPayloadSuccess(false)
                   // Reset to original values
@@ -1305,24 +1812,42 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         ) : (
           <div>
             {monitor.payload_validation_rules && monitor.payload_validation_rules.fields && monitor.payload_validation_rules.fields.length > 0 ? (
-              <div className="space-y-2 text-sm">
-                {monitor.payload_validation_rules.fields.map((field: any, index: number) => (
-                  <div key={index} className="p-2 bg-background border border-input rounded">
-                    <p>
-                      <span className="font-medium">{field.name}</span> ({field.type}){' '}
-                      <span className="text-muted-foreground">{field.rule}</span>{' '}
-                      <span className="font-mono">{String(field.value)}</span>
-                      {field.severity && field.severity !== 'error' && (
-                        <WarningTooltip content="This is a warning rule. The monitor will stay healthy but show a warning status if validation fails.">
-                          <span className="ml-2 inline-flex items-center gap-1 text-xs text-warning">
-                            <WarningIcon className="w-3 h-3" />
-                            ({field.severity})
-                          </span>
-                        </WarningTooltip>
-                      )}
-                    </p>
-                  </div>
-                ))}
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Name</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Condition</th>
+                      <th className="text-left py-2 px-3 font-medium text-muted-foreground">Value</th>
+                      <th className="text-right py-2 px-3 font-medium text-muted-foreground">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {monitor.payload_validation_rules.fields.map((field: any, index: number) => (
+                      <tr key={index} className="border-b border-border last:border-b-0">
+                        <td className="py-2 px-3 font-medium">{field.name}</td>
+                        <td className="py-2 px-3 text-muted-foreground">{getRuleLabel(field.rule)}</td>
+                        <td className="py-2 px-3 font-mono">{String(field.value)}</td>
+                        <td className="py-2 px-3">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleEditPayloadRule(index)}
+                              className="px-2 py-1 text-xs border border-border rounded hover:bg-accent transition-smooth"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeletePayloadRule(index)}
+                              className="px-2 py-1 text-xs text-error border border-error/20 rounded hover:bg-error/10 transition-smooth"
+                            >
+                              Remove
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             ) : (
               <p className="text-sm text-muted-foreground italic">
@@ -1334,7 +1859,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
       </div>
 
       {/* Alert Channels Override Section */}
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden mb-4 sm:mb-6">
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border flex items-center justify-between">
           <div>
             <h2 className="text-base sm:text-lg font-semibold">Alert Channels Override</h2>
@@ -1501,7 +2026,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
         )}
       </div>
 
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden">
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden mb-4 sm:mb-6">
         <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
           <h2 className="text-base sm:text-lg font-semibold">Recent Pings</h2>
         </div>
@@ -1571,6 +2096,110 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, pi
                 </div>
               </div>
             ))
+          )}
+        </div>
+      </div>
+
+      {/* Job Runs Section */}
+      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden mb-4 sm:mb-6">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border">
+          <h2 className="text-base sm:text-lg font-semibold">Job Runs</h2>
+        </div>
+        <div className="divide-y divide-border">
+          {jobRuns.length === 0 ? (
+            <div className="px-4 sm:px-6 py-6 sm:py-8 text-center text-muted-foreground text-sm">
+              <p className="mb-2">No job runs yet</p>
+              <p className="text-xs">
+                Use <code className="px-1 py-0.5 bg-muted rounded text-xs">POST /api/ping/[slug]/start</code> to track individual job executions
+              </p>
+            </div>
+          ) : (
+            jobRuns.map((run, index) => {
+              const startedAt = new Date(run.started_at)
+              const isRunning = run.status === 'running'
+              const isTimeout = run.status === 'timeout'
+              const isCompleted = run.status === 'completed'
+              const isFailed = run.status === 'failed'
+              
+              // Check if running job exceeds max execution time
+              const exceedsMaxTime = isRunning && monitor.max_execution_time_seconds && monitor.max_execution_time_seconds > 0
+                ? (Date.now() - startedAt.getTime()) > (monitor.max_execution_time_seconds * 1000)
+                : false
+              
+              const runningDurationMs = isRunning ? Date.now() - startedAt.getTime() : null
+              const runningDurationSeconds = runningDurationMs ? Math.floor(runningDurationMs / 1000) : null
+              
+              let statusBadge = ''
+              let statusClass = ''
+              let statusText = ''
+              
+              if (isRunning) {
+                statusBadge = '⏳'
+                statusClass = 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                statusText = 'RUNNING'
+              } else if (isCompleted) {
+                statusBadge = '✓'
+                statusClass = 'bg-success/10 text-success border-success/20'
+                statusText = 'COMPLETED'
+              } else if (isTimeout) {
+                statusBadge = '⚠️'
+                statusClass = 'bg-warning/10 text-warning border-warning/20'
+                statusText = 'TIMEOUT'
+              } else if (isFailed) {
+                statusBadge = '✗'
+                statusClass = 'bg-error/10 text-error border-error/20'
+                statusText = 'FAILED'
+              }
+              
+              return (
+                <div
+                  key={run.id}
+                  className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-smooth animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 sm:gap-4 flex-1 min-w-0">
+                      <span
+                        className={`px-2 py-0.5 sm:py-1 text-xs font-semibold rounded border flex-shrink-0 ${statusClass}`}
+                      >
+                        {statusBadge} {statusText}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs sm:text-sm font-medium font-mono truncate">
+                          {run.run_id.substring(0, 8)}...
+                        </p>
+                        <p className="text-xs sm:text-sm text-muted-foreground mt-1">
+                          {format(startedAt, 'PPp')}
+                        </p>
+                        {isRunning && runningDurationSeconds !== null && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Running for: {Math.floor(runningDurationSeconds / 60)}m {runningDurationSeconds % 60}s
+                            {exceedsMaxTime && (
+                              <span className="ml-2 text-warning">⚠️ Exceeds max execution time</span>
+                            )}
+                          </p>
+                        )}
+                        {isCompleted && run.duration_ms !== null && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Duration: {run.duration_ms}ms
+                          </p>
+                        )}
+                        {isTimeout && run.duration_ms !== null && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Timed out after: {Math.floor(run.duration_ms / 1000)}s
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right flex-shrink-0 hidden sm:block">
+                      <p className="text-xs text-muted-foreground" suppressHydrationWarning>
+                        {formatDistanceToNow(startedAt, { addSuffix: true })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })
           )}
         </div>
       </div>

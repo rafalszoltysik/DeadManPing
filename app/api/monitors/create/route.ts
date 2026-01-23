@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, scheduleType, cronExpression } = body
+    const { name, expectedIntervalSeconds, gracePeriodSeconds, maxExecutionTimeSeconds, payloadValidationRules, alertChannels, scheduleType, cronExpression } = body
 
     // Validate input
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
@@ -87,6 +87,16 @@ export async function POST(request: NextRequest) {
     if (gracePeriod < 0) {
       await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
       return badRequestResponse('Grace period cannot be negative')
+    }
+
+    // Validate max execution time if provided
+    let validatedMaxExecutionTime: number | null = null
+    if (maxExecutionTimeSeconds !== undefined && maxExecutionTimeSeconds !== null) {
+      if (typeof maxExecutionTimeSeconds !== 'number' || maxExecutionTimeSeconds < 1) {
+        await captureHeartbeatCreateFailed(user.id, { reason: 'validation' })
+        return badRequestResponse('Max execution time must be at least 1 second')
+      }
+      validatedMaxExecutionTime = maxExecutionTimeSeconds
     }
 
     // Validate and sanitize payload validation rules
@@ -231,6 +241,7 @@ export async function POST(request: NextRequest) {
       slug,
       expected_interval_seconds: validatedIntervalSeconds,
       grace_period_seconds: gracePeriod,
+      max_execution_time_seconds: validatedMaxExecutionTime,
       payload_validation_rules: validatedRules,
       status: 'pending',
       next_expected_ping_at: nextExpectedPing.toISOString(),

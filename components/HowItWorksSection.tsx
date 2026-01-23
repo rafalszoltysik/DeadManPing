@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { MonitorFormDemo, type MonitorFormData } from './MonitorFormDemo'
 import { CTAButton } from './CTAButton'
 import { AnimatedItem, StaggerContainer } from './AnimatedSection'
+import { CodeBlock } from './CodeBlock'
 
 function generateCronExpression(intervalValue: number, intervalUnit: 'hours' | 'minutes'): string {
   if (intervalUnit === 'minutes') {
@@ -191,9 +192,10 @@ export function HowItWorksSection() {
                     <div className="w-2 h-2 rounded-full bg-success"></div>
                     <p className="text-xs sm:text-sm text-muted-foreground font-mono">{scriptName}.sh</p>
                   </div>
-                  <pre className="bg-background rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm">
-                    <code className="break-words text-foreground whitespace-pre">{scriptExample}</code>
-                  </pre>
+                  <CodeBlock
+                    code={scriptExample}
+                    language="bash"
+                  />
                   <div className="mt-3 pt-3 border-t border-border">
                     <p className="text-xs sm:text-sm text-muted-foreground font-mono">
                       <span className="text-muted-foreground/60"># In crontab:</span> <span className="text-foreground">{cronExpression} /path/to/{scriptName}.sh</span>

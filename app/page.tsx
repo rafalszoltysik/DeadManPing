@@ -9,10 +9,10 @@ import { CTAButton } from '@/components/CTAButton'
 import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
-import { SiPython, SiNodedotjs, SiRuby, SiGo, SiPhp } from 'react-icons/si'
-import { FaTerminal, FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
+import { FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
 import PricingSectionClient from '@/components/PricingSectionClient'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
+import { CodeBlock } from '@/components/CodeBlock'
 
 // Lazy load heavy components below the fold
 const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
@@ -293,6 +293,70 @@ export default function Home() {
           }>
             <DashboardPreview />
           </Suspense>
+        </AnimatedSection>
+
+        {/* Three Monitoring Modes */}
+        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={100} direction="up" duration={800}>
+          <div className="max-w-5xl mx-auto px-4">
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Three Ways to Monitor</h2>
+            </AnimatedItem>
+            <AnimatedItem delay={200} direction="up" duration={700}>
+              <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
+                Choose the monitoring mode that fits your needs
+              </p>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" staggerDelay={100}>
+              <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
+                <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-primary text-lg sm:text-xl font-bold">1</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3 text-center">Simple Ping</h3>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  Just verify that your job executed. One curl line confirms completion.
+                </p>
+                <CodeBlock
+                  code="curl https://deadmanping.com/api/ping/your-slug"
+                  language="bash"
+                />
+              </div>
+
+              <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
+                <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-primary text-lg sm:text-xl font-bold">2</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3 text-center">Ping with Payload</h3>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  Verify correctness. Send data from execution and validate results in the dashboard.
+                </p>
+                <CodeBlock
+                  code='curl -X POST "https://deadmanping.com/api/ping/your-slug?count=100"'
+                  language="bash"
+                />
+              </div>
+
+              <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
+                <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-primary text-lg sm:text-xl font-bold">3</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3 text-center">Start/Stop Tracking</h3>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  Measure execution time. Track job duration and optionally include payload validation.
+                </p>
+                <CodeBlock
+                  code="/api/ping/your-slug/start → ... → /api/ping/your-slug?run_id=..."
+                  language="bash"
+                />
+              </div>
+            </StaggerContainer>
+            <AnimatedItem delay={500} direction="up" duration={700}>
+              <p className="text-center text-sm text-muted-foreground mt-8">
+                <Link href="/docs" className="text-primary hover:underline font-medium">
+                  See detailed examples in documentation →
+                </Link>
+              </p>
+            </AnimatedItem>
+          </div>
         </AnimatedSection>
 
         {/* The uncomfortable truth */}
@@ -614,191 +678,6 @@ export default function Home() {
                   </div>
                 </div>
               </AnimatedItem>
-          </div>
-        </AnimatedSection>
-
-        {/* Real-World Examples */}
-          <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Real-world examples" delay={100} direction="up" duration={800}>
-          <div className="max-w-6xl mx-auto px-4">
-            <AnimatedItem delay={100} direction="up" duration={700}>
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Real-World Examples</h2>
-            </AnimatedItem>
-            <AnimatedItem delay={200} direction="up" duration={700}>
-              <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
-                Different types of verification that DeadManPing can monitor:
-              </p>
-            </AnimatedItem>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" staggerDelay={80}>
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#3776ab]/20 flex items-center justify-center flex-shrink-0 border border-[#3776ab]/30">
-                      <SiPython className="w-5 h-5 text-[#3776ab]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">File Verification</h3>
-                      <span className="text-xs text-muted-foreground">Python</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">Check if backup file exists and size</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`import os
-import requests
-
-file_exists = os.path.exists(backup_file)
-size = os.path.getsize(backup_file) if file_exists else 0
-
-# Single ping with file data
-# In DeadManPing panel: set validation rules:
-#   - "file_exists" == True
-#   - "size" > 0
-requests.post(f"https://deadmanping.com/api/ping/{MONITOR_ID}?file_exists={file_exists}&size={size}")`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#339933]/20 flex items-center justify-center flex-shrink-0 border border-[#339933]/30">
-                      <SiNodedotjs className="w-5 h-5 text-[#339933]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">Status Verification</h3>
-                      <span className="text-xs text-muted-foreground">Node.js</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">Success/failure with context</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`const { execSync } = require('child_process');
-const https = require('https');
-
-let exitCode = 0;
-try {
-  execSync('./backup.sh');
-} catch (error) {
-  exitCode = error.status || 1;
-}
-
-// Single ping with exit code
-// In DeadManPing panel: set validation rule "exit_code" == 0
-https.request(\`https://deadmanping.com/api/ping/\${MONITOR_ID}?exit_code=\${exitCode}\`, 
-  { method: 'POST' }).end();`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#4eaa25]/20 flex items-center justify-center flex-shrink-0 border border-[#4eaa25]/30">
-                      <FaTerminal className="w-5 h-5 text-[#4eaa25]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">Duration Verification</h3>
-                      <span className="text-xs text-muted-foreground">Bash</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">How long script execution took</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`START_TIME=$(date +%s)
-./generate_report.sh
-END_TIME=$(date +%s)
-curl ... -d "{\\"duration_seconds\\": $((END_TIME - START_TIME))}"`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#cc342d]/20 flex items-center justify-center flex-shrink-0 border border-[#cc342d]/30">
-                      <SiRuby className="w-5 h-5 text-[#cc342d]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">Threshold Verification</h3>
-                      <span className="text-xs text-muted-foreground">Ruby</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">Numeric values (more/less than X)</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`files_deleted = \`./cleanup.sh\`.lines.count
-system("curl ... -d '{\\"files_deleted\\": #{files_deleted}}'")
-# Dashboard: >= 10 → OK, < 10 → WARN`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#00add8]/20 flex items-center justify-center flex-shrink-0 border border-[#00add8]/30">
-                      <SiGo className="w-5 h-5 text-[#00add8]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">Count Verification</h3>
-                      <span className="text-xs text-muted-foreground">Go</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">How many records/items processed</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`import (
-  "os/exec"
-  "strings"
-  "fmt"
-)
-
-out, _ := exec.Command("./sync.sh").Output()
-count := len(strings.Split(string(out), "synced"))
-exec.Command("curl", "...", "-d",
-  fmt.Sprintf("{\\"count\\": %d}", count)).Run()`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-background border border-border rounded-lg p-5 sm:p-6 card-hover h-full flex flex-col transition-all duration-300 hover:shadow-md hover:-translate-y-1">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#777bb4]/20 flex items-center justify-center flex-shrink-0 border border-[#777bb4]/30">
-                      <SiPhp className="w-5 h-5 text-[#777bb4]" />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-base sm:text-lg font-semibold">Output Verification</h3>
-                      <span className="text-xs text-muted-foreground">PHP</span>
-                    </div>
-                  </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground mb-4">Check script output content</p>
-                  <div className="bg-card border border-border rounded p-3 flex-grow flex flex-col min-h-0">
-                    <div className="flex-1 overflow-x-auto overflow-y-hidden">
-                      <pre className="text-xs">
-                        <code className="text-foreground">{`$output = shell_exec('./process.sh');
-$hasExpectedContent = strpos($output, 'success') !== false ? 1 : 0;
-$outputLength = strlen($output);
-
-// Single ping with output validation data
-// In DeadManPing panel: set validation rules:
-//   - "has_expected_content" == 1
-//   - "output_length" > 0
-shell_exec("curl -X POST \"https://deadmanping.com/api/ping/{$MONITOR_ID}?has_expected_content={$hasExpectedContent}&output_length={$outputLength}\"");`}</code>
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-            </StaggerContainer>
-            <AnimatedItem delay={500} direction="up" duration={400}>
-              <p className="text-center text-sm sm:text-base text-muted-foreground mt-8 sm:mt-12">
-                And more... Works with any language that can execute curl.
-              </p>
-            </AnimatedItem>
           </div>
         </AnimatedSection>
 

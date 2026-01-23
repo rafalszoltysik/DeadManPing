@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
+import { CodeBlock } from '@/components/CodeBlock'
 
 export const metadata: Metadata = {
   title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
@@ -118,18 +119,17 @@ export default function DeadManSwitchPage() {
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 rsync Backup Example
               </h3>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>#!/bin/bash</div>
-                  <div>set -e</div>
-                  <div></div>
-                  <div># Run backup</div>
-                  <div>rsync -avz /data/ user@backup-server:/backups/</div>
-                  <div></div>
-                  <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`#!/bin/bash
+set -e
+
+# Run backup
+rsync -avz /data/ user@backup-server:/backups/
+
+# Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+curl -X POST "https://deadmanping.com/api/ping/backup-daily"`}
+                language="bash"
+              />
               <p className="text-muted-foreground mb-4">
                 The <code className="bg-muted px-1.5 py-0.5 rounded text-sm">set -e</code> ensures the script exits on any error, 
                 so the ping only happens if rsync succeeds.
@@ -138,46 +138,44 @@ export default function DeadManSwitchPage() {
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Database Backup Example
               </h3>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>#!/bin/bash</div>
-                  <div></div>
-                  <div>BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql"</div>
-                  <div></div>
-                  <div>pg_dump mydb &gt; "$BACKUP_FILE"</div>
-                  <div>gzip "$BACKUP_FILE"</div>
-                  <div></div>
-                  <div># Get backup file size</div>
-                  <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE.gz" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE.gz" 2&gt;/dev/null || echo 0)</div>
-                  <div></div>
-                  <div># Single ping with file size in payload</div>
-                  <div># In DeadManPing panel: set validation rule "size" &gt; 0</div>
-                  <div># Panel will automatically detect if backup file is empty</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-db?size=$FILE_SIZE"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`#!/bin/bash
+
+BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql"
+
+pg_dump mydb > "$BACKUP_FILE"
+gzip "$BACKUP_FILE"
+
+# Get backup file size
+FILE_SIZE=$(stat -f%z "$BACKUP_FILE.gz" 2>/dev/null || stat -c%s "$BACKUP_FILE.gz" 2>/dev/null || echo 0)
+
+# Single ping with file size in payload
+# In DeadManPing panel: set validation rule "size" > 0
+# Panel will automatically detect if backup file is empty
+curl -X POST "https://deadmanping.com/api/ping/backup-db?size=$FILE_SIZE"`}
+                language="bash"
+              />
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Cloud Backup (S3, GCS, etc.)
               </h3>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>#!/bin/bash</div>
-                  <div></div>
-                  <div># Create backup archive</div>
-                  <div>tar -czf backup.tar.gz /data/</div>
-                  <div></div>
-                  <div># Upload to S3</div>
-                  <div>aws s3 cp backup.tar.gz s3://my-bucket/backups/</div>
-                  <div>UPLOAD_EXIT_CODE=$?</div>
-                  <div>rm backup.tar.gz</div>
-                  <div></div>
-                  <div># Single ping with upload exit code in payload</div>
-                  <div># In DeadManPing panel: set validation rule "upload_exit_code" == 0</div>
-                  <div># Panel will automatically detect if S3 upload failed</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-s3?upload_exit_code=$UPLOAD_EXIT_CODE"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`#!/bin/bash
+
+# Create backup archive
+tar -czf backup.tar.gz /data/
+
+# Upload to S3
+aws s3 cp backup.tar.gz s3://my-bucket/backups/
+UPLOAD_EXIT_CODE=$?
+rm backup.tar.gz
+
+# Single ping with upload exit code in payload
+# In DeadManPing panel: set validation rule "upload_exit_code" == 0
+# Panel will automatically detect if S3 upload failed
+curl -X POST "https://deadmanping.com/api/ping/backup-s3?upload_exit_code=$UPLOAD_EXIT_CODE"`}
+                language="bash"
+              />
               </section>
             </AnimatedSection>
 

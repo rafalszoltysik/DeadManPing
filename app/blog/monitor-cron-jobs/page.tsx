@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
+import { CodeBlock } from '@/components/CodeBlock'
 
 export const metadata: Metadata = {
   title: "Monitor Cron Jobs Without Migration | DeadManPing",
@@ -118,16 +119,15 @@ export default function MonitorCronJobsPage() {
               <p className="text-muted-foreground mb-4">
                 <strong>Important:</strong> The curl command must be <strong>inside your script</strong>, not in the cron line, because only in the script do you have access to variables from execution results.
               </p>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>#!/bin/bash</div>
-                  <div># Your existing backup script here</div>
-                  <div>./backup.sh</div>
-                  <div></div>
-                  <div># Add this one line at the end</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`#!/bin/bash
+# Your existing backup script here
+./backup.sh
+
+# Add this one line at the end
+curl -X POST "https://deadmanping.com/api/ping/backup-daily"`}
+                language="bash"
+              />
               <p className="text-muted-foreground mb-4">
                 In crontab: <code className="bg-muted px-1.5 py-0.5 rounded text-sm">0 3 * * * /path/to/backup.sh</code>
               </p>
@@ -141,20 +141,19 @@ export default function MonitorCronJobsPage() {
               <p className="text-muted-foreground mb-4">
                 You can include data from execution using query parameters. Set validation rules in the DeadManPing panel to check these values:
               </p>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>#!/bin/bash</div>
-                  <div>./backup.sh</div>
-                  <div>EXIT_CODE=$?</div>
-                  <div>BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)</div>
-                  <div></div>
-                  <div># Single ping with data from execution</div>
-                  <div># In DeadManPing panel: set validation rules:</div>
-                  <div>#   - "exit_code" == 0</div>
-                  <div>#   - "backup_size" contains expected pattern</div>
-                  <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_code=$EXIT_CODE&backup_size=$BACKUP_SIZE"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`#!/bin/bash
+./backup.sh
+EXIT_CODE=$?
+BACKUP_SIZE=$(du -sh /backups/latest | cut -f1)
+
+# Single ping with data from execution
+# In DeadManPing panel: set validation rules:
+#   - "exit_code" == 0
+#   - "backup_size" contains expected pattern
+curl -X POST "https://deadmanping.com/api/ping/backup-daily?exit_code=$EXIT_CODE&backup_size=$BACKUP_SIZE"`}
+                language="bash"
+              />
               </section>
             </AnimatedSection>
 
@@ -167,39 +166,37 @@ export default function MonitorCronJobsPage() {
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Python
               </h3>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>import requests</div>
-                  <div>import sys</div>
-                  <div></div>
-                  <div># Your backup logic here</div>
-                  <div>run_backup()</div>
-                  <div></div>
-                  <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                  <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`import requests
+import sys
+
+# Your backup logic here
+run_backup()
+
+# Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+requests.post("https://deadmanping.com/api/ping/backup-daily")`}
+                language="python"
+              />
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Node.js
               </h3>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>const https = require('https');</div>
-                  <div></div>
-                  <div>async function runBackup() {'{'}</div>
-                  <div>  await performBackup();</div>
-                  <div>  </div>
-                  <div>  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                  <div>  https.request('https://deadmanping.com/api/ping/backup-daily', {'{'} method: 'POST' {'}'}).end();</div>
-                  <div>{'}'}</div>
-                  <div></div>
-                  <div>runBackup().catch((err) =&gt; {'{'}</div>
-                  <div>  // If job fails, ping won't arrive - DeadManPing will detect missing ping</div>
-                  <div>  process.exit(1);</div>
-                  <div>{'}'});</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`const https = require('https');
+
+async function runBackup() {
+  await performBackup();
+  
+  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+  https.request('https://deadmanping.com/api/ping/backup-daily', { method: 'POST' }).end();
+}
+
+runBackup().catch((err) => {
+  // If job fails, ping won't arrive - DeadManPing will detect missing ping
+  process.exit(1);
+});`}
+                language="javascript"
+              />
 
               <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                 Docker Containers
@@ -207,12 +204,11 @@ export default function MonitorCronJobsPage() {
               <p className="text-muted-foreground mb-4">
                 For containerized cron jobs, use the same approach. The container just needs network access:
               </p>
-              <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                <code className="text-foreground">
-                  <div>0 3 * * * docker run --rm your-backup-image && \</div>
-                  <div>  curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
-                </code>
-              </div>
+              <CodeBlock
+                code={`0 3 * * * docker run --rm your-backup-image && \\
+  curl -X POST "https://deadmanping.com/api/ping/backup-daily"`}
+                language="bash"
+              />
               </section>
             </AnimatedSection>
 

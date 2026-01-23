@@ -15,6 +15,7 @@ export interface Monitor {
   next_expected_ping_at: string | null
   expected_interval_seconds: number
   grace_period_seconds: number
+  max_execution_time_seconds: number | null
   payload_validation_rules: PayloadValidationRules | null
   alert_email: string | null
   slack_webhook_url: string | null
@@ -34,9 +35,23 @@ export interface Ping {
   received_at: string
 }
 
+export interface JobRun {
+  id: string
+  monitor_id: string
+  run_id: string
+  started_at: string
+  completed_at: string | null
+  status: 'running' | 'completed' | 'timeout' | 'failed'
+  duration_ms: number | null
+  metadata: Record<string, any> | null
+  created_at: string
+  updated_at: string
+}
+
 export interface MonitorDetailProps {
   monitor: Monitor
   pings: Ping[]
+  jobRuns?: JobRun[]
   pingUrl: string
   isOnboarding?: boolean
   userTier?: string
@@ -57,6 +72,7 @@ export interface MonitorUpdateRequest {
   name?: string
   expectedIntervalSeconds?: number
   gracePeriodSeconds?: number
+  maxExecutionTimeSeconds?: number | null
   payloadValidationRules?: PayloadValidationRules | null
   alertChannels?: AlertChannels | null
   status?: MonitorStatus

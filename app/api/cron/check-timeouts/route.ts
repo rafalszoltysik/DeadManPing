@@ -49,6 +49,121 @@ export async function GET(request: NextRequest) {
       return successResponse({ checked: 0, updated: 0 })
     }
 
+    // Check for zombie jobs (running jobs that exceeded max_execution_time)
+    let timeoutCount = 0
+    const monitorsWithTimeout = allMonitors.filter((m) => m.max_execution_time_seconds !== null && m.max_execution_time_seconds > 0)
+    
+    for (const monitor of monitorsWithTimeout) {
+      const maxExecutionTimeMs = monitor.max_execution_time_seconds * 1000
+      const timeoutThreshold = new Date(now.getTime() - maxExecutionTimeMs)
+      
+      // Find running job runs that exceeded max execution time
+      const { data: timedOutRuns, error: timedOutRunsError } = await supabaseAdmin
+        .from('job_runs')
+        .select('*')
+        .eq('monitor_id', monitor.id)
+        .eq('status', 'running')
+        .lt('started_at', timeoutThreshold.toISOString()) as { data: any[] | null; error: any }
+      
+      if (timedOutRunsError) {
+        console.error(`Error fetching timed out runs for monitor ${monitor.id}:`, timedOutRunsError)
+        captureBackendError(timedOutRunsError, {
+          endpoint: '/api/cron/check-timeouts',
+          statusCode: 500,
+          action: 'fetch_timed_out_runs',
+          additionalData: {
+            monitorId: monitor.id,
+          },
+        })
+        continue
+      }
+      
+      if (timedOutRuns && timedOutRuns.length > 0) {
+        for (const jobRun of timedOutRuns) {
+          // Calculate how long it's been running
+          const startedAt = new Date(jobRun.started_at)
+          const runningDurationMs = now.getTime() - startedAt.getTime()
+          const runningDurationSeconds = Math.floor(runningDurationMs / 1000)
+          
+          // Update job run status to timeout
+          const { error: updateError } = await (supabaseAdmin
+            .from('job_runs') as any)
+            .update({
+              status: 'timeout',
+              updated_at: nowISO,
+            })
+            .eq('id', jobRun.id)
+          
+          if (updateError) {
+            console.error(`Error updating timed out job run ${jobRun.id}:`, updateError)
+            captureBackendError(updateError, {
+              endpoint: '/api/cron/check-timeouts',
+              statusCode: 500,
+              action: 'update_timed_out_job_run',
+              additionalData: {
+                monitorId: monitor.id,
+                jobRunId: jobRun.id,
+              },
+            })
+            continue
+          }
+          
+          timeoutCount++
+          
+          // Insert ping record for timeout
+          const { error: pingError } = await supabaseAdmin.from('pings').insert({
+            monitor_id: monitor.id,
+            status: 'fail',
+            message: `Job execution timeout - job started but did not complete within expected time (running for ${runningDurationSeconds}s, max: ${monitor.max_execution_time_seconds}s)`,
+            duration_ms: runningDurationMs,
+            metadata: {
+              run_id: jobRun.run_id,
+              timeout: true,
+            },
+            received_at: nowISO,
+          } as any)
+          
+          if (pingError) {
+            console.error(`Error inserting ping for timed out job run ${jobRun.id}:`, pingError)
+            captureBackendError(pingError, {
+              endpoint: '/api/cron/check-timeouts',
+              statusCode: 500,
+              action: 'insert_ping_timeout',
+              additionalData: {
+                monitorId: monitor.id,
+                jobRunId: jobRun.id,
+              },
+            })
+          }
+          
+          // Trigger alert for timeout
+          try {
+            await fetch(`${request.nextUrl.origin}/api/internal/send-alert`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Internal-Secret': process.env.INTERNAL_API_SECRET || '',
+              },
+              body: JSON.stringify({
+                monitor_id: monitor.id,
+                alert_type: 'failed',
+              }),
+            })
+          } catch (alertError) {
+            console.error(`Error triggering timeout alert for monitor ${monitor.id}:`, alertError)
+            captureIntegrationError('alert', alertError, {
+              action: 'send_timeout_alert',
+              additionalData: {
+                monitorId: monitor.id,
+                userId: monitor.user_id,
+                jobRunId: jobRun.id,
+              },
+            })
+          }
+        }
+      }
+    }
+
     // Check each monitor to see if it's overdue
     const lateMonitors = allMonitors.filter((monitor) => shouldMarkAsLate(monitor, now))
     const failedMonitors = allMonitors.filter((monitor) => shouldMarkAsFailed(monitor, now))
@@ -236,7 +351,7 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (lateMonitors.length === 0 && failedMonitors.length === 0) {
+    if (lateMonitors.length === 0 && failedMonitors.length === 0 && timeoutCount === 0) {
       return successResponse({ checked: allMonitors.length, updated: 0 })
     }
 
@@ -244,7 +359,8 @@ export async function GET(request: NextRequest) {
       checked: allMonitors.length, 
       updated: updatedCount,
       late: lateMonitors.length,
-      failed: failedMonitors.length
+      failed: failedMonitors.length,
+      timeouts: timeoutCount
     })
   } catch (error: any) {
     console.error('Error in check-timeouts:', error)

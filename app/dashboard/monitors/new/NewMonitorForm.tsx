@@ -47,8 +47,12 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
   const [calendarSelectedDayOfMonth, setCalendarSelectedDayOfMonth] = useState<number>(1)
   const [gracePeriodHours, setGracePeriodHours] = useState(1)
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
+  const [maxExecutionTimeMinutes, setMaxExecutionTimeMinutes] = useState(0)
+  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [maxExecutionTimeEnabled, setMaxExecutionTimeEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [monitoringMode, setMonitoringMode] = useState<'simple' | 'payload' | 'start-stop' | 'start-stop-payload'>('simple')
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
   const [payloadFields, setPayloadFields] = useState<Array<{
     name: string
@@ -70,6 +74,15 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
     const onboarding = searchParams.get('onboarding')
     setIsOnboarding(onboarding === 'true')
   }, [searchParams])
+
+  // Auto-open payload validation when selecting modes that require it
+  useEffect(() => {
+    if (monitoringMode === 'payload' || monitoringMode === 'start-stop-payload') {
+      setShowPayloadValidation(true)
+    } else {
+      setShowPayloadValidation(false)
+    }
+  }, [monitoringMode])
 
   // Auto-switch to manual mode on mobile (since Calendar button is hidden)
   useEffect(() => {
@@ -222,6 +235,22 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
     }
   }
 
+  // Convert max execution time to appropriate unit for display
+  const getMaxExecutionTimeValue = () => {
+    if (maxExecutionTimeUnit === 'hours') {
+      return Math.round((maxExecutionTimeMinutes / 60) * 10) / 10
+    }
+    return maxExecutionTimeMinutes
+  }
+
+  const setMaxExecutionTimeValue = (value: number) => {
+    if (maxExecutionTimeUnit === 'hours') {
+      setMaxExecutionTimeMinutes(Math.round(value * 60))
+    } else {
+      setMaxExecutionTimeMinutes(Math.round(value))
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -258,6 +287,10 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
     const expectedIntervalSeconds = scheduleType === 'interval' ? intervalMinutes * 60 : 0
     // gracePeriodHours is always stored in hours (conversion happens in setGraceValue)
     const gracePeriodSeconds = gracePeriodHours * 3600
+    // maxExecutionTimeMinutes is always stored in minutes (conversion happens in setMaxExecutionTimeValue)
+    const maxExecutionTimeSeconds = maxExecutionTimeEnabled && maxExecutionTimeMinutes > 0
+      ? maxExecutionTimeMinutes * 60
+      : null
 
     // Build payload validation rules from fields
     let payloadValidationRules: any = null
@@ -300,6 +333,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
       name: name.trim(),
       expectedIntervalSeconds,
       gracePeriodSeconds,
+      maxExecutionTimeSeconds,
       scheduleType,
       ...(scheduleType === 'cron' && { cronExpression: cronExpression.trim() }),
     }
@@ -937,23 +971,241 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
             </p>
           </div>
 
-          {/* Payload Validation Section */}
+          {/* Max Execution Time Section */}
           <div className="border-t border-border pt-4 sm:pt-6">
-            <button
-              type="button"
-              onClick={() => setShowPayloadValidation(!showPayloadValidation)}
-              className="flex items-center justify-between w-full text-left group py-2 sm:py-0"
-            >
-              <div className="flex-1 min-w-0 pr-2">
-                <h3 className="text-sm font-medium group-hover:text-primary transition-smooth">Payload Validation (Optional)</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Verify that your cron job executed correctly by validating payload fields
-                </p>
+            <div className="flex items-center justify-between mb-2">
+              <label htmlFor="maxExecutionTime" className="block text-sm font-medium">
+                Max Execution Time (Optional)
+              </label>
+              <div className="flex gap-1 bg-muted rounded-lg p-1 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setMaxExecutionTimeUnit('minutes')}
+                  className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                    maxExecutionTimeUnit === 'minutes'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Minutes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMaxExecutionTimeUnit('hours')}
+                  className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                    maxExecutionTimeUnit === 'hours'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                  }`}
+                >
+                  Hours
+                </button>
               </div>
-              <span className="text-muted-foreground text-lg transition-transform group-hover:text-primary flex-shrink-0">
-                {showPayloadValidation ? '▼' : '▶'}
-              </span>
-            </button>
+            </div>
+
+            <div className="flex items-center gap-3 mb-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
+                  if (maxExecutionTimeEnabled) {
+                    setMaxExecutionTimeMinutes(0)
+                  }
+                }}
+                className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
+                style={{
+                  backgroundColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'transparent',
+                  borderColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'rgb(var(--input))',
+                }}
+                aria-label="Enable timeout detection"
+              >
+                {maxExecutionTimeEnabled && (
+                  <svg
+                    className="absolute inset-0 w-full h-full text-primary-foreground"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                )}
+              </button>
+              <label 
+                htmlFor="maxExecutionTimeEnabled" 
+                className="text-sm text-muted-foreground cursor-pointer"
+                onClick={() => {
+                  setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
+                  if (maxExecutionTimeEnabled) {
+                    setMaxExecutionTimeMinutes(0)
+                  }
+                }}
+              >
+                Enable timeout detection
+              </label>
+            </div>
+
+            {maxExecutionTimeEnabled && (
+              <>
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <input
+                    id="maxExecutionTime"
+                    type="range"
+                    min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                    max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
+                    step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                    value={getMaxExecutionTimeValue()}
+                    onChange={(e) => setMaxExecutionTimeValue(Number(e.target.value))}
+                    className="flex-1 h-2 sm:h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                  />
+                  <input
+                    type="number"
+                    min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                    max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
+                    step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                    value={getMaxExecutionTimeValue()}
+                    onChange={(e) => {
+                      const value = Number(e.target.value)
+                      if (value >= (maxExecutionTimeUnit === 'hours' ? 0.1 : 1)) {
+                        setMaxExecutionTimeValue(value)
+                      }
+                    }}
+                    className="w-20 sm:w-20 px-2 sm:px-2 py-2 sm:py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth min-h-[44px] sm:min-h-0"
+                  />
+                </div>
+
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>
+                    {maxExecutionTimeUnit === 'hours' ? '0.1 hr' : '1 min'}
+                  </span>
+                  <span>{maxExecutionTimeUnit === 'hours' ? '24 hours' : '1440 min'}</span>
+                </div>
+              </>
+            )}
+
+            <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
+              Maximum time a job can run before being marked as timeout. If set, jobs that run longer than this time will trigger an alert.
+            </p>
+          </div>
+
+          {/* Monitoring Mode Section */}
+          <div className="border-t border-border pt-4 sm:pt-6">
+            <h3 className="text-sm font-medium mb-3">Monitoring Mode</h3>
+            <p className="text-xs text-muted-foreground mb-4">
+              Choose how you want to monitor your job execution
+            </p>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMonitoringMode('simple')
+                  setShowPayloadValidation(false)
+                  setPayloadFields([])
+                }}
+                className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
+                  monitoringMode === 'simple'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50 bg-background'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">Simple Ping</div>
+                <div className="text-xs text-muted-foreground">
+                  Just verify that your job executed. No payload validation or duration tracking.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMonitoringMode('payload')
+                  setShowPayloadValidation(true)
+                }}
+                className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
+                  monitoringMode === 'payload'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50 bg-background'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">Ping with Payload</div>
+                <div className="text-xs text-muted-foreground">
+                  Verify execution and validate payload data to ensure correctness.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMonitoringMode('start-stop')
+                  setShowPayloadValidation(false)
+                  setPayloadFields([])
+                }}
+                className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
+                  monitoringMode === 'start-stop'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50 bg-background'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">Start/Stop Tracking</div>
+                <div className="text-xs text-muted-foreground">
+                  Track job duration by sending start and stop signals. No payload validation.
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setMonitoringMode('start-stop-payload')
+                  setShowPayloadValidation(true)
+                }}
+                className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
+                  monitoringMode === 'start-stop-payload'
+                    ? 'border-primary bg-primary/10'
+                    : 'border-border hover:border-primary/50 bg-background'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">Start/Stop with Payload</div>
+                <div className="text-xs text-muted-foreground">
+                  Track duration and validate payload data for complete monitoring.
+                </div>
+              </button>
+            </div>
+
+            {(monitoringMode === 'start-stop' || monitoringMode === 'start-stop-payload') && (
+              <div className="mt-4 p-3 sm:p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                <div className="text-xs font-medium mb-2">Start/Stop Tracking Instructions</div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>• Send a POST request to <code className="bg-background px-1 py-0.5 rounded">/api/ping/your-slug/start</code> when your job starts</p>
+                  <p>• Send a POST request to <code className="bg-background px-1 py-0.5 rounded">/api/ping/your-slug?run_id=your-run-id</code> when your job completes</p>
+                  <p>• The system will track duration and alert if the job doesn't complete within the max execution time</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Payload Validation Section */}
+          {(monitoringMode === 'payload' || monitoringMode === 'start-stop-payload') && (
+            <div className="border-t border-border pt-4 sm:pt-6">
+              <button
+                type="button"
+                onClick={() => setShowPayloadValidation(!showPayloadValidation)}
+                className="flex items-center justify-between w-full text-left group py-2 sm:py-0"
+              >
+                <div className="flex-1 min-w-0 pr-2">
+                  <h3 className="text-sm font-medium group-hover:text-primary transition-smooth">Payload Validation</h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Verify that your cron job executed correctly by validating payload fields
+                  </p>
+                </div>
+                <span className="text-muted-foreground text-lg transition-transform group-hover:text-primary flex-shrink-0">
+                  {showPayloadValidation ? '▼' : '▶'}
+                </span>
+              </button>
 
             {showPayloadValidation && (
               <div className="mt-4 space-y-3 sm:space-y-4 pl-3 sm:pl-4 border-l-2 border-border">
@@ -1135,6 +1387,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
               </div>
             )}
           </div>
+          )}
 
           {/* Alert Channels Override Section */}
           <div className="border-t border-border pt-4 sm:pt-6">

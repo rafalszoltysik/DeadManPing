@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { CodeBlock } from '@/components/CodeBlock'
 
 export const metadata: Metadata = {
   title: "Detect Empty Backup File Cron | DeadManPing",
@@ -91,70 +92,68 @@ export default function DetectEmptyBackupFileCronPage() {
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Bash Example
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>#!/bin/bash</div>
-                    <div>BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql"</div>
-                    <div>pg_dump mydb &gt; "$BACKUP_FILE"</div>
-                    <div></div>
-                    <div># Get file size</div>
-                    <div>FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2&gt;/dev/null || stat -c%s "$BACKUP_FILE" 2&gt;/dev/null || echo 0)</div>
-                    <div></div>
-                    <div># Single ping with file size in payload</div>
-                    <div># In DeadManPing panel: set validation rule "size" &gt; 0 (or &gt;= 1024 for minimum size)</div>
-                    <div># Panel will automatically detect if size is 0 or too small</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily?size=$FILE_SIZE"</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`#!/bin/bash
+BACKUP_FILE="/backups/db-$(date +%Y%m%d).sql"
+pg_dump mydb > "$BACKUP_FILE"
+
+# Get file size
+FILE_SIZE=$(stat -f%z "$BACKUP_FILE" 2>/dev/null || stat -c%s "$BACKUP_FILE" 2>/dev/null || echo 0)
+
+# Single ping with file size in payload
+# In DeadManPing panel: set validation rule "size" > 0 (or >= 1024 for minimum size)
+# Panel will automatically detect if size is 0 or too small
+curl -X POST "https://deadmanping.com/api/ping/backup-daily?size=$FILE_SIZE"`}
+                  language="bash"
+                />
 
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Python Example
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>import os</div>
-                    <div>import subprocess</div>
-                    <div>import requests</div>
-                    <div></div>
-                    <div>backup_file = f"/backups/db-{'{'}os.popen('date +%Y%m%d').read().strip(){'}'}.sql"</div>
-                    <div>subprocess.run(["pg_dump", "mydb"], stdout=open(backup_file, "w"))</div>
-                    <div></div>
-                    <div># Get file size</div>
-                    <div>file_size = os.path.getsize(backup_file) if os.path.exists(backup_file) else 0</div>
-                    <div></div>
-                    <div># Single ping with file size in payload</div>
-                    <div># In DeadManPing panel: set validation rule "size" &gt; 0 (or &gt;= 1024 for minimum size)</div>
-                    <div># Panel will automatically detect if size is 0 or too small</div>
-                    <div>requests.post(f"https://deadmanping.com/api/ping/backup-daily?size={'{'}file_size{'}'}")</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`import os
+import subprocess
+import requests
+from datetime import datetime
+
+backup_file = f"/backups/db-{datetime.now().strftime('%Y%m%d')}.sql"
+subprocess.run(["pg_dump", "mydb"], stdout=open(backup_file, "w"))
+
+# Get file size
+file_size = os.path.getsize(backup_file) if os.path.exists(backup_file) else 0
+
+# Single ping with file size in payload
+# In DeadManPing panel: set validation rule "size" > 0 (or >= 1024 for minimum size)
+# Panel will automatically detect if size is 0 or too small
+requests.post(f"https://deadmanping.com/api/ping/backup-daily?size={file_size}")`}
+                  language="python"
+                />
 
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Node.js Example
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>const fs = require('fs');</div>
-                    <div>const {'{'} execSync {'}'} = require(&apos;child_process&apos;);</div>
-                    <div>const https = require('https');</div>
-                    <div></div>
-                    <div>const backupFile = &#96;/backups/db-${'{'}new Date().toISOString().split('T')[0].replace(/-/g, ''){'}'}.sql&#96;;</div>
-                    <div>execSync(&#96;pg_dump mydb &gt; ${'{'}backupFile{'}'}&#96;);</div>
-                    <div></div>
-                    <div>// Get file size</div>
-                    <div>let fileSize = 0;</div>
-                    <div>try {'{'}</div>
-                    <div>  fileSize = fs.statSync(backupFile).size;</div>
-                    <div>{'}'} catch (e) {'{'}</div>
-                    <div>  // File doesn't exist</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>// Single ping with file size in payload</div>
-                    <div>// In DeadManPing panel: set validation rule "size" &gt; 0 (or &gt;= 1024 for minimum size)</div>
-                    <div>// Panel will automatically detect if size is 0 or too small</div>
-                    <div>https.request(&#96;https://deadmanping.com/api/ping/backup-daily?size=${'{'}fileSize{'}'}&#96;, {'{'} method: 'POST' {'}'}).end();</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`const fs = require('fs');
+const { execSync } = require('child_process');
+const https = require('https');
+
+const backupFile = \`/backups/db-\${new Date().toISOString().split('T')[0].replace(/-/g, '')}.sql\`;
+execSync(\`pg_dump mydb > \${backupFile}\`);
+
+// Get file size
+let fileSize = 0;
+try {
+  fileSize = fs.statSync(backupFile).size;
+} catch (e) {
+  // File doesn't exist
+}
+
+// Single ping with file size in payload
+// In DeadManPing panel: set validation rule "size" > 0 (or >= 1024 for minimum size)
+// Panel will automatically detect if size is 0 or too small
+https.request(\`https://deadmanping.com/api/ping/backup-daily?size=\${fileSize}\`, { method: 'POST' }).end();`}
+                  language="javascript"
+                />
               </section>
             </AnimatedSection>
 

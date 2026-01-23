@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { CodeBlock } from '@/components/CodeBlock'
 
 export const metadata: Metadata = {
   title: "Silent Cron Failures: How to Detect Them | DeadManPing",
@@ -133,80 +134,76 @@ export default function SilentCronFailuresPage() {
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Bash Example: Trap Errors and Always Ping
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>#!/bin/bash</div>
-                    <div>set -e  # Exit on error</div>
-                    <div>set -o pipefail  # Catch pipe failures</div>
-                    <div></div>
-                    <div># Your actual work</div>
-                    <div>./backup.sh</div>
-                    <div>./sync.sh</div>
-                    <div></div>
-                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/backup-daily"</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`#!/bin/bash
+set -e  # Exit on error
+set -o pipefail  # Catch pipe failures
+
+# Your actual work
+./backup.sh
+./sync.sh
+
+# Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+curl -X POST "https://deadmanping.com/api/ping/backup-daily"`}
+                  language="bash"
+                />
 
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Python Example: Try-Finally for Guaranteed Ping
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>import requests</div>
-                    <div>import sys</div>
-                    <div></div>
-                    <div># Your actual work</div>
-                    <div>perform_backup()</div>
-                    <div>sync_data()</div>
-                    <div></div>
-                    <div># Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                    <div>requests.post("https://deadmanping.com/api/ping/backup-daily")</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`import requests
+import sys
+
+# Your actual work
+perform_backup()
+sync_data()
+
+# Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+requests.post("https://deadmanping.com/api/ping/backup-daily")`}
+                  language="python"
+                />
 
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Node.js Example: Process Exit Handlers
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>const https = require('https');</div>
-                    <div></div>
-                    <div>// Your actual work</div>
-                    <div>async function run() {'{'}</div>
-                    <div>  await performBackup();</div>
-                    <div>  await syncData();</div>
-                    <div>  </div>
-                    <div>  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert</div>
-                    <div>  https.request('https://deadmanping.com/api/ping/backup-daily', {'{'} method: 'POST' {'}'}).end();</div>
-                    <div>{'}'}</div>
-                    <div></div>
-                    <div>run().catch((err) =&gt; {'{'}</div>
-                    <div>  // If job fails, ping won't arrive - DeadManPing will detect missing ping</div>
-                    <div>  process.exit(1);</div>
-                    <div>{'}'});</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`const https = require('https');
+
+// Your actual work
+async function run() {
+  await performBackup();
+  await syncData();
+  
+  // Single ping at end - if job fails, ping won't arrive and DeadManPing will alert
+  https.request('https://deadmanping.com/api/ping/backup-daily', { method: 'POST' }).end();
+}
+
+run().catch((err) => {
+  // If job fails, ping won't arrive - DeadManPing will detect missing ping
+  process.exit(1);
+});`}
+                  language="javascript"
+                />
 
                 <h3 className="text-lg sm:text-xl font-semibold mb-3 mt-6">
                   Verify Cron Daemon is Running
                 </h3>
-                <div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">
-                  <code className="text-foreground">
-                    <div>#!/bin/bash</div>
-                    <div># Check if cron is running before relying on it</div>
-                    <div># Check if cron is running</div>
-                    <div>CRON_RUNNING=0</div>
-                    <div>if pgrep -x cron &gt; /dev/null || pgrep -x crond &gt; /dev/null; then</div>
-                    <div>  CRON_RUNNING=1</div>
-                    <div>fi</div>
-                    <div></div>
-                    <div># Single ping with cron status in payload</div>
-                    <div># In DeadManPing panel: set validation rule "cron_running" == 1</div>
-                    <div># Panel will automatically detect if cron daemon is not running</div>
-                    <div>curl -X POST "https://deadmanping.com/api/ping/cron-daemon-check?cron_running=$CRON_RUNNING"</div>
-                  </code>
-                </div>
+                <CodeBlock
+                  code={`#!/bin/bash
+# Check if cron is running before relying on it
+# Check if cron is running
+CRON_RUNNING=0
+if pgrep -x cron > /dev/null || pgrep -x crond > /dev/null; then
+  CRON_RUNNING=1
+fi
+
+# Single ping with cron status in payload
+# In DeadManPing panel: set validation rule "cron_running" == 1
+# Panel will automatically detect if cron daemon is not running
+curl -X POST "https://deadmanping.com/api/ping/cron-daemon-check?cron_running=$CRON_RUNNING"`}
+                  language="bash"
+                />
               </section>
             </AnimatedSection>
 

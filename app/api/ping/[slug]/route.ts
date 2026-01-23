@@ -89,12 +89,21 @@ async function handlePing(
       return errorResponse('Rate limit exceeded', 429)
     }
 
+    // Extract run_id from query params or payload (for job run tracking)
+    const searchParams = request.nextUrl.searchParams
+    let runId: string | null = searchParams.get('run_id')
+    
     // Parse payload (user can send any JSON)
     const parseResult = await parsePayload(request, method)
     if (!parseResult.success) {
       return errorResponse(parseResult.error, parseResult.status, parseResult.details)
     }
     const payload = parseResult.payload
+    
+    // If run_id not in query params, check payload
+    if (!runId && payload && typeof payload === 'object' && 'run_id' in payload) {
+      runId = payload.run_id as string
+    }
 
     // Get validation rules from monitor
     const validationRules = monitor.payload_validation_rules
@@ -203,6 +212,58 @@ async function handlePing(
     // Calculate next expected ping time
     const currentTime = new Date()
     
+    // Handle job run completion if run_id is provided
+    let jobRunDurationMs: number | null = null
+    if (runId) {
+      try {
+        // Find the corresponding job run
+        const { data: jobRun, error: jobRunError } = await supabaseAdmin
+          .from('job_runs')
+          .select('*')
+          .eq('monitor_id', monitor.id)
+          .eq('run_id', runId)
+          .single() as { data: any; error: any }
+        
+        if (!jobRunError && jobRun && jobRun.status === 'running') {
+          // Calculate duration
+          const startedAt = new Date(jobRun.started_at)
+          jobRunDurationMs = Math.floor(currentTime.getTime() - startedAt.getTime())
+          
+          // Determine job run status based on validation result
+          const jobRunStatus = validationResult.valid ? 'completed' : 'failed'
+          
+          // Update job run
+          const { error: updateJobRunError } = await (supabaseAdmin
+            .from('job_runs') as any)
+            .update({
+              status: jobRunStatus,
+              completed_at: currentTime.toISOString(),
+              duration_ms: jobRunDurationMs,
+              updated_at: currentTime.toISOString(),
+            })
+            .eq('id', jobRun.id)
+          
+          if (updateJobRunError) {
+            console.error('Error updating job run:', updateJobRunError)
+            // Don't fail the request, just log the error
+            captureBackendError(updateJobRunError, {
+              endpoint: `/api/ping/${slug}`,
+              statusCode: 500,
+              action: 'update_job_run',
+              additionalData: {
+                monitorId: monitor.id,
+                runId: runId,
+              },
+            })
+          }
+        }
+        // If job run doesn't exist or is not in 'running' status, ignore (backward compatibility)
+      } catch (jobRunError) {
+        console.error('Error handling job run completion:', jobRunError)
+        // Don't fail the request if job run handling fails
+      }
+    }
+    
     // Check if ping is late (soft error - not a bug, but UX issue)
     if (monitor.last_ping_at) {
       const lastPingAt = new Date(monitor.last_ping_at)
@@ -278,11 +339,13 @@ async function handlePing(
     // Insert ping record
     // Status: 'ok' if validation passed, 'fail' if validation failed
     const pingStatus = validationResult.valid ? 'ok' : 'fail'
+    // Use job run duration if available, otherwise null
+    const pingDurationMs = jobRunDurationMs !== null ? jobRunDurationMs : null
     const { error: pingError } = await supabaseAdmin.from('pings').insert({
       monitor_id: monitor.id,
       status: pingStatus,
       message: validationMessage,
-      duration_ms: null, // Not used in new model
+      duration_ms: pingDurationMs,
       metadata: Object.keys(metadata).length > 0 ? metadata : null,
       received_at: currentTime.toISOString(),
     } as any)

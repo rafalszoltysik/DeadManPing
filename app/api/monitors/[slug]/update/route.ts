@@ -75,7 +75,7 @@ export async function PUT(
     }
 
     const body = await request.json()
-    const { name, expectedIntervalSeconds, gracePeriodSeconds, payloadValidationRules, alertChannels, status, expectedUpdatedAt } = body
+    const { name, expectedIntervalSeconds, gracePeriodSeconds, maxExecutionTimeSeconds, payloadValidationRules, alertChannels, status, expectedUpdatedAt } = body
 
     // Verify monitor access
     const accessResult = await verifyMonitorAccessBySlug(slug, authResult.user.id)
@@ -126,6 +126,17 @@ export async function PUT(
         return badRequestResponse('Grace period cannot be negative')
       }
       updateData.grace_period_seconds = gracePeriodSeconds
+    }
+
+    if (maxExecutionTimeSeconds !== undefined) {
+      if (maxExecutionTimeSeconds === null) {
+        // Allow setting to null to disable timeout detection
+        updateData.max_execution_time_seconds = null
+      } else if (typeof maxExecutionTimeSeconds !== 'number' || maxExecutionTimeSeconds < 1) {
+        return badRequestResponse('Max execution time must be at least 1 second')
+      } else {
+        updateData.max_execution_time_seconds = maxExecutionTimeSeconds
+      }
     }
 
     // Validate and sanitize payload validation rules

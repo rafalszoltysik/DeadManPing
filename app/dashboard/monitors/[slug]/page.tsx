@@ -37,6 +37,14 @@ export default async function MonitorDetailPage(props: {
     .order('received_at', { ascending: false })
     .limit(50)
 
+  // Get job runs
+  const { data: jobRuns } = await supabaseAdmin
+    .from('job_runs')
+    .select('*')
+    .eq('monitor_id', monitor.id)
+    .order('started_at', { ascending: false })
+    .limit(50)
+
   // Get user tier
   let userTier = 'free'
   const { data: workspace } = await supabaseAdmin
@@ -67,6 +75,7 @@ export default async function MonitorDetailPage(props: {
       <MonitorDetail
         monitor={monitor}
         pings={pings || []}
+        jobRuns={jobRuns || []}
         pingUrl={pingUrl}
         isOnboarding={isOnboarding}
         userTier={userTier}
