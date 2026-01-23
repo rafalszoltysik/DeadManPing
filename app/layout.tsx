@@ -5,7 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider'
 import AnalyticsWrapperClient from '@/components/AnalyticsWrapperClient'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-// Ensure baseUrl is without www for consistency
+// Ensure baseUrl is without www for consistency (canonical URL)
 const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
@@ -70,7 +70,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  // Ensure baseUrl is without www for consistency
+  // Ensure baseUrl is without www for consistency (canonical URL)
   const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
   const organizationSchema = {

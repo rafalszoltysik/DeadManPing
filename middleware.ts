@@ -54,6 +54,25 @@ const isPublicRoute = (pathname: string): boolean => {
 }
 
 export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host') || ''
+  const protocol = request.headers.get('x-forwarded-proto') || (request.nextUrl.protocol === 'https:' ? 'https' : 'http')
+  
+  // Canonical domain: deadmanping.com (without www) with HTTPS
+  const canonicalHost = 'deadmanping.com'
+  const canonicalProtocol = 'https'
+  
+  // Redirect to canonical URL if needed (skip for localhost in development)
+  if (!hostname.includes('localhost') && hostname.includes('deadmanping.com')) {
+    // Remove www if present, ensure HTTPS
+    const needsRedirect = hostname !== canonicalHost || protocol !== canonicalProtocol
+    
+    if (needsRedirect) {
+      // Build canonical URL preserving pathname and search params
+      const canonicalUrl = new URL(request.nextUrl.pathname + request.nextUrl.search, `${canonicalProtocol}://${canonicalHost}`)
+      return NextResponse.redirect(canonicalUrl, 301) // Permanent redirect for SEO
+    }
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
