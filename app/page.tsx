@@ -70,7 +70,7 @@ export const metadata: Metadata = {
     images: ["https://deadmanping.com/icon.png"],
   },
   alternates: {
-    canonical: "/",
+    canonical: "https://deadmanping.com",
   },
   category: "Software",
   classification: "Developer Tools, Monitoring Software",

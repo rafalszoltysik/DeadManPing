@@ -58,7 +58,7 @@ export const metadata: Metadata = {
     images: [`${canonicalBaseUrl}/icon.png`],
   },
   alternates: {
-    canonical: "/",
+    canonical: canonicalBaseUrl,
   },
   category: "Software",
   classification: "Developer Tools, Monitoring Software",
