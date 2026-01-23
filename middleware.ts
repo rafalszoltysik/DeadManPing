@@ -54,44 +54,13 @@ const isPublicRoute = (pathname: string): boolean => {
 }
 
 export async function middleware(request: NextRequest) {
-  const pathname = request.nextUrl.pathname
-  
-  // Skip redirects for sitemap, robots.txt, and API routes to avoid redirect loops
-  if (pathname === '/sitemap.xml' || 
-      pathname === '/robots.txt' || 
-      pathname.startsWith('/api/') ||
-      pathname.startsWith('/_next/')) {
-    return NextResponse.next()
-  }
-  
-  const hostname = request.headers.get('host') || ''
-  // Check protocol from x-forwarded-proto (set by Vercel/reverse proxy) or from URL
-  const forwardedProto = request.headers.get('x-forwarded-proto')
-  const isHttps = forwardedProto === 'https' || request.nextUrl.protocol === 'https:'
-  
-  // Canonical domain: deadmanping.com (without www) with HTTPS
-  const canonicalHost = 'deadmanping.com'
-  
-  // Redirect to canonical URL if needed (skip for localhost in development)
-  if (!hostname.includes('localhost') && hostname.includes('deadmanping.com')) {
-    // Normalize hostname - remove www if present
-    const normalizedHost = hostname.replace(/^www\./, '')
-    
-    // Check if we need to redirect (www -> non-www, or HTTP -> HTTPS)
-    const needsRedirect = normalizedHost !== canonicalHost || !isHttps
-    
-    if (needsRedirect) {
-      // Build canonical URL preserving pathname and search params
-      const canonicalUrl = new URL(pathname + request.nextUrl.search, `https://${canonicalHost}`)
-      return NextResponse.redirect(canonicalUrl, 301) // Permanent redirect for SEO
-    }
-  }
-
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
+
+  const pathname = request.nextUrl.pathname
 
   // Redirect old blog routes to /blog/
   if (OLD_BLOG_ROUTES.includes(pathname)) {
