@@ -499,7 +499,8 @@ export function SettingsForm({ profile, hasStripeCustomer, trialDaysRemaining, i
         options: {
           redirectTo: redirectTo,
           queryParams: {
-            prompt: 'select_account',
+            access_type: 'online',
+            prompt: 'select_account', // Always show account selection screen
           },
         },
       })

@@ -237,6 +237,7 @@ function LoginForm() {
         options: {
           redirectTo: redirectTo,
           queryParams: {
+            access_type: 'online',
             prompt: 'select_account', // Always show account selection screen
           },
         },
