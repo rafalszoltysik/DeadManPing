@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 import { captureFrontendError } from '@/lib/sentry/client'
 
 export default function GlobalError({
@@ -36,12 +37,12 @@ export default function GlobalError({
                 >
                   Try again
                 </button>
-                <a
+                <Link
                   href="/"
                   className="bg-secondary hover:bg-secondary/80 text-secondary-foreground px-4 py-2 rounded-md text-sm font-medium transition-smooth inline-block"
                 >
                   Go Back
-                </a>
+                </Link>
               </div>
             </div>
           </div>
