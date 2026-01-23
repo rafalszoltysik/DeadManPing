@@ -29,7 +29,7 @@ function updateCodeBlocksInFile(filePath: string): boolean {
   }
 
   // Pattern to match code blocks with divs inside code
-  const codeBlockPattern = /<div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">\s*<code className="text-foreground">\s*((?:<div>.*?<\/div>\s*)+)\s*<\/code>\s*<\/div>/gs
+  const codeBlockPattern = /<div className="bg-background border border-border p-4 rounded-lg font-mono text-sm mb-4 overflow-x-auto">\s*<code className="text-foreground">\s*((?:<div>[\s\S]*?<\/div>\s*)+)\s*<\/code>\s*<\/div>/g
 
   content = content.replace(codeBlockPattern, (match, divs) => {
     // Extract text from divs

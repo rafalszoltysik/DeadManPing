@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 type PayloadField = {
   name: string
@@ -40,7 +40,7 @@ export function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
   ])
 
   // Notify parent when form data changes
-  const updateFormData = (updates: Partial<{ name: string; scheduleType: 'interval' | 'cron'; intervalValue: number; intervalUnit: 'hours' | 'minutes'; cronExpression?: string; payloadFields: PayloadField[] }>) => {
+  const updateFormData = useCallback((updates: Partial<{ name: string; scheduleType: 'interval' | 'cron'; intervalValue: number; intervalUnit: 'hours' | 'minutes'; cronExpression?: string; payloadFields: PayloadField[] }>) => {
     const newData: MonitorFormData = {
       name: updates.name ?? name,
       scheduleType: updates.scheduleType ?? scheduleType,
@@ -50,7 +50,7 @@ export function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
       payloadFields: updates.payloadFields ?? payloadFields,
     }
     onChange?.(newData)
-  }
+  }, [name, scheduleType, intervalValue, intervalUnit, cronExpression, payloadFields, onChange])
 
   const getGraceValue = () => {
     if (graceUnit === 'minutes') {
@@ -97,7 +97,7 @@ export function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
   // Notify parent on mount
   useEffect(() => {
     updateFormData({})
-  }, [])
+  }, [updateFormData])
 
   return (
     <div className="bg-background border border-border rounded-lg p-4 sm:p-6 space-y-4 sm:space-y-6">
