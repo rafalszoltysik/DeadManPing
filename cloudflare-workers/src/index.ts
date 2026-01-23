@@ -110,103 +110,111 @@ export default {
           }
         }
         
-        // Handle JSON responses (Supabase returns OAuth URL in JSON body)
+        // Get content type first
         const contentType = responseHeaders.get('Content-Type') || ''
-        if (contentType.includes('application/json') && response.status === 200) {
+        
+        // Only read body once - clone response if we need to read it
+        if (response.status === 200 && (contentType.includes('application/json') || contentType.includes('text/html'))) {
           try {
-            const bodyText = await response.text()
-            const bodyJson = JSON.parse(bodyText)
+            // Clone response to read body without consuming original
+            const clonedResponse = response.clone()
+            const bodyText = await clonedResponse.text()
             
-            // If response contains 'url' field with Supabase domain, replace it
-            if (bodyJson.url && typeof bodyJson.url === 'string') {
-              const oauthUrl = new URL(bodyJson.url)
-              // Replace Supabase domain in redirect_uri parameter
-              if (oauthUrl.searchParams.has('redirect_uri')) {
-                const redirectUri = oauthUrl.searchParams.get('redirect_uri')!
-                const redirectUriUrl = new URL(redirectUri)
-                if (redirectUriUrl.hostname.includes('supabase.co')) {
-                  // Replace Supabase domain with proxy domain
-                  redirectUriUrl.hostname = url.hostname
-                  redirectUriUrl.protocol = url.protocol
-                  oauthUrl.searchParams.set('redirect_uri', redirectUriUrl.toString())
-                  bodyJson.url = oauthUrl.toString()
+            if (contentType.includes('application/json')) {
+              // Handle JSON responses (Supabase returns OAuth URL in JSON body)
+              try {
+                const bodyJson = JSON.parse(bodyText)
+                
+                // If response contains 'url' field with Supabase domain, replace it
+                if (bodyJson.url && typeof bodyJson.url === 'string') {
+                  const oauthUrl = new URL(bodyJson.url)
                   
-                  // Create new response body with modified URL
+                  // Always add prompt=select_account to Google OAuth URLs
+                  if (oauthUrl.hostname === 'accounts.google.com') {
+                    oauthUrl.searchParams.set('prompt', 'select_account')
+                  }
+                  
+                  // Replace Supabase domain in redirect_uri parameter
+                  if (oauthUrl.searchParams.has('redirect_uri')) {
+                    const redirectUri = oauthUrl.searchParams.get('redirect_uri')!
+                    const redirectUriUrl = new URL(redirectUri)
+                    if (redirectUriUrl.hostname.includes('supabase.co')) {
+                      // Replace Supabase domain with proxy domain
+                      redirectUriUrl.hostname = url.hostname
+                      redirectUriUrl.protocol = url.protocol
+                      oauthUrl.searchParams.set('redirect_uri', redirectUriUrl.toString())
+                    }
+                  }
+                  
+                  bodyJson.url = oauthUrl.toString()
                   modifiedBody = JSON.stringify(bodyJson)
                 }
+              } catch (e) {
+                // If JSON parsing fails, use original body
+                console.error('Error parsing JSON response:', e)
+              }
+            } else if (contentType.includes('text/html')) {
+              // Handle HTML responses (Supabase may return HTML with OAuth form)
+              // IMPORTANT: Don't modify Google's OAuth form HTML - it breaks the form
+              // Only modify redirect_uri in query strings, not in JavaScript or form attributes
+              const supabaseDomain = env.SUPABASE_URL.replace('https://', '').replace('http://', '')
+              const proxyDomain = url.hostname
+              
+              // Only modify redirect_uri in URL query strings (not in JavaScript or form attributes)
+              // Pattern: ?redirect_uri=https://xyz.supabase.co/auth/v1/callback&...
+              // or &redirect_uri=https://xyz.supabase.co/auth/v1/callback
+              let modifiedText = bodyText
+              
+              // Replace redirect_uri in query strings only (very specific pattern)
+              modifiedText = modifiedText.replace(
+                new RegExp(`([?&]redirect_uri=)(https?://[^"'\s&<>]*?)${supabaseDomain.replace(/\./g, '\\.')}([^"'\s&<>]*)`, 'gi'),
+                (match, prefix, before, after) => {
+                  try {
+                    const redirectUriUrl = new URL(`${before}${supabaseDomain}${after}`)
+                    redirectUriUrl.hostname = proxyDomain
+                    redirectUriUrl.protocol = url.protocol
+                    return `${prefix}${redirectUriUrl.toString()}`
+                  } catch (e) {
+                    console.error('Error replacing redirect_uri in query:', e)
+                    return match
+                  }
+                }
+              )
+              
+              // Replace URL-encoded redirect_uri in query strings
+              modifiedText = modifiedText.replace(
+                new RegExp(`([?&]redirect_uri=)([^"'\s&<>]*)`, 'gi'),
+                (match, prefix, encoded) => {
+                  try {
+                    const decoded = decodeURIComponent(encoded)
+                    if (decoded.includes(supabaseDomain) && decoded.startsWith('http')) {
+                      const redirectUriUrl = new URL(decoded)
+                      redirectUriUrl.hostname = proxyDomain
+                      redirectUriUrl.protocol = url.protocol
+                      return `${prefix}${encodeURIComponent(redirectUriUrl.toString())}`
+                    }
+                  } catch (e) {
+                    // Not URL-encoded or doesn't contain Supabase domain, skip
+                  }
+                  return match
+                }
+              )
+              
+              // Replace Supabase domain in text content (for "to continue to" message) - but be careful
+              // Only replace in specific contexts, not in JavaScript
+              modifiedText = modifiedText.replace(
+                new RegExp(`(Przejdź do aplikacji |to continue to |Go to application )${supabaseDomain.replace(/\./g, '\\.')}`, 'gi'),
+                (match, prefix) => {
+                  return `${prefix}${proxyDomain}`
+                }
+              )
+              
+              if (modifiedText !== bodyText) {
+                modifiedBody = modifiedText
               }
             }
           } catch (e) {
-            // If JSON parsing fails, use original body
-            console.error('Error parsing JSON response:', e)
-          }
-        }
-        
-        // Handle HTML responses (Supabase may return HTML with OAuth form)
-        // Replace Supabase domain in HTML content (in redirect_uri parameters, URLs, etc.)
-        if (contentType.includes('text/html') && response.status === 200 && !modifiedBody) {
-          try {
-            const bodyText = await response.text()
-            // Replace Supabase domain in redirect_uri parameters in HTML
-            // Pattern: redirect_uri=https://xyz.supabase.co/auth/v1/callback
-            const supabaseDomain = env.SUPABASE_URL.replace('https://', '').replace('http://', '')
-            const proxyDomain = url.hostname
-            
-            // Replace redirect_uri in query strings (URL-encoded and plain)
-            // Pattern 1: redirect_uri=https%3A%2F%2Fxyz.supabase.co%2Fauth%2Fv1%2Fcallback (URL-encoded)
-            // Pattern 2: redirect_uri=https://xyz.supabase.co/auth/v1/callback (plain)
-            let modifiedText = bodyText
-            
-            // Replace URL-encoded redirect_uri
-            modifiedText = modifiedText.replace(
-              new RegExp(`redirect_uri=([^"'\s&]*)${supabaseDomain.replace(/\./g, '\\.')}([^"'\s&]*)`, 'gi'),
-              (match, before, after) => {
-                try {
-                  // Try to decode and reconstruct URL
-                  const encoded = encodeURIComponent(`${before}${supabaseDomain}${after}`)
-                  const decoded = decodeURIComponent(encoded)
-                  const redirectUriUrl = new URL(decoded)
-                  redirectUriUrl.hostname = proxyDomain
-                  const newEncoded = encodeURIComponent(redirectUriUrl.toString())
-                  return `redirect_uri=${newEncoded}`
-                } catch (e) {
-                  // If decoding fails, try direct replacement
-                  return match.replace(supabaseDomain, proxyDomain)
-                }
-              }
-            )
-            
-            // Replace plain redirect_uri (not URL-encoded)
-            modifiedText = modifiedText.replace(
-              new RegExp(`redirect_uri=(https?://[^"'\s&]*?)${supabaseDomain.replace(/\./g, '\\.')}([^"'\s&]*)`, 'gi'),
-              (match, before, after) => {
-                try {
-                  const redirectUriUrl = new URL(`${before}${supabaseDomain}${after}`)
-                  redirectUriUrl.hostname = proxyDomain
-                  return `redirect_uri=${redirectUriUrl.toString()}`
-                } catch (e) {
-                  return match.replace(supabaseDomain, proxyDomain)
-                }
-              }
-            )
-            
-            // Also replace any direct Supabase URLs in the HTML (for display purposes)
-            modifiedText = modifiedText.replace(
-              new RegExp(`https?://${supabaseDomain.replace(/\./g, '\\.')}`, 'gi'),
-              `${url.protocol}//${proxyDomain}`
-            )
-            
-            // Replace Supabase domain in text content (for "to continue to" message)
-            modifiedText = modifiedText.replace(
-              new RegExp(supabaseDomain.replace(/\./g, '\\.'), 'gi'),
-              proxyDomain
-            )
-            
-            if (modifiedText !== bodyText) {
-              modifiedBody = modifiedText
-            }
-          } catch (e) {
-            console.error('Error parsing HTML response:', e)
+            console.error('Error parsing response body:', e)
           }
         }
       }
