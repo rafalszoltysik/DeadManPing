@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, WarningIcon } from './Icons'
 import { StaggerContainer } from './AnimatedSection'
+import { CTAButton } from './CTAButton'
 
 const mockMonitors = [
   // OK: Ping przyszedł + payload poprawny
@@ -180,7 +181,9 @@ export function DashboardPreview() {
         >
           <div className="flex items-center justify-between">
             <h3 className="font-semibold text-sm sm:text-base">Active Monitors</h3>
-            <span className="text-xs sm:text-sm text-muted-foreground">{mockMonitors.length} monitors</span>
+            <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-smooth hover-lift-smooth">
+              Add monitor
+            </CTAButton>
           </div>
         </div>
         <div className="divide-y divide-border">

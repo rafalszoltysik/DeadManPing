@@ -3,14 +3,16 @@ import type { Metadata } from 'next'
 import dynamicImport from 'next/dynamic'
 import { Suspense } from 'react'
 import { PageNav } from '@/components/PageNav'
-import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon } from '@/components/Icons'
+import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon, WarningIcon } from '@/components/Icons'
+import { MonitorStatusIcon, MonitorStatus } from '@/components/MonitorStatus'
 import { CTAButton } from '@/components/CTAButton'
 import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { SiPython, SiNodedotjs, SiRuby, SiGo, SiPhp } from 'react-icons/si'
-import { FaTerminal } from 'react-icons/fa'
+import { FaTerminal, FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
 import PricingSectionClient from '@/components/PricingSectionClient'
+import { HowItWorksSection } from '@/components/HowItWorksSection'
 
 // Lazy load heavy components below the fold
 const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
@@ -501,171 +503,117 @@ export default function Home() {
             <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8 lg:mb-12 px-4">How It Works</h2>
           </AnimatedItem>
           <div className="max-w-5xl mx-auto px-4 sm:px-6 space-y-6 sm:space-y-8 lg:space-y-12">
-              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
-                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">1</span>
-                  </div>
-                <div className="flex-grow min-w-0 w-full sm:w-auto">
-                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 animate-fade-in" style={{ animationDelay: '150ms' }}>Add one line at the end of your existing script</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    Cron runs your script. Your script executes logic and collects data. At the end of your script — one curl line with data from execution.
-                  </p>
-                  
-                  <div className="bg-primary/10 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
-                    <p className="text-sm sm:text-base text-muted-foreground font-medium">
-                      <span className="text-primary font-semibold">Important:</span> Curl must be <span className="font-semibold">INSIDE</span> the script, not in the cron line, because only in the script do you have access to variables from execution results.
-                    </p>
-                  </div>
+            <HowItWorksSection />
 
-                  <div className="bg-background border border-border rounded-lg p-4 sm:p-6 mb-4 sm:mb-6 overflow-hidden shadow-sm animate-fade-in" style={{ animationDelay: '300ms' }}>
-                    <div className="flex items-center gap-2 mb-3 pb-2 border-b border-border">
-                      <div className="w-2 h-2 rounded-full bg-success"></div>
-                      <p className="text-xs sm:text-sm text-muted-foreground font-mono">sync_users.sh</p>
+              <AnimatedItem delay={100} direction="up" duration={600}>
+                <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover">
+                  <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
+                    <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20">
+                      <span className="text-lg sm:text-xl font-mono font-bold text-primary">3</span>
                     </div>
-                    <pre className="bg-background rounded-lg p-3 sm:p-4 overflow-x-auto text-xs sm:text-sm">
-                      <code className="break-words text-foreground">{`#!/bin/bash
-users_synced=$(./sync_users_logic.sh)
-EXIT_CODE=$?
-
-# Single ping with data from execution
-# In DeadManPing panel: set validation rules:
-#   - "exit_code" == 0
-#   - "count" >= 1
-curl -X POST "https://deadmanping.com/api/ping/abc123?exit_code=$EXIT_CODE&count=$users_synced"`}</code>
-                    </pre>
-                    <div className="mt-3 pt-3 border-t border-border">
-                      <p className="text-xs sm:text-sm text-muted-foreground font-mono">
-                        <span className="text-muted-foreground/60"># In crontab:</span> <span className="text-foreground">*/5 * * * * /path/to/sync_users.sh</span>
+                    <div className="flex-grow min-w-0 w-full sm:w-auto">
+                      <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Get state-aware alerts</h3>
+                      <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
+                        Alerts fire on state transitions. No spam. No silence.
                       </p>
+                      <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" staggerDelay={100}>
+                        {/* Recovered Email Preview */}
+                        <div className="bg-card border border-border hover:border-success rounded-lg sm:rounded-xl overflow-hidden shadow-sm card-hover transition-smooth">
+                      <div className="bg-success/15 border-b border-success/20 px-4 sm:px-5 py-3 sm:py-4 text-center">
+                        <h4 className="m-0 text-base sm:text-lg font-semibold text-success">Monitor Recovered</h4>
+                      </div>
+                      <div className="p-4 sm:p-5">
+                        <div className="bg-success/5 border-l-4 border-success/20 p-3 sm:p-4 rounded-md mb-4">
+                          <p className="m-0 text-sm sm:text-base text-foreground leading-relaxed">
+                            Monitor recovered successfully. All validation rules passed and monitor is working.
+                          </p>
+                        </div>
+                        <div className="space-y-2.5 mb-4">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Monitor Name:</span>
+                            <span className="font-semibold text-foreground">Backup Job</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Status:</span>
+                            <span className="font-semibold text-success">Healthy</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Last Ping:</span>
+                            <span className="font-mono text-xs text-foreground">5 minutes ago</span>
+                          </div>
+                        </div>
+                        <CTAButton className="w-full bg-success/10 hover:bg-success/15 border border-success/20 hover:border-success text-success rounded-md py-2.5 px-4 transition-smooth">
+                          View Monitor Details
+                        </CTAButton>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="flex items-center gap-2 p-3 bg-card border border-border rounded-lg transition-all duration-200 hover:border-primary/30 hover:shadow-sm animate-fade-in" style={{ animationDelay: '350ms' }}>
-                      <span className="text-success text-lg">✓</span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">No SDKs</span>
+                        {/* Error Email Preview */}
+                        <div className="bg-card border border-border hover:border-error rounded-lg sm:rounded-xl overflow-hidden shadow-sm card-hover transition-smooth">
+                      <div className="bg-error/15 border-b border-error/20 px-4 sm:px-5 py-3 sm:py-4 text-center">
+                        <h4 className="m-0 text-base sm:text-lg font-semibold text-error">Monitor Reported Failure</h4>
+                      </div>
+                      <div className="p-4 sm:p-5">
+                        <div className="bg-error/5 border-l-4 border-error/20 p-3 sm:p-4 rounded-md mb-4">
+                          <p className="m-0 text-sm sm:text-base text-foreground leading-relaxed">
+                            Your monitor reported a failure status. Please check your job logs and investigate the issue.
+                          </p>
+                        </div>
+                        <div className="space-y-2.5 mb-4">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Monitor Name:</span>
+                            <span className="font-semibold text-foreground">User Sync</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Status:</span>
+                            <span className="font-semibold text-error">Failed</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Last Ping:</span>
+                            <span className="font-mono text-xs text-foreground">2 minutes ago</span>
+                          </div>
+                        </div>
+                        <CTAButton className="w-full bg-error/10 hover:bg-error/15 border border-error/20 hover:border-error text-error rounded-md py-2.5 px-4 transition-smooth">
+                          View Monitor Details
+                        </CTAButton>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-card border border-border rounded-lg transition-all duration-200 hover:border-primary/30 hover:shadow-sm animate-fade-in" style={{ animationDelay: '400ms' }}>
-                      <span className="text-success text-lg">✓</span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">No branching logic</span>
+
+                        {/* Warning Email Preview */}
+                        <div className="bg-card border border-border hover:border-warning rounded-lg sm:rounded-xl overflow-hidden shadow-sm card-hover transition-smooth">
+                      <div className="bg-warning/15 border-b border-warning/20 px-4 sm:px-5 py-3 sm:py-4 text-center">
+                        <h4 className="m-0 text-base sm:text-lg font-semibold text-warning">Monitor Warning</h4>
+                      </div>
+                      <div className="p-4 sm:p-5">
+                        <div className="bg-warning/5 border-l-4 border-warning/20 p-3 sm:p-4 rounded-md mb-4">
+                          <p className="m-0 text-sm sm:text-base text-foreground leading-relaxed">
+                            Payload validation warning detected. Monitor is still within grace period.
+                          </p>
+                        </div>
+                        <div className="space-y-2.5 mb-4">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Monitor Name:</span>
+                            <span className="font-semibold text-foreground">Report Generator</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Status:</span>
+                            <span className="font-semibold text-warning">Warn</span>
+                          </div>
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-muted-foreground">Last Ping:</span>
+                            <span className="font-mono text-xs text-foreground">1 hour ago</span>
+                          </div>
+                        </div>
+                        <CTAButton className="w-full bg-warning/10 hover:bg-warning/15 border border-warning/20 hover:border-warning text-warning rounded-md py-2.5 px-4 transition-smooth">
+                          View Monitor Details
+                        </CTAButton>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 p-3 bg-card border border-border rounded-lg transition-all duration-200 hover:border-primary/30 hover:shadow-sm animate-fade-in" style={{ animationDelay: '450ms' }}>
-                      <span className="text-success text-lg">✓</span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">No alert decisions in code</span>
-                    </div>
-                    <div className="flex items-center gap-2 p-3 bg-card border border-border rounded-lg transition-all duration-200 hover:border-primary/30 hover:shadow-sm animate-fade-in" style={{ animationDelay: '500ms' }}>
-                      <span className="text-success text-lg">✓</span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">Data from execution</span>
+                      </StaggerContainer>
                     </div>
                   </div>
                 </div>
-              </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
-                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">2</span>
-                  </div>
-                <div className="flex-grow min-w-0 w-full sm:w-auto">
-                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 animate-fade-in" style={{ animationDelay: '150ms' }}>Define rules in the dashboard</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    Configure rules visually. Change anytime. No redeploys.
-                  </p>
-                  <div className="bg-background border border-border rounded-lg p-4 sm:p-6 space-y-3 opacity-0 animate-fade-in" style={{ animationDelay: '250ms' }}>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border border-border transition-all duration-300 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 opacity-0 animate-fade-in" style={{ animationDelay: '400ms' }}>
-                      <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1">Condition</div>
-                        <code className="text-sm font-mono transition-colors duration-200">exit_code == 0</code>
-                      </div>
-                      <div className="w-16 text-center">
-                        <div className="text-xs text-muted-foreground mb-1">Status</div>
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-success/20 text-success transition-transform duration-200 hover:scale-110">OK</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border border-border transition-all duration-300 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 opacity-0 animate-fade-in" style={{ animationDelay: '550ms' }}>
-                      <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1">Condition</div>
-                        <code className="text-sm font-mono transition-colors duration-200">count {'>='} 100</code>
-                      </div>
-                      <div className="w-16 text-center">
-                        <div className="text-xs text-muted-foreground mb-1">Status</div>
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-success/20 text-success transition-transform duration-200 hover:scale-110">OK</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border border-border transition-all duration-300 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 opacity-0 animate-fade-in" style={{ animationDelay: '700ms' }}>
-                      <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1">Condition</div>
-                        <code className="text-sm font-mono transition-colors duration-200">count {'<'} 100</code>
-                      </div>
-                      <div className="w-16 text-center">
-                        <div className="text-xs text-muted-foreground mb-1">Status</div>
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 transition-transform duration-200 hover:scale-110">WARN</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border border-border transition-all duration-300 hover:shadow-md hover:border-primary/30 hover:-translate-y-0.5 opacity-0 animate-fade-in" style={{ animationDelay: '850ms' }}>
-                      <div className="flex-1">
-                        <div className="text-xs text-muted-foreground mb-1">Condition</div>
-                        <code className="text-sm font-mono transition-colors duration-200">no ping for 15 min</code>
-                      </div>
-                      <div className="w-16 text-center">
-                        <div className="text-xs text-muted-foreground mb-1">Status</div>
-                        <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-error/20 text-error transition-transform duration-200 hover:scale-110">FAIL</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              </div>
-
-              <div className="bg-card border border-border rounded-lg p-4 sm:p-6 lg:p-8 card-hover animate-fade-in">
-                <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-                  <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-smooth group-hover:bg-primary/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
-                    <span className="text-lg sm:text-xl font-mono font-bold text-primary">3</span>
-                  </div>
-                <div className="flex-grow min-w-0 w-full sm:w-auto">
-                  <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4 animate-fade-in" style={{ animationDelay: '150ms' }}>Get state-aware alerts</h3>
-                  <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                    Alerts fire on state transitions. No spam. No silence.
-                  </p>
-                  <div className="bg-background border border-border rounded-lg p-4 sm:p-6 space-y-3 opacity-0 animate-fade-in" style={{ animationDelay: '250ms' }}>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-error transition-all duration-300 hover:shadow-md hover:-translate-x-1 opacity-0 animate-fade-in group" style={{ animationDelay: '400ms' }}>
-                      <div className="flex-shrink-0 w-2 h-2 rounded-full bg-error animate-pulse group-hover:scale-150 transition-transform duration-300"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium mb-1 transition-colors duration-200 group-hover:text-foreground">Monitor: User Sync</div>
-                        <div className="text-xs text-muted-foreground">OK → FAIL • 2 minutes ago</div>
-                      </div>
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-error/20 text-error transition-transform duration-200 group-hover:scale-110">FAIL</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-success transition-all duration-300 hover:shadow-md hover:-translate-x-1 opacity-0 animate-fade-in group" style={{ animationDelay: '550ms' }}>
-                      <div className="flex-shrink-0 w-2 h-2 rounded-full bg-success animate-pulse group-hover:scale-150 transition-transform duration-300"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium mb-1 transition-colors duration-200 group-hover:text-foreground">Monitor: Backup Job</div>
-                        <div className="text-xs text-muted-foreground">FAIL → OK • 5 minutes ago</div>
-                      </div>
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-success/20 text-success transition-transform duration-200 group-hover:scale-110">OK</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-error transition-all duration-300 hover:shadow-md hover:-translate-x-1 opacity-0 animate-fade-in group" style={{ animationDelay: '700ms' }}>
-                      <div className="flex-shrink-0 w-2 h-2 rounded-full bg-error animate-pulse group-hover:scale-150 transition-transform duration-300"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium mb-1 transition-colors duration-200 group-hover:text-foreground">Monitor: Data Export</div>
-                        <div className="text-xs text-muted-foreground">Job didn't run • 15 minutes ago</div>
-                      </div>
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-error/20 text-error transition-transform duration-200 group-hover:scale-110">FAIL</span>
-                    </div>
-                    <div className="flex items-center gap-3 p-3 bg-card rounded border-l-4 border-yellow-500 transition-all duration-300 hover:shadow-md hover:-translate-x-1 opacity-0 animate-fade-in group" style={{ animationDelay: '850ms' }}>
-                      <div className="flex-shrink-0 w-2 h-2 rounded-full bg-yellow-500 animate-pulse group-hover:scale-150 transition-transform duration-300"></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium mb-1 transition-colors duration-200 group-hover:text-foreground">Monitor: Report Generator</div>
-                        <div className="text-xs text-muted-foreground">Result degraded • 1 hour ago</div>
-                      </div>
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 transition-transform duration-200 group-hover:scale-110">WARN</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              </div>
+              </AnimatedItem>
           </div>
         </AnimatedSection>
 
@@ -1032,6 +980,14 @@ shell_exec("curl -X POST \"https://deadmanping.com/api/ping/{$MONITOR_ID}?has_ex
                   <p className="text-sm text-muted-foreground">Instant email notifications for critical alerts</p>
                 </div>
             </StaggerContainer>
+            <AnimatedItem delay={400} direction="up" duration={700}>
+              <div className="mt-8 sm:mt-12 text-center">
+                <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-sm sm:text-base font-medium transition-smooth hover-lift-smooth shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 inline-flex items-center gap-2 group">
+                  <FaBell className="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-300 group-hover:animate-ring" />
+                  <span>Start Notifications</span>
+                </CTAButton>
+              </div>
+            </AnimatedItem>
           </div>
         </AnimatedSection>
 
@@ -1121,6 +1077,38 @@ shell_exec("curl -X POST \"https://deadmanping.com/api/ping/{$MONITOR_ID}?has_ex
                 <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> tells you when it succeeded… incorrectly.
               </p>
             </AnimatedItem>
+          </div>
+        </AnimatedSection>
+
+        {/* Trust Indicators */}
+        <AnimatedSection className="pt-2 sm:pt-4 lg:pt-6 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" aria-label="Trust indicators" delay={100} direction="up" duration={800}>
+          <div className="max-w-5xl mx-auto px-4">
+            <AnimatedItem delay={100} direction="up" duration={700}>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Reliable & Secure</h2>
+            </AnimatedItem>
+            <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8" staggerDelay={80}>
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <FaLock className="text-primary text-xl" />
+                </div>
+                <h3 className="font-semibold mb-2">Secure & Private</h3>
+                <p className="text-sm text-muted-foreground">Your data is encrypted. We only store what you send. No access to your servers.</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <FaBolt className="text-primary text-xl" />
+                </div>
+                <h3 className="font-semibold mb-2">99.9% Uptime</h3>
+                <p className="text-sm text-muted-foreground">Reliable infrastructure. Your monitors are always checked, even when you're not.</p>
+              </div>
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <FaDollarSign className="text-primary text-xl" />
+                </div>
+                <h3 className="font-semibold mb-2">No Hidden Costs</h3>
+                <p className="text-sm text-muted-foreground">Transparent pricing. Cancel anytime. Free tier available. No credit card required for trial.</p>
+              </div>
+            </StaggerContainer>
           </div>
         </AnimatedSection>
 
