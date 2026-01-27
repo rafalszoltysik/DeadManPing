@@ -1183,6 +1183,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                   <p>• Send a POST request to <code className="bg-background px-1 py-0.5 rounded">/api/ping/your-slug/start</code> when your job starts</p>
                   <p>• Send a POST request to <code className="bg-background px-1 py-0.5 rounded">/api/ping/your-slug?run_id=your-run-id</code> when your job completes</p>
                   <p>• The system will track duration and alert if the job doesn't complete within the max execution time</p>
+                  <p className="mt-2 text-xs italic">Note: In the next step, you'll receive the exact URLs for start and stop endpoints.</p>
                 </div>
               </div>
             )}
