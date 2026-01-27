@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Cron Job Wrong Exit Code | DeadManPing",
   description: "How to detect when cron jobs return wrong exit codes—success when they should fail, or failure when they should succeed.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Detect Cron Job Wrong Exit Code | DeadManPing",
     description: "How to detect when cron jobs return wrong exit codes.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-cron-job-wrong-exit-code`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs return wrong exit codes.",
   },
   alternates: {
-    canonical: "/blog/detect-cron-job-wrong-exit-code",
+    canonical: `${cleanBaseUrl}/blog/detect-cron-job-wrong-exit-code`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function DetectCronJobWrongExitCodePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-cron-job-wrong-exit-code`,
     "headline": "Detect Cron Job Wrong Exit Code: Validate Exit Codes",
     "description": "Complete guide on detecting when cron jobs return wrong exit codes and how to validate them.",
     "author": {

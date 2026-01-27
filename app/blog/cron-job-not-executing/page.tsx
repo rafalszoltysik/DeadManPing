@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Not Executing | DeadManPing",
   description: "How to detect when cron jobs are not executing. Examples for verifying job execution and detecting when jobs don't run.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Cron Job Not Executing | DeadManPing",
     description: "How to detect when cron jobs are not executing.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-not-executing`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs are not executing.",
   },
   alternates: {
-    canonical: "/blog/cron-job-not-executing",
+    canonical: `${cleanBaseUrl}/blog/cron-job-not-executing`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function CronJobNotExecutingPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/cron-job-not-executing`,
     "headline": "Cron Job Not Executing: Detect When Jobs Don't Run",
     "description": "Complete guide on detecting when cron jobs are not executing and how to verify job execution.",
     "author": {

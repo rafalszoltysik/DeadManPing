@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Verify Cron Output: Check Script Output Content | DeadManPing",
   description: "How to verify cron job script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Verify Cron Output: Check Script Output Content | DeadManPing",
     description: "How to verify cron job script output contains expected content.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/verify-cron-output`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,37 +22,35 @@ export const metadata: Metadata = {
     description: "How to verify cron job script output contains expected content.",
   },
   alternates: {
-    canonical: "/blog/verify-cron-output",
+    canonical: `${cleanBaseUrl}/blog/verify-cron-output`,
   },
 }
 
 export default function VerifyCronOutputPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/verify-cron-output`,
     "headline": "Verify Cron Output: How to Validate Script Output Content",
     "description": "Complete guide on verifying that cron job scripts produce expected output and detecting when output is missing or incorrect.",
-    "url": `${baseUrl}/verify-cron-output`,
     "datePublished": "2024-12-01",
     "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",
-      "url": baseUrl
+      "url": cleanBaseUrl
     },
     "publisher": {
       "@type": "Organization",
       "name": "DeadManPing",
       "logo": {
         "@type": "ImageObject",
-        "url": `${baseUrl}/icon.svg`
+        "url": `${cleanBaseUrl}/icon.svg`
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${baseUrl}/verify-cron-output`
+      "@id": `${cleanBaseUrl}/blog/verify-cron-output`
     },
     "articleSection": "Cron Monitoring Guides",
     "keywords": "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
@@ -63,13 +65,13 @@ export default function VerifyCronOutputPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": baseUrl
+        "item": cleanBaseUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Verify Cron Output",
-        "item": `${baseUrl}/verify-cron-output`
+        "item": `${cleanBaseUrl}/blog/verify-cron-output`
       }
     ]
   }

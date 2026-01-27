@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Empty Backup File | DeadManPing",
   description: "How to detect when backup files are empty or zero bytes. Examples for verifying backup file size in bash, Python, Node.js.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Detect Empty Backup File | DeadManPing",
     description: "How to detect when backup files are empty or zero bytes.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-empty-backup-file`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when backup files are empty or zero bytes.",
   },
   alternates: {
-    canonical: "/blog/detect-empty-backup-file",
+    canonical: `${cleanBaseUrl}/blog/detect-empty-backup-file`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function DetectEmptyBackupFilePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-empty-backup-file`,
     "headline": "Detect Empty Backup File: Verify Backup Files Aren't Zero Bytes",
     "description": "Complete guide on detecting when backup files are empty or zero bytes and how to monitor this automatically.",
     "author": {

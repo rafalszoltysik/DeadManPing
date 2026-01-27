@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Cron Job Partial Failure | DeadManPing",
   description: "How to detect when cron jobs partially fail—some steps succeed but others fail. Examples for validating multi-step job completion.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Detect Cron Job Partial Failure | DeadManPing",
     description: "How to detect when cron jobs partially fail—some steps succeed but others fail.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-cron-job-partial-failure`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs partially fail—some steps succeed but others fail.",
   },
   alternates: {
-    canonical: "/blog/detect-cron-job-partial-failure",
+    canonical: `${cleanBaseUrl}/blog/detect-cron-job-partial-failure`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function DetectCronJobPartialFailurePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-cron-job-partial-failure`,
     "headline": "Detect Cron Job Partial Failure: Verify All Steps Complete",
     "description": "Complete guide on detecting when cron jobs partially fail—some steps succeed but others fail.",
     "author": {

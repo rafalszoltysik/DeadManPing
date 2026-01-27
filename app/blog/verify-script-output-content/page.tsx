@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Verify Script Output Content | DeadManPing",
   description: "How to verify script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Verify Script Output Content | DeadManPing",
     description: "How to verify script output contains expected content.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/verify-script-output-content`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to verify script output contains expected content.",
   },
   alternates: {
-    canonical: "/blog/verify-script-output-content",
+    canonical: `${cleanBaseUrl}/blog/verify-script-output-content`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function VerifyScriptOutputContentPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/verify-script-output-content`,
     "headline": "Verify Script Output Content: Validate Output Quality",
     "description": "Complete guide on verifying that script output contains expected content and detecting when output is missing or incorrect.",
     "author": {

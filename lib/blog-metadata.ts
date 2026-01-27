@@ -183,7 +183,7 @@ export function getBlogMetadata(slug: string): Metadata | null {
       description: meta.description,
     },
     alternates: {
-      canonical: `/blog/${slug}`,
+      canonical: `${cleanBaseUrl}/blog/${slug}`,
     },
   }
 }

@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Returns Success But Fails | DeadManPing",
   description: "How to detect when cron jobs return success exit code but actually fail. Examples for validating job results beyond exit codes.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Cron Job Returns Success But Fails | DeadManPing",
     description: "How to detect when cron jobs return success exit code but actually fail.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs return success exit code but actually fail.",
   },
   alternates: {
-    canonical: "/blog/cron-job-returns-success-but-fails",
+    canonical: `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`,
   },
 }
 
@@ -28,13 +32,23 @@ export default function CronJobReturnsSuccessButFailsPage() {
     "@type": "Article",
     "headline": "Cron Job Returns Success But Fails: Detect False Success",
     "description": "Complete guide on detecting when cron jobs return success exit code but actually fail to complete their work.",
+    "url": `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`,
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": cleanBaseUrl
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`
     }
   }
 

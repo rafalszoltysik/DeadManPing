@@ -4,6 +4,9 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { CodeBlock } from '@/components/CodeBlock'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Empty Backup File Cron | DeadManPing",
   description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js for verifying backup file size.",
@@ -12,6 +15,7 @@ export const metadata: Metadata = {
     title: "Detect Empty Backup File Cron | DeadManPing",
     description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-empty-backup-file-cron`,
   },
   twitter: {
     card: "summary_large_image",
@@ -19,7 +23,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js.",
   },
   alternates: {
-    canonical: "/blog/detect-empty-backup-file-cron",
+    canonical: `${cleanBaseUrl}/blog/detect-empty-backup-file-cron`,
   },
 }
 
@@ -27,6 +31,7 @@ export default function DetectEmptyBackupFileCronPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-empty-backup-file-cron`,
     "headline": "Detect Empty Backup File Cron: How to Verify Backup Files Aren't Empty",
     "description": "Complete guide on detecting when cron backup jobs create empty files and how to monitor this automatically.",
     "author": {

@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Backup File Missing | DeadManPing",
   description: "How to detect when backup files are missing after backup jobs complete. Examples for verifying backup file existence.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Detect Backup File Missing | DeadManPing",
     description: "How to detect when backup files are missing after backup jobs complete.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-backup-file-missing`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when backup files are missing after backup jobs complete.",
   },
   alternates: {
-    canonical: "/blog/detect-backup-file-missing",
+    canonical: `${cleanBaseUrl}/blog/detect-backup-file-missing`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function DetectBackupFileMissingPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-backup-file-missing`,
     "headline": "Detect Backup File Missing: Verify Backup Files Exist",
     "description": "Complete guide on detecting when backup files are missing after backup jobs complete.",
     "author": {

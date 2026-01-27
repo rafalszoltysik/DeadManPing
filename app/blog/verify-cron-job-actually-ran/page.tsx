@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Verify Cron Job Actually Ran | DeadManPing",
   description: "How to verify that cron jobs actually executed. Examples for confirming job execution with timestamps and pings.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Verify Cron Job Actually Ran | DeadManPing",
     description: "How to verify that cron jobs actually executed.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/verify-cron-job-actually-ran`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to verify that cron jobs actually executed.",
   },
   alternates: {
-    canonical: "/blog/verify-cron-job-actually-ran",
+    canonical: `${cleanBaseUrl}/blog/verify-cron-job-actually-ran`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function VerifyCronJobActuallyRanPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/verify-cron-job-actually-ran`,
     "headline": "Verify Cron Job Actually Ran: Confirm Job Execution",
     "description": "Complete guide on verifying that cron jobs actually executed and detecting when they don't run.",
     "author": {

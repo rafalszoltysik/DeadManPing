@@ -5,6 +5,9 @@ import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Monitor Cron Jobs Without Migration | DeadManPing",
   description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
@@ -13,6 +16,7 @@ export const metadata: Metadata = {
     title: "Monitor Cron Jobs Without Migration | DeadManPing",
     description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/monitor-cron-jobs`,
   },
   twitter: {
     card: "summary_large_image",
@@ -20,7 +24,7 @@ export const metadata: Metadata = {
     description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
   },
   alternates: {
-    canonical: "/blog/monitor-cron-jobs",
+    canonical: `${cleanBaseUrl}/blog/monitor-cron-jobs`,
   },
 }
 
@@ -28,6 +32,7 @@ export default function MonitorCronJobsPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/monitor-cron-jobs`,
     "headline": "How to Monitor Cron Jobs and Detect Failures",
     "description": "Complete guide on monitoring cron jobs and detecting when they fail or stop running.",
     "author": {

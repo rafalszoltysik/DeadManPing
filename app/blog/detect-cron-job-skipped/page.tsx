@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Detect Cron Job Skipped | DeadManPing",
   description: "How to detect when cron jobs are skipped—not executed when they should be. Examples for detecting skipped jobs.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Detect Cron Job Skipped | DeadManPing",
     description: "How to detect when cron jobs are skipped—not executed when they should be.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/detect-cron-job-skipped`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs are skipped—not executed when they should be.",
   },
   alternates: {
-    canonical: "/blog/detect-cron-job-skipped",
+    canonical: `${cleanBaseUrl}/blog/detect-cron-job-skipped`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function DetectCronJobSkippedPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/detect-cron-job-skipped`,
     "headline": "Detect Cron Job Skipped: Catch Jobs That Don't Run",
     "description": "Complete guide on detecting when cron jobs are skipped and not executed when they should be.",
     "author": {

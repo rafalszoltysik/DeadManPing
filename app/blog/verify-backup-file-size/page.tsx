@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Verify Backup File Size | DeadManPing",
   description: "How to verify backup file sizes are within expected ranges. Examples for checking backup file sizes in bash, Python, Node.js.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Verify Backup File Size | DeadManPing",
     description: "How to verify backup file sizes are within expected ranges.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/verify-backup-file-size`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to verify backup file sizes are within expected ranges.",
   },
   alternates: {
-    canonical: "/blog/verify-backup-file-size",
+    canonical: `${cleanBaseUrl}/blog/verify-backup-file-size`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function VerifyBackupFileSizePage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/verify-backup-file-size`,
     "headline": "Verify Backup File Size: Ensure Backups Are Complete",
     "description": "Complete guide on verifying backup file sizes are within expected ranges and detecting when backups are too small or too large.",
     "author": {

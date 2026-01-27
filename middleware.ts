@@ -54,6 +54,27 @@ const isPublicRoute = (pathname: string): boolean => {
 }
 
 export async function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone()
+  const hostname = request.headers.get('host') || ''
+  const protocol = request.headers.get('x-forwarded-proto') || url.protocol.slice(0, -1)
+  
+  // Get canonical base URL (non-www, HTTPS)
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  const canonicalHost = baseUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/^https?:\/\//, '')
+  
+  // Redirect HTTP to HTTPS (301 permanent)
+  if (protocol === 'http' && process.env.NODE_ENV === 'production') {
+    url.protocol = 'https:'
+    return NextResponse.redirect(url, 301)
+  }
+  
+  // Redirect www to non-www (301 permanent)
+  if (hostname.startsWith('www.')) {
+    url.hostname = canonicalHost
+    url.protocol = 'https:'
+    return NextResponse.redirect(url, 301)
+  }
+
   let response = NextResponse.next({
     request: {
       headers: request.headers,
@@ -173,7 +194,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // Exclude static files, images, and private file types
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|sh|py|js|ts|json|env|config|log|tmp)$).*)',
   ],
 }
 

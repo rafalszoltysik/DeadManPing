@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Curl Returns 200 But Wrong Data | DeadManPing",
   description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages. Examples for validating API responses.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Curl Returns 200 But Wrong Data | DeadManPing",
     description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/curl-returns-200-but-wrong-data`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages.",
   },
   alternates: {
-    canonical: "/blog/curl-returns-200-but-wrong-data",
+    canonical: `${cleanBaseUrl}/blog/curl-returns-200-but-wrong-data`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function CurlReturns200ButWrongDataPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/curl-returns-200-but-wrong-data`,
     "headline": "Curl Returns 200 But Wrong Data: Validate API Responses",
     "description": "Complete guide on detecting when curl returns HTTP 200 but contains error messages or wrong data.",
     "author": {

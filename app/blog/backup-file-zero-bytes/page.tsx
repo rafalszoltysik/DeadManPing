@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Backup File Zero Bytes | DeadManPing",
   description: "How to detect when backup files are zero bytes. Examples for verifying backup file size and detecting empty backups.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Backup File Zero Bytes | DeadManPing",
     description: "How to detect when backup files are zero bytes.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/backup-file-zero-bytes`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when backup files are zero bytes.",
   },
   alternates: {
-    canonical: "/blog/backup-file-zero-bytes",
+    canonical: `${cleanBaseUrl}/blog/backup-file-zero-bytes`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function BackupFileZeroBytesPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/backup-file-zero-bytes`,
     "headline": "Backup File Zero Bytes: Detect Empty Backup Files",
     "description": "Complete guide on detecting when backup files are zero bytes and how to prevent empty backups.",
     "author": {

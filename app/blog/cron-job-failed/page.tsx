@@ -2,6 +2,9 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Not Running? How to Detect and Fix | DeadManPing",
   description: "Your cron job stopped running. Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
@@ -10,6 +13,7 @@ export const metadata: Metadata = {
     title: "Cron Job Not Running? How to Detect and Fix",
     description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-failed`,
   },
   twitter: {
     card: "summary_large_image",
@@ -17,7 +21,7 @@ export const metadata: Metadata = {
     description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
   },
   alternates: {
-    canonical: "/blog/cron-job-failed",
+    canonical: `${cleanBaseUrl}/blog/cron-job-failed`,
   },
 }
 
@@ -27,9 +31,23 @@ export default function CronJobFailedPage() {
     "@type": "Article",
     "headline": "Cron Job Not Running? How to Detect and Fix",
     "description": "Troubleshooting guide for detecting and fixing cron jobs that stopped running.",
+    "url": `${cleanBaseUrl}/blog/cron-job-failed`,
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": cleanBaseUrl
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${cleanBaseUrl}/blog/cron-job-failed`
     }
   }
 

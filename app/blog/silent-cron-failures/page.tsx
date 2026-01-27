@@ -4,6 +4,9 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { CodeBlock } from '@/components/CodeBlock'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Silent Cron Failures: How to Detect Them | DeadManPing",
   description: "How to detect silent cron job failures that don't log errors. Examples for catching failures that exit without notification.",
@@ -12,6 +15,7 @@ export const metadata: Metadata = {
     title: "Silent Cron Failures: How to Detect Them | DeadManPing",
     description: "How to detect silent cron job failures that don't log errors.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/silent-cron-failures`,
   },
   twitter: {
     card: "summary_large_image",
@@ -19,37 +23,35 @@ export const metadata: Metadata = {
     description: "How to detect silent cron job failures that don't log errors.",
   },
   alternates: {
-    canonical: "/blog/silent-cron-failures",
+    canonical: `${cleanBaseUrl}/blog/silent-cron-failures`,
   },
 }
 
 export default function SilentCronFailuresPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": "Silent Cron Failures: How to Detect Jobs That Fail Without Logging",
     "description": "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
-    "url": `${baseUrl}/silent-cron-failures`,
+    "url": `${cleanBaseUrl}/blog/silent-cron-failures`,
     "datePublished": "2024-12-01",
     "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",
-      "url": baseUrl
+      "url": cleanBaseUrl
     },
     "publisher": {
       "@type": "Organization",
       "name": "DeadManPing",
       "logo": {
         "@type": "ImageObject",
-        "url": `${baseUrl}/icon.svg`
+        "url": `${cleanBaseUrl}/icon.svg`
       }
     },
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `${baseUrl}/silent-cron-failures`
+      "@id": `${cleanBaseUrl}/blog/silent-cron-failures`
     },
     "articleSection": "Cron Monitoring Guides",
     "keywords": "silent cron failures, detect silent cron failure, cron job silent failure detection, cron fails silently, detect cron job not running, silent cron job failure",
@@ -64,13 +66,13 @@ export default function SilentCronFailuresPage() {
         "@type": "ListItem",
         "position": 1,
         "name": "Home",
-        "item": baseUrl
+        "item": cleanBaseUrl
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": "Silent Cron Failures",
-        "item": `${baseUrl}/silent-cron-failures`
+        "item": `${cleanBaseUrl}/blog/silent-cron-failures`
       }
     ]
   }

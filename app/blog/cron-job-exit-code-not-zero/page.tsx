@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
   description: "How to detect when cron jobs exit with non-zero exit codes. Examples for checking exit codes in bash, Python, Node.js.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
     description: "How to detect when cron jobs exit with non-zero exit codes.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-exit-code-not-zero`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect when cron jobs exit with non-zero exit codes.",
   },
   alternates: {
-    canonical: "/blog/cron-job-exit-code-not-zero",
+    canonical: `${cleanBaseUrl}/blog/cron-job-exit-code-not-zero`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function CronJobExitCodeNotZeroPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/cron-job-exit-code-not-zero`,
     "headline": "Cron Job Exit Code Not Zero: How to Detect and Handle Failures",
     "description": "Complete guide on detecting when cron jobs exit with non-zero exit codes and how to monitor this automatically.",
     "author": {

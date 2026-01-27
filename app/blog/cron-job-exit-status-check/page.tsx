@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Exit Status Check | DeadManPing",
   description: "How to check cron job exit status and verify jobs completed successfully. Examples for validating exit codes.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Cron Job Exit Status Check | DeadManPing",
     description: "How to check cron job exit status and verify jobs completed successfully.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-exit-status-check`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to check cron job exit status and verify jobs completed successfully.",
   },
   alternates: {
-    canonical: "/blog/cron-job-exit-status-check",
+    canonical: `${cleanBaseUrl}/blog/cron-job-exit-status-check`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function CronJobExitStatusCheckPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/cron-job-exit-status-check`,
     "headline": "Cron Job Exit Status Check: Verify Job Completion",
     "description": "Complete guide on checking cron job exit status and verifying jobs completed successfully.",
     "author": {

@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Cron Job Silent Failure Detection | DeadManPing",
   description: "How to detect silent cron job failures that don't produce error logs. Examples for catching failures that exit without notification.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Cron Job Silent Failure Detection | DeadManPing",
     description: "How to detect silent cron job failures that don't produce error logs.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/cron-job-silent-failure-detection`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to detect silent cron job failures that don't produce error logs.",
   },
   alternates: {
-    canonical: "/blog/cron-job-silent-failure-detection",
+    canonical: `${cleanBaseUrl}/blog/cron-job-silent-failure-detection`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function CronJobSilentFailureDetectionPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/cron-job-silent-failure-detection`,
     "headline": "Cron Job Silent Failure Detection: Catch Failures Without Logs",
     "description": "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
     "author": {

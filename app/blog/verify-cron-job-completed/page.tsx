@@ -3,6 +3,9 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Verify Cron Job Completed | DeadManPing",
   description: "How to verify that cron jobs completed successfully. Examples for confirming job completion with explicit pings.",
@@ -11,6 +14,7 @@ export const metadata: Metadata = {
     title: "Verify Cron Job Completed | DeadManPing",
     description: "How to verify that cron jobs completed successfully.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/verify-cron-job-completed`,
   },
   twitter: {
     card: "summary_large_image",
@@ -18,7 +22,7 @@ export const metadata: Metadata = {
     description: "How to verify that cron jobs completed successfully.",
   },
   alternates: {
-    canonical: "/blog/verify-cron-job-completed",
+    canonical: `${cleanBaseUrl}/blog/verify-cron-job-completed`,
   },
 }
 
@@ -26,6 +30,7 @@ export default function VerifyCronJobCompletedPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/verify-cron-job-completed`,
     "headline": "Verify Cron Job Completed: Confirm Successful Completion",
     "description": "Complete guide on verifying that cron jobs completed successfully and detecting when they don't finish.",
     "author": {

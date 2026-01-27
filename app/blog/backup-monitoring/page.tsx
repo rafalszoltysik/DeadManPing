@@ -4,6 +4,9 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
   description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
@@ -12,6 +15,7 @@ export const metadata: Metadata = {
     title: "Backup Monitoring Service | DeadManPing",
     description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/backup-monitoring`,
   },
   twitter: {
     card: "summary_large_image",
@@ -19,7 +23,7 @@ export const metadata: Metadata = {
     description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
   },
   alternates: {
-    canonical: "/blog/backup-monitoring",
+    canonical: `${cleanBaseUrl}/blog/backup-monitoring`,
   },
 }
 
@@ -27,6 +31,7 @@ export default function BackupMonitoringPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
+    "url": `${cleanBaseUrl}/blog/backup-monitoring`,
     "headline": "Backup Monitoring Service: Never Miss a Failed Backup",
     "description": "How to set up automated monitoring for backup jobs to detect failures immediately.",
     "author": {

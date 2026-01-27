@@ -5,6 +5,9 @@ import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
   description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
@@ -13,6 +16,7 @@ export const metadata: Metadata = {
     title: "Dead Man Switch for Backups | DeadManPing",
     description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
     type: "article",
+    url: `${cleanBaseUrl}/blog/dead-man-switch`,
   },
   twitter: {
     card: "summary_large_image",
@@ -20,7 +24,7 @@ export const metadata: Metadata = {
     description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
   },
   alternates: {
-    canonical: "/blog/dead-man-switch",
+    canonical: `${cleanBaseUrl}/blog/dead-man-switch`,
   },
 }
 
@@ -30,9 +34,23 @@ export default function DeadManSwitchPage() {
     "@type": "Article",
     "headline": "Dead Man Switch for Backups: Never Miss a Failed Backup Again",
     "description": "How to implement dead man switch monitoring for backup jobs to detect failures immediately.",
+    "url": `${cleanBaseUrl}/blog/dead-man-switch`,
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": cleanBaseUrl
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${cleanBaseUrl}/blog/dead-man-switch`
     }
   }
 
