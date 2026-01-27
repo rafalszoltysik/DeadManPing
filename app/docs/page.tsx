@@ -300,9 +300,9 @@ https.request(\`https://deadmanping.com/api/ping/your-monitor-slug?count=\${reco
 
             <AnimatedSection>
               <section id="monitoring-modes">
-                <h2 className="text-xl sm:text-2xl font-semibold mb-4">Three Monitoring Modes</h2>
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">Four Monitoring Methods</h2>
                 <p className="text-muted-foreground mb-6">
-                  DeadManPing supports three monitoring modes. Choose the one that fits your needs:
+                  DeadManPing supports four monitoring methods. Choose the one that fits your needs:
                 </p>
 
                 <div className="space-y-6">
@@ -315,16 +315,40 @@ https.request(\`https://deadmanping.com/api/ping/your-monitor-slug?count=\${reco
                         <h3 className="text-lg sm:text-xl font-semibold">Simple Ping</h3>
                       </div>
                       <p className="text-muted-foreground mb-4">
-                        Just verify that your job executed. Perfect for basic monitoring when you only need to know if the cron ran.
+                        Just verify that your job executed. One curl line confirms completion. Perfect for basic monitoring when you only need to know if the cron ran.
                       </p>
-                      <CodeBlock
-                        code={`#!/bin/bash
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <strong>How it works:</strong> When your job completes, it sends a ping to DeadManPing. If the ping doesn't arrive within the expected time window, you get an alert. The monitor status changes from "healthy" to "late" or "down" if no ping is received.
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Bash Example:</p>
+                          <CodeBlock
+                            code={`#!/bin/bash
 ./backup.sh
 
 # Simple ping - just confirms execution
-curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug"`}
-                        language="bash"
-                      />
+curl https://deadmanping.com/api/ping/your-slug`}
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Python Example:</p>
+                          <CodeBlock
+                            code={`import requests
+
+# Your job logic
+backup_database()
+
+# Simple ping
+requests.post("https://deadmanping.com/api/ping/your-slug")`}
+                            language="python"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Supported HTTP methods:</strong> GET, POST, HEAD. All methods work the same way.
+                        </p>
+                      </div>
                     </div>
                   </AnimatedItem>
 
@@ -337,18 +361,47 @@ curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug"`}
                         <h3 className="text-lg sm:text-xl font-semibold">Ping with Payload</h3>
                       </div>
                       <p className="text-muted-foreground mb-4">
-                        Verify correctness by sending data from execution. Configure validation rules in the dashboard to check if results meet your criteria (e.g., count &gt; 100, file_size &gt; 0).
+                        Verify correctness. Send data from execution and validate results in the dashboard. Configure validation rules to check if results meet your criteria (e.g., count &gt; 100, file_size &gt; 0).
                       </p>
-                      <CodeBlock
-                        code={`#!/bin/bash
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <strong>How it works:</strong> Send data in query parameters (GET) or JSON body (POST). DeadManPing validates the payload against rules you configure in the dashboard. If validation fails, the monitor status changes to "failed" and you get an alert. Only fields declared in your validation rules are checked - extra fields are ignored.
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Bash Example (Query Parameters):</p>
+                          <CodeBlock
+                            code={`#!/bin/bash
 users_synced=$(./sync_users.sh)
 EXIT_CODE=$?
 
-# Ping with payload - validates results
+# Ping with payload via query parameters
 # In DeadManPing panel: set validation rules like "count >= 100" and "exit_code == 0"
-curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug?count=$users_synced&exit_code=$EXIT_CODE"`}
-                        language="bash"
-                      />
+curl -X POST "https://deadmanping.com/api/ping/your-slug?count=$users_synced&exit_code=$EXIT_CODE"`}
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Python Example (JSON Body):</p>
+                          <CodeBlock
+                            code={`import requests
+
+# Your job logic
+records_synced = sync_users()
+backup_size = get_backup_size()
+
+# Ping with payload via JSON body
+# In DeadManPing panel: set validation rules like "count >= 100" and "size > 0"
+requests.post(
+  "https://deadmanping.com/api/ping/your-slug",
+  json={"count": records_synced, "size": backup_size}
+)`}
+                            language="python"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Payload format:</strong> Query parameters (GET/HEAD) or JSON body (POST). Max payload size: 2KB. Validation rules can use operators: ==, !=, &gt;, &lt;, &gt;=, &lt;=, contains, starts_with, ends_with.
+                        </p>
+                      </div>
                     </div>
                   </AnimatedItem>
 
@@ -361,9 +414,71 @@ curl -X POST "https://deadmanping.com/api/ping/your-monitor-slug?count=$users_sy
                         <h3 className="text-lg sm:text-xl font-semibold">Start/Stop Tracking</h3>
                       </div>
                       <p className="text-muted-foreground mb-4">
-                        Measure execution time by sending a start signal at the beginning and a ping with run_id at the end. Optionally include payload for result validation. Perfect for tracking job duration and detecting performance issues.
+                        Measure execution time. Track job duration and optionally include payload validation. Perfect for tracking job duration and detecting performance issues.
                       </p>
-                      <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <strong>How it works:</strong> Send a POST request to <code className="bg-muted px-1 py-0.5 rounded text-xs">/api/ping/your-slug/start</code> at the beginning of your job. This returns a <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code>. When your job completes, send a ping with the <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code> as a query parameter. DeadManPing automatically calculates the duration between start and stop. The duration is displayed in the dashboard and can be used for performance monitoring.
+                      </p>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Bash Example:</p>
+                          <CodeBlock
+                            code={`#!/bin/bash
+
+# Start tracking - returns run_id
+RUN_ID=$(curl -s -X POST "https://deadmanping.com/api/ping/your-slug/start" \\
+  -H "Content-Type: application/json" | jq -r '.run_id')
+
+# Your job logic
+./backup.sh
+EXIT_CODE=$?
+
+# Stop tracking with run_id
+# Duration is automatically calculated and displayed in dashboard
+curl -X POST "https://deadmanping.com/api/ping/your-slug?run_id=$RUN_ID"`}
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Python Example:</p>
+                          <CodeBlock
+                            code={`import requests
+
+# Start tracking
+start_response = requests.post("https://deadmanping.com/api/ping/your-slug/start")
+run_id = start_response.json()["run_id"]
+
+# Your job logic
+sync_users()
+
+# Stop tracking
+# Duration is automatically calculated: stop_time - start_time
+requests.post(f"https://deadmanping.com/api/ping/your-slug?run_id={run_id}")`}
+                            language="python"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Duration tracking:</strong> The dashboard automatically calculates execution time in milliseconds. If a job run is not completed (no stop ping), it remains in "running" status. You can optionally provide your own <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code> in the start request body.
+                        </p>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={300}>
+                    <div className="bg-card border-2 border-primary/20 rounded-lg p-6">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-primary/10 rounded-full w-10 h-10 flex items-center justify-center flex-shrink-0">
+                          <span className="text-primary text-xl font-bold">4</span>
+                        </div>
+                        <h3 className="text-lg sm:text-xl font-semibold">Start/Stop with Payload</h3>
+                      </div>
+                      <p className="text-muted-foreground mb-4">
+                        Track duration and validate payload data for complete monitoring. Combines execution time tracking with payload validation.
+                      </p>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        <strong>How it works:</strong> Same as Start/Stop Tracking, but include payload data in the stop ping. DeadManPing tracks both execution duration and validates the payload against your rules. This gives you complete visibility: you know how long the job took AND whether the results are correct.
+                      </p>
+                      <div className="space-y-3">
                         <div>
                           <p className="text-sm font-medium mb-2">Bash Example:</p>
                           <CodeBlock
@@ -374,13 +489,12 @@ RUN_ID=$(curl -s -X POST "https://deadmanping.com/api/ping/your-slug/start" \\
   -H "Content-Type: application/json" | jq -r '.run_id')
 
 # Your job logic
-./backup.sh
+users_synced=$(./sync_users.sh)
 EXIT_CODE=$?
 
-# Stop tracking with payload
-curl -X POST "https://deadmanping.com/api/ping/your-slug?run_id=$RUN_ID" \\
-  -H "Content-Type: application/json" \\
-  -d '{"exit_code": '$EXIT_CODE'}'`}
+# Stop tracking with run_id AND payload
+# Duration is tracked AND payload is validated
+curl -X POST "https://deadmanping.com/api/ping/your-slug?run_id=$RUN_ID&count=$users_synced&exit_code=$EXIT_CODE"`}
                             language="bash"
                           />
                         </div>
@@ -395,18 +509,314 @@ run_id = start_response.json()["run_id"]
 
 # Your job logic
 records_synced = sync_users()
+backup_size = get_backup_size()
 
-# Stop tracking with payload
+# Stop tracking with run_id AND payload
+# Duration is tracked AND payload is validated
 requests.post(
   f"https://deadmanping.com/api/ping/your-slug?run_id={run_id}",
-  json={"count": records_synced}
+  json={"count": records_synced, "size": backup_size}
 )`}
                             language="python"
                           />
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          The dashboard will automatically calculate and display execution duration. You can also set validation rules on the payload data.
+                        <p className="text-xs text-muted-foreground">
+                          <strong>Best of both worlds:</strong> You get execution duration tracking AND payload validation. If validation fails, the job run is marked as "failed" even if the duration was normal. This helps detect jobs that complete but produce incorrect results.
                         </p>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+                </div>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
+              <section id="api-reference">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">API Reference</h2>
+                <p className="text-muted-foreground mb-6">
+                  Detailed technical documentation for all API endpoints and how they work.
+                </p>
+
+                <div className="space-y-6">
+                  <AnimatedItem delay={0}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">1. Simple Ping Endpoint</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Endpoint:</p>
+                          <CodeBlock
+                            code="GET|POST|HEAD https://deadmanping.com/api/ping/{slug}"
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Description:</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Sends a ping to confirm job execution. Updates monitor status to "healthy" and sets the next expected ping time.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Response (200 OK):</p>
+                          <CodeBlock
+                            code={`{
+  "ok": true,
+  "monitor": "Backup Daily",
+  "status": "healthy"
+}`}
+                            language="json"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">How it works:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li>Updates <code className="bg-muted px-1 py-0.5 rounded text-xs">last_ping_at</code> timestamp</li>
+                            <li>Calculates <code className="bg-muted px-1 py-0.5 rounded text-xs">next_expected_ping_at</code> based on expected interval + grace period</li>
+                            <li>Changes status from "pending" → "healthy" (first ping) or "late"/"failed" → "healthy" (recovery)</li>
+                            <li>Creates a ping record in the database</li>
+                            <li>Triggers recovery alerts if status changed from failed/late to healthy</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={100}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">2. Ping with Payload Endpoint</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Endpoint:</p>
+                          <CodeBlock
+                            code={`POST https://deadmanping.com/api/ping/{slug}?field1=value1&field2=value2
+POST https://deadmanping.com/api/ping/{slug}
+Content-Type: application/json
+
+{"field1": "value1", "field2": "value2"}`}
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Description:</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Sends a ping with payload data for validation. Only fields declared in your validation rules are checked - extra fields are ignored.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Payload Format:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside mb-2">
+                            <li><strong>Query parameters (GET/POST):</strong> <code className="bg-muted px-1 py-0.5 rounded text-xs">?count=100&exit_code=0</code></li>
+                            <li><strong>JSON body (POST):</strong> <code className="bg-muted px-1 py-0.5 rounded text-xs">{"{"}"count": 100, "exit_code": 0{"}"}</code></li>
+                            <li><strong>Max size:</strong> 2KB total</li>
+                            <li><strong>Supported types:</strong> strings, numbers, booleans</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">How Validation Works:</p>
+                          <ol className="text-sm text-muted-foreground space-y-1 list-decimal list-inside">
+                            <li>Extract only declared fields from payload (ignore everything else)</li>
+                            <li>Validate each field against its rule (==, !=, &gt;, &lt;, &gt;=, &lt;=, contains, etc.)</li>
+                            <li>If any field with severity "error" fails → status = "failed"</li>
+                            <li>If only fields with severity "warn" fail → status stays "healthy" but ping shows as "fail"</li>
+                            <li>If all validations pass → status = "healthy"</li>
+                          </ol>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Response (200 OK):</p>
+                          <CodeBlock
+                            code={`{
+  "ok": true,
+  "monitor": "Backup Daily",
+  "status": "healthy"  // or "failed" if validation failed
+}`}
+                            language="json"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={200}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">3. Start Tracking Endpoint</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Endpoint:</p>
+                          <CodeBlock
+                            code={`POST https://deadmanping.com/api/ping/{slug}/start
+Content-Type: application/json
+
+{
+  "run_id": "optional-custom-run-id",  // Optional
+  "metadata": {}  // Optional
+}`}
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Description:</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Starts tracking a job run. Returns a <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code> that you must include in the stop ping. If you don't provide a <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code>, one is automatically generated.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Response (200 OK):</p>
+                          <CodeBlock
+                            code={`{
+  "ok": true,
+  "run_id": "550e8400-e29b-41d4-a716-446655440000"
+}`}
+                            language="json"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">How it works:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li>Creates a job run record with status "running"</li>
+                            <li>Stores <code className="bg-muted px-1 py-0.5 rounded text-xs">started_at</code> timestamp</li>
+                            <li>Returns <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code> that you must use in the stop ping</li>
+                            <li>If you provide a custom <code className="bg-muted px-1 py-0.5 rounded text-xs">run_id</code>, it must be unique for this monitor</li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={300}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">4. Stop Tracking (with run_id)</h3>
+                      <div className="space-y-4">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Endpoint:</p>
+                          <CodeBlock
+                            code="POST https://deadmanping.com/api/ping/{slug}?run_id={run_id}
+POST https://deadmanping.com/api/ping/{slug}?run_id={run_id}&count=100&exit_code=0"
+                            language="bash"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Description:</p>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Completes a job run started with the start endpoint. Automatically calculates duration. Optionally includes payload for validation.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">How Duration is Calculated:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li>Duration = <code className="bg-muted px-1 py-0.5 rounded text-xs">stop_time - start_time</code> (in milliseconds)</li>
+                            <li>Stored in <code className="bg-muted px-1 py-0.5 rounded text-xs">job_runs.duration_ms</code></li>
+                            <li>Also stored in <code className="bg-muted px-1 py-0.5 rounded text-xs">pings.duration_ms</code> for the ping record</li>
+                            <li>Displayed in dashboard for performance monitoring</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Job Run Status:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li><strong>"completed":</strong> If payload validation passes (or no validation rules)</li>
+                            <li><strong>"failed":</strong> If payload validation fails</li>
+                            <li><strong>"running":</strong> If stop ping never arrives (job crashed or timed out)</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Response (200 OK):</p>
+                          <CodeBlock
+                            code={`{
+  "ok": true,
+  "monitor": "Backup Daily",
+  "status": "healthy"
+}`}
+                            language="json"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={400}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">Error Responses</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">404 - Monitor Not Found:</p>
+                          <CodeBlock
+                            code={`{
+  "error": "Monitor not found"
+}`}
+                            language="json"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">403 - Monitor Paused or Subscription Expired:</p>
+                          <CodeBlock
+                            code={`{
+  "error": "Monitor is paused. Please upgrade your plan to reactivate it."
+}`}
+                            language="json"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">429 - Rate Limit Exceeded:</p>
+                          <CodeBlock
+                            code={`{
+  "error": "Rate limit exceeded"
+}`}
+                            language="json"
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Max 1 ping per 10 seconds per monitor. This prevents accidental spam and ensures accurate monitoring.
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">400 - Invalid Payload:</p>
+                          <CodeBlock
+                            code={`{
+  "error": "Payload too large (max 2KB)",
+  "details": "..."
+}`}
+                            language="json"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </AnimatedItem>
+
+                  <AnimatedItem delay={500}>
+                    <div className="bg-card border border-border rounded-lg p-6">
+                      <h3 className="text-lg font-semibold mb-4">Monitor Status Lifecycle</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-sm font-medium mb-2">Status States:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li><strong>"pending":</strong> Monitor created but no ping received yet</li>
+                            <li><strong>"healthy":</strong> Pings arriving on time and validation passing</li>
+                            <li><strong>"late":</strong> Ping received but after expected time window</li>
+                            <li><strong>"failed":</strong> Ping received but payload validation failed (error severity)</li>
+                            <li><strong>"down":</strong> No ping received within expected time + grace period</li>
+                            <li><strong>"paused":</strong> Monitor disabled (subscription expired or manually paused)</li>
+                          </ul>
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Status Transitions:</p>
+                          <CodeBlock
+                            code={`pending → healthy (first successful ping)
+healthy → late (ping received but too late)
+healthy → failed (ping received but validation failed)
+healthy → down (no ping received)
+late → healthy (ping received on time)
+late → down (no ping received)
+failed → healthy (ping received with valid payload)
+down → healthy (ping received after downtime)
+down → late (ping received but late)`}
+                            language="text"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium mb-2">Alert Triggers:</p>
+                          <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+                            <li><strong>Failure alert:</strong> When status changes to "failed" or "down"</li>
+                            <li><strong>Recovery alert:</strong> When status changes from "failed"/"late"/"down" to "healthy"</li>
+                            <li>Alerts are sent via email, Slack, or Discord webhooks (configured in settings)</li>
+                          </ul>
+                        </div>
                       </div>
                     </div>
                   </AnimatedItem>
