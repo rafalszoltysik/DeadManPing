@@ -15,7 +15,7 @@ export default async function ContactPage() {
   const initialEmail = user?.email || null
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent text-foreground relative">
       <PageNav />
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">

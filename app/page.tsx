@@ -12,7 +12,6 @@ import { Footer } from '@/components/Footer'
 import { FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
 import PricingSectionClient from '@/components/PricingSectionClient'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
-import { CodeBlock } from '@/components/CodeBlock'
 
 // Lazy load heavy components below the fold
 const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
@@ -295,18 +294,18 @@ export default function Home() {
           </Suspense>
         </AnimatedSection>
 
-        {/* Three Monitoring Modes */}
+        {/* Four Monitoring Modes */}
         <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={100} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Three Ways to Monitor</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Four Ways to Monitor</h2>
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
                 Choose the monitoring mode that fits your needs
               </p>
             </AnimatedItem>
-            <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6" staggerDelay={100}>
+            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" staggerDelay={100}>
               <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                 <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 mx-auto">
                   <span className="text-primary text-lg sm:text-xl font-bold">1</span>
@@ -315,10 +314,6 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mb-4 text-center">
                   Just verify that your job executed. One curl line confirms completion.
                 </p>
-                <CodeBlock
-                  code="curl https://deadmanping.com/api/ping/your-slug"
-                  language="bash"
-                />
               </div>
 
               <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
@@ -329,10 +324,6 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mb-4 text-center">
                   Verify correctness. Send data from execution and validate results in the dashboard.
                 </p>
-                <CodeBlock
-                  code='curl -X POST "https://deadmanping.com/api/ping/your-slug?count=100"'
-                  language="bash"
-                />
               </div>
 
               <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
@@ -343,10 +334,16 @@ export default function Home() {
                 <p className="text-sm text-muted-foreground mb-4 text-center">
                   Measure execution time. Track job duration and optionally include payload validation.
                 </p>
-                <CodeBlock
-                  code="/api/ping/your-slug/start → ... → /api/ping/your-slug?run_id=..."
-                  language="bash"
-                />
+              </div>
+
+              <div className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
+                <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center mb-4 mx-auto">
+                  <span className="text-primary text-lg sm:text-xl font-bold">4</span>
+                </div>
+                <h3 className="text-lg font-semibold mb-3 text-center">Start/Stop with Payload</h3>
+                <p className="text-sm text-muted-foreground mb-4 text-center">
+                  Track duration and validate payload data for complete monitoring.
+                </p>
               </div>
             </StaggerContainer>
             <AnimatedItem delay={500} direction="up" duration={700}>
@@ -977,7 +974,7 @@ export default function Home() {
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                   <FaBolt className="text-primary text-xl" />
                 </div>
-                <h3 className="font-semibold mb-2">99.9% Uptime</h3>
+                <h3 className="font-semibold mb-2">24/7 Monitoring</h3>
                 <p className="text-sm text-muted-foreground">Reliable infrastructure. Your monitors are always checked, even when you're not.</p>
               </div>
               <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
