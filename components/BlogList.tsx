@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo } from 'react'
 import type { BlogPostMetadata } from '@/lib/blog-metadata'
 import { BlogCard } from './BlogCard'
 import { BlogSearch } from './BlogSearch'
@@ -50,7 +50,7 @@ function matchesSearch(article: { slug: string; metadata: BlogPostMetadata }, qu
   )
 }
 
-export function BlogList({ articles, featuredSlugs = [] }: BlogListProps) {
+export const BlogList = memo(function BlogList({ articles, featuredSlugs = [] }: BlogListProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
 
@@ -188,5 +188,5 @@ export function BlogList({ articles, featuredSlugs = [] }: BlogListProps) {
       </AnimatedSection>
     </>
   )
-}
+})
 

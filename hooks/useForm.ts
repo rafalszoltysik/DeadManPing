@@ -4,7 +4,7 @@ import { captureApiError, captureFrontendError } from '@/lib/sentry/client'
 
 export interface UseFormOptions<T> {
   onSubmit: (data: T) => Promise<Response>
-  onSuccess?: (data: any) => void
+  onSuccess?: (data: unknown) => void
   onError?: (error: string) => void
   validate?: (data: T) => string | null
   resetOnSuccess?: boolean
@@ -22,7 +22,7 @@ export interface UseFormResult<T> {
 /**
  * Hook for handling form submissions with loading, error, and success states
  */
-export function useForm<T = any>(
+export function useForm<T = unknown>(
   options: UseFormOptions<T>
 ): UseFormResult<T> {
   const [error, setError] = useState<string | null>(null)

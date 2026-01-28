@@ -2,13 +2,13 @@
 
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, memo } from 'react'
 import { ChevronRightIcon } from './Icons'
 import { MonitorListProps } from '@/lib/types/monitor'
 import { MonitorStatusIcon, MonitorStatus } from './MonitorStatus'
 import { getStatusColor } from '@/lib/monitor-utils'
 
-export function MonitorList({ monitors }: MonitorListProps) {
+export const MonitorList = memo(function MonitorList({ monitors }: MonitorListProps) {
   const [mounted, setMounted] = useState(false)
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([])
 
@@ -143,4 +143,4 @@ export function MonitorList({ monitors }: MonitorListProps) {
       </div>
     </div>
   )
-}
+})

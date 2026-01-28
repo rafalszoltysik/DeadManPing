@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
 
 interface Member {
@@ -23,7 +23,7 @@ interface TeamMembersProps {
   initialMembers: Member[]
 }
 
-export function TeamMembers({ workspaceId, subscriptionTier, maxMembers, initialMembers }: TeamMembersProps) {
+export const TeamMembers = memo(function TeamMembers({ workspaceId, subscriptionTier, maxMembers, initialMembers }: TeamMembersProps) {
   const [members, setMembers] = useState<Member[]>(initialMembers)
   const [error, setError] = useState<string | null>(null)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -230,6 +230,6 @@ export function TeamMembers({ workspaceId, subscriptionTier, maxMembers, initial
       </div>
     </div>
   )
-}
+})
 
 

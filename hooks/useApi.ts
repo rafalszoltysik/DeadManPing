@@ -4,7 +4,7 @@ import { captureApiError } from '@/lib/sentry/client'
 export interface UseApiOptions<T> {
   onSuccess?: (data: T) => void
   onError?: (error: string) => void
-  transform?: (data: any) => T
+  transform?: (data: unknown) => T
 }
 
 export interface UseApiResult<T> {
@@ -19,7 +19,7 @@ export interface UseApiResult<T> {
  * Generic hook for making API calls
  * Handles loading state, error handling, and data transformation
  */
-export function useApi<T = any>(
+export function useApi<T = unknown>(
   options: UseApiOptions<T> = {}
 ): UseApiResult<T> {
   const [data, setData] = useState<T | null>(null)
