@@ -164,7 +164,13 @@ const STRUCTURED_DATA = {
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.png`,
+        "width": 1200,
+        "height": 1200
+      }
     },
     "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring, multi-currency pricing, USD pricing, EUR pricing",
     "inLanguage": "en",
@@ -205,7 +211,9 @@ export default function Home() {
       "name": "DeadManPing",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://deadmanping.com/icon.svg"
+        "url": `${cleanBaseUrl}/icon.png`,
+        "width": 1200,
+        "height": 1200
       }
     }
   }

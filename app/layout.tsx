@@ -78,7 +78,15 @@ export default function RootLayout({
     "@type": "Organization",
     "name": "DeadManPing",
     "url": baseUrl,
-    "logo": `${baseUrl}/icon.svg`,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${canonicalBaseUrl}/icon.png`,
+      "width": 1200,
+      "height": 1200,
+      "contentUrl": `${canonicalBaseUrl}/icon.png`,
+      "encodingFormat": "image/png"
+    },
+    "image": `${canonicalBaseUrl}/icon.png`,
     "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup.",
     "foundingDate": "2024",
     "sameAs": [],

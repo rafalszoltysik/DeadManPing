@@ -48,7 +48,9 @@ export default function MonitorCronJobsPage() {
       "name": "DeadManPing",
       "logo": {
         "@type": "ImageObject",
-        "url": `${cleanBaseUrl}/icon.svg`
+        "url": `${cleanBaseUrl}/icon.png`,
+        "width": 1200,
+        "height": 1200
       }
     },
     "mainEntityOfPage": {
