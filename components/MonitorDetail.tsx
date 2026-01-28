@@ -269,44 +269,101 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
     if (monitor.custom_webhook_url) setCustomWebhook(monitor.custom_webhook_url)
   }, [monitor.alert_email, monitor.slack_webhook_url, monitor.discord_webhook_url, monitor.custom_webhook_url])
 
-  // Build curl command with example payload based on configured fields
-  const buildCurlCommand = () => {
-    const hasPayloadFields = monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0
+  // Determine monitoring mode based on monitor configuration
+  const hasStartStop = monitor.max_execution_time_seconds !== null && monitor.max_execution_time_seconds > 0
+  const hasPayloadFields = monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0
+
+  // Build example payload from configured fields
+  const buildExamplePayload = () => {
+    if (!hasPayloadFields || !monitor.payload_validation_rules) {
+      return null
+    }
     
-    if (hasPayloadFields && monitor.payload_validation_rules) {
-      // Build example payload from configured fields
-      const examplePayload: Record<string, any> = {}
-      monitor.payload_validation_rules.fields.forEach((field: any) => {
-        // Generate example value based on type and rule
-        if (field.type === 'number') {
-          if (field.rule === '>' || field.rule === '>=') {
-            examplePayload[field.name] = (Number(field.value) || 0) + 10
-          } else if (field.rule === '<' || field.rule === '<=') {
-            examplePayload[field.name] = Math.max(0, (Number(field.value) || 100) - 10)
-          } else {
-            examplePayload[field.name] = field.value || 0
-          }
-        } else if (field.type === 'boolean') {
-          examplePayload[field.name] = field.value === false || field.value === 'false' ? false : true
+    const examplePayload: Record<string, any> = {}
+    monitor.payload_validation_rules.fields.forEach((field: any) => {
+      // Generate example value based on type and rule
+      if (field.type === 'number') {
+        if (field.rule === '>' || field.rule === '>=') {
+          examplePayload[field.name] = (Number(field.value) || 0) + 10
+        } else if (field.rule === '<' || field.rule === '<=') {
+          examplePayload[field.name] = Math.max(0, (Number(field.value) || 100) - 10)
         } else {
-          examplePayload[field.name] = field.value || 'ok'
+          examplePayload[field.name] = field.value || 0
         }
-      })
-      
+      } else if (field.type === 'boolean') {
+        examplePayload[field.name] = field.value === false || field.value === 'false' ? false : true
+      } else {
+        examplePayload[field.name] = field.value || 'ok'
+      }
+    })
+    
+    return examplePayload
+  }
+
+  const examplePayload = buildExamplePayload()
+
+  // Build curl command based on monitoring mode
+  const buildCurlCommand = () => {
+    if (hasStartStop && hasPayloadFields) {
+      // Start/Stop with Payload
       const payloadJson = JSON.stringify(examplePayload)
-      // For Windows, use --data-raw with escaped quotes, for Unix use single quotes
+      const startCommand = `curl -X POST "${pingUrl}/start" \\
+  -H "Content-Type: application/json" \\
+  -d '{"run_id": "optional-uuid"}'`
+      
+      const completeCommandUnix = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
+  -H "Content-Type: application/json" \\
+  -d '${payloadJson}'`
+      
+      const completeCommandWindows = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" -H "Content-Type: application/json" --data-raw "${payloadJson.replace(/"/g, '\\"')}"`
+      
+      return {
+        type: 'start-stop-payload',
+        start: startCommand,
+        complete: {
+          unix: completeCommandUnix,
+          windows: completeCommandWindows,
+          default: completeCommandUnix,
+        },
+        examplePayload,
+      }
+    } else if (hasStartStop) {
+      // Start/Stop only
+      const startCommand = `curl -X POST "${pingUrl}/start" \\
+  -H "Content-Type: application/json" \\
+  -d '{"run_id": "optional-uuid"}'`
+      
+      const completeCommand = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
+  -H "Content-Type: application/json"`
+      
+      return {
+        type: 'start-stop',
+        start: startCommand,
+        complete: {
+          unix: completeCommand,
+          windows: completeCommand,
+          default: completeCommand,
+        },
+        examplePayload: null,
+      }
+    } else if (hasPayloadFields) {
+      // Payload only
+      const payloadJson = JSON.stringify(examplePayload)
       const windowsCommand = `curl -X POST "${pingUrl}" -H "Content-Type: application/json" --data-raw "${payloadJson.replace(/"/g, '\\"')}"`
       const unixCommand = `curl -X POST "${pingUrl}" -H "Content-Type: application/json" -d '${payloadJson}'`
       
       return {
+        type: 'payload',
         windows: windowsCommand,
         unix: unixCommand,
-        default: unixCommand, // Default for copy
-        examplePayload, // Include payload for reuse
+        default: unixCommand,
+        examplePayload,
       }
     } else {
+      // Simple ping
       const simpleCommand = `curl -X POST "${pingUrl}"`
       return {
+        type: 'simple',
         windows: simpleCommand,
         unix: simpleCommand,
         default: simpleCommand,
@@ -317,28 +374,22 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
 
   const curlCommands = buildCurlCommand()
   const [selectedPlatform, setSelectedPlatform] = useState<'windows' | 'unix'>('unix')
-  const curlCommand = curlCommands[selectedPlatform]
-
-  const buildStartCurlCommand = () => {
-    return `curl -X POST "${pingUrl}/start" \\
-  -H "Content-Type: application/json" \\
-  -d '{"run_id": "optional-uuid"}'`
-  }
-
-  const buildCompleteCurlCommand = () => {
-    const curlData = buildCurlCommand()
-    const hasPayload = curlData.examplePayload && Object.keys(curlData.examplePayload).length > 0
-    const payloadJson = hasPayload ? JSON.stringify(curlData.examplePayload) : ''
-    
-    if (hasPayload) {
-      return `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
-  -H "Content-Type: application/json" \\
-  -d '${payloadJson}'`
-    } else {
-      return `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
-  -H "Content-Type: application/json"`
+  const [showStartStopExample, setShowStartStopExample] = useState(true) // For start-stop mode, show start command first
+  
+  // Get the command to display based on mode
+  const getDisplayCommand = (): string => {
+    if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
+      if (showStartStopExample) {
+        return curlCommands.start || ''
+      }
+      return curlCommands.complete?.[selectedPlatform] || curlCommands.complete?.default || ''
+    } else if (curlCommands.type === 'payload' || curlCommands.type === 'simple') {
+      return (curlCommands as any)[selectedPlatform] || curlCommands.default || ''
     }
+    return ''
   }
+  
+  const curlCommand = getDisplayCommand()
 
   // Check if monitor should be marked as late or failed based on last_ping_at and expected interval
   const checkMonitorStatus = (monitorData: Monitor): Monitor => {
@@ -838,7 +889,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
             Copy the command below and run it in your terminal or add it to your cron job.
           </p>
           <div className="space-y-3">
-            {monitor.payload_validation_rules?.fields && monitor.payload_validation_rules.fields.length > 0 && (
+            {/* Platform selector - show for payload or start-stop-payload */}
+            {(hasPayloadFields || (hasStartStop && hasPayloadFields)) && (
               <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
                 <button
                   type="button"
@@ -864,10 +916,48 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                 </button>
               </div>
             )}
+            
+            {/* Start/Stop mode - show tabs for start and complete */}
+            {(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && (
+              <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
+                <button
+                  type="button"
+                  onClick={() => setShowStartStopExample(true)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition-smooth ${
+                    showStartStopExample
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Start Command
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowStartStopExample(false)}
+                  className={`px-3 py-1.5 text-xs font-medium rounded transition-smooth ${
+                    !showStartStopExample
+                      ? 'bg-primary text-primary-foreground'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Complete Command
+                </button>
+              </div>
+            )}
+            
             <CodeBlock
               code={curlCommand}
               language="bash"
             />
+            
+            {/* Additional info for start-stop mode */}
+            {(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && (
+              <p className="text-xs text-muted-foreground">
+                {showStartStopExample 
+                  ? 'Call this endpoint when your job starts. Save the run_id from the response.'
+                  : 'Call this endpoint when your job completes. Use the run_id from the start response.'}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -967,7 +1057,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                   </div>
                 </div>
                 <CodeBlock
-                  code={buildStartCurlCommand()}
+                  code={(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && curlCommands.start ? curlCommands.start : ''}
                   language="bash"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
@@ -988,7 +1078,16 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                   </div>
                 </div>
                 <CodeBlock
-                  code={buildCompleteCurlCommand()}
+                  code={(() => {
+                    if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
+                      return curlCommands.complete?.unix || curlCommands.complete?.default || ''
+                    } else if (curlCommands.type === 'payload') {
+                      return (curlCommands as any).unix || curlCommands.default || ''
+                    } else if (curlCommands.type === 'simple') {
+                      return curlCommands.default || ''
+                    }
+                    return ''
+                  })()}
                   language="bash"
                 />
                 <p className="text-xs text-muted-foreground mt-2">

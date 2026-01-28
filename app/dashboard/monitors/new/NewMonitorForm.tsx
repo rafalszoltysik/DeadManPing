@@ -1108,7 +1108,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                 className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
                   monitoringMode === 'simple'
                     ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50 bg-background'
+                    : 'border-border hover:border-primary/50 bg-card'
                 }`}
               >
                 <div className="font-medium text-sm mb-1">Simple Ping</div>
@@ -1126,7 +1126,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                 className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
                   monitoringMode === 'payload'
                     ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50 bg-background'
+                    : 'border-border hover:border-primary/50 bg-card'
                 }`}
               >
                 <div className="font-medium text-sm mb-1">Ping with Payload</div>
@@ -1145,7 +1145,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                 className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
                   monitoringMode === 'start-stop'
                     ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50 bg-background'
+                    : 'border-border hover:border-primary/50 bg-card'
                 }`}
               >
                 <div className="font-medium text-sm mb-1">Start/Stop Tracking</div>
@@ -1163,7 +1163,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                 className={`p-3 sm:p-4 rounded-lg border-2 text-left transition-smooth ${
                   monitoringMode === 'start-stop-payload'
                     ? 'border-primary bg-primary/10'
-                    : 'border-border hover:border-primary/50 bg-background'
+                    : 'border-border hover:border-primary/50 bg-card'
                 }`}
               >
                 <div className="font-medium text-sm mb-1">Start/Stop with Payload</div>
@@ -1240,25 +1240,25 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                       No fields configured. Click "Add Field" to add validation rules.
                     </p>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {payloadFields.map((field, index) => (
-                        <div key={index} className="bg-background border border-input rounded-lg p-3 sm:p-3 space-y-2 sm:space-y-2 animate-slide-up card-hover" style={{ animationDelay: `${index * 50}ms` }}>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
+                        <div key={index} className="bg-card border border-border rounded-lg p-4 sm:p-5 space-y-4 animate-slide-up card-hover" style={{ animationDelay: `${index * 50}ms` }}>
+                          <div className="flex items-center justify-between pb-3 border-b border-border">
+                            <h4 className="text-sm font-semibold">Field {index + 1}</h4>
                             <button
                               type="button"
                               onClick={() => {
                                 setPayloadFields(payloadFields.filter((_, i) => i !== index))
                               }}
-                              className="text-xs px-3 py-2 sm:px-2 sm:py-1 text-error hover:bg-error/10 rounded transition-smooth min-h-[44px] sm:min-h-0"
+                              className="text-xs px-3 py-1.5 text-error hover:bg-error/10 rounded transition-smooth font-medium"
                             >
                               Remove
                             </button>
                           </div>
                           
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-medium mb-1">Field Name</label>
+                              <label className="block text-xs font-medium mb-2 text-foreground">Field Name</label>
                               <input
                                 type="text"
                                 value={field.name}
@@ -1268,12 +1268,12 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                                   setPayloadFields(newFields)
                                 }}
                                 placeholder="e.g., count"
-                                className="w-full px-3 py-2.5 sm:px-2 sm:py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth min-h-[44px] sm:min-h-0"
+                                className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
                               />
                             </div>
                             
                             <div>
-                              <label className="block text-xs font-medium mb-1">Type</label>
+                              <label className="block text-xs font-medium mb-2 text-foreground">Type</label>
                               <select
                                 value={field.type}
                                 onChange={(e) => {
@@ -1289,7 +1289,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                                   }
                                   setPayloadFields(newFields)
                                 }}
-                                className="w-full px-3 py-2.5 sm:px-2 sm:py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth min-h-[44px] sm:min-h-0"
+                                className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                               >
                                 <option value="number">Number</option>
                                 <option value="boolean">Boolean</option>
@@ -1298,9 +1298,9 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-2">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                              <label className="block text-xs font-medium mb-1">Rule</label>
+                              <label className="block text-xs font-medium mb-2 text-foreground">Rule</label>
                               <select
                                 value={field.rule}
                                 onChange={(e) => {
@@ -1308,28 +1308,28 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                                   newFields[index].rule = e.target.value as '>' | '<' | '>=' | '<=' | '==' | '!='
                                   setPayloadFields(newFields)
                                 }}
-                                className="w-full px-3 py-2.5 sm:px-2 sm:py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth min-h-[44px] sm:min-h-0"
+                                className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                               >
                                 {field.type === 'number' ? (
                                   <>
-                                    <option value=">">Greater than (&gt;)</option>
-                                    <option value="<">Less than (&lt;)</option>
-                                    <option value=">=">Greater or equal (&gt;=)</option>
-                                    <option value="<=">Less or equal (&lt;=)</option>
-                                    <option value="==">Equal (==)</option>
-                                    <option value="!=">Not equal (!=)</option>
+                                    <option value=">">Greater than</option>
+                                    <option value="<">Less than</option>
+                                    <option value=">=">Greater than or equal</option>
+                                    <option value="<=">Less than or equal</option>
+                                    <option value="==">Equal to</option>
+                                    <option value="!=">Not equal to</option>
                                   </>
                                 ) : (
                                   <>
-                                    <option value="==">Equal (==)</option>
-                                    <option value="!=">Not equal (!=)</option>
+                                    <option value="==">Equal to</option>
+                                    <option value="!=">Not equal to</option>
                                   </>
                                 )}
                               </select>
                             </div>
                             
                             <div>
-                              <label className="block text-xs font-medium mb-1">Value</label>
+                              <label className="block text-xs font-medium mb-2 text-foreground">Value</label>
                               <input
                                 type={field.type === 'number' ? 'number' : 'text'}
                                 value={field.value}
@@ -1345,13 +1345,13 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                                     ? 'true or false'
                                     : 'e.g., "ok"'
                                 }
-                                className="w-full px-3 py-2.5 sm:px-2 sm:py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent focus:scale-[1.01] hover:border-primary/30 transition-smooth min-h-[44px] sm:min-h-0"
+                                className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth"
                               />
                             </div>
                           </div>
                           
                           <div>
-                            <label className="flex items-center gap-1.5 text-xs font-medium mb-1">
+                            <label className="flex items-center gap-1.5 text-xs font-medium mb-2 text-foreground">
                               Severity
                               <InfoTooltip content="Error: Monitor will be marked as FAIL if validation fails. Warning: Monitor stays healthy but shows warning status.">
                                 <button type="button" className="text-muted-foreground hover:text-foreground transition-smooth">
@@ -1366,7 +1366,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                                 newFields[index].severity = e.target.value as 'warn' | 'error'
                                 setPayloadFields(newFields)
                               }}
-                              className="w-full px-3 py-2.5 sm:px-2 sm:py-1.5 bg-background border border-input rounded text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent min-h-[44px] sm:min-h-0"
+                              className="w-full px-3 py-2 bg-card border border-input rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth appearance-none bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22rgb(161%2C%20161%2C%20170)%22%20d%3D%22M6%209L1%204h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px_12px] bg-[right_0.75rem_center] bg-no-repeat pr-10"
                             >
                               <option value="error">Error (mark as FAIL)</option>
                               <option value="warn">Warning</option>
