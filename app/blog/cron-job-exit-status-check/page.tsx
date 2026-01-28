@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobExitStatusCheckPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/cron-job-exit-status-check`,
-    "headline": "Cron Job Exit Status Check: Verify Job Completion",
-    "description": "Complete guide on checking cron job exit status and verifying jobs completed successfully.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-exit-status-check",
+    headline: "Cron Job Exit Status Check: Verify Job Completion",
+    description: "Complete guide on checking cron job exit status and verifying jobs completed successfully.",
+    keywords: "cron job exit status check, check cron job exit status, verify cron job exit status, cron job exit code check, validate cron job exit status",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-exit-status-check",
+    title: "Cron Job Exit Status Check"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -180,6 +183,8 @@ export default function CronJobExitStatusCheckPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-exit-status-check" />
           </div>
         </article>
       </main>

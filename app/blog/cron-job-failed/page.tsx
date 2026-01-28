@@ -4,13 +4,15 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
   title: "Cron Job Not Running? How to Detect and Fix | DeadManPing",
-  description: "Your cron job stopped running. Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
+  description: "Your cron job stopped running. Learn how to detect failures, diagnose why they're not running, and set up monitoring to prevent incidents.",
   keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron notification when job fails, cron notification if job fails, cron job notification service, monitor cron notification",
   openGraph: {
     title: "Cron Job Not Running? How to Detect and Fix",
@@ -29,36 +31,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobFailedPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Cron Job Not Running? How to Detect and Fix",
-    "description": "Troubleshooting guide for detecting and fixing cron jobs that stopped running.",
-    "url": `${cleanBaseUrl}/blog/cron-job-failed`,
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing",
-      "url": cleanBaseUrl
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${cleanBaseUrl}/icon.svg`
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `${cleanBaseUrl}/blog/cron-job-failed`
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-failed",
+    headline: "Cron Job Not Running? How to Detect and Fix",
+    description: "Troubleshooting guide for detecting and fixing cron jobs that stopped running.",
+    keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-failed",
+    title: "Cron Job Not Running"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -283,15 +277,25 @@ df -i`}
                     DeadManPing provides dead man switch monitoring for cron jobs. Set up monitoring in 2 minutes, 
                     get instant alerts when jobs fail, and sleep peacefully knowing you'll be notified immediately.
                   </p>
-                  <Link
-                    href="/auth/signup"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift"
-                  >
-                    Start Monitoring Free
-                  </Link>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Link
+                      href="/auth/signup"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                    >
+                      Start Monitoring Free
+                    </Link>
+                    <Link
+                      href="/faq"
+                      className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                    >
+                      View FAQ
+                    </Link>
+                  </div>
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-failed" />
           </div>
         </article>
       </main>

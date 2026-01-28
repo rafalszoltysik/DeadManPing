@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectBackupFileMissingPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-backup-file-missing`,
-    "headline": "Detect Backup File Missing: Verify Backup Files Exist",
-    "description": "Complete guide on detecting when backup files are missing after backup jobs complete.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-backup-file-missing",
+    headline: "Detect Backup File Missing: Verify Backup Files Exist",
+    description: "Complete guide on detecting when backup files are missing after backup jobs complete.",
+    keywords: "detect backup file missing, backup file missing detection, verify backup file exists, check backup file missing, detect missing backup file",
+    articleSection: "Backup Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-backup-file-missing",
+    title: "Detect Backup File Missing"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -199,6 +202,8 @@ export default function DetectBackupFileMissingPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-backup-file-missing" />
           </div>
         </article>
       </main>

@@ -13,9 +13,12 @@ import { HowItWorksSection } from '@/components/HowItWorksSection'
 import LazyPricingSection from '@/components/LazyPricingSection'
 import LazyDashboardPreview from '@/components/LazyDashboardPreview'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
   title: "Never Miss a Cron Job Again | DeadManPing",
-  description: "Never miss a cron job again. DeadManPing monitors your cron jobs without changing your setup. Monitor outcomes, not just execution. One curl line. Your job logic stays the same. Result-aware monitoring that verifies job outcomes. Detect silent failures, wrong results, and missing runs. Free tier available with 20 monitors. Multi-currency pricing in USD and EUR.",
+  description: "Never miss a cron job again. DeadManPing monitors your cron jobs without changing your setup. Monitor outcomes, not just execution. One curl line. Your job logic stays the same.",
   keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
@@ -33,13 +36,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Never Miss a Cron Job Again | DeadManPing",
-    description: "Never miss a cron job again. Monitor outcomes, not just execution. DeadManPing monitors your cron jobs without changing your setup. One curl line. Your job logic stays the same. Result-aware monitoring that verifies job outcomes. Multi-currency pricing in USD and EUR.",
+    description: "Never miss a cron job again. Monitor outcomes, not just execution. DeadManPing monitors your cron jobs without changing your setup. One curl line. Your job logic stays the same.",
     type: "website",
-    url: "https://deadmanping.com",
+    url: cleanBaseUrl,
     siteName: "DeadManPing",
     images: [
       {
-        url: "https://deadmanping.com/icon.png",
+        url: `${cleanBaseUrl}/icon.png`,
         width: 1200,
         height: 1200,
         alt: "DeadManPing - Cron Job Monitoring",
@@ -50,10 +53,10 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Never Miss a Cron Job Again | DeadManPing",
     description: "Never miss a cron job again. Monitor outcomes, not just execution. One curl line. Your job logic stays the same.",
-    images: ["https://deadmanping.com/icon.png"],
+    images: [`${cleanBaseUrl}/icon.png`],
   },
   alternates: {
-    canonical: "https://deadmanping.com",
+    canonical: cleanBaseUrl,
   },
   category: "Software",
   classification: "Developer Tools, Monitoring Software",
@@ -71,9 +74,11 @@ const STRUCTURED_DATA = {
     "applicationCategory": "DeveloperApplication",
     "applicationSubCategory": "Monitoring Software",
     "operatingSystem": "Any",
-    "url": "https://deadmanping.com",
+    "url": cleanBaseUrl,
+    "datePublished": "2024-01-01",
+    "dateModified": new Date().toISOString().split('T')[0],
     "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Your job logic stays the same. Get instant alerts when your jobs don't run or produce incorrect results.",
-    "screenshot": "https://deadmanping.com/icon.svg",
+    "screenshot": `${cleanBaseUrl}/icon.svg`,
     "softwareVersion": "1.0",
     "releaseNotes": "Result-aware monitoring for cron jobs. Verify job outcomes, not just execution. Payload validation rules. State-aware alerts.",
     "offers": [

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobNotExecutingPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/cron-job-not-executing`,
-    "headline": "Cron Job Not Executing: Detect When Jobs Don't Run",
-    "description": "Complete guide on detecting when cron jobs are not executing and how to verify job execution.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-not-executing",
+    headline: "Cron Job Not Executing: Detect When Jobs Don't Run",
+    description: "Complete guide on detecting when cron jobs are not executing and how to verify job execution.",
+    keywords: "cron job not executing, detect cron job not running, verify cron job executed, cron job not running detection, detect cron job not executing",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-not-executing",
+    title: "Cron Job Not Executing"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -180,6 +183,8 @@ export default function CronJobNotExecutingPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-not-executing" />
           </div>
         </article>
       </main>

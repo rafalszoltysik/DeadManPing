@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CurlReturns200ButWrongDataPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/curl-returns-200-but-wrong-data`,
-    "headline": "Curl Returns 200 But Wrong Data: Validate API Responses",
-    "description": "Complete guide on detecting when curl returns HTTP 200 but contains error messages or wrong data.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "curl-returns-200-but-wrong-data",
+    headline: "Curl Returns 200 But Wrong Data: Validate API Responses",
+    description: "Complete guide on detecting when curl returns HTTP 200 but contains error messages or wrong data.",
+    keywords: "curl returns 200 but wrong data, curl success but wrong response, verify curl response content, detect curl error in response, curl response validation",
+    articleSection: "API Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "curl-returns-200-but-wrong-data",
+    title: "Curl Returns 200 But Wrong Data"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -195,6 +198,8 @@ export default function CurlReturns200ButWrongDataPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="curl-returns-200-but-wrong-data" />
           </div>
         </article>
       </main>

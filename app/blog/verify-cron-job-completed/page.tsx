@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function VerifyCronJobCompletedPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/verify-cron-job-completed`,
-    "headline": "Verify Cron Job Completed: Confirm Successful Completion",
-    "description": "Complete guide on verifying that cron jobs completed successfully and detecting when they don't finish.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "verify-cron-job-completed",
+    headline: "Verify Cron Job Completed: Confirm Successful Completion",
+    description: "Complete guide on verifying that cron jobs completed successfully and detecting when they don't finish.",
+    keywords: "verify cron job completed, confirm cron job completed, verify cron job finished, check cron job completed, cron job completion verification",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "verify-cron-job-completed",
+    title: "Verify Cron Job Completed"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -176,6 +179,8 @@ export default function VerifyCronJobCompletedPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="verify-cron-job-completed" />
           </div>
         </article>
       </main>

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectCronJobPartialFailurePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-cron-job-partial-failure`,
-    "headline": "Detect Cron Job Partial Failure: Verify All Steps Complete",
-    "description": "Complete guide on detecting when cron jobs partially fail—some steps succeed but others fail.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-cron-job-partial-failure",
+    headline: "Detect Cron Job Partial Failure: Verify All Steps Complete",
+    description: "Complete guide on detecting when cron jobs partially fail—some steps succeed but others fail.",
+    keywords: "detect cron job partial failure, cron job partial failure detection, verify cron job complete, detect incomplete cron job, cron job partial success",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-cron-job-partial-failure",
+    title: "Detect Cron Job Partial Failure"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -210,6 +213,8 @@ export default function DetectCronJobPartialFailurePage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-cron-job-partial-failure" />
           </div>
         </article>
       </main>

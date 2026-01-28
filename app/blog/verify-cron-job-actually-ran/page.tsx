@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function VerifyCronJobActuallyRanPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/verify-cron-job-actually-ran`,
-    "headline": "Verify Cron Job Actually Ran: Confirm Job Execution",
-    "description": "Complete guide on verifying that cron jobs actually executed and detecting when they don't run.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "verify-cron-job-actually-ran",
+    headline: "Verify Cron Job Actually Ran: Confirm Job Execution",
+    description: "Complete guide on verifying that cron jobs actually executed and detecting when they don't run.",
+    keywords: "verify cron job actually ran, confirm cron job executed, detect cron job not running, verify cron job completed, check cron job ran, cron job execution verification",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "verify-cron-job-actually-ran",
+    title: "Verify Cron Job Actually Ran"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -246,6 +249,8 @@ export default function VerifyCronJobActuallyRanPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="verify-cron-job-actually-ran" />
           </div>
         </article>
       </main>

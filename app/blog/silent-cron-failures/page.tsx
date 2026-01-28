@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { CodeBlock } from '@/components/CodeBlock'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -261,6 +262,8 @@ curl -X POST "https://deadmanping.com/api/ping/cron-daemon-check?cron_running=$C
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="silent-cron-failures" />
           </div>
         </article>
       </main>

@@ -4,6 +4,7 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -35,6 +36,8 @@ export default function DeadManSwitchPage() {
     "headline": "Dead Man Switch for Backups: Never Miss a Failed Backup Again",
     "description": "How to implement dead man switch monitoring for backup jobs to detect failures immediately.",
     "url": `${cleanBaseUrl}/blog/dead-man-switch`,
+    "datePublished": "2024-12-01",
+    "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",
@@ -51,7 +54,29 @@ export default function DeadManSwitchPage() {
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": `${cleanBaseUrl}/blog/dead-man-switch`
-    }
+    },
+    "articleSection": "Backup Monitoring Guides",
+    "keywords": "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
+    "inLanguage": "en-US"
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": cleanBaseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Dead Man Switch",
+        "item": `${cleanBaseUrl}/blog/dead-man-switch`
+      }
+    ]
   }
 
   return (
@@ -59,6 +84,10 @@ export default function DeadManSwitchPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -251,6 +280,8 @@ curl -X POST "https://deadmanping.com/api/ping/backup-s3?upload_exit_code=$UPLOA
               </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="dead-man-switch" />
           </div>
         </article>
       </main>

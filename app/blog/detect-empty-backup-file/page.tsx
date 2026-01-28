@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectEmptyBackupFilePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-empty-backup-file`,
-    "headline": "Detect Empty Backup File: Verify Backup Files Aren't Zero Bytes",
-    "description": "Complete guide on detecting when backup files are empty or zero bytes and how to monitor this automatically.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-empty-backup-file",
+    headline: "Detect Empty Backup File: Verify Backup Files Aren't Zero Bytes",
+    description: "Complete guide on detecting when backup files are empty or zero bytes and how to monitor this automatically.",
+    keywords: "detect empty backup file, empty backup file detection, verify backup file not empty, backup file zero bytes, check backup file size, detect zero byte backup",
+    articleSection: "Backup Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-empty-backup-file",
+    title: "Detect Empty Backup File"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -228,6 +231,8 @@ export default function DetectEmptyBackupFilePage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-empty-backup-file" />
           </div>
         </article>
       </main>

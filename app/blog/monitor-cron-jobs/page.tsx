@@ -4,6 +4,7 @@ import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -35,14 +36,47 @@ export default function MonitorCronJobsPage() {
     "url": `${cleanBaseUrl}/blog/monitor-cron-jobs`,
     "headline": "How to Monitor Cron Jobs and Detect Failures",
     "description": "Complete guide on monitoring cron jobs and detecting when they fail or stop running.",
+    "datePublished": "2024-12-01",
+    "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
+      "name": "DeadManPing",
+      "url": cleanBaseUrl
     },
     "publisher": {
       "@type": "Organization",
-      "name": "DeadManPing"
-    }
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${cleanBaseUrl}/blog/monitor-cron-jobs`
+    },
+    "articleSection": "Cron Monitoring Guides",
+    "keywords": "monitor cron jobs without migration, cron monitoring, how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts",
+    "inLanguage": "en-US"
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": cleanBaseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Monitor Cron Jobs",
+        "item": `${cleanBaseUrl}/blog/monitor-cron-jobs`
+      }
+    ]
   }
 
   return (
@@ -50,6 +84,10 @@ export default function MonitorCronJobsPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -271,15 +309,25 @@ runBackup().catch((err) => {
                   DeadManPing provides dead man switch monitoring for cron jobs. No complex setup, no agents to install. 
                   Just add a curl command to your cron job.
                 </p>
-                <Link
-                  href="/auth/signup"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift"
-                >
-                  Start Monitoring Free
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/auth/signup"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    Start Monitoring Free
+                  </Link>
+                  <Link
+                    href="/faq"
+                    className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    View FAQ
+                  </Link>
+                </div>
               </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="monitor-cron-jobs" />
           </div>
         </article>
       </main>

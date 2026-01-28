@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -34,10 +35,47 @@ export default function BackupMonitoringPage() {
     "url": `${cleanBaseUrl}/blog/backup-monitoring`,
     "headline": "Backup Monitoring Service: Never Miss a Failed Backup",
     "description": "How to set up automated monitoring for backup jobs to detect failures immediately.",
+    "datePublished": "2024-12-01",
+    "dateModified": "2024-12-01",
     "author": {
       "@type": "Organization",
-      "name": "DeadManPing"
-    }
+      "name": "DeadManPing",
+      "url": cleanBaseUrl
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "DeadManPing",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${cleanBaseUrl}/icon.svg`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${cleanBaseUrl}/blog/backup-monitoring`
+    },
+    "articleSection": "Backup Monitoring Guides",
+    "keywords": "backup monitoring, backup monitoring service, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert, backup job monitoring",
+    "inLanguage": "en-US"
+  }
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": cleanBaseUrl
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Backup Monitoring",
+        "item": `${cleanBaseUrl}/blog/backup-monitoring`
+      }
+    ]
   }
 
   return (
@@ -45,6 +83,10 @@ export default function BackupMonitoringPage() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -239,15 +281,25 @@ export default function BackupMonitoringPage() {
                   Set up monitoring in 2 minutes, works with any backup method, and sends alerts via 
                   email, Slack, or Discord.
                 </p>
-                <Link
-                  href="/auth/signup"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift"
-                >
-                  Start Free Trial
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/auth/signup"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    Start Free Trial
+                  </Link>
+                  <Link
+                    href="/faq"
+                    className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    View FAQ
+                  </Link>
+                </div>
               </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="backup-monitoring" />
           </div>
         </article>
       </main>

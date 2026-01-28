@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function VerifyBackupFileSizePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/verify-backup-file-size`,
-    "headline": "Verify Backup File Size: Ensure Backups Are Complete",
-    "description": "Complete guide on verifying backup file sizes are within expected ranges and detecting when backups are too small or too large.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "verify-backup-file-size",
+    headline: "Verify Backup File Size: Ensure Backups Are Complete",
+    description: "Complete guide on verifying backup file sizes are within expected ranges and detecting when backups are too small or too large.",
+    keywords: "verify backup file size, check backup file size, backup file size validation, verify backup file not empty, check backup file size cron, backup file size check",
+    articleSection: "Backup Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "verify-backup-file-size",
+    title: "Verify Backup File Size"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -229,6 +232,8 @@ export default function VerifyBackupFileSizePage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="verify-backup-file-size" />
           </div>
         </article>
       </main>

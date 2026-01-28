@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function BackupFileZeroBytesPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/backup-file-zero-bytes`,
-    "headline": "Backup File Zero Bytes: Detect Empty Backup Files",
-    "description": "Complete guide on detecting when backup files are zero bytes and how to prevent empty backups.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "backup-file-zero-bytes",
+    headline: "Backup File Zero Bytes: Detect Empty Backup Files",
+    description: "Complete guide on detecting when backup files are zero bytes and how to prevent empty backups.",
+    keywords: "backup file zero bytes, detect zero byte backup, empty backup file detection, backup file zero bytes detection, verify backup file not zero bytes",
+    articleSection: "Backup Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "backup-file-zero-bytes",
+    title: "Backup File Zero Bytes"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -186,6 +189,8 @@ export default function BackupFileZeroBytesPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="backup-file-zero-bytes" />
           </div>
         </article>
       </main>

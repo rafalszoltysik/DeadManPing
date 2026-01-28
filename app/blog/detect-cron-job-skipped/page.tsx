@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectCronJobSkippedPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-cron-job-skipped`,
-    "headline": "Detect Cron Job Skipped: Catch Jobs That Don't Run",
-    "description": "Complete guide on detecting when cron jobs are skipped and not executed when they should be.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-cron-job-skipped",
+    headline: "Detect Cron Job Skipped: Catch Jobs That Don't Run",
+    description: "Complete guide on detecting when cron jobs are skipped and not executed when they should be.",
+    keywords: "detect cron job skipped, cron job skipped detection, verify cron job not skipped, detect skipped cron job, cron job skip detection",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-cron-job-skipped",
+    title: "Detect Cron Job Skipped"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -176,6 +179,8 @@ export default function DetectCronJobSkippedPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-cron-job-skipped" />
           </div>
         </article>
       </main>

@@ -1,0 +1,512 @@
+---
+description: DeadManPing project guide - comprehensive overview of architecture, structure, conventions, and development workflow for the cron job monitoring SaaS platform.
+alwaysApply: true
+---
+
+# DeadManPing - Project Guide
+
+## PROJEKT OVERVIEW
+
+**DeadManPing** to SaaS platforma do monitorowania cron jobs działająca na zasadzie "dead man switch". Platforma monitoruje wyniki wykonania zadań, nie tylko fakt uruchomienia, pozwalając wykrywać ciche błędy i problemy zanim staną się krytyczne.
+
+### Główne wartości:
+- **"Keep your cron. Keep your scripts. We only verify the result."**
+- **"Monitor outcomes, not just execution"**
+- **"One curl line. Your job logic stays the same."**
+- **"Result-aware monitoring"** - wykrywa ciche błędy (zero rows processed, wrong counts, outdated results)
+
+### Core Features:
+1. **Simple Ping** - podstawowe potwierdzenie wykonania
+2. **Ping with Payload** - walidacja wyników (rozmiar pliku, liczba rekordów, status)
+3. **Start/Stop Tracking** - mierzenie czasu wykonania, wykrywanie wiszących skryptów
+4. **Missing Run Detection** - wykrywa gdy cron przestaje się wykonywać
+5. **Payload Validation** - sprawdzanie poprawności wyników (puste pliki backupów, stare backupy, nieprawidłowe wyniki)
+6. **Multi-channel Alerts** - Email, Slack, Discord, custom webhooks
+
+## TECH STACK
+
+### Frontend:
+- **Next.js 15** (App Router) - React framework
+- **TypeScript** - type safety
+- **Tailwind CSS** - styling
+- **React 19** - UI library
+
+### Backend:
+- **Next.js API Routes** - serverless API endpoints
+- **Supabase** - PostgreSQL database + authentication
+- **Stripe** - billing i subscriptions
+- **Resend** - email delivery
+- **Upstash Redis** - rate limiting
+
+### Infrastructure:
+- **Vercel** - hosting i deployment
+- **Cloudflare Workers** - proxy dla Supabase Edge Functions (custom domain)
+- **Sentry** - error tracking
+- **PostHog** - analytics
+
+### Development Tools:
+- **ESLint** - linting
+- **TypeScript** - type checking
+- **tsx** - TypeScript execution dla scripts
+
+## STRUKTURA PROJEKTU
+
+### Główne foldery:
+
+```
+DeadManPing/
+├── app/                    # Next.js App Router
+│   ├── api/               # API endpoints
+│   │   ├── ping/         # Ping endpoints (core functionality)
+│   │   ├── monitors/     # Monitor CRUD operations
+│   │   ├── auth/         # Authentication endpoints
+│   │   ├── billing/      # Stripe billing
+│   │   ├── cron/         # Cron jobs (check-all, check-timeouts)
+│   │   └── webhooks/     # Webhook handlers
+│   ├── auth/             # Auth pages (login, signup, etc.)
+│   ├── blog/             # SEO blog articles (24+ articles)
+│   ├── dashboard/        # User dashboard
+│   │   ├── monitors/     # Monitor management
+│   │   ├── billing/      # Billing management
+│   │   ├── settings/     # User settings
+│   │   └── team/         # Team management
+│   ├── docs/             # Documentation pages
+│   └── page.tsx          # Landing page
+├── components/            # React components
+│   ├── AnimatedSection.tsx
+│   ├── CodeBlock.tsx
+│   ├── MonitorDetail.tsx
+│   ├── MonitorList.tsx
+│   └── ...
+├── lib/                   # Utility libraries
+│   ├── api/              # API client helpers
+│   ├── auth/             # Authentication utilities
+│   ├── supabase/         # Supabase clients
+│   ├── alerts.ts         # Alert sending logic
+│   ├── limits.ts         # Tier limits checking
+│   ├── payload-validator.ts  # Payload validation
+│   ├── payload-parser.ts     # Payload parsing
+│   └── ...
+├── hooks/                 # React hooks
+│   ├── useMonitor.ts
+│   ├── useApi.ts
+│   └── ...
+├── supabase/
+│   └── migrations/       # Database migrations
+├── examples/              # Code examples (Bash, Python, Node.js)
+├── cloudflare-workers/    # Cloudflare Workers proxy
+└── scripts/              # Utility scripts
+```
+
+## ARCHITEKTURA
+
+### API Endpoints:
+
+#### Core Ping Endpoints:
+- `GET/POST/HEAD /api/ping/[slug]` - główny endpoint ping
+- `POST /api/ping/[slug]/start` - start tracking (dla start/stop)
+
+#### Monitor Management:
+- `POST /api/monitors/create` - tworzenie monitora
+- `PATCH /api/monitors/[slug]/update` - aktualizacja monitora
+- `GET /api/monitors/[slug]/runs` - historia uruchomień
+
+#### Authentication:
+- `POST /api/auth/signup` - rejestracja
+- `POST /api/auth/login` - logowanie
+- `POST /api/auth/google` - Google OAuth
+- `POST /api/auth/forgot-password` - reset hasła
+
+#### Billing:
+- `POST /api/billing/create-checkout` - Stripe checkout
+- `POST /api/billing/create-portal-session` - Stripe portal
+- `POST /api/billing/change-plan` - zmiana planu
+- `POST /api/webhooks/stripe` - Stripe webhooks
+
+#### Cron Jobs:
+- `POST /api/cron/check-all` - sprawdzanie wszystkich monitorów
+- `POST /api/cron/check-timeouts` - sprawdzanie timeoutów
+- `POST /api/cron/check-trial-expiry` - sprawdzanie wygaśnięcia trial
+
+### Database Schema (Supabase):
+
+#### Główne tabele:
+- `profiles` - użytkownicy
+- `workspaces` - workspace/organizacje
+- `workspace_members` - członkowie workspace
+- `monitors` - monitory cron jobs
+- `monitor_runs` - historia uruchomień (start/stop tracking)
+- `pings` - historia pingów (ostatnie 100 per monitor)
+- `subscriptions` - Stripe subscriptions
+- `alerts` - historia alertów
+
+### Authentication Flow:
+
+1. **Email/Password**: Supabase Auth
+2. **Google OAuth**: Supabase Auth + Google OAuth
+3. **Session Management**: Server-side sessions przez Supabase SSR
+
+### Billing Flow:
+
+1. **Stripe Checkout** → tworzy subscription
+2. **Stripe Webhook** → aktualizuje subscription w bazie
+3. **Tier Limits** → sprawdzane przez `lib/limits.ts`
+4. **Plany**: Free (20 monitors), Starter ($7), Pro ($24), Team ($79)
+
+## KONWENCJE KODOWANIA
+
+### TypeScript:
+- **Zawsze** używaj TypeScript types
+- **Zawsze** definiuj typy dla API responses
+- **Używaj** `as const` dla readonly values
+- **Unikaj** `any` - używaj `unknown` jeśli potrzebne
+
+### React Components:
+- **Używaj** Server Components domyślnie (Next.js 15)
+- **Client Components** tylko gdy potrzebne (`'use client'`)
+- **Naming**: PascalCase dla komponentów
+- **Props**: definiuj przez TypeScript interfaces
+
+### API Routes:
+- **Zawsze** używaj `errorResponse` i `successResponse` z `lib/api/response`
+- **Zawsze** waliduj input (Zod schemas)
+- **Zawsze** obsługuj błędy (try/catch)
+- **Rate limiting**: używaj `checkRateLimit` dla publicznych endpointów
+
+### File Naming:
+- **Components**: PascalCase (`MonitorDetail.tsx`)
+- **Utilities**: camelCase (`payload-validator.ts`)
+- **API Routes**: `route.ts` w folderze endpointu
+- **Pages**: `page.tsx` dla routes
+
+### Code Organization:
+- **Komponenty**: w `components/`
+- **Utilities**: w `lib/`
+- **Hooks**: w `hooks/`
+- **Types**: w `lib/types/` lub lokalnie w pliku
+
+## KLUCZOWE FUNKCJONALNOŚCI
+
+### 1. Ping System:
+
+**Endpoint**: `/api/ping/[slug]`
+
+**Funkcjonalność**:
+- Akceptuje GET, POST, HEAD
+- Rate limiting: 1 ping per 10 seconds
+- Payload parsing i validation
+- Status tracking: pending → healthy/late/failed
+- Grace period handling
+
+**Payload Validation**:
+- Rozmiar pliku (file_size)
+- Liczba rekordów (count)
+- Status (success/failure)
+- Data modyfikacji (modified_at)
+- Custom fields
+
+### 2. Start/Stop Tracking:
+
+**Endpoints**:
+- `POST /api/ping/[slug]/start` - rozpoczęcie trackingu
+- `POST /api/ping/[slug]` z `run_id` - zakończenie trackingu
+
+**Funkcjonalność**:
+- Mierzy czas wykonania między start a stop
+- Wykrywa wiszące skrypty (timeout)
+- Zapisuje do `monitor_runs` table
+
+### 3. Monitor Management:
+
+**Tworzenie monitora**:
+- Slug (unique identifier)
+- Expected interval (np. "5 minutes")
+- Grace period
+- Payload validation rules
+- Alert channels (email, Slack, Discord, webhook)
+
+**Status Monitora**:
+- `pending` - nowy monitor, czeka na pierwszy ping
+- `healthy` - ostatni ping w czasie
+- `late` - ping spóźniony, ale w grace period
+- `failed` - brak pingu poza grace period
+
+### 4. Alert System:
+
+**Channels**:
+- Email (Resend)
+- Slack (webhook)
+- Discord (webhook)
+- Custom webhook
+
+**Alert Types**:
+- Monitor failed (brak pingu)
+- Monitor recovered (ping po failure)
+- Payload validation failed
+- Monitor timeout (start bez stop)
+
+**State-aware**: Alerty tylko na zmianę statusu (no spam)
+
+### 5. Payload Validation:
+
+**Rules** (definiowane w UI):
+- File size: min/max
+- Count: min/max
+- Status: must be "success"
+- Modified at: max age
+- Custom field validation
+
+**Validation Logic**: `lib/payload-validator.ts`
+
+## DEVELOPMENT WORKFLOW
+
+### Setup:
+
+1. **Install dependencies**:
+```bash
+npm install
+```
+
+2. **Environment variables**:
+```bash
+cp .env.example .env.local
+# Fill in: SUPABASE_URL, SUPABASE_ANON_KEY, STRIPE_SECRET_KEY, etc.
+```
+
+3. **Database migrations**:
+```bash
+# Run migrations in supabase/migrations/ in order
+```
+
+4. **Run dev server**:
+```bash
+npm run dev
+```
+
+### Code Changes:
+
+1. **Feature development**:
+   - Twórz feature branch
+   - Implementuj zgodnie z konwencjami
+   - Testuj lokalnie
+   - Commit z descriptive messages
+
+2. **API Changes**:
+   - Dodaj walidację (Zod)
+   - Dodaj error handling
+   - Zaktualizuj types
+   - Testuj endpoint
+
+3. **Database Changes**:
+   - Twórz migration w `supabase/migrations/`
+   - Testuj migration lokalnie
+   - Update types jeśli potrzebne
+
+### Testing:
+
+- **Manual testing** dla nowych features
+- **API testing** przez curl/Postman
+- **E2E testing** dla critical flows (signup, monitor creation, ping)
+
+### Deployment:
+
+- **Vercel**: automatyczne deployment z Git
+- **Production**: branch `main`
+- **Preview**: branch `dev` lub PRs
+- **Environment variables**: ustawione w Vercel Dashboard
+
+## KLUCZOWE BIBLIOTEKI I UTILITIES
+
+### `lib/payload-validator.ts`:
+- Walidacja payload zgodnie z rules
+- Sprawdzanie file_size, count, status, etc.
+
+### `lib/payload-parser.ts`:
+- Parsowanie payload z różnych formatów
+- Extract declared fields
+
+### `lib/alerts.ts`:
+- Wysyłanie alertów przez różne kanały
+- Email templates
+- State-aware alerting
+
+### `lib/limits.ts`:
+- Sprawdzanie limitów tier (monitors, intervals)
+- Rate limiting per tier
+
+### `lib/rate-limit.ts`:
+- Rate limiting dla API endpoints
+- Upstash Redis integration
+
+### `lib/monitor-utils.ts`:
+- Utility functions dla monitorów
+- Status calculation
+- Interval parsing
+
+## SEO & CONTENT
+
+### Blog Structure:
+- **Location**: `app/blog/[slug]/page.tsx`
+- **24+ articles** o cron monitoring
+- **Structured data**: Schema.org Article
+- **Metadata**: title, description, keywords, OpenGraph
+
+### Content Strategy:
+- **Educational content** - uświadamianie o problemach
+- **How-to guides** - praktyczne przykłady
+- **Problem-solving** - konkretne scenariusze
+
+Zobacz `.cursor/rules/SEO.mdc` dla szczegółów SEO strategy.
+
+## SECURITY
+
+### Authentication:
+- Supabase Auth (secure, managed)
+- Server-side session validation
+- Password hashing (Supabase)
+
+### API Security:
+- Rate limiting na publicznych endpointach
+- Input validation (Zod)
+- SQL injection protection (Supabase parameterized queries)
+- CORS configuration
+
+### Data Privacy:
+- User data encryption (Supabase)
+- Secure webhook validation (Stripe)
+- No sensitive data w logs
+
+## MONITORING & ANALYTICS
+
+### Error Tracking:
+- **Sentry**: backend i frontend errors
+- **Error boundaries**: React error boundaries
+
+### Analytics:
+- **PostHog**: user behavior tracking
+- **Vercel Analytics**: performance metrics
+- **Custom events**: first ping, recovery, etc.
+
+### Logging:
+- Structured logging dla API
+- Error logging przez Sentry
+- Performance logging
+
+## COMMON PATTERNS
+
+### API Route Pattern:
+```typescript
+import { NextRequest } from 'next/server'
+import { errorResponse, successResponse } from '@/lib/api/response'
+import { getSession } from '@/lib/auth/get-session'
+
+export const dynamic = 'force-dynamic'
+
+export async function POST(request: NextRequest) {
+  try {
+    const session = await getSession()
+    if (!session) {
+      return errorResponse('Unauthorized', 401)
+    }
+    
+    const body = await request.json()
+    // Validation, processing...
+    
+    return successResponse({ data: result })
+  } catch (error) {
+    return errorResponse('Internal error', 500)
+  }
+}
+```
+
+### Component Pattern:
+```typescript
+import { Metadata } from 'next'
+import { PageNav } from '@/components/PageNav'
+import { Footer } from '@/components/Footer'
+
+export const metadata: Metadata = {
+  title: 'Page Title | DeadManPing',
+  description: 'Page description',
+}
+
+export default function Page() {
+  return (
+    <div className="min-h-screen">
+      <PageNav />
+      <main>
+        {/* Content */}
+      </main>
+      <Footer />
+    </div>
+  )
+}
+```
+
+### Database Query Pattern:
+```typescript
+import { getSupabaseAdmin } from '@/lib/supabase/admin'
+
+const supabase = getSupabaseAdmin()
+const { data, error } = await supabase
+  .from('monitors')
+  .select('*')
+  .eq('workspace_id', workspaceId)
+  .single()
+
+if (error) {
+  // Handle error
+}
+```
+
+## DEPLOYMENT CHECKLIST
+
+Przed deployment:
+- [ ] Environment variables ustawione
+- [ ] Database migrations wykonane
+- [ ] Stripe webhooks skonfigurowane
+- [ ] Email templates przetestowane
+- [ ] Rate limiting działa
+- [ ] Error tracking działa
+- [ ] Analytics działa
+
+## USEFUL COMMANDS
+
+```bash
+# Development
+npm run dev
+
+# Build
+npm run build
+
+# Lint
+npm run lint
+
+# Generate social posts
+npm run generate-social-posts
+
+# Extract blog metadata
+npm run extract-blog-metadata
+```
+
+## IMPORTANT NOTES
+
+1. **Always use** `cleanBaseUrl` dla canonical URLs
+2. **Always validate** input w API routes
+3. **Always handle** errors gracefully
+4. **Always use** TypeScript types
+5. **Never commit** `.env.local` lub secrets
+6. **Always test** przed commitowaniem
+7. **Always use** existing components zamiast tworzyć nowe
+8. **Follow** existing patterns i conventions
+
+## RESOURCES
+
+- **Documentation**: `/docs` page
+- **Examples**: `/examples` directory
+- **Blog**: `/blog` articles
+- **GitHub Examples**: https://github.com/DeadManPing/examples
+
+---
+
+Ten przewodnik powinien być używany jako referencja przy pracy z projektem DeadManPing. Wszystkie zmiany powinny być zgodne z konwencjami i wzorcami tutaj opisanych.

@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectCronJobWrongExitCodePage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-cron-job-wrong-exit-code`,
-    "headline": "Detect Cron Job Wrong Exit Code: Validate Exit Codes",
-    "description": "Complete guide on detecting when cron jobs return wrong exit codes and how to validate them.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-cron-job-wrong-exit-code",
+    headline: "Detect Cron Job Wrong Exit Code: Validate Exit Codes",
+    description: "Complete guide on detecting when cron jobs return wrong exit codes and how to validate them.",
+    keywords: "detect cron job wrong exit code, cron job wrong exit code, verify cron job exit code, check cron job exit code, cron job exit code validation",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-cron-job-wrong-exit-code",
+    title: "Detect Cron Job Wrong Exit Code"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -191,6 +194,8 @@ export default function DetectCronJobWrongExitCodePage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-cron-job-wrong-exit-code" />
           </div>
         </article>
       </main>

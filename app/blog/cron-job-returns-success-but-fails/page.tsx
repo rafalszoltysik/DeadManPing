@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,36 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobReturnsSuccessButFailsPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "headline": "Cron Job Returns Success But Fails: Detect False Success",
-    "description": "Complete guide on detecting when cron jobs return success exit code but actually fail to complete their work.",
-    "url": `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`,
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing",
-      "url": cleanBaseUrl
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing",
-      "logo": {
-        "@type": "ImageObject",
-        "url": `${cleanBaseUrl}/icon.svg`
-      }
-    },
-    "mainEntityOfPage": {
-      "@type": "WebPage",
-      "@id": `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-returns-success-but-fails",
+    headline: "Cron Job Returns Success But Fails: Detect False Success",
+    description: "Complete guide on detecting when cron jobs return success exit code but actually fail to complete their work.",
+    keywords: "cron job returns success but fails, detect cron job false success, verify cron job actually succeeded, cron job success but error, check cron job real success",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-returns-success-but-fails",
+    title: "Cron Job Returns Success But Fails"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -261,6 +255,8 @@ export default function CronJobReturnsSuccessButFailsPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-returns-success-but-fails" />
           </div>
         </article>
       </main>

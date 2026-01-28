@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobExitCodeNotZeroPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/cron-job-exit-code-not-zero`,
-    "headline": "Cron Job Exit Code Not Zero: How to Detect and Handle Failures",
-    "description": "Complete guide on detecting when cron jobs exit with non-zero exit codes and how to monitor this automatically.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-exit-code-not-zero",
+    headline: "Cron Job Exit Code Not Zero: How to Detect and Handle Failures",
+    description: "Complete guide on detecting when cron jobs exit with non-zero exit codes and how to monitor this automatically.",
+    keywords: "cron job exit code not zero, detect cron job exit code, cron job exit status check, check cron job exit code, verify cron job exit code, cron job failure exit code",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-exit-code-not-zero",
+    title: "Cron Job Exit Code Not Zero"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -249,6 +252,8 @@ export default function CronJobExitCodeNotZeroPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-exit-code-not-zero" />
           </div>
         </article>
       </main>

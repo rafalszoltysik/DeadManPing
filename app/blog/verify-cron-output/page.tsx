@@ -2,6 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -295,6 +296,8 @@ export default function VerifyCronOutputPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="verify-cron-output" />
           </div>
         </article>
       </main>

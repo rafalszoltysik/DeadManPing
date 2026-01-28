@@ -3,6 +3,8 @@ import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { CodeBlock } from '@/components/CodeBlock'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -28,27 +30,28 @@ export const metadata: Metadata = {
 }
 
 export default function DetectEmptyBackupFileCronPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/detect-empty-backup-file-cron`,
-    "headline": "Detect Empty Backup File Cron: How to Verify Backup Files Aren't Empty",
-    "description": "Complete guide on detecting when cron backup jobs create empty files and how to monitor this automatically.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "detect-empty-backup-file-cron",
+    headline: "Detect Empty Backup File Cron: How to Verify Backup Files Aren't Empty",
+    description: "Complete guide on detecting when cron backup jobs create empty files and how to monitor this automatically.",
+    keywords: "detect empty backup file cron, empty backup file detection, cron backup empty file, verify backup file not empty, detect zero byte backup, backup file size check cron",
+    articleSection: "Backup Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "detect-empty-backup-file-cron",
+    title: "Detect Empty Backup File Cron"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -214,6 +217,8 @@ https.request(\`https://deadmanping.com/api/ping/backup-daily?size=\${fileSize}\
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="detect-empty-backup-file-cron" />
           </div>
         </article>
       </main>

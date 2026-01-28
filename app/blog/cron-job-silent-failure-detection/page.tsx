@@ -2,6 +2,8 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
+import { createArticleSchema, createBreadcrumbSchema } from '@/lib/seo-helpers'
+import { RelatedArticles } from '@/components/RelatedArticles'
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
@@ -27,27 +29,28 @@ export const metadata: Metadata = {
 }
 
 export default function CronJobSilentFailureDetectionPage() {
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    "url": `${cleanBaseUrl}/blog/cron-job-silent-failure-detection`,
-    "headline": "Cron Job Silent Failure Detection: Catch Failures Without Logs",
-    "description": "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
-    "author": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "DeadManPing"
-    }
-  }
+  const structuredData = createArticleSchema({
+    slug: "cron-job-silent-failure-detection",
+    headline: "Cron Job Silent Failure Detection: Catch Failures Without Logs",
+    description: "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
+    keywords: "cron job silent failure detection, detect silent cron failure, silent cron job failure, cron fails silently, detect cron job silent failure",
+    articleSection: "Cron Monitoring Guides"
+  })
+
+  const breadcrumbSchema = createBreadcrumbSchema({
+    slug: "cron-job-silent-failure-detection",
+    title: "Cron Job Silent Failure Detection"
+  })
 
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
       <PageNav />
 
@@ -181,6 +184,8 @@ export default function CronJobSilentFailureDetectionPage() {
                 </div>
               </section>
             </AnimatedSection>
+
+            <RelatedArticles slug="cron-job-silent-failure-detection" />
           </div>
         </article>
       </main>
