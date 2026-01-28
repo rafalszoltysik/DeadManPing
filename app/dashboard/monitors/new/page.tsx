@@ -51,18 +51,35 @@ async function NewMonitorPageContent() {
 export default function NewMonitorPage() {
   return (
     <Suspense fallback={
-      <AnimatedSection className="max-w-2xl mx-auto" delay={0} direction="up" duration={800}>
-        <AnimatedItem delay={100} direction="up" duration={700}>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-6">New Monitor</h1>
-        </AnimatedItem>
-        <div className="bg-card border border-border rounded-lg sm:rounded-xl p-4 sm:p-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-10 bg-muted rounded"></div>
-            <div className="h-20 bg-muted rounded"></div>
-            <div className="h-20 bg-muted rounded"></div>
+      <div>
+        <div className="mb-4 sm:mb-6">
+          <div className="h-5 w-32 bg-muted rounded animate-pulse"></div>
+        </div>
+        <div className="max-w-2xl mx-auto px-4 sm:px-0">
+          <div className="h-8 sm:h-9 w-48 sm:w-64 bg-muted rounded animate-pulse mb-4 sm:mb-6"></div>
+          <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
+            <div className="space-y-4 sm:space-y-6">
+              <div>
+                <div className="h-4 w-24 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
+                <div className="h-3 w-48 bg-muted rounded animate-pulse mt-2"></div>
+              </div>
+              <div>
+                <div className="h-4 w-32 bg-muted rounded animate-pulse mb-3"></div>
+                <div className="h-12 bg-muted rounded-lg animate-pulse"></div>
+              </div>
+              <div>
+                <div className="h-4 w-28 bg-muted rounded animate-pulse mb-2"></div>
+                <div className="h-20 bg-muted rounded animate-pulse"></div>
+              </div>
+              <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4 pt-4 sm:pt-4">
+                <div className="h-11 sm:h-9 w-full sm:w-auto bg-muted rounded-lg animate-pulse"></div>
+                <div className="h-11 sm:h-9 w-full sm:w-auto bg-muted rounded-lg animate-pulse"></div>
+              </div>
+            </div>
           </div>
         </div>
-      </AnimatedSection>
+      </div>
     }>
       <NewMonitorPageContent />
     </Suspense>

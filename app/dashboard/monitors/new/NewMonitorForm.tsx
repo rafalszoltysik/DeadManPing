@@ -8,7 +8,6 @@ import { WarningTooltip, InfoTooltip } from '@/components/Tooltip'
 import { WarningIcon, InfoIcon } from '@/components/Icons'
 import { CronExpressionParser } from 'cron-parser'
 import { format, addDays, startOfDay, getDaysInMonth, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, getDay, addMonths, addYears } from 'date-fns'
-import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
 interface NewMonitorFormProps {
   userTier: keyof typeof TIER_LIMITS
@@ -391,31 +390,29 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
   }
 
   return (
-    <AnimatedSection delay={0} direction="up" duration={800}>
-      <AnimatedItem delay={100} direction="up" duration={700}>
+    <div style={{ 
+      opacity: 0, 
+      animation: 'fadeIn 0.3s ease-out 0.1s forwards' 
+    }}>
+      <div className="mb-4 sm:mb-6">
         <Link 
           href="/dashboard" 
-          className="text-primary hover:text-primary/80 text-xs sm:text-sm mb-4 sm:mb-6 inline-block transition-smooth flex items-center gap-1.5 group hover-lift-smooth"
+          className="text-primary hover:text-primary/80 text-xs sm:text-sm inline-block transition-smooth flex items-center gap-1.5 group hover-lift-smooth"
         >
           <span className="group-hover:-translate-x-0.5 transition-transform">←</span>
           Back to monitors
         </Link>
-      </AnimatedItem>
+      </div>
       <div className="max-w-2xl mx-auto px-4 sm:px-0">
-        <AnimatedItem delay={150} direction="up" duration={700}>
-          <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
-            {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
-          </h1>
-        </AnimatedItem>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
+          {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
+        </h1>
 
-      <AnimatedSection delay={200} direction="up" duration={800}>
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6 card-hover hover-lift-smooth" noValidate>
           {error && (
-            <AnimatedItem delay={0} direction="up" duration={600}>
-              <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6 animate-scale-in text-sm break-words">
-                {error}
-              </div>
-            </AnimatedItem>
+            <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg mb-4 sm:mb-6 animate-scale-in text-sm break-words">
+              {error}
+            </div>
           )}
 
         <div className="space-y-4 sm:space-y-6">
@@ -1505,9 +1502,8 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
           </div>
         </div>
       </form>
-      </AnimatedSection>
       </div>
-    </AnimatedSection>
+    </div>
   )
 }
 
