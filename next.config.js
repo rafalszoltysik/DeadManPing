@@ -9,7 +9,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['react-icons', 'react-icons/fa'],
     // Enable more aggressive code splitting
-    optimizeCss: true,
+    // optimizeCss: true, // Disabled due to critters module resolution issues in Next.js 15
   },
   
   // Performance optimizations

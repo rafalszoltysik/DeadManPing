@@ -66,7 +66,8 @@ export function AnimatedSection({
   const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
-    if (!ref.current || hasAnimated.current) return
+    const element = ref.current
+    if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
     if (prefersReducedMotion.current) {
@@ -75,9 +76,13 @@ export function AnimatedSection({
       return
     }
 
+    let observedElement: Element | null = null
+
     // Defer observer setup until after initial render
     const timer = setTimeout(() => {
-      if (!ref.current || hasAnimated.current) return
+      const currentElement = ref.current
+      if (!currentElement || hasAnimated.current) return
+      observedElement = currentElement
 
       const observer = getSharedObserver()
       const callback = () => {
@@ -90,25 +95,23 @@ export function AnimatedSection({
 
         // Unobserve after animation starts
         setTimeout(() => {
-          if (ref.current) {
-            observer.unobserve(ref.current)
-            observedElements.delete(ref.current)
+          if (observedElement) {
+            observer.unobserve(observedElement)
+            observedElements.delete(observedElement)
           }
         }, delay + duration + 100)
       }
 
-      if (ref.current) {
-        observedElements.set(ref.current, callback)
-        observer.observe(ref.current)
-      }
+      observedElements.set(currentElement, callback)
+      observer.observe(currentElement)
     }, 50) // Small delay to batch initial renders
 
     return () => {
       clearTimeout(timer)
-      if (ref.current) {
+      if (observedElement) {
         const observer = getSharedObserver()
-        observer.unobserve(ref.current)
-        observedElements.delete(ref.current)
+        observer.unobserve(observedElement)
+        observedElements.delete(observedElement)
       }
     }
   }, [delay, duration])
@@ -173,7 +176,8 @@ export function AnimatedItem({
   const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
-    if (!ref.current || hasAnimated.current) return
+    const element = ref.current
+    if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
     if (prefersReducedMotion.current) {
@@ -182,9 +186,13 @@ export function AnimatedItem({
       return
     }
 
+    let observedElement: Element | null = null
+
     // Defer observer setup until after initial render
     const timer = setTimeout(() => {
-      if (!ref.current || hasAnimated.current) return
+      const currentElement = ref.current
+      if (!currentElement || hasAnimated.current) return
+      observedElement = currentElement
 
       const observer = getSharedObserver()
       const callback = () => {
@@ -197,25 +205,23 @@ export function AnimatedItem({
 
         // Unobserve after animation starts
         setTimeout(() => {
-          if (ref.current) {
-            observer.unobserve(ref.current)
-            observedElements.delete(ref.current)
+          if (observedElement) {
+            observer.unobserve(observedElement)
+            observedElements.delete(observedElement)
           }
         }, delay + duration + 100)
       }
 
-      if (ref.current) {
-        observedElements.set(ref.current, callback)
-        observer.observe(ref.current)
-      }
+      observedElements.set(currentElement, callback)
+      observer.observe(currentElement)
     }, 50) // Small delay to batch initial renders
 
     return () => {
       clearTimeout(timer)
-      if (ref.current) {
+      if (observedElement) {
         const observer = getSharedObserver()
-        observer.unobserve(ref.current)
-        observedElements.delete(ref.current)
+        observer.unobserve(observedElement)
+        observedElements.delete(observedElement)
       }
     }
   }, [delay, duration])
@@ -278,11 +284,12 @@ export function StaggerContainer({
   const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
-    if (!ref.current || hasAnimated.current) return
+    const element = ref.current
+    if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
     if (prefersReducedMotion.current) {
-      const children = Array.from(ref.current?.children || [])
+      const children = Array.from(element.children || [])
       children.forEach((_, index) => {
         setVisibleIndices(prev => new Set([...prev, index]))
       })
@@ -290,16 +297,20 @@ export function StaggerContainer({
       return
     }
 
+    let observedElement: Element | null = null
+
     // Defer observer setup until after initial render
     const timer = setTimeout(() => {
-      if (!ref.current || hasAnimated.current) return
+      const currentElement = ref.current
+      if (!currentElement || hasAnimated.current) return
+      observedElement = currentElement
 
       const observer = getSharedObserver()
       const callback = () => {
         if (hasAnimated.current) return
         hasAnimated.current = true
         
-        const children = Array.from(ref.current?.children || [])
+        const children = Array.from(observedElement?.children || [])
         const actualStaggerDelay = isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay
         
         children.forEach((_, index) => {
@@ -309,18 +320,16 @@ export function StaggerContainer({
         })
       }
 
-      if (ref.current) {
-        observedElements.set(ref.current, callback)
-        observer.observe(ref.current)
-      }
+      observedElements.set(currentElement, callback)
+      observer.observe(currentElement)
     }, 50) // Small delay to batch initial renders
 
     return () => {
       clearTimeout(timer)
-      if (ref.current) {
+      if (observedElement) {
         const observer = getSharedObserver()
-        observer.unobserve(ref.current)
-        observedElements.delete(ref.current)
+        observer.unobserve(observedElement)
+        observedElements.delete(observedElement)
       }
     }
   }, [staggerDelay])
