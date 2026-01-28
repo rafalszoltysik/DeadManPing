@@ -28,9 +28,9 @@ export async function POST(request: NextRequest) {
 
     const user = authResult.user
 
-    // Rate limiting: 10 monitors per minute per user
+    // Rate limiting: prevent rapid-fire creation (5 seconds between attempts)
     const rateLimitKey = `monitor:create:${user.id}`
-    const rateLimit = await checkRateLimit(rateLimitKey, 60000) // 1 minute
+    const rateLimit = await checkRateLimit(rateLimitKey, 5000) // 5 seconds
     if (!rateLimit.allowed) {
       return errorResponse(
         'Too many monitor creation attempts. Please wait a moment before creating another monitor.',

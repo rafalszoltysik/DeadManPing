@@ -115,10 +115,10 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
   const [intervalSuccess, setIntervalSuccess] = useState(false)
   const [intervalUnit, setIntervalUnit] = useState<'minutes' | 'hours'>('minutes')
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
-  const [maxExecutionTimeMinutes, setMaxExecutionTimeMinutes] = useState(
-    monitor.max_execution_time_seconds ? Math.floor(monitor.max_execution_time_seconds / 60) : 0
+  const [maxExecutionTimeSeconds, setMaxExecutionTimeSeconds] = useState(
+    monitor.max_execution_time_seconds || 0
   )
-  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'seconds' | 'minutes' | 'hours'>('seconds')
   const [maxExecutionTimeEnabled, setMaxExecutionTimeEnabled] = useState(
     monitor.max_execution_time_seconds !== null && monitor.max_execution_time_seconds > 0
   )
@@ -192,17 +192,22 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
 
   // Convert max execution time to appropriate unit for display
   const getMaxExecutionTimeValue = () => {
-    if (maxExecutionTimeUnit === 'hours') {
-      return Math.round((maxExecutionTimeMinutes / 60) * 10) / 10
+    if (maxExecutionTimeUnit === 'seconds') {
+      return maxExecutionTimeSeconds
+    } else if (maxExecutionTimeUnit === 'minutes') {
+      return Math.round(maxExecutionTimeSeconds / 60)
+    } else { // hours
+      return Math.round((maxExecutionTimeSeconds / 3600) * 10) / 10
     }
-    return maxExecutionTimeMinutes
   }
 
   const setMaxExecutionTimeValue = (value: number) => {
-    if (maxExecutionTimeUnit === 'hours') {
-      setMaxExecutionTimeMinutes(Math.round(value * 60))
-    } else {
-      setMaxExecutionTimeMinutes(Math.round(value))
+    if (maxExecutionTimeUnit === 'seconds') {
+      setMaxExecutionTimeSeconds(Math.round(value))
+    } else if (maxExecutionTimeUnit === 'minutes') {
+      setMaxExecutionTimeSeconds(Math.round(value * 60))
+    } else { // hours
+      setMaxExecutionTimeSeconds(Math.round(value * 3600))
     }
   }
 
@@ -307,9 +312,11 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
     if (hasStartStop && hasPayloadFields) {
       // Start/Stop with Payload
       const payloadJson = JSON.stringify(examplePayload)
-      const startCommand = `curl -X POST "${pingUrl}/start" \\
+      const startCommandUnix = `curl -X POST "${pingUrl}/start" \\
   -H "Content-Type: application/json" \\
   -d '{"run_id": "optional-uuid"}'`
+      
+      const startCommandWindows = `curl -X POST "${pingUrl}/start" -H "Content-Type: application/json" -d "{\\"run_id\\": \\"optional-uuid\\"}"`
       
       const completeCommandUnix = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
   -H "Content-Type: application/json" \\
@@ -319,7 +326,11 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
       
       return {
         type: 'start-stop-payload',
-        start: startCommand,
+        start: {
+          unix: startCommandUnix,
+          windows: startCommandWindows,
+          default: startCommandUnix,
+        },
         complete: {
           unix: completeCommandUnix,
           windows: completeCommandWindows,
@@ -329,20 +340,28 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
       }
     } else if (hasStartStop) {
       // Start/Stop only
-      const startCommand = `curl -X POST "${pingUrl}/start" \\
+      const startCommandUnix = `curl -X POST "${pingUrl}/start" \\
   -H "Content-Type: application/json" \\
   -d '{"run_id": "optional-uuid"}'`
       
-      const completeCommand = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
+      const startCommandWindows = `curl -X POST "${pingUrl}/start" -H "Content-Type: application/json" -d "{\\"run_id\\": \\"optional-uuid\\"}"`
+      
+      const completeCommandUnix = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" \\
   -H "Content-Type: application/json"`
+      
+      const completeCommandWindows = `curl -X POST "${pingUrl}?run_id=YOUR_RUN_ID" -H "Content-Type: application/json"`
       
       return {
         type: 'start-stop',
-        start: startCommand,
+        start: {
+          unix: startCommandUnix,
+          windows: startCommandWindows,
+          default: startCommandUnix,
+        },
         complete: {
-          unix: completeCommand,
-          windows: completeCommand,
-          default: completeCommand,
+          unix: completeCommandUnix,
+          windows: completeCommandWindows,
+          default: completeCommandUnix,
         },
         examplePayload: null,
       }
@@ -374,14 +393,23 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
 
   const curlCommands = buildCurlCommand()
   const [selectedPlatform, setSelectedPlatform] = useState<'windows' | 'unix'>('unix')
-  const [showStartStopExample, setShowStartStopExample] = useState(true) // For start-stop mode, show start command first
+  // For start-stop-payload mode, show complete command first (more useful with payload)
+  // For start-stop only mode, show start command first
+  const [showStartStopExample, setShowStartStopExample] = useState(
+    hasStartStop && hasPayloadFields ? false : true
+  )
   
   // Get the command to display based on mode
   const getDisplayCommand = (): string => {
     if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
       if (showStartStopExample) {
+        // Start command - check if it's an object with platform-specific versions
+        if (typeof curlCommands.start === 'object' && curlCommands.start !== null) {
+          return (curlCommands.start as any)[selectedPlatform] || (curlCommands.start as any).default || ''
+        }
         return curlCommands.start || ''
       }
+      // Complete command
       return curlCommands.complete?.[selectedPlatform] || curlCommands.complete?.default || ''
     } else if (curlCommands.type === 'payload' || curlCommands.type === 'simple') {
       return (curlCommands as any)[selectedPlatform] || curlCommands.default || ''
@@ -886,7 +914,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
             Waiting for first ping...
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground mb-4">
-            Copy the command below and run it in your terminal or add it to your cron job.
+            {curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload'
+              ? 'Use the commands below to track your job execution. First call the Start Command when your job begins, then call the Complete Command when it finishes.'
+              : 'Copy the command below and run it in your terminal or add it to your cron job.'}
           </p>
           <div className="space-y-3">
             {/* Platform selector - show for payload or start-stop-payload */}
@@ -1044,6 +1074,34 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                 Use these endpoints to track individual job executions and detect zombie jobs:
               </p>
 
+              {/* Platform selector - show for start-stop modes */}
+              {(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && (
+                <div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlatform('unix')}
+                    className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                      selectedPlatform === 'unix'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Linux/Mac
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlatform('windows')}
+                    className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                      selectedPlatform === 'windows'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
+                    }`}
+                  >
+                    Windows
+                  </button>
+                </div>
+              )}
+
               {/* Start Endpoint */}
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -1057,7 +1115,11 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                   </div>
                 </div>
                 <CodeBlock
-                  code={(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && curlCommands.start ? curlCommands.start : ''}
+                  code={(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && (curlCommands as any).start 
+                    ? (typeof (curlCommands as any).start === 'object' && (curlCommands as any).start !== null
+                        ? ((curlCommands as any).start as any)[selectedPlatform] || ((curlCommands as any).start as any).default || ''
+                        : (curlCommands as any).start)
+                    : ''}
                   language="bash"
                 />
                 <p className="text-xs text-muted-foreground mt-2">
@@ -1080,9 +1142,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                 <CodeBlock
                   code={(() => {
                     if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
-                      return curlCommands.complete?.unix || curlCommands.complete?.default || ''
+                      return curlCommands.complete?.[selectedPlatform] || curlCommands.complete?.default || ''
                     } else if (curlCommands.type === 'payload') {
-                      return (curlCommands as any).unix || curlCommands.default || ''
+                      return (curlCommands as any)[selectedPlatform] || curlCommands.default || ''
                     } else if (curlCommands.type === 'simple') {
                       return curlCommands.default || ''
                     }
@@ -1163,7 +1225,20 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
             <h3 className="text-xs sm:text-sm font-medium text-muted-foreground mb-2">Max Execution Time</h3>
             <p className="text-xl sm:text-2xl font-bold font-mono">
               {monitor.max_execution_time_seconds 
-                ? `${Math.floor(monitor.max_execution_time_seconds / 60)} min`
+                ? (() => {
+                    const seconds = monitor.max_execution_time_seconds
+                    if (seconds < 60) {
+                      return `${seconds} sec`
+                    } else if (seconds < 3600) {
+                      return `${Math.floor(seconds / 60)} min`
+                    } else {
+                      const hours = Math.floor(seconds / 3600)
+                      const remainingMinutes = Math.floor((seconds % 3600) / 60)
+                      return remainingMinutes > 0 
+                        ? `${hours} hr ${remainingMinutes} min`
+                        : `${hours} hr`
+                    }
+                  })()
                 : 'Disabled'}
             </p>
           </div>
@@ -1184,7 +1259,19 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                     setIntervalSuccess(false)
                     setIntervalMinutes(Math.floor(monitor.expected_interval_seconds / 60))
                     setGracePeriodMinutes(Math.floor(monitor.grace_period_seconds / 60))
-                    setMaxExecutionTimeMinutes(monitor.max_execution_time_seconds ? Math.floor(monitor.max_execution_time_seconds / 60) : 0)
+                    setMaxExecutionTimeSeconds(monitor.max_execution_time_seconds || 0)
+                    // Set appropriate unit based on value
+                    if (monitor.max_execution_time_seconds) {
+                      if (monitor.max_execution_time_seconds < 60) {
+                        setMaxExecutionTimeUnit('seconds')
+                      } else if (monitor.max_execution_time_seconds < 3600) {
+                        setMaxExecutionTimeUnit('minutes')
+                      } else {
+                        setMaxExecutionTimeUnit('hours')
+                      }
+                    } else {
+                      setMaxExecutionTimeUnit('seconds')
+                    }
                     setMaxExecutionTimeEnabled(monitor.max_execution_time_seconds !== null && monitor.max_execution_time_seconds > 0)
                   }}
                   className="text-muted-foreground hover:text-foreground transition-smooth text-xl"
@@ -1343,6 +1430,17 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                     <div className="flex gap-1 bg-muted rounded-lg p-1">
                       <button
                         type="button"
+                        onClick={() => setMaxExecutionTimeUnit('seconds')}
+                        className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
+                          maxExecutionTimeUnit === 'seconds'
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-muted-foreground hover:text-foreground'
+                        }`}
+                      >
+                        Seconds
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setMaxExecutionTimeUnit('minutes')}
                         className={`px-2 py-1 text-xs font-medium rounded transition-smooth ${
                           maxExecutionTimeUnit === 'minutes'
@@ -1372,7 +1470,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                       onClick={() => {
                         setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
                         if (maxExecutionTimeEnabled) {
-                          setMaxExecutionTimeMinutes(0)
+                          setMaxExecutionTimeSeconds(0)
                         }
                       }}
                       className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
@@ -1405,7 +1503,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                       onClick={() => {
                         setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
                         if (maxExecutionTimeEnabled) {
-                          setMaxExecutionTimeMinutes(0)
+                          setMaxExecutionTimeSeconds(0)
                         }
                       }}
                     >
@@ -1419,22 +1517,23 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                         <input
                           id="maxExecutionTime"
                           type="range"
-                          min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                          max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
-                          step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          min={maxExecutionTimeUnit === 'seconds' ? '1' : maxExecutionTimeUnit === 'minutes' ? '1' : '1'}
+                          max={maxExecutionTimeUnit === 'seconds' ? '60' : maxExecutionTimeUnit === 'minutes' ? '60' : '24'}
+                          step={maxExecutionTimeUnit === 'hours' ? '1' : '1'}
                           value={getMaxExecutionTimeValue()}
                           onChange={(e) => setMaxExecutionTimeValue(Number(e.target.value))}
                           className="flex-1 h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
                         />
                         <input
                           type="number"
-                          min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                          max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
-                          step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
+                          min={maxExecutionTimeUnit === 'seconds' ? '1' : maxExecutionTimeUnit === 'minutes' ? '1' : '1'}
+                          max={maxExecutionTimeUnit === 'seconds' ? '60' : maxExecutionTimeUnit === 'minutes' ? '60' : '24'}
+                          step={maxExecutionTimeUnit === 'hours' ? '1' : '1'}
                           value={getMaxExecutionTimeValue()}
                           onChange={(e) => {
                             const value = Number(e.target.value)
-                            if (value >= (maxExecutionTimeUnit === 'hours' ? 0.1 : 1)) {
+                            const minValue = maxExecutionTimeUnit === 'seconds' ? 1 : maxExecutionTimeUnit === 'minutes' ? 1 : 1
+                            if (value >= minValue) {
                               setMaxExecutionTimeValue(value)
                             }
                           }}
@@ -1444,9 +1543,11 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
 
                       <div className="flex justify-between text-xs text-muted-foreground mt-1">
                         <span>
-                          {maxExecutionTimeUnit === 'hours' ? '0.1 hr' : '1 min'}
+                          {maxExecutionTimeUnit === 'seconds' ? '1 sec' : maxExecutionTimeUnit === 'minutes' ? '1 min' : '1 hr'}
                         </span>
-                        <span>{maxExecutionTimeUnit === 'hours' ? '24 hours' : '1440 min'}</span>
+                        <span>
+                          {maxExecutionTimeUnit === 'seconds' ? '60 sec' : maxExecutionTimeUnit === 'minutes' ? '60 min' : '24 hr'}
+                        </span>
                       </div>
                     </>
                   )}
@@ -1466,8 +1567,8 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                       try {
                         const expectedIntervalSeconds = intervalMinutes * 60
                         const gracePeriodSeconds = gracePeriodMinutes * 60
-                        const maxExecutionTimeSeconds = maxExecutionTimeEnabled && maxExecutionTimeMinutes > 0
-                          ? maxExecutionTimeMinutes * 60
+                        const maxExecutionTimeSecondsForApi = maxExecutionTimeEnabled && maxExecutionTimeSeconds > 0
+                          ? maxExecutionTimeSeconds
                           : null
 
                         if (expectedIntervalSeconds < 60) {
@@ -1485,7 +1586,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                         const requestBody: any = {
                           expectedIntervalSeconds,
                           gracePeriodSeconds,
-                          maxExecutionTimeSeconds,
+                          maxExecutionTimeSeconds: maxExecutionTimeSecondsForApi,
                           expectedUpdatedAt: monitor.updated_at,
                         }
 

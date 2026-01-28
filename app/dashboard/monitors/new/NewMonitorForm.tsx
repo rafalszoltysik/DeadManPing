@@ -46,8 +46,8 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
   const [calendarSelectedDayOfMonth, setCalendarSelectedDayOfMonth] = useState<number>(1)
   const [gracePeriodHours, setGracePeriodHours] = useState(1)
   const [graceUnit, setGraceUnit] = useState<'minutes' | 'hours'>('hours')
-  const [maxExecutionTimeMinutes, setMaxExecutionTimeMinutes] = useState(0)
-  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'minutes' | 'hours'>('minutes')
+  const [maxExecutionTimeSeconds, setMaxExecutionTimeSeconds] = useState(30) // Store in seconds, default 30 seconds
+  const [maxExecutionTimeUnit, setMaxExecutionTimeUnit] = useState<'seconds' | 'minutes' | 'hours'>('seconds')
   const [maxExecutionTimeEnabled, setMaxExecutionTimeEnabled] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -82,6 +82,30 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
       setShowPayloadValidation(false)
     }
   }, [monitoringMode])
+
+  // Auto-enable max execution time for start-stop modes
+  useEffect(() => {
+    if (monitoringMode === 'start-stop' || monitoringMode === 'start-stop-payload') {
+      setMaxExecutionTimeEnabled(true)
+      // Set default value if not set (30 seconds)
+      if (maxExecutionTimeSeconds === 0) {
+        setMaxExecutionTimeSeconds(30)
+        setMaxExecutionTimeUnit('seconds')
+      }
+    } else {
+      // Disable max execution time for non-start-stop modes
+      setMaxExecutionTimeEnabled(false)
+      setMaxExecutionTimeSeconds(0)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [monitoringMode])
+
+  // Scroll to top when error occurs
+  useEffect(() => {
+    if (error) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [error])
 
   // Auto-switch to manual mode on mobile (since Calendar button is hidden)
   useEffect(() => {
@@ -236,17 +260,22 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
 
   // Convert max execution time to appropriate unit for display
   const getMaxExecutionTimeValue = () => {
-    if (maxExecutionTimeUnit === 'hours') {
-      return Math.round((maxExecutionTimeMinutes / 60) * 10) / 10
+    if (maxExecutionTimeUnit === 'seconds') {
+      return maxExecutionTimeSeconds
+    } else if (maxExecutionTimeUnit === 'minutes') {
+      return Math.round(maxExecutionTimeSeconds / 60)
+    } else { // hours
+      return Math.round((maxExecutionTimeSeconds / 3600) * 10) / 10
     }
-    return maxExecutionTimeMinutes
   }
 
   const setMaxExecutionTimeValue = (value: number) => {
-    if (maxExecutionTimeUnit === 'hours') {
-      setMaxExecutionTimeMinutes(Math.round(value * 60))
-    } else {
-      setMaxExecutionTimeMinutes(Math.round(value))
+    if (maxExecutionTimeUnit === 'seconds') {
+      setMaxExecutionTimeSeconds(Math.round(value))
+    } else if (maxExecutionTimeUnit === 'minutes') {
+      setMaxExecutionTimeSeconds(Math.round(value * 60))
+    } else { // hours
+      setMaxExecutionTimeSeconds(Math.round(value * 3600))
     }
   }
 
@@ -286,9 +315,9 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
     const expectedIntervalSeconds = scheduleType === 'interval' ? intervalMinutes * 60 : 0
     // gracePeriodHours is always stored in hours (conversion happens in setGraceValue)
     const gracePeriodSeconds = gracePeriodHours * 3600
-    // maxExecutionTimeMinutes is always stored in minutes (conversion happens in setMaxExecutionTimeValue)
-    const maxExecutionTimeSeconds = maxExecutionTimeEnabled && maxExecutionTimeMinutes > 0
-      ? maxExecutionTimeMinutes * 60
+    // maxExecutionTimeSeconds is already stored in seconds (conversion happens in setMaxExecutionTimeValue)
+    const maxExecutionTimeSecondsForApi = maxExecutionTimeEnabled && maxExecutionTimeSeconds > 0
+      ? maxExecutionTimeSeconds
       : null
 
     // Build payload validation rules from fields
@@ -332,7 +361,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
       name: name.trim(),
       expectedIntervalSeconds,
       gracePeriodSeconds,
-      maxExecutionTimeSeconds,
+      maxExecutionTimeSeconds: maxExecutionTimeSecondsForApi,
       scheduleType,
       ...(scheduleType === 'cron' && { cronExpression: cronExpression.trim() }),
     }
@@ -968,128 +997,6 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
             </p>
           </div>
 
-          {/* Max Execution Time Section */}
-          <div className="border-t border-border pt-4 sm:pt-6">
-            <div className="flex items-center justify-between mb-2">
-              <label htmlFor="maxExecutionTime" className="block text-sm font-medium">
-                Max Execution Time (Optional)
-              </label>
-              <div className="flex gap-1 bg-muted rounded-lg p-1 w-full sm:w-auto">
-                <button
-                  type="button"
-                  onClick={() => setMaxExecutionTimeUnit('minutes')}
-                  className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
-                    maxExecutionTimeUnit === 'minutes'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  Minutes
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMaxExecutionTimeUnit('hours')}
-                  className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
-                    maxExecutionTimeUnit === 'hours'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  }`}
-                >
-                  Hours
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 mb-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
-                  if (maxExecutionTimeEnabled) {
-                    setMaxExecutionTimeMinutes(0)
-                  }
-                }}
-                className="relative flex-shrink-0 w-5 h-5 rounded border-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background cursor-pointer"
-                style={{
-                  backgroundColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'transparent',
-                  borderColor: maxExecutionTimeEnabled ? 'rgb(var(--primary))' : 'rgb(var(--input))',
-                }}
-                aria-label="Enable timeout detection"
-              >
-                {maxExecutionTimeEnabled && (
-                  <svg
-                    className="absolute inset-0 w-full h-full text-primary-foreground"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="3"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-              </button>
-              <label 
-                htmlFor="maxExecutionTimeEnabled" 
-                className="text-sm text-muted-foreground cursor-pointer"
-                onClick={() => {
-                  setMaxExecutionTimeEnabled(!maxExecutionTimeEnabled)
-                  if (maxExecutionTimeEnabled) {
-                    setMaxExecutionTimeMinutes(0)
-                  }
-                }}
-              >
-                Enable timeout detection
-              </label>
-            </div>
-
-            {maxExecutionTimeEnabled && (
-              <>
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <input
-                    id="maxExecutionTime"
-                    type="range"
-                    min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                    max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
-                    step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                    value={getMaxExecutionTimeValue()}
-                    onChange={(e) => setMaxExecutionTimeValue(Number(e.target.value))}
-                    className="flex-1 h-2 sm:h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
-                  />
-                  <input
-                    type="number"
-                    min={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                    max={maxExecutionTimeUnit === 'hours' ? '24' : '1440'}
-                    step={maxExecutionTimeUnit === 'hours' ? '0.1' : '1'}
-                    value={getMaxExecutionTimeValue()}
-                    onChange={(e) => {
-                      const value = Number(e.target.value)
-                      if (value >= (maxExecutionTimeUnit === 'hours' ? 0.1 : 1)) {
-                        setMaxExecutionTimeValue(value)
-                      }
-                    }}
-                    className="w-20 sm:w-20 px-2 sm:px-2 py-2 sm:py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth min-h-[44px] sm:min-h-0"
-                  />
-                </div>
-
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>
-                    {maxExecutionTimeUnit === 'hours' ? '0.1 hr' : '1 min'}
-                  </span>
-                  <span>{maxExecutionTimeUnit === 'hours' ? '24 hours' : '1440 min'}</span>
-                </div>
-              </>
-            )}
-
-            <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
-              Maximum time a job can run before being marked as timeout. If set, jobs that run longer than this time will trigger an alert.
-            </p>
-          </div>
-
           {/* Monitoring Mode Section */}
           <div className="border-t border-border pt-4 sm:pt-6">
             <h3 className="text-sm font-medium mb-3">Monitoring Mode</h3>
@@ -1182,6 +1089,93 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
                   <p>• The system will track duration and alert if the job doesn't complete within the max execution time</p>
                   <p className="mt-2 text-xs italic">Note: In the next step, you'll receive the exact URLs for start and stop endpoints.</p>
                 </div>
+              </div>
+            )}
+
+            {/* Max Execution Time Section - only for start-stop modes */}
+            {(monitoringMode === 'start-stop' || monitoringMode === 'start-stop-payload') && (
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <label htmlFor="maxExecutionTime" className="block text-sm font-medium">
+                    Max Execution Time
+                  </label>
+                  <div className="flex gap-1 bg-muted rounded-lg p-1 w-full sm:w-auto">
+                    <button
+                      type="button"
+                      onClick={() => setMaxExecutionTimeUnit('seconds')}
+                      className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                        maxExecutionTimeUnit === 'seconds'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Seconds
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMaxExecutionTimeUnit('minutes')}
+                      className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                        maxExecutionTimeUnit === 'minutes'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Minutes
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setMaxExecutionTimeUnit('hours')}
+                      className={`flex-1 sm:flex-none px-3 py-2 sm:py-1 text-xs font-medium rounded transition-smooth active:scale-95 min-h-[44px] sm:min-h-0 ${
+                        maxExecutionTimeUnit === 'hours'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                      }`}
+                    >
+                      Hours
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <input
+                    id="maxExecutionTime"
+                    type="range"
+                    min={maxExecutionTimeUnit === 'seconds' ? '1' : maxExecutionTimeUnit === 'minutes' ? '1' : '1'}
+                    max={maxExecutionTimeUnit === 'seconds' ? '60' : maxExecutionTimeUnit === 'minutes' ? '60' : '24'}
+                    step={maxExecutionTimeUnit === 'hours' ? '1' : '1'}
+                    value={getMaxExecutionTimeValue()}
+                    onChange={(e) => setMaxExecutionTimeValue(Number(e.target.value))}
+                    className="flex-1 h-2 sm:h-2 bg-muted rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-moz-range-thumb]:w-5 [&::-moz-range-thumb]:h-5 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:bg-primary [&::-moz-range-thumb]:border-0"
+                  />
+                  <input
+                    type="number"
+                    min={maxExecutionTimeUnit === 'seconds' ? '1' : maxExecutionTimeUnit === 'minutes' ? '1' : '1'}
+                    max={maxExecutionTimeUnit === 'seconds' ? '60' : maxExecutionTimeUnit === 'minutes' ? '60' : '24'}
+                    step={maxExecutionTimeUnit === 'hours' ? '1' : '1'}
+                    value={getMaxExecutionTimeValue()}
+                    onChange={(e) => {
+                      const value = Number(e.target.value)
+                      const minValue = maxExecutionTimeUnit === 'seconds' ? 1 : maxExecutionTimeUnit === 'minutes' ? 1 : 1
+                      if (value >= minValue) {
+                        setMaxExecutionTimeValue(value)
+                      }
+                    }}
+                    className="w-20 sm:w-20 px-2 sm:px-2 py-2 sm:py-1 bg-background border border-input rounded text-sm text-center focus:outline-none focus:ring-2 focus:ring-ring transition-smooth min-h-[44px] sm:min-h-0"
+                  />
+                </div>
+
+                <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                  <span>
+                    {maxExecutionTimeUnit === 'seconds' ? '1 sec' : maxExecutionTimeUnit === 'minutes' ? '1 min' : '1 hr'}
+                  </span>
+                  <span>
+                    {maxExecutionTimeUnit === 'seconds' ? '60 sec' : maxExecutionTimeUnit === 'minutes' ? '60 min' : '24 hr'}
+                  </span>
+                </div>
+
+                <p className="mt-2 text-xs sm:text-sm text-muted-foreground">
+                  Maximum time a job can run before being marked as timeout. If set, jobs that run longer than this time will trigger an alert.
+                </p>
               </div>
             )}
           </div>
