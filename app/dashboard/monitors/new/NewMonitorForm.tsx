@@ -403,7 +403,7 @@ export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProp
           Back to monitors
         </Link>
       </div>
-      <div className="max-w-2xl mx-auto px-4 sm:px-0">
+      <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-0">
         <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">
           {isOnboarding ? 'Create Your First Monitor' : 'New Monitor'}
         </h1>

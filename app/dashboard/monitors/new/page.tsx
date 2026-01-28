@@ -55,7 +55,7 @@ export default function NewMonitorPage() {
         <div className="mb-4 sm:mb-6">
           <div className="h-5 w-32 bg-muted rounded animate-pulse"></div>
         </div>
-        <div className="max-w-2xl mx-auto px-4 sm:px-0">
+        <div className="max-w-2xl lg:max-w-4xl xl:max-w-5xl mx-auto px-4 sm:px-0">
           <div className="h-8 sm:h-9 w-48 sm:w-64 bg-muted rounded animate-pulse mb-4 sm:mb-6"></div>
           <div className="bg-card border border-border rounded-lg sm:rounded-xl shadow-sm p-4 sm:p-6">
             <div className="space-y-4 sm:space-y-6">
