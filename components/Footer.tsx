@@ -25,18 +25,8 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/blog/monitor-cron-jobs" className="text-muted-foreground hover:text-foreground transition-smooth">
-                  Monitor Cron Jobs
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog/dead-man-switch" className="text-muted-foreground hover:text-foreground transition-smooth">
-                  Dead Man Switch
-                </Link>
-              </li>
-              <li>
-                <Link href="/blog/backup-monitoring" className="text-muted-foreground hover:text-foreground transition-smooth">
-                  Backup Monitoring
+                <Link href="/blog" className="text-muted-foreground hover:text-foreground transition-smooth">
+                  Blog
                 </Link>
               </li>
             </ul>

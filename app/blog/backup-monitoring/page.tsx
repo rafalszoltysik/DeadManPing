@@ -93,7 +93,7 @@ export default function BackupMonitoringPage() {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="mb-6">
           <Link 
-            href="/" 
+            href="/blog" 
             className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-smooth group"
           >
             <svg 
@@ -104,7 +104,7 @@ export default function BackupMonitoringPage() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="text-sm font-medium">Back to Home</span>
+            <span className="text-sm font-medium">Back to Blog</span>
           </Link>
         </div>
         <article>
