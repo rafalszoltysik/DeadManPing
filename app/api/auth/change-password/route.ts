@@ -74,8 +74,15 @@ export async function POST(request: NextRequest) {
 
     if (updateError) {
       console.error('Error updating password:', updateError)
+      // Translate common Supabase error messages to English
+      let errorMessage = updateError.message || 'Failed to change password'
+      if (errorMessage.includes('Password')) {
+        errorMessage = 'Invalid password. Please check your password requirements.'
+      } else if (errorMessage.includes('rate limit')) {
+        errorMessage = 'Too many password change attempts. Please try again later.'
+      }
       return NextResponse.json(
-        { error: updateError.message || 'Failed to change password' },
+        { error: errorMessage },
         { status: 400 }
       )
     }

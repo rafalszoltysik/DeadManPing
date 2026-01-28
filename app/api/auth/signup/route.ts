@@ -46,14 +46,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Rate limiting: 3 attempts per minute per IP and per email
+    // Rate limiting: per IP (5 seconds) and per email (1 minute)
+    // IP limit is very short to allow legitimate users to try different emails quickly
     const clientIp = request.headers.get('x-forwarded-for')?.split(',')[0] || 
                      request.headers.get('x-real-ip') || 
                      'unknown'
     const ipKey = `signup:ip:${clientIp}`
     const emailKey = `signup:email:${email.toLowerCase().trim()}`
     
-    const ipRateLimit = await checkRateLimit(ipKey, 60000) // 1 minute
+    const ipRateLimit = await checkRateLimit(ipKey, 5000) // 5 seconds - allows quick retries with different emails
     if (!ipRateLimit.allowed) {
       return NextResponse.json(
         { error: 'Too many signup attempts. Please try again later.' },
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const emailRateLimit = await checkRateLimit(emailKey, 60000) // 1 minute
+    const emailRateLimit = await checkRateLimit(emailKey, 60000) // 1 minute per email
     if (!emailRateLimit.allowed) {
       return NextResponse.json(
         { error: 'Too many signup attempts for this email. Please try again later.' },
@@ -128,8 +129,18 @@ export async function POST(request: NextRequest) {
         reason: authError?.message?.toLowerCase().includes('validation') ? 'validation' : 'unknown',
       })
       
+      // Translate common Supabase error messages to English
+      let errorMessage = authError?.message || 'Failed to create account'
+      if (errorMessage.includes('User already registered')) {
+        errorMessage = 'An account with this email already exists. Please sign in.'
+      } else if (errorMessage.includes('Email rate limit exceeded')) {
+        errorMessage = 'Too many signup attempts. Please try again later.'
+      } else if (errorMessage.includes('Password')) {
+        errorMessage = 'Invalid password. Please check your password requirements.'
+      }
+      
       return NextResponse.json(
-        { error: authError?.message || 'Failed to create account' },
+        { error: errorMessage },
         { status: 400 }
       )
     }

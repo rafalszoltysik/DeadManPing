@@ -1,0 +1,24 @@
+'use client'
+
+import dynamic from 'next/dynamic'
+
+// Client-side only wrapper for PricingSectionClient
+const LazyPricingSection = dynamic(() => import('@/components/PricingSectionClient').then(mod => ({ default: mod.default })), {
+  loading: () => (
+    <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
+      <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 h-96 animate-pulse"></div>
+        ))}
+      </div>
+    </section>
+  ),
+  ssr: false, // Client-side only to reduce initial bundle
+})
+
+export default function LazyPricingSectionWrapper() {
+  return <LazyPricingSection />
+}
+

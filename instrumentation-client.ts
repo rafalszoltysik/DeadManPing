@@ -13,19 +13,46 @@ export function init() {
     return
   }
 
+  // Defer initialization until after page is interactive
+  // This improves initial page load performance
+  if (typeof window !== 'undefined') {
+    const initializeWhenReady = () => {
+      if (document.readyState === 'complete') {
+        initializeAnalytics()
+      } else {
+        window.addEventListener('load', () => {
+          // Additional delay to ensure page is fully interactive
+          setTimeout(initializeAnalytics, 100)
+        })
+      }
+    }
+
+    if ('requestIdleCallback' in window) {
+      requestIdleCallback(initializeWhenReady, { timeout: 2000 })
+    } else {
+      // Fallback for browsers without requestIdleCallback
+      setTimeout(initializeWhenReady, 1000)
+    }
+    return
+  }
+
+  // Server-side: initialize immediately
+  initializeAnalytics()
+}
+
+function initializeAnalytics() {
+
   // Initialize Sentry on the client (only in production)
   // Sentry uses essential cookies that don't require user consent
   // But developers can block them using blockEssentialCookies flag
   const sentryDsn = process.env.NEXT_PUBLIC_SENTRY_DSN
-  if (sentryDsn) {
+  if (sentryDsn && typeof window !== 'undefined') {
     // Check for developer block flag for essential cookies (only in browser)
     let shouldInitSentry = true
-    if (typeof window !== 'undefined') {
-      const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
-      if (blockEssentialCookies === 'true') {
-        // Developer has blocked essential cookies, don't initialize Sentry
-        shouldInitSentry = false
-      }
+    const blockEssentialCookies = localStorage.getItem('blockEssentialCookies')
+    if (blockEssentialCookies === 'true') {
+      // Developer has blocked essential cookies, don't initialize Sentry
+      shouldInitSentry = false
     }
     
     if (shouldInitSentry) {

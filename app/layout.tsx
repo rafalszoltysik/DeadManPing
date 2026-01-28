@@ -122,42 +122,6 @@ export default function RootLayout({
     "inLanguage": "en-US"
   }
 
-  // Aggregate reviews schema - można później zastąpić prawdziwymi recenzjami
-  const aggregateReviewSchema = {
-    "@context": "https://schema.org",
-    "@type": "AggregateRating",
-    "itemReviewed": {
-      "@type": "SoftwareApplication",
-      "name": "DeadManPing"
-    },
-    "ratingValue": "4.8",
-    "reviewCount": "50",
-    "bestRating": "5",
-    "worstRating": "1"
-  }
-
-  // Przykładowe recenzje - można później zastąpić prawdziwymi
-  const reviewSchema = {
-    "@context": "https://schema.org",
-    "@type": "Review",
-    "itemReviewed": {
-      "@type": "SoftwareApplication",
-      "name": "DeadManPing",
-      "applicationCategory": "DeveloperApplication"
-    },
-    "reviewRating": {
-      "@type": "Rating",
-      "ratingValue": "5",
-      "bestRating": "5"
-    },
-    "author": {
-      "@type": "Person",
-      "name": "Alex M."
-    },
-    "reviewBody": "DeadManPing solved our silent failure problem. We were losing data because backups appeared to succeed but were actually empty. Now we catch these issues immediately. The payload validation is brilliant - we verify file sizes, record counts, and execution times without writing any custom alert logic.",
-    "datePublished": "2024-12-01"
-  }
-
   return (
     <html lang="en" suppressHydrationWarning className="dark">
       <head>
@@ -169,16 +133,6 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-          suppressHydrationWarning
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(aggregateReviewSchema) }}
-          suppressHydrationWarning
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
           suppressHydrationWarning
         />
       </head>

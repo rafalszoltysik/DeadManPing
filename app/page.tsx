@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import dynamicImport from 'next/dynamic'
 import { Suspense } from 'react'
 import { PageNav } from '@/components/PageNav'
 import { DiscordIcon, SlackIcon, EmailIcon, MonitorIcon, WarningIcon } from '@/components/Icons'
@@ -10,24 +9,9 @@ import { ErrorHandlerWrapper } from '@/components/ErrorHandlerWrapper'
 import { AnimatedSection, AnimatedItem, StaggerContainer } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
-import PricingSectionClient from '@/components/PricingSectionClient'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
-
-// Lazy load heavy components below the fold
-const DashboardPreview = dynamicImport(() => import('@/components/DashboardPreview').then(mod => ({ default: mod.DashboardPreview })), {
-  loading: () => (
-    <div className="max-w-5xl mx-auto px-4">
-      <div className="text-center mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
-        <p className="text-muted-foreground text-base sm:text-lg">
-          Real-time status updates and instant alerts for all your cron jobs
-        </p>
-      </div>
-      <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl animate-pulse h-96"></div>
-    </div>
-  ),
-  ssr: true,
-})
+import LazyPricingSection from '@/components/LazyPricingSection'
+import LazyDashboardPreview from '@/components/LazyDashboardPreview'
 
 export const metadata: Metadata = {
   title: "Never Miss a Cron Job Again | DeadManPing",
@@ -169,13 +153,6 @@ const STRUCTURED_DATA = {
       "Works with any language",
       "Dashboard with real-time status"
     ],
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "50",
-      "bestRating": "5",
-      "worstRating": "1"
-    },
     "creator": {
       "@type": "Organization",
       "name": "DeadManPing"
@@ -231,6 +208,7 @@ export default function Home() {
   return (
     <div className="min-h-screen text-foreground relative bg-transparent">
       <ErrorHandlerWrapper />
+      {/* Structured data - optimized to reduce HTML size */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
@@ -241,11 +219,6 @@ export default function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(FEATURES_ITEM_LIST_SCHEMA) }}
         suppressHydrationWarning
       />
-      {/* VideoObject schema - zakomentuj jeśli nie masz filmów */}
-      {/* <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(videoSchema) }}
-      /> */}
       
       {/* Navigation */}
       <PageNav />
@@ -290,7 +263,7 @@ export default function Home() {
               <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl animate-pulse h-96"></div>
             </div>
           }>
-            <DashboardPreview />
+            <LazyDashboardPreview />
           </Suspense>
         </AnimatedSection>
 
@@ -678,21 +651,9 @@ export default function Home() {
           </div>
         </AnimatedSection>
 
-        {/* Pricing */}
+        {/* Pricing - Defer loading until scrolled into view */}
         <AnimatedSection delay={100} direction="up" duration={900}>
-          <Suspense fallback={
-            <section className="py-12 sm:py-16 lg:py-20" aria-label="Pricing plans">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-3 sm:mb-4 px-4">Simple, Transparent Pricing</h2>
-              <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-sm sm:text-base px-4">14-day free trial • No credit card required</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto px-4 items-stretch">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="bg-card border-2 border-border rounded-lg p-6 sm:p-8 h-96 animate-pulse"></div>
-                ))}
-              </div>
-            </section>
-          }>
-            <PricingSectionClient />
-          </Suspense>
+          <LazyPricingSection />
         </AnimatedSection>
 
         {/* What DeadManPing Does */}

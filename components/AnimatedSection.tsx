@@ -11,6 +11,46 @@ interface AnimatedSectionProps {
   duration?: number
 }
 
+// Shared IntersectionObserver instance to reduce overhead
+let sharedObserver: IntersectionObserver | null = null
+const observedElements = new WeakMap<Element, () => void>()
+
+function getSharedObserver() {
+  if (sharedObserver) return sharedObserver
+
+  sharedObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        const callback = observedElements.get(entry.target)
+        if (callback && entry.isIntersecting) {
+          callback()
+        }
+      })
+    },
+    { threshold: 0.1, rootMargin: '-50px' }
+  )
+
+  return sharedObserver
+}
+
+// Check reduced motion preference once and cache
+let cachedPrefersReducedMotion: boolean | null = null
+function getPrefersReducedMotion(): boolean {
+  if (cachedPrefersReducedMotion === null && typeof window !== 'undefined') {
+    cachedPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  }
+  return cachedPrefersReducedMotion ?? false
+}
+
+// Check mobile once and cache (can be updated on resize if needed)
+let cachedIsMobile: boolean | null = null
+function getIsMobile(): boolean {
+  if (cachedIsMobile === null && typeof window !== 'undefined') {
+    cachedIsMobile = window.innerWidth < 768
+  }
+  return cachedIsMobile ?? false
+}
+
 export function AnimatedSection({ 
   children, 
   className = '', 
@@ -21,85 +61,63 @@ export function AnimatedSection({
 }: AnimatedSectionProps) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches)
-    }
-    mediaQuery.addEventListener('change', handleChange)
-
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange)
-      window.removeEventListener('resize', checkMobile)
-    }
-  }, [])
+  const prefersReducedMotion = useRef(getPrefersReducedMotion())
+  const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
     if (!ref.current || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion.current) {
       setIsVisible(true)
       hasAnimated.current = true
       return
     }
 
-    // Adjust rootMargin for mobile (smaller viewport)
-    const rootMargin = isMobile ? '-50px' : '-100px'
+    // Defer observer setup until after initial render
+    const timer = setTimeout(() => {
+      if (!ref.current || hasAnimated.current) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimated.current) {
-            hasAnimated.current = true
-            
-            const timer = setTimeout(() => {
-              setIsVisible(true)
-            }, delay)
+      const observer = getSharedObserver()
+      const callback = () => {
+        if (hasAnimated.current) return
+        hasAnimated.current = true
+        
+        setTimeout(() => {
+          setIsVisible(true)
+        }, delay)
 
-            // Unobserve after animation starts
-            setTimeout(() => {
-              if (ref.current) {
-                observer.unobserve(ref.current)
-              }
-            }, delay + duration + 100)
-
-            return () => clearTimeout(timer)
+        // Unobserve after animation starts
+        setTimeout(() => {
+          if (ref.current) {
+            observer.unobserve(ref.current)
+            observedElements.delete(ref.current)
           }
-        })
-      },
-      { threshold: 0.1, rootMargin }
-    )
+        }, delay + duration + 100)
+      }
 
-    const currentRef = ref.current
-    observer.observe(currentRef)
+      if (ref.current) {
+        observedElements.set(ref.current, callback)
+        observer.observe(ref.current)
+      }
+    }, 50) // Small delay to batch initial renders
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
+      clearTimeout(timer)
+      if (ref.current) {
+        const observer = getSharedObserver()
+        observer.unobserve(ref.current)
+        observedElements.delete(ref.current)
       }
     }
-  }, [delay, duration, prefersReducedMotion, isMobile])
+  }, [delay, duration])
 
   const getTransformStyle = () => {
     if (isVisible) return { transform: 'translateY(0) translateX(0) scale(1)' }
     
     // Smaller transforms on mobile
-    const translateValue = isMobile ? 4 : 8
+    const translateValue = isMobile.current ? 4 : 8
     
     switch (direction) {
       case 'up':
@@ -118,7 +136,7 @@ export function AnimatedSection({
   }
 
   // Shorter duration on mobile or if reduced motion
-  const actualDuration = prefersReducedMotion ? 0 : (isMobile ? Math.min(duration, 600) : duration)
+  const actualDuration = prefersReducedMotion.current ? 0 : (isMobile.current ? Math.min(duration, 600) : duration)
 
   return (
     <div
@@ -150,85 +168,63 @@ export function AnimatedItem({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches)
-    }
-    mediaQuery.addEventListener('change', handleChange)
-
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange)
-      window.removeEventListener('resize', checkMobile)
-    }
-  }, [])
+  const prefersReducedMotion = useRef(getPrefersReducedMotion())
+  const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
     if (!ref.current || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion.current) {
       setIsVisible(true)
       hasAnimated.current = true
       return
     }
 
-    // Adjust rootMargin for mobile
-    const rootMargin = isMobile ? '25px' : '50px'
+    // Defer observer setup until after initial render
+    const timer = setTimeout(() => {
+      if (!ref.current || hasAnimated.current) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimated.current) {
-            hasAnimated.current = true
-            
-            const timer = setTimeout(() => {
-              setIsVisible(true)
-            }, delay)
+      const observer = getSharedObserver()
+      const callback = () => {
+        if (hasAnimated.current) return
+        hasAnimated.current = true
+        
+        setTimeout(() => {
+          setIsVisible(true)
+        }, delay)
 
-            // Unobserve after animation starts
-            setTimeout(() => {
-              if (ref.current) {
-                observer.unobserve(ref.current)
-              }
-            }, delay + duration + 100)
-
-            return () => clearTimeout(timer)
+        // Unobserve after animation starts
+        setTimeout(() => {
+          if (ref.current) {
+            observer.unobserve(ref.current)
+            observedElements.delete(ref.current)
           }
-        })
-      },
-      { threshold: 0.1, rootMargin }
-    )
+        }, delay + duration + 100)
+      }
 
-    const currentRef = ref.current
-    observer.observe(currentRef)
+      if (ref.current) {
+        observedElements.set(ref.current, callback)
+        observer.observe(ref.current)
+      }
+    }, 50) // Small delay to batch initial renders
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
+      clearTimeout(timer)
+      if (ref.current) {
+        const observer = getSharedObserver()
+        observer.unobserve(ref.current)
+        observedElements.delete(ref.current)
       }
     }
-  }, [delay, duration, prefersReducedMotion, isMobile])
+  }, [delay, duration])
 
   const getTransformStyle = () => {
     if (isVisible) return { transform: 'translateY(0) translateX(0) scale(1)' }
     
     // Smaller transforms on mobile
-    const translateValue = isMobile ? 3 : 6
+    const translateValue = isMobile.current ? 3 : 6
     
     switch (direction) {
       case 'up':
@@ -247,8 +243,8 @@ export function AnimatedItem({
   }
 
   // Shorter duration on mobile or if reduced motion
-  const actualDuration = prefersReducedMotion ? 0 : (isMobile ? Math.min(duration, 500) : duration)
-  const actualDelay = prefersReducedMotion ? 0 : delay
+  const actualDuration = prefersReducedMotion.current ? 0 : (isMobile.current ? Math.min(duration, 500) : duration)
+  const actualDelay = prefersReducedMotion.current ? 0 : delay
 
   return (
     <div
@@ -277,38 +273,15 @@ export function StaggerContainer({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const [visibleIndices, setVisibleIndices] = useState<Set<number>>(new Set())
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
   const hasAnimated = useRef(false)
-
-  useEffect(() => {
-    // Check for reduced motion preference
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReducedMotion(mediaQuery.matches)
-    
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches)
-    }
-    mediaQuery.addEventListener('change', handleChange)
-
-    // Check if mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange)
-      window.removeEventListener('resize', checkMobile)
-    }
-  }, [])
+  const prefersReducedMotion = useRef(getPrefersReducedMotion())
+  const isMobile = useRef(getIsMobile())
 
   useEffect(() => {
     if (!ref.current || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion.current) {
       const children = Array.from(ref.current?.children || [])
       children.forEach((_, index) => {
         setVisibleIndices(prev => new Set([...prev, index]))
@@ -317,48 +290,44 @@ export function StaggerContainer({
       return
     }
 
-    // Adjust rootMargin for mobile
-    const rootMargin = isMobile ? '-50px' : '-100px'
-    // Shorter stagger delay on mobile
-    const actualStaggerDelay = isMobile ? Math.min(staggerDelay, 60) : staggerDelay
+    // Defer observer setup until after initial render
+    const timer = setTimeout(() => {
+      if (!ref.current || hasAnimated.current) return
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimated.current) {
-            hasAnimated.current = true
-            
-            const children = Array.from(ref.current?.children || [])
-            children.forEach((_, index) => {
-              setTimeout(() => {
-                setVisibleIndices(prev => new Set([...prev, index]))
-              }, index * actualStaggerDelay)
-            })
-
-            setTimeout(() => {
-              if (ref.current) {
-                observer.unobserve(ref.current)
-              }
-            }, children.length * actualStaggerDelay + 300)
-          }
+      const observer = getSharedObserver()
+      const callback = () => {
+        if (hasAnimated.current) return
+        hasAnimated.current = true
+        
+        const children = Array.from(ref.current?.children || [])
+        const actualStaggerDelay = isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay
+        
+        children.forEach((_, index) => {
+          setTimeout(() => {
+            setVisibleIndices(prev => new Set([...prev, index]))
+          }, index * actualStaggerDelay)
         })
-      },
-      { threshold: 0.1, rootMargin }
-    )
+      }
 
-    const currentRef = ref.current
-    observer.observe(currentRef)
+      if (ref.current) {
+        observedElements.set(ref.current, callback)
+        observer.observe(ref.current)
+      }
+    }, 50) // Small delay to batch initial renders
 
     return () => {
-      if (currentRef) {
-        observer.unobserve(currentRef)
+      clearTimeout(timer)
+      if (ref.current) {
+        const observer = getSharedObserver()
+        observer.unobserve(ref.current)
+        observedElements.delete(ref.current)
       }
     }
-  }, [staggerDelay, prefersReducedMotion, isMobile])
+  }, [staggerDelay])
 
   // Smaller translate on mobile
-  const translateValue = isMobile ? 3 : 6
-  const duration = isMobile ? 500 : 700
+  const translateValue = isMobile.current ? 3 : 6
+  const duration = isMobile.current ? 500 : 700
 
   return (
     <div ref={ref} className={className}>
@@ -373,7 +342,7 @@ export function StaggerContainer({
           style={{ 
             transform: visibleIndices.has(index) ? 'translateY(0)' : `translateY(${translateValue * 4}px)`,
             transitionDuration: `${duration}ms`,
-            transitionDelay: prefersReducedMotion ? '0ms' : `${index * (isMobile ? Math.min(staggerDelay, 60) : staggerDelay)}ms`,
+            transitionDelay: prefersReducedMotion.current ? '0ms' : `${index * (isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay)}ms`,
             willChange: visibleIndices.has(index) ? 'auto' : 'transform, opacity'
           }}
         >

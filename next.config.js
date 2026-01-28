@@ -7,7 +7,9 @@ const nextConfig = {
   
   // Optimize package imports for better tree-shaking
   experimental: {
-    optimizePackageImports: ['react-icons'],
+    optimizePackageImports: ['react-icons', 'react-icons/fa'],
+    // Enable more aggressive code splitting
+    optimizeCss: true,
   },
   
   // Performance optimizations

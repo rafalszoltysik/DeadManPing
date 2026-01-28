@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
       if (existingProfileCheck) {
         // Profile exists, so user exists but password is wrong
         return NextResponse.json(
-          { error: 'Nieprawidłowe hasło. Sprawdź hasło lub użyj opcji "Zapomniałem hasła".' },
+          { error: 'Incorrect password. Please check your password or use the "Forgot password" option.' },
           { status: 401 }
         )
       } else {
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
         // Note: There's a small edge case where user exists in auth but not in profiles,
         // but this is rare and will be handled by creating profile on successful login
         return NextResponse.json(
-          { error: 'Nie ma takiego konta. Sprawdź adres email lub utwórz nowe konto.' },
+          { error: 'No account found. Please check your email address or create a new account.' },
           { status: 401 }
         )
       }

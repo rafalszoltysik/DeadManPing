@@ -1,22 +1,40 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { AnimatedItem } from '@/components/AnimatedSection'
 
-interface ContactFormProps {
-  initialEmail: string | null
-}
-
-export function ContactForm({ initialEmail }: ContactFormProps) {
+export function ContactForm() {
   const [email, setEmail] = useState('')
+  const [userEmail, setUserEmail] = useState<string | null>(null)
   const [subject, setSubject] = useState('')
   const [message, setMessage] = useState('')
   const [honeypot, setHoneypot] = useState('') // Honeypot field for spam protection
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  const isLoggedIn = !!initialEmail
+  const [isLoadingUser, setIsLoadingUser] = useState(true)
+  const isLoggedIn = !!userEmail
+
+  // Fetch user email client-side after mount
+  useEffect(() => {
+    const fetchUserEmail = async () => {
+      try {
+        const response = await fetch('/api/user/email')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.email) {
+            setUserEmail(data.email)
+          }
+        }
+      } catch (err) {
+        // Silently fail - user can still use the form
+      } finally {
+        setIsLoadingUser(false)
+      }
+    }
+
+    fetchUserEmail()
+  }, [])
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -164,133 +182,121 @@ export function ContactForm({ initialEmail }: ContactFormProps) {
         />
       </div>
 
-      <AnimatedItem delay={200} direction="up" duration={700}>
-        {!isLoggedIn && (
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email Address <span className="text-error">*</span>
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your.email@example.com"
-              required
-              maxLength={254}
-              className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              We'll use this email to respond to your inquiry.
-            </p>
-          </div>
-        )}
-
-        {isLoggedIn && initialEmail && (
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={initialEmail}
-              disabled
-              className="w-full px-3 py-2 border border-input rounded-lg bg-muted opacity-50 cursor-not-allowed"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              We'll respond to your account email address.
-            </p>
-          </div>
-        )}
-      </AnimatedItem>
-
-      <AnimatedItem delay={300} direction="up" duration={700}>
+      {!isLoggedIn && !isLoadingUser && (
         <div>
-          <label htmlFor="subject" className="block text-sm font-medium mb-2">
-            Subject <span className="text-error">*</span>
+          <label htmlFor="email" className="block text-sm font-medium mb-2">
+            Email Address <span className="text-error">*</span>
           </label>
           <input
-            id="subject"
-            type="text"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-            placeholder="What can we help you with?"
-            maxLength={200}
-            minLength={3}
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="your.email@example.com"
             required
+            maxLength={254}
             className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
           />
           <p className="mt-1 text-xs text-muted-foreground">
-            {subject.length}/200 characters (minimum 3)
+            We'll use this email to respond to your inquiry.
           </p>
         </div>
-      </AnimatedItem>
+      )}
 
-      <AnimatedItem delay={400} direction="up" duration={700}>
+      {isLoggedIn && userEmail && (
         <div>
-          <label htmlFor="message" className="block text-sm font-medium mb-2">
-            Message <span className="text-error">*</span>
+          <label htmlFor="email" className="block text-sm font-medium mb-2">
+            Email Address
           </label>
-          <textarea
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Please describe your question or issue in detail..."
-            rows={6}
-            maxLength={5000}
-            minLength={10}
-            required
-            className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30 resize-y"
+          <input
+            id="email"
+            type="email"
+            value={userEmail}
+            disabled
+            className="w-full px-3 py-2 border border-input rounded-lg bg-muted opacity-50 cursor-not-allowed"
           />
           <p className="mt-1 text-xs text-muted-foreground">
-            {message.length}/5000 characters (minimum 10)
+            We'll respond to your account email address.
           </p>
         </div>
-      </AnimatedItem>
+      )}
 
-      <AnimatedItem delay={500} direction="up" duration={700}>
-        {error && (
-          <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-fade-in">
-            {error}
-          </div>
-        )}
-
-        {success && (
-          <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-fade-in">
-            Your message has been sent successfully. We will get back to you soon{isLoggedIn && initialEmail ? ` at ${initialEmail}` : email ? ` at ${email}` : ''}.
-          </div>
-        )}
-      </AnimatedItem>
-
-      <AnimatedItem delay={600} direction="up" duration={700}>
-        <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
-          <button
-            type="submit"
-            disabled={loading || !subject.trim() || !message.trim() || (!isLoggedIn && !email.trim())}
-            className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-smooth hover-lift active:scale-95"
-          >
-            {loading ? 'Sending...' : 'Send Message'}
-          </button>
-        </div>
-
-        <p className="text-xs text-muted-foreground mt-4">
-          Your message will be sent to our support inbox. We'll get back to you as soon as possible.
+      <div>
+        <label htmlFor="subject" className="block text-sm font-medium mb-2">
+          Subject <span className="text-error">*</span>
+        </label>
+        <input
+          id="subject"
+          type="text"
+          value={subject}
+          onChange={(e) => setSubject(e.target.value)}
+          placeholder="What can we help you with?"
+          maxLength={200}
+          minLength={3}
+          required
+          className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          {subject.length}/200 characters (minimum 3)
         </p>
-      </AnimatedItem>
+      </div>
+
+      <div>
+        <label htmlFor="message" className="block text-sm font-medium mb-2">
+          Message <span className="text-error">*</span>
+        </label>
+        <textarea
+          id="message"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Please describe your question or issue in detail..."
+          rows={6}
+          maxLength={5000}
+          minLength={10}
+          required
+          className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent transition-smooth focus:scale-[1.01] hover:border-primary/30 resize-y"
+        />
+        <p className="mt-1 text-xs text-muted-foreground">
+          {message.length}/5000 characters (minimum 10)
+        </p>
+      </div>
+
+      {error && (
+        <div className="bg-error/10 border border-error/20 text-error px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-fade-in">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="bg-success/10 border border-success/20 text-success px-3 sm:px-4 py-2 sm:py-3 rounded-lg text-xs sm:text-sm animate-fade-in">
+          Your message has been sent successfully. We will get back to you soon{isLoggedIn && userEmail ? ` at ${userEmail}` : email ? ` at ${email}` : ''}.
+        </div>
+      )}
+
+      <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+        <button
+          type="submit"
+          disabled={loading || isLoadingUser || !subject.trim() || !message.trim() || (!isLoggedIn && !email.trim())}
+          className="w-full sm:w-auto px-3 sm:px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-smooth hover-lift active:scale-95"
+        >
+          {loading ? 'Sending...' : 'Send Message'}
+        </button>
+      </div>
+
+      <p className="text-xs text-muted-foreground mt-4">
+        Your message will be sent to our support inbox. We'll get back to you as soon as possible.
+      </p>
 
       {isLoggedIn && (
-        <AnimatedItem delay={700} direction="up" duration={700}>
-          <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-sm text-muted-foreground">
-              You can also access the contact form from your{' '}
-              <Link href="/dashboard/settings#support" className="text-primary hover:underline">
-                dashboard settings
-              </Link>
-              .
-            </p>
-          </div>
-        </AnimatedItem>
+        <div className="mt-6 pt-6 border-t border-border">
+          <p className="text-sm text-muted-foreground">
+            You can also access the contact form from your{' '}
+            <Link href="/dashboard/settings#support" className="text-primary hover:underline">
+              dashboard settings
+            </Link>
+            .
+          </p>
+        </div>
       )}
     </form>
   )
