@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, memo } from 'react'
 
 type PayloadField = {
   name: string
@@ -23,7 +23,7 @@ interface MonitorFormDemoProps {
   onChange?: (data: MonitorFormData) => void
 }
 
-export function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
+export const MonitorFormDemo = memo(function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
   const [name, setName] = useState('Daily Backup')
   const [scheduleType, setScheduleType] = useState<'interval' | 'cron'>('interval')
   const [intervalValue, setIntervalValue] = useState(24)
@@ -640,4 +640,4 @@ export function MonitorFormDemo({ onChange }: MonitorFormDemoProps) {
       </div>
     </div>
   )
-}
+})

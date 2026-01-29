@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, memo, useCallback } from 'react'
 import Link from 'next/link'
 import type { ReactElement } from 'react'
 
@@ -15,10 +15,10 @@ interface FAQAccordionProps {
   startIndex: number
 }
 
-export function FAQAccordion({ items, startIndex }: FAQAccordionProps) {
+export const FAQAccordion = memo(function FAQAccordion({ items, startIndex }: FAQAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set())
 
-  const toggleItem = (index: number) => {
+  const toggleItem = useCallback((index: number) => {
     setOpenItems(prev => {
       const next = new Set(prev)
       if (next.has(index)) {
@@ -28,7 +28,7 @@ export function FAQAccordion({ items, startIndex }: FAQAccordionProps) {
       }
       return next
     })
-  }
+  }, [])
 
   return (
     <div className="space-y-4">
@@ -103,5 +103,5 @@ export function FAQAccordion({ items, startIndex }: FAQAccordionProps) {
       })}
     </div>
   )
-}
+})
 

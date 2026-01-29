@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo, useCallback } from 'react'
 import type { BlogPostMetadata } from '@/lib/blog-metadata'
 
 interface BlogSearchProps {
@@ -17,9 +17,13 @@ const CATEGORIES = [
   'General'
 ] as const
 
-export function BlogSearch({ articles, onFilterChange }: BlogSearchProps) {
+export const BlogSearch = memo(function BlogSearch({ articles, onFilterChange }: BlogSearchProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('All')
+
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category)
+  }, [])
 
   const filteredArticles = useMemo(() => {
     let filtered = articles
@@ -97,7 +101,7 @@ export function BlogSearch({ articles, onFilterChange }: BlogSearchProps) {
         {CATEGORIES.map((category) => (
           <button
             key={category}
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => handleCategoryChange(category)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               selectedCategory === category
                 ? 'bg-primary text-primary-foreground shadow-md'
@@ -130,7 +134,7 @@ export function BlogSearch({ articles, onFilterChange }: BlogSearchProps) {
       </div>
     </div>
   )
-}
+})
 
 export function useFilteredArticles(
   articles: Array<{ slug: string; metadata: BlogPostMetadata }>,

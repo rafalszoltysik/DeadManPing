@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { memo } from 'react'
 import type { BlogPostMetadata } from '@/lib/blog-metadata'
 
 interface BlogCardProps {
@@ -6,7 +7,7 @@ interface BlogCardProps {
   metadata: BlogPostMetadata
 }
 
-export function BlogCard({ slug, metadata }: BlogCardProps) {
+export const BlogCard = memo(function BlogCard({ slug, metadata }: BlogCardProps) {
   // Extract category from keywords or slug
   const getCategory = () => {
     if (slug.includes('backup')) return 'Backup Monitoring'
@@ -57,5 +58,5 @@ export function BlogCard({ slug, metadata }: BlogCardProps) {
       </div>
     </Link>
   )
-}
+})
 

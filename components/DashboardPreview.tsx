@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback, memo } from 'react'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, WarningIcon } from './Icons'
 import { StaggerContainer } from './AnimatedSection'
 import { CTAButton } from './CTAButton'
@@ -67,7 +67,7 @@ function getStatusLabel(status: string) {
   }
 }
 
-export function DashboardPreview() {
+export const DashboardPreview = memo(function DashboardPreview() {
   const containerRef = useRef<HTMLDivElement>(null)
   const [showTitle, setShowTitle] = useState(false)
   const [showSubtitle, setShowSubtitle] = useState(false)
@@ -76,15 +76,16 @@ export function DashboardPreview() {
   const [mounted, setMounted] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
 
+  const checkMobile = useCallback(() => {
+    setIsMobile(window.innerWidth < 768)
+  }, [])
+
   useEffect(() => {
     setMounted(true)
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
     checkMobile()
     window.addEventListener('resize', checkMobile)
     return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  }, [checkMobile])
 
   useEffect(() => {
     if (!mounted || !containerRef.current || hasStartedAnimation.current) return
@@ -236,5 +237,5 @@ export function DashboardPreview() {
       </div>
     </div>
   )
-}
+})
 
