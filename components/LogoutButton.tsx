@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { logger } from '@/lib/logger'
 
 interface LogoutButtonProps {
   variant?: 'default' | 'compact'
@@ -26,17 +27,17 @@ export function LogoutButton({ variant = 'default' }: LogoutButtonProps) {
       } catch (e) {
         // If response is not JSON, try to get text
         const text = await response.text()
-        console.error('Logout response is not JSON:', text)
+        logger.error('Logout response is not JSON:', text)
         responseData = { success: false, error: 'Invalid response format' }
       }
 
       if (response.ok && responseData.success) {
-        console.log('Logout successful')
+        logger.log('Logout successful')
         // Force a hard refresh to clear any cached state
         window.location.href = '/'
       } else {
         const errorMessage = responseData.error || `HTTP ${response.status}: ${response.statusText}`
-        console.error('Logout failed:', {
+        logger.error('Logout failed:', {
           status: response.status,
           statusText: response.statusText,
           response: responseData,
@@ -53,7 +54,7 @@ export function LogoutButton({ variant = 'default' }: LogoutButtonProps) {
         window.location.href = '/'
       }
     } catch (error) {
-      console.error('Logout fetch error:', {
+      logger.error('Logout fetch error:', {
         error,
         message: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined,

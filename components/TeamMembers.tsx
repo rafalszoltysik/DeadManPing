@@ -2,6 +2,7 @@
 
 import { useState, useEffect, memo } from 'react'
 import { useRouter } from 'next/navigation'
+import { getErrorMessage } from '@/lib/error-utils'
 
 interface Member {
   id: string
@@ -39,8 +40,8 @@ export const TeamMembers = memo(function TeamMembers({ workspaceId, subscription
       }
       const data = await response.json()
       setMembers(data.members || [])
-    } catch (err: any) {
-      setError(err.message || 'Failed to load members')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     }
   }
 
@@ -69,8 +70,8 @@ export const TeamMembers = memo(function TeamMembers({ workspaceId, subscription
 
       setInviteEmail('')
       await fetchMembers()
-    } catch (err: any) {
-      setError(err.message || 'Failed to add member')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       setInviting(false)
     }
@@ -96,8 +97,8 @@ export const TeamMembers = memo(function TeamMembers({ workspaceId, subscription
       }
 
       await fetchMembers()
-    } catch (err: any) {
-      setError(err.message || 'Failed to remove member')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       setRemoving(null)
     }

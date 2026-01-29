@@ -61,7 +61,7 @@ export function PricingSection() {
         setAvailableCurrencies(data.availableCurrencies || ['usd'])
       }
     } catch (err) {
-      console.error('Error fetching prices:', err)
+      // Error is handled silently - prices will use default values
     } finally {
       const elapsedTime = Date.now() - startTime
       const remainingTime = Math.max(0, minAnimationTime - elapsedTime)

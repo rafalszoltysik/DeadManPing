@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { formatPrice } from '@/lib/currency-detection'
+import { getErrorMessage } from '@/lib/error-utils'
 
 interface Plan {
   key: string
@@ -80,8 +81,8 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
       if (data.url) {
         window.location.href = data.url
       }
-    } catch (err: any) {
-      setError(err.message)
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
       setLoadingPlan(null)
     }
   }
@@ -107,8 +108,8 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
         setCurrency(data.currency || newCurrency)
         setAvailableCurrencies(data.availableCurrencies || ['usd'])
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to update currency')
+    } catch (err: unknown) {
+      setError(getErrorMessage(err))
     } finally {
       const elapsedTime = Date.now() - startTime
       const remainingTime = Math.max(0, minAnimationTime - elapsedTime)

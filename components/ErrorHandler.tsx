@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { logger } from '@/lib/logger'
 
 export function ErrorHandler() {
   useEffect(() => {
@@ -23,11 +24,9 @@ export function ErrorHandler() {
           errorCode = hashParams.get('error_code')
           errorDescription = hashParams.get('error_description')
           
-          if (process.env.NODE_ENV === 'development') {
-            console.log('ErrorHandler: Hash params:', { errorCode, errorDescription, hashString })
-          }
+          logger.debug('ErrorHandler: Hash params:', { errorCode, errorDescription, hashString })
         } catch (e) {
-          console.error('ErrorHandler: Failed to parse hash:', e)
+          logger.error('ErrorHandler: Failed to parse hash:', e)
         }
       }
       

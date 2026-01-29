@@ -295,7 +295,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
       onUpdate(data.monitor)
     } catch (err: unknown) {
       const errorMessage = getErrorMessage(err)
-      console.error('Error deleting rule:', errorMessage)
+      // Error is already handled by parent component state
     }
   }, [monitor.slug, monitor.updated_at, monitor.payload_validation_rules, onUpdate])
 

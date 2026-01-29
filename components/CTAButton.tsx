@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { captureCTAClicked } from '@/lib/posthog/client'
+import { logger } from '@/lib/logger'
 
 interface CTAButtonProps {
   children: React.ReactNode
@@ -32,7 +33,7 @@ export function CTAButton({ children, className = '' }: CTAButtonProps) {
         router.push('/auth/signup')
       }
     } catch (error) {
-      console.error('Error checking session:', error)
+      logger.error('Error checking session:', error)
       // W razie błędu, przekieruj do signup
       router.push('/auth/signup')
     }

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 
 interface PricingButtonProps {
   plan: 'starter' | 'pro' | 'team'
@@ -30,7 +31,7 @@ export function PricingButton({ plan, isPrimary = false, children }: PricingButt
         router.push('/auth/signup')
       }
     } catch (error) {
-      console.error('Error checking session:', error)
+      logger.error('Error checking session:', error)
       // W razie błędu, przekieruj do signup (bezpieczniejsze)
       router.push('/auth/signup')
     }

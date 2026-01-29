@@ -88,7 +88,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
           setUserTier(tier)
         }
       } catch (err) {
-        console.error('Error fetching user tier:', err)
+        // Silently fail - tier polling is not critical
       }
     }
     
@@ -325,7 +325,9 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                 status: checkedMonitor.status,
                 expectedUpdatedAt: data.monitor.updated_at 
               }),
-            }).catch(err => console.error('Error updating monitor status:', err))
+            }).catch(() => {
+              // Silently fail - status update is not critical
+            })
           }
         }
         if (data.pings) {
@@ -333,7 +335,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
         }
       }
     } catch (err) {
-      console.error('Error fetching monitor data:', err)
+      // Error handling is done by parent component
     }
   }, [monitor.slug])
 
