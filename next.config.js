@@ -1,5 +1,8 @@
 // Injected by Sentry
 const { withSentryConfig } = require('@sentry/nextjs')
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true',
+})
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -107,9 +110,10 @@ const nextConfig = {
 // Dynamic Sentry configuration based on environment
 const isProduction = process.env.NODE_ENV === 'production'
 
-// Wrap with Sentry
-module.exports = withSentryConfig(
-  nextConfig,
+// Wrap with Bundle Analyzer and Sentry
+module.exports = withBundleAnalyzer(
+  withSentryConfig(
+    nextConfig,
   {
     // Sentry options
     silent: true,
@@ -127,5 +131,6 @@ module.exports = withSentryConfig(
     // Sentry webpack plugin options
     hideSourceMaps: isProduction,
   }
+  )
 )
 

@@ -6,6 +6,7 @@ import type { PayloadField, PayloadValidationRules } from '@/lib/payload-validat
 import { InfoTooltip } from './Tooltip'
 import { InfoIcon } from './Icons'
 import { getErrorMessage } from '@/lib/error-utils'
+import { MAX_PAYLOAD_FIELDS, MAX_FIELD_NAME_LENGTH } from '@/lib/constants'
 
 interface MonitorPayloadValidationProps {
   monitor: Monitor
@@ -45,6 +46,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
   const [editingFieldIndex, setEditingFieldIndex] = useState<number | null>(null)
   const [originalEditingField, setOriginalEditingField] = useState<{ name: string; rule: string } | null>(null)
   const [payloadFields, setPayloadFields] = useState<Array<{
+    id: string
     name: string
     type: 'number' | 'boolean' | 'string'
     rule: '>' | '<' | '>=' | '<=' | '==' | '!='
@@ -57,7 +59,8 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
   // Load existing payload validation rules when monitor changes
   useEffect(() => {
     if (monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
-      const fields = monitor.payload_validation_rules.fields.map((field: PayloadField) => ({
+      const fields = monitor.payload_validation_rules.fields.map((field: PayloadField, index: number) => ({
+        id: `field-${field.name}-${index}-${Date.now()}`,
         name: field.name || '',
         type: field.type || 'number',
         rule: field.rule || '>',
@@ -76,6 +79,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
       const field = monitor.payload_validation_rules.fields[editingFieldIndex]
       if (field) {
         const fieldData = {
+          id: `field-${field.name}-${editingFieldIndex}-${Date.now()}`,
           name: field.name || '',
           type: field.type || 'number',
           rule: field.rule || '>',
@@ -304,6 +308,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
     const field = monitor.payload_validation_rules.fields[index]
     setEditingFieldIndex(index)
     setPayloadFields([{
+      id: `field-${field.name}-${index}-${Date.now()}`,
       name: field.name,
       type: field.type,
       rule: field.rule,
@@ -332,6 +337,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
               setEditingFieldIndex(null)
               setOriginalEditingField(null)
               setPayloadFields([{
+                id: `field-new-${Date.now()}`,
                 name: '',
                 type: 'number',
                 rule: '>',
@@ -370,8 +376,9 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
                 <button
                   type="button"
                   onClick={() => {
-                    if (payloadFields.length < 5) {
+                    if (payloadFields.length < MAX_PAYLOAD_FIELDS) {
                       setPayloadFields([...payloadFields, {
+                        id: `field-new-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                         name: '',
                         type: 'number',
                         rule: '>',
@@ -380,15 +387,15 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
                       }])
                     }
                   }}
-                  disabled={payloadFields.length >= 5}
+                  disabled={payloadFields.length >= MAX_PAYLOAD_FIELDS}
                   className="text-xs px-2 py-1 border border-border rounded hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  + Add Field {payloadFields.length >= 5 ? '(max 5)' : ''}
+                  + Add Field {payloadFields.length >= MAX_PAYLOAD_FIELDS ? `(max ${MAX_PAYLOAD_FIELDS})` : ''}
                 </button>
               )}
             </div>
             <p className="text-xs text-muted-foreground mb-3">
-              Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum 5 fields per monitor. Field names must be 100 characters or less.
+              Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum {MAX_PAYLOAD_FIELDS} fields per monitor. Field names must be {MAX_FIELD_NAME_LENGTH} characters or less.
             </p>
             
             {payloadFields.length === 0 ? (
@@ -398,7 +405,7 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
             ) : (
               <div className="space-y-4">
                 {payloadFields.map((field, index) => (
-                  <div key={index} className="bg-card border border-border rounded-lg p-4 sm:p-5 space-y-4">
+                  <div key={field.id} className="bg-card border border-border rounded-lg p-4 sm:p-5 space-y-4">
                     <div className="flex items-center justify-between pb-3 border-b border-border">
                       <h4 className="text-sm font-semibold">Field {index + 1}</h4>
                       <button
@@ -616,7 +623,8 @@ export const MonitorPayloadValidation = memo(function MonitorPayloadValidation({
                 setPayloadError(null)
                 setPayloadSuccess(false)
                 if (monitor.payload_validation_rules && monitor.payload_validation_rules.fields) {
-                  const fields = monitor.payload_validation_rules.fields.map((field: PayloadField) => ({
+                  const fields = monitor.payload_validation_rules.fields.map((field: PayloadField, index: number) => ({
+                    id: `field-${field.name}-${index}-${Date.now()}`,
                     name: field.name || '',
                     type: field.type || 'number',
                     rule: field.rule || '>',

@@ -125,7 +125,7 @@ export function HowItWorksSection() {
     intervalValue: 24,
     intervalUnit: 'hours',
     payloadFields: [
-      { name: 'count', type: 'number', rule: '>=', value: '1', severity: 'error' },
+      { id: `field-count-${Date.now()}`, name: 'count', type: 'number', rule: '>=', value: '1', severity: 'error' },
     ],
   })
 

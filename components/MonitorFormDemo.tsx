@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'
+import { MAX_PAYLOAD_FIELDS } from '@/lib/constants'
 
 type PayloadField = {
+  id: string
   name: string
   type: 'number' | 'boolean' | 'string'
   rule: '>' | '<' | '>=' | '<=' | '==' | '!='
@@ -36,7 +38,7 @@ export const MonitorFormDemo = memo(function MonitorFormDemo({ onChange }: Monit
   const [maxExecutionTimeEnabled, setMaxExecutionTimeEnabled] = useState(false)
   const [showPayloadValidation, setShowPayloadValidation] = useState(false)
   const [payloadFields, setPayloadFields] = useState<PayloadField[]>([
-    { name: 'count', type: 'number', rule: '>=', value: '1', severity: 'error' },
+    { id: `field-${Date.now()}`, name: 'count', type: 'number', rule: '>=', value: '1', severity: 'error' },
   ])
 
   // Notify parent when form data changes
@@ -467,8 +469,9 @@ export const MonitorFormDemo = memo(function MonitorFormDemo({ onChange }: Monit
                 <button
                   type="button"
                   onClick={() => {
-                    if (payloadFields.length < 5) {
+                    if (payloadFields.length < MAX_PAYLOAD_FIELDS) {
                       const newFields = [...payloadFields, {
+                        id: `field-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
                         name: '',
                         type: 'number' as const,
                         rule: '>' as const,
@@ -479,14 +482,14 @@ export const MonitorFormDemo = memo(function MonitorFormDemo({ onChange }: Monit
                       updateFormData({ payloadFields: newFields })
                     }
                   }}
-                  disabled={payloadFields.length >= 5}
+                  disabled={payloadFields.length >= MAX_PAYLOAD_FIELDS}
                   className="text-xs px-3 py-2 sm:py-1 border border-border rounded hover:bg-accent transition-smooth disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                 >
-                  + Add Field {payloadFields.length >= 5 ? '(max 5)' : ''}
+                  + Add Field {payloadFields.length >= MAX_PAYLOAD_FIELDS ? `(max ${MAX_PAYLOAD_FIELDS})` : ''}
                 </button>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum 5 fields per monitor.
+                Configure fields to validate in your payload. Only declared fields are processed, rest is ignored. Maximum {MAX_PAYLOAD_FIELDS} fields per monitor.
               </p>
               
               {payloadFields.length === 0 ? (
@@ -496,7 +499,7 @@ export const MonitorFormDemo = memo(function MonitorFormDemo({ onChange }: Monit
               ) : (
                 <div className="space-y-3">
                   {payloadFields.map((field, index) => (
-                    <div key={index} className="bg-card border border-input rounded-lg p-3 space-y-2">
+                    <div key={field.id} className="bg-card border border-input rounded-lg p-3 space-y-2">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-medium text-muted-foreground">Field {index + 1}</span>
                         <button
