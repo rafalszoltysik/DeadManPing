@@ -337,27 +337,32 @@ export function StaggerContainer({
   // Smaller translate on mobile
   const translateValue = isMobile.current ? 3 : 6
   const duration = isMobile.current ? 500 : 700
+  const calculatedStaggerDelay = isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay
+  const baseTransitionClass = 'transition-all ease-[cubic-bezier(0.16,1,0.3,1)]'
 
   return (
     <div ref={ref} className={className}>
-      {Array.isArray(children) ? children.map((child, index) => (
-        <div
-          key={index}
-          className={`transition-all ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            visibleIndices.has(index)
-              ? 'opacity-100'
-              : 'opacity-0'
-          }`}
-          style={{ 
-            transform: visibleIndices.has(index) ? 'translateY(0)' : `translateY(${translateValue * 4}px)`,
-            transitionDuration: `${duration}ms`,
-            transitionDelay: prefersReducedMotion.current ? '0ms' : `${index * (isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay)}ms`,
-            willChange: visibleIndices.has(index) ? 'auto' : 'transform, opacity'
-          }}
-        >
-          {child}
-        </div>
-      )) : children}
+      {Array.isArray(children) ? children.map((child, index) => {
+        const isVisible = visibleIndices.has(index)
+        const delay = prefersReducedMotion.current ? '0ms' : `${index * calculatedStaggerDelay}ms`
+        const translateY = isVisible ? 'translateY(0)' : `translateY(${translateValue * 4}px)`
+        const willChange = isVisible ? 'auto' : 'transform, opacity'
+        
+        return (
+          <div
+            key={index}
+            className={`${baseTransitionClass} ${isVisible ? 'opacity-100' : 'opacity-0'}`}
+            style={{ 
+              transform: translateY,
+              transitionDuration: `${duration}ms`,
+              transitionDelay: delay,
+              willChange
+            }}
+          >
+            {child}
+          </div>
+        )
+      }) : children}
     </div>
   )
 }

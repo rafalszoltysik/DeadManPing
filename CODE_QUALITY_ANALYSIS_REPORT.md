@@ -487,10 +487,27 @@ Wszystkie zadania z Fazy 1 zostały zrealizowane:
 - **console.log/error/warn w komponentach**: Z 13 do 0 (wszystkie zastąpione przez logger lub usunięte)
 - **Error handling**: Wszystkie `catch (err: any)` zastąpione przez `catch (err: unknown)` z `getErrorMessage`
 
-### Następne kroki (Faza 3):
-- ⏳ Poprawić użycie `as any` w MonitorDetail.tsx dla curlCommands (7 wystąpień - wymaga poprawy typów)
-- ⏳ Zoptymalizować inline object/array creation w JSX (MonitorDetail, MonitorFormDemo, inne)
+10. ✅ **Poprawa typów dla curlCommands w MonitorDetail.tsx**
+    - Zdefiniowano discriminated union type `CurlCommands` z 4 wariantami
+    - Zdefiniowano type `PlatformCommands` dla platform-specific commands
+    - Zastąpiono wszystkie 7 użyć `as any` przez proper type guards
+    - Dodano return type `CurlCommands` dla `buildCurlCommand()`
+    - **Redukcja**: Z 7 użyć `as any` do 0 w MonitorDetail.tsx
+
+11. ✅ **Optymalizacja inline object/array creation w JSX**
+    - `components/AnimatedSection.tsx`: Wyciągnięto obliczenia poza map, zoptymalizowano style object creation
+    - Zmniejszono inline object creation w StaggerContainer przez wyciągnięcie zmiennych przed map
+    - **Wpływ**: Redukcja niepotrzebnych re-renderów w animowanych sekcjach
+
+### Statystyki po Fazie 3 (częściowo):
+- **Użycie `as any` w komponentach**: Z 7 do 0 (wszystkie poprawione!)
+- **console.log/error/warn w komponentach**: 0 (wszystkie zastąpione)
+- **Error handling**: 100% używa `getErrorMessage` z `lib/error-utils`
+- **Type safety**: Wszystkie curlCommands mają proper types (discriminated union)
+
+### Następne kroki (Faza 3 - kontynuacja):
 - ⏳ Dodać React.memo dla komponentów które mogą skorzystać (jeśli jeszcze nie mają)
 - ⏳ Dodać useCallback dla funkcji przekazywanych jako props w pozostałych komponentach
 - ⏳ Analiza bundle size z @next/bundle-analyzer
+- ⏳ Dodać Suspense boundaries dla async Server Components
 

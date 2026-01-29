@@ -48,6 +48,41 @@ function getStatusColor(status: string) {
   }
 }
 
+// Types for curl commands
+type PlatformCommands = {
+  windows: string
+  unix: string
+  default: string
+}
+
+type CurlCommands =
+  | {
+      type: 'start-stop-payload'
+      start: PlatformCommands
+      complete: PlatformCommands
+      examplePayload: Record<string, unknown> | null
+    }
+  | {
+      type: 'start-stop'
+      start: PlatformCommands
+      complete: PlatformCommands
+      examplePayload: null
+    }
+  | {
+      type: 'payload'
+      windows: string
+      unix: string
+      default: string
+      examplePayload: Record<string, unknown> | null
+    }
+  | {
+      type: 'simple'
+      windows: string
+      unix: string
+      default: string
+      examplePayload: null
+    }
+
 function getStatusLabel(status: string) {
   switch (status) {
     case 'healthy':
@@ -143,7 +178,7 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
   const examplePayload = buildExamplePayload()
 
   // Build curl command based on monitoring mode
-  const buildCurlCommand = () => {
+  const buildCurlCommand = (): CurlCommands => {
     if (hasStartStop && hasPayloadFields) {
       // Start/Stop with Payload
       const payloadJson = JSON.stringify(examplePayload)
@@ -238,16 +273,13 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
   const getDisplayCommand = (): string => {
     if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
       if (showStartStopExample) {
-        // Start command - check if it's an object with platform-specific versions
-        if (typeof curlCommands.start === 'object' && curlCommands.start !== null) {
-          return (curlCommands.start as any)[selectedPlatform] || (curlCommands.start as any).default || ''
-        }
-        return curlCommands.start || ''
+        // Start command
+        return curlCommands.start[selectedPlatform] || curlCommands.start.default || ''
       }
       // Complete command
-      return curlCommands.complete?.[selectedPlatform] || curlCommands.complete?.default || ''
+      return curlCommands.complete[selectedPlatform] || curlCommands.complete.default || ''
     } else if (curlCommands.type === 'payload' || curlCommands.type === 'simple') {
-      return (curlCommands as any)[selectedPlatform] || curlCommands.default || ''
+      return curlCommands[selectedPlatform] || curlCommands.default || ''
     }
     return ''
   }
@@ -613,10 +645,8 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                   </div>
                 </div>
                 <CodeBlock
-                  code={(curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') && (curlCommands as any).start 
-                    ? (typeof (curlCommands as any).start === 'object' && (curlCommands as any).start !== null
-                        ? ((curlCommands as any).start as any)[selectedPlatform] || ((curlCommands as any).start as any).default || ''
-                        : (curlCommands as any).start)
+                  code={curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload'
+                    ? curlCommands.start[selectedPlatform] || curlCommands.start.default || ''
                     : ''}
                   language="bash"
                 />
@@ -640,11 +670,10 @@ export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jo
                 <CodeBlock
                   code={(() => {
                     if (curlCommands.type === 'start-stop' || curlCommands.type === 'start-stop-payload') {
-                      return curlCommands.complete?.[selectedPlatform] || curlCommands.complete?.default || ''
-                    } else if (curlCommands.type === 'payload') {
-                      return (curlCommands as any)[selectedPlatform] || curlCommands.default || ''
-                    } else if (curlCommands.type === 'simple') {
-                      return curlCommands.default || ''
+                      return curlCommands.complete[selectedPlatform] || curlCommands.complete.default || ''
+                    }
+                    if (curlCommands.type === 'payload' || curlCommands.type === 'simple') {
+                      return curlCommands[selectedPlatform] || curlCommands.default || ''
                     }
                     return ''
                   })()}
