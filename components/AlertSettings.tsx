@@ -162,8 +162,8 @@ export const AlertSettings = React.memo(function AlertSettings({
     }
 
     // Update profile
-    const { error: updateError } = await supabase
-      .from('profiles')
+    const { error: updateError } = await (supabase
+      .from('profiles') as any)
       .update(updateData)
       .eq('id', profileId)
 

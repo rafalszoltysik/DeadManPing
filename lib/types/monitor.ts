@@ -28,11 +28,11 @@ export interface Monitor {
 export interface Ping {
   id: string
   monitor_id: string
-  status: PingStatus
+  status: PingStatus | string // Allow string for database compatibility
   message: string | null
   duration_ms: number | null
   metadata: Record<string, any> | null
-  received_at: string
+  received_at: string // Always set in conversion from database
 }
 
 export interface JobRun {

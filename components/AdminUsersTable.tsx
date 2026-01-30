@@ -7,10 +7,10 @@ interface User {
   id: string
   email: string
   is_admin: boolean
-  subscription_tier: string
-  subscription_status: string
-  created_at: string
-  email_verified: boolean
+  subscription_tier: string | null
+  subscription_status: string | null
+  created_at: string | null
+  email_verified: boolean | null
 }
 
 interface AdminUsersTableProps {
@@ -172,8 +172,12 @@ export function AdminUsersTable({ initialUsers, initialPagination }: AdminUsersT
                             <span className="text-muted-foreground">-</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-sm text-foreground capitalize">{user.subscription_tier}</td>
-                        <td className="px-4 py-3 text-sm text-foreground capitalize">{user.subscription_status}</td>
+                        <td className="px-4 py-3 text-sm text-foreground capitalize">
+                          {user.subscription_tier || '-'}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-foreground capitalize">
+                          {user.subscription_status || '-'}
+                        </td>
                         <td className="px-4 py-3 text-sm">
                           {user.email_verified ? (
                             <span className="text-green-600 dark:text-green-400">✓</span>
@@ -182,7 +186,9 @@ export function AdminUsersTable({ initialUsers, initialPagination }: AdminUsersT
                           )}
                         </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(user.created_at), { addSuffix: true })}
+                          {user.created_at
+                            ? formatDistanceToNow(new Date(user.created_at), { addSuffix: true })
+                            : '-'}
                         </td>
                         <td className="px-4 py-3 text-sm">
                           <div className="flex gap-2">

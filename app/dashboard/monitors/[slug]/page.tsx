@@ -30,20 +30,41 @@ export default async function MonitorDetailPage(props: {
   const monitor = accessResult.monitor
 
   const supabaseAdmin = getSupabaseAdmin()
-  const { data: pings } = await supabaseAdmin
+  const { data: pingsData } = await supabaseAdmin
     .from('pings')
     .select('*')
     .eq('monitor_id', monitor.id)
     .order('received_at', { ascending: false })
     .limit(50)
 
+  // Convert database types to component types
+  const pings = (pingsData || []).map(ping => ({
+    ...ping,
+    status: ping.status as 'ok' | 'fail', // Type assertion - database constraint ensures 'ok' | 'fail'
+    received_at: ping.received_at || new Date().toISOString(), // Ensure received_at is not null
+    metadata: (ping.metadata && typeof ping.metadata === 'object' && !Array.isArray(ping.metadata))
+      ? ping.metadata as Record<string, any>
+      : null, // Convert Json to Record<string, any> | null
+  }))
+
   // Get job runs
-  const { data: jobRuns } = await supabaseAdmin
+  const { data: jobRunsData } = await supabaseAdmin
     .from('job_runs')
     .select('*')
     .eq('monitor_id', monitor.id)
     .order('started_at', { ascending: false })
     .limit(50)
+
+  // Convert database types to component types
+  const jobRuns = (jobRunsData || []).map(run => ({
+    ...run,
+    status: run.status as 'running' | 'completed' | 'timeout' | 'failed', // Type assertion - database constraint ensures these values
+    metadata: (run.metadata && typeof run.metadata === 'object' && !Array.isArray(run.metadata))
+      ? run.metadata as Record<string, any>
+      : null, // Convert Json to Record<string, any> | null
+    created_at: run.created_at || new Date().toISOString(), // Ensure created_at is not null
+    updated_at: run.updated_at || new Date().toISOString(), // Ensure updated_at is not null
+  }))
 
   // Get user tier
   let userTier = 'free'

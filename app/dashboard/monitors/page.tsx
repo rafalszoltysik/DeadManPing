@@ -164,9 +164,7 @@ export default async function MonitorsPage() {
           </div>
         </AnimatedSection>
       ) : (
-        <AnimatedSection delay={300} direction="up" duration={800}>
-          <MonitorList monitors={sortedMonitors} />
-        </AnimatedSection>
+        <MonitorList monitors={sortedMonitors} />
       )}
     </div>
   )

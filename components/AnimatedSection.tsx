@@ -62,15 +62,22 @@ export function AnimatedSection({
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const hasAnimated = useRef(false)
-  const prefersReducedMotion = useRef(getPrefersReducedMotion())
-  const isMobile = useRef(getIsMobile())
+  // Use state to ensure SSR/CSR consistency - default to desktop values
+  const [isMobile, setIsMobile] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  
+  useEffect(() => {
+    // Set actual values after mount to avoid hydration mismatch
+    setIsMobile(getIsMobile())
+    setPrefersReducedMotion(getPrefersReducedMotion())
+  }, [])
 
   useEffect(() => {
     const element = ref.current
     if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion.current) {
+    if (prefersReducedMotion) {
       setIsVisible(true)
       hasAnimated.current = true
       return
@@ -114,13 +121,13 @@ export function AnimatedSection({
         observedElements.delete(observedElement)
       }
     }
-  }, [delay, duration])
+  }, [delay, duration, prefersReducedMotion])
 
   const getTransformStyle = () => {
     if (isVisible) return { transform: 'translateY(0) translateX(0) scale(1)' }
     
     // Smaller transforms on mobile
-    const translateValue = isMobile.current ? 4 : 8
+    const translateValue = isMobile ? 4 : 8
     
     switch (direction) {
       case 'up':
@@ -139,7 +146,7 @@ export function AnimatedSection({
   }
 
   // Shorter duration on mobile or if reduced motion
-  const actualDuration = prefersReducedMotion.current ? 0 : (isMobile.current ? Math.min(duration, 600) : duration)
+  const actualDuration = prefersReducedMotion ? 0 : (isMobile ? Math.min(duration, 600) : duration)
 
   return (
     <div
@@ -148,7 +155,8 @@ export function AnimatedSection({
       style={{ 
         ...getTransformStyle(),
         transitionDuration: `${actualDuration}ms`,
-        willChange: isVisible ? 'auto' : 'transform, opacity'
+        willChange: isVisible ? 'auto' : 'transform, opacity',
+        visibility: isVisible ? 'visible' : 'hidden'
       }}
     >
       {children}
@@ -172,15 +180,22 @@ export function AnimatedItem({
   const ref = useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
   const hasAnimated = useRef(false)
-  const prefersReducedMotion = useRef(getPrefersReducedMotion())
-  const isMobile = useRef(getIsMobile())
+  // Use state to ensure SSR/CSR consistency - default to desktop values
+  const [isMobile, setIsMobile] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  
+  useEffect(() => {
+    // Set actual values after mount to avoid hydration mismatch
+    setIsMobile(getIsMobile())
+    setPrefersReducedMotion(getPrefersReducedMotion())
+  }, [])
 
   useEffect(() => {
     const element = ref.current
     if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion.current) {
+    if (prefersReducedMotion) {
       setIsVisible(true)
       hasAnimated.current = true
       return
@@ -224,13 +239,13 @@ export function AnimatedItem({
         observedElements.delete(observedElement)
       }
     }
-  }, [delay, duration])
+  }, [delay, duration, prefersReducedMotion])
 
   const getTransformStyle = () => {
     if (isVisible) return { transform: 'translateY(0) translateX(0) scale(1)' }
     
     // Smaller transforms on mobile
-    const translateValue = isMobile.current ? 3 : 6
+    const translateValue = isMobile ? 3 : 6
     
     switch (direction) {
       case 'up':
@@ -249,8 +264,8 @@ export function AnimatedItem({
   }
 
   // Shorter duration on mobile or if reduced motion
-  const actualDuration = prefersReducedMotion.current ? 0 : (isMobile.current ? Math.min(duration, 500) : duration)
-  const actualDelay = prefersReducedMotion.current ? 0 : delay
+  const actualDuration = prefersReducedMotion ? 0 : (isMobile ? Math.min(duration, 500) : duration)
+  const actualDelay = prefersReducedMotion ? 0 : delay
 
   return (
     <div
@@ -260,7 +275,8 @@ export function AnimatedItem({
         ...getTransformStyle(),
         transitionDuration: `${actualDuration}ms`, 
         transitionDelay: `${actualDelay}ms`,
-        willChange: isVisible ? 'auto' : 'transform, opacity'
+        willChange: isVisible ? 'auto' : 'transform, opacity',
+        visibility: isVisible ? 'visible' : 'hidden'
       }}
     >
       {children}
@@ -280,15 +296,22 @@ export function StaggerContainer({
   const ref = useRef<HTMLDivElement>(null)
   const [visibleIndices, setVisibleIndices] = useState<Set<number>>(new Set())
   const hasAnimated = useRef(false)
-  const prefersReducedMotion = useRef(getPrefersReducedMotion())
-  const isMobile = useRef(getIsMobile())
+  // Use state to ensure SSR/CSR consistency - default to desktop values
+  const [isMobile, setIsMobile] = useState(false)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  
+  useEffect(() => {
+    // Set actual values after mount to avoid hydration mismatch
+    setIsMobile(getIsMobile())
+    setPrefersReducedMotion(getPrefersReducedMotion())
+  }, [])
 
   useEffect(() => {
     const element = ref.current
     if (!element || hasAnimated.current) return
 
     // Skip animation if user prefers reduced motion
-    if (prefersReducedMotion.current) {
+    if (prefersReducedMotion) {
       const children = Array.from(element.children || [])
       children.forEach((_, index) => {
         setVisibleIndices(prev => new Set([...prev, index]))
@@ -311,7 +334,7 @@ export function StaggerContainer({
         hasAnimated.current = true
         
         const children = Array.from(observedElement?.children || [])
-        const actualStaggerDelay = isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay
+        const actualStaggerDelay = isMobile ? Math.min(staggerDelay, 60) : staggerDelay
         
         children.forEach((_, index) => {
           setTimeout(() => {
@@ -332,19 +355,19 @@ export function StaggerContainer({
         observedElements.delete(observedElement)
       }
     }
-  }, [staggerDelay])
+  }, [staggerDelay, isMobile, prefersReducedMotion])
 
   // Smaller translate on mobile
-  const translateValue = isMobile.current ? 3 : 6
-  const duration = isMobile.current ? 500 : 700
-  const calculatedStaggerDelay = isMobile.current ? Math.min(staggerDelay, 60) : staggerDelay
+  const translateValue = isMobile ? 3 : 6
+  const duration = isMobile ? 500 : 700
+  const calculatedStaggerDelay = isMobile ? Math.min(staggerDelay, 60) : staggerDelay
   const baseTransitionClass = 'transition-all ease-[cubic-bezier(0.16,1,0.3,1)]'
 
   return (
     <div ref={ref} className={className}>
       {Array.isArray(children) ? children.map((child, index) => {
         const isVisible = visibleIndices.has(index)
-        const delay = prefersReducedMotion.current ? '0ms' : `${index * calculatedStaggerDelay}ms`
+        const delay = prefersReducedMotion ? '0ms' : `${index * calculatedStaggerDelay}ms`
         const translateY = isVisible ? 'translateY(0)' : `translateY(${translateValue * 4}px)`
         const willChange = isVisible ? 'auto' : 'transform, opacity'
         
@@ -356,7 +379,8 @@ export function StaggerContainer({
               transform: translateY,
               transitionDuration: `${duration}ms`,
               transitionDelay: delay,
-              willChange
+              willChange,
+              visibility: isVisible ? 'visible' : 'hidden'
             }}
           >
             {child}

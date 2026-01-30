@@ -173,9 +173,7 @@ export default async function DashboardPage({
           </div>
         </AnimatedSection>
       ) : (
-        <AnimatedSection delay={300} direction="up" duration={800}>
-          <MonitorList monitors={sortedMonitors} />
-        </AnimatedSection>
+        <MonitorList monitors={sortedMonitors} />
       )}
     </div>
   )

@@ -1,9 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback, memo } from 'react'
+import { memo } from 'react'
 import { StatusHealthyIcon, StatusLateIcon, StatusFailedIcon, StatusPendingIcon, WarningIcon } from './Icons'
-import { StaggerContainer } from './AnimatedSection'
 import { CTAButton } from './CTAButton'
+import { AnimatedItem, StaggerContainer } from './AnimatedSection'
 
 const mockMonitors = [
   // OK: Ping przyszedł + payload poprawny
@@ -68,147 +68,39 @@ function getStatusLabel(status: string) {
 }
 
 export const DashboardPreview = memo(function DashboardPreview() {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const [showTitle, setShowTitle] = useState(false)
-  const [showSubtitle, setShowSubtitle] = useState(false)
-  const [showActiveMonitors, setShowActiveMonitors] = useState(false)
-  const hasStartedAnimation = useRef(false)
-  const [mounted, setMounted] = useState(false)
-  const [isMobile, setIsMobile] = useState(false)
-
-  const checkMobile = useCallback(() => {
-    setIsMobile(window.innerWidth < 768)
-  }, [])
-
-  useEffect(() => {
-    setMounted(true)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [checkMobile])
-
-  useEffect(() => {
-    if (!mounted || !containerRef.current || hasStartedAnimation.current) return
-
-    const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-    
-    // On mobile, add delay to sync with hero section animation
-    // Hero section last item: delay 400ms + duration 800ms = 1200ms total
-    // We start showing monitors at ~600ms to create cascading effect
-    // On desktop, add delay to ensure hero section appears first
-    const syncDelay = isMobile ? 600 : 800
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasStartedAnimation.current) {
-            hasStartedAnimation.current = true
-            
-            // Cascade animation: title -> subtitle -> active monitors
-            const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-            const staggerDelay = isMobile ? 150 : 100
-            
-            // 1. Show title first
-            setTimeout(() => {
-              setShowTitle(true)
-            }, syncDelay)
-            
-            // 2. Show subtitle after title
-            setTimeout(() => {
-              setShowSubtitle(true)
-            }, syncDelay + staggerDelay)
-            
-            // 3. Show "Active Monitors" header
-            setTimeout(() => {
-              setShowActiveMonitors(true)
-            }, syncDelay + staggerDelay * 2)
-
-            // Unobserve after showing items
-            setTimeout(() => {
-              if (containerRef.current) {
-                observer.unobserve(containerRef.current)
-              }
-            }, syncDelay + 100)
-          }
-        })
-      },
-      { 
-        threshold: 0.1, 
-        rootMargin: isMobile ? '-50px' : '-100px'
-      }
-    )
-
-    const currentContainerRef = containerRef.current
-    observer.observe(currentContainerRef)
-
-    return () => {
-      if (currentContainerRef) {
-        observer.unobserve(currentContainerRef)
-      }
-    }
-  }, [mounted])
-
   return (
-    <div ref={containerRef} className="max-w-5xl mx-auto px-4">
+    <div className="max-w-5xl mx-auto px-4">
       <div className="text-center mb-6 sm:mb-8">
-        <h2 
-          className={`text-2xl sm:text-3xl font-bold mb-3 sm:mb-4 transition-all duration-700 ease-out ${
-            showTitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
-        >
-          Monitor Everything in One Place
-        </h2>
-        <p 
-          className={`text-muted-foreground text-base sm:text-lg transition-all duration-700 ease-out ${
-            showSubtitle ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
-        >
-          Real-time status updates and instant alerts for all your cron jobs
-        </p>
+        <AnimatedItem delay={100} direction="up" duration={700}>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+            Monitor Everything in One Place
+          </h2>
+        </AnimatedItem>
+        <AnimatedItem delay={200} direction="up" duration={700}>
+          <p className="text-muted-foreground text-base sm:text-lg">
+            Real-time status updates and instant alerts for all your cron jobs
+          </p>
+        </AnimatedItem>
       </div>
-      <div 
-        className={`bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl transition-opacity duration-700 ${
-          showActiveMonitors ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={!mounted || !showActiveMonitors ? { opacity: 0, visibility: 'hidden' } : { visibility: 'visible' }}
-      >
-        <div 
-          className={`bg-muted/50 border-b border-border px-4 sm:px-6 py-3 sm:py-4 transition-all duration-700 ease-out ${
-            showActiveMonitors ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}
-          style={!mounted ? { opacity: 0, transform: 'translateY(16px)' } : undefined}
-        >
-          <div className="flex items-center justify-between">
-            <h3 className="font-semibold text-sm sm:text-base">Active Monitors</h3>
-            <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-smooth hover-lift-smooth">
-              Add monitor
-            </CTAButton>
+      <AnimatedItem delay={300} direction="up" duration={800}>
+        <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl">
+          <div className="bg-muted/50 border-b border-border px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-semibold text-sm sm:text-base">Active Monitors</h3>
+              <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-smooth hover-lift-smooth">
+                Add monitor
+              </CTAButton>
+            </div>
           </div>
-        </div>
-        <div className="divide-y divide-border">
-          {mockMonitors.map((monitor, index) => {
-            const isFirst = index === 0
-            const duration = isMobile ? 500 : 700
-            const staggerDelay = isMobile ? 60 : 80
-            
-            return (
-              <div
-                key={index}
-                className={`px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-all ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  showActiveMonitors
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-4'
-                }`}
-                style={{
-                  transitionDuration: `${duration}ms`,
-                  transitionDelay: isFirst ? '0ms' : `${index * staggerDelay}ms`,
-                  willChange: showActiveMonitors ? 'auto' : 'transform, opacity'
-                }}
-              >
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+          <StaggerContainer className="divide-y divide-border" staggerDelay={60}>
+            {mockMonitors.map((monitor, index) => {
+              return (
+                <div
+                  key={index}
+                  className="px-4 sm:px-6 py-3 sm:py-4 hover:bg-accent/50 transition-smooth"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                     <div className={`p-1.5 sm:p-2 rounded-lg border flex-shrink-0 ${getStatusColor(monitor.status)}`}>
                       {getStatusIcon(monitor.status)}
                     </div>
@@ -224,17 +116,18 @@ export const DashboardPreview = memo(function DashboardPreview() {
                         <p className="text-xs text-muted-foreground/80 mt-1 font-mono">{monitor.reason}</p>
                       )}
                     </div>
-                  </div>
-                  <div className="text-right hidden sm:block flex-shrink-0">
-                    <p className="text-xs sm:text-sm text-muted-foreground">Last ping</p>
-                    <p className="text-xs sm:text-sm font-mono">{monitor.lastPing}</p>
+                    </div>
+                    <div className="text-right hidden sm:block flex-shrink-0">
+                      <p className="text-xs sm:text-sm text-muted-foreground">Last ping</p>
+                      <p className="text-xs sm:text-sm font-mono">{monitor.lastPing}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </StaggerContainer>
         </div>
-      </div>
+      </AnimatedItem>
     </div>
   )
 })

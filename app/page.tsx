@@ -264,24 +264,16 @@ export default function Home() {
         </section>
 
         {/* Dashboard Preview */}
-        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-8 sm:pb-12 lg:pb-16" delay={0} direction="up" duration={900}>
-          <Suspense fallback={
-            <div className="max-w-5xl mx-auto px-4">
-              <div className="text-center mb-6 sm:mb-8">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Monitor Everything in One Place</h2>
-                <p className="text-muted-foreground text-base sm:text-lg">
-                  Real-time status updates and instant alerts for all your cron jobs
-                </p>
-              </div>
-              <div className="bg-card border border-border rounded-lg sm:rounded-xl overflow-hidden shadow-xl animate-pulse h-96"></div>
-            </div>
-          }>
-            <LazyDashboardPreview />
-          </Suspense>
-        </AnimatedSection>
+        <section className="pt-0 sm:pt-0 lg:pt-0 pb-8 sm:pb-12 lg:pb-16">
+          <AnimatedSection delay={200} direction="up" duration={800}>
+            <Suspense fallback={null}>
+              <LazyDashboardPreview />
+            </Suspense>
+          </AnimatedSection>
+        </section>
 
         {/* Four Monitoring Modes */}
-        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={100} direction="up" duration={800}>
+        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={600} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Four Ways to Monitor</h2>

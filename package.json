@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "npm run generate-types",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "generate-social-posts": "tsx scripts/generate-social-posts.ts",
     "extract-blog-metadata": "tsx scripts/extract-blog-metadata.ts",
+    "generate-types": "tsx scripts/generate-types.ts",
     "analyze": "ANALYZE=true next build"
   },
   "dependencies": {
