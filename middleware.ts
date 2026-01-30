@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { createClient } from '@supabase/supabase-js'
 
 // Public routes that don't need auth check
 const PUBLIC_ROUTES = [
@@ -96,7 +97,7 @@ export async function middleware(request: NextRequest) {
 
   // Skip auth check for public routes to improve TTFB
   const needsAuthCheck = !isPublicRoute(pathname) && 
-    (pathname.startsWith('/dashboard') || pathname.startsWith('/auth'))
+    (pathname.startsWith('/dashboard') || pathname.startsWith('/auth') || pathname.startsWith('/admin'))
 
   let user = null
 
@@ -174,6 +175,49 @@ export async function middleware(request: NextRequest) {
     url.pathname = '/auth/login'
     url.searchParams.set('redirect', request.nextUrl.pathname)
     return NextResponse.redirect(url)
+  }
+
+  // Protect admin routes - require authentication and admin status
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/auth/login'
+      url.searchParams.set('redirect', request.nextUrl.pathname)
+      return NextResponse.redirect(url)
+    }
+
+    // Check if user is admin using admin client
+    try {
+      const supabaseAdmin = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+          },
+        }
+      )
+
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user.id)
+        .maybeSingle()
+
+      if (!profile || !profile.is_admin) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        url.searchParams.set('error', 'admin_access_required')
+        return NextResponse.redirect(url)
+      }
+    } catch (error) {
+      console.error('Error checking admin status in middleware:', error)
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      url.searchParams.set('error', 'admin_check_failed')
+      return NextResponse.redirect(url)
+    }
   }
 
   // Redirect authenticated users away from auth pages
