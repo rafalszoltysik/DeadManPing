@@ -31,7 +31,7 @@ export function createArticleSchema(options: ArticleSchemaOptions) {
     description,
     keywords,
     articleSection,
-    datePublished = "2024-12-01",
+    datePublished = "2026-01-01",
     dateModified = new Date().toISOString().split('T')[0]
   } = options
 

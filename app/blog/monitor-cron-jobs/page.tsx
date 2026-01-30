@@ -36,8 +36,8 @@ export default function MonitorCronJobsPage() {
     "url": `${cleanBaseUrl}/blog/monitor-cron-jobs`,
     "headline": "How to Monitor Cron Jobs and Detect Failures",
     "description": "Complete guide on monitoring cron jobs and detecting when they fail or stop running.",
-    "datePublished": "2024-12-01",
-    "dateModified": "2024-12-01",
+    "datePublished": "2026-01-15",
+    "dateModified": "2026-01-15",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",

@@ -75,7 +75,7 @@ const STRUCTURED_DATA = {
     "applicationSubCategory": "Monitoring Software",
     "operatingSystem": "Any",
     "url": cleanBaseUrl,
-    "datePublished": "2024-01-01",
+    "datePublished": "2026-01-01",
     "dateModified": new Date().toISOString().split('T')[0],
     "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Your job logic stays the same. Get instant alerts when your jobs don't run or produce incorrect results.",
     "screenshot": `${cleanBaseUrl}/icon.svg`,
@@ -202,7 +202,7 @@ export default function Home() {
     "name": "DeadManPing - Quick Start Guide",
     "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Your job logic stays the same.",
     "thumbnailUrl": "https://deadmanping.com/icon.svg",
-    "uploadDate": "2024-12-01",
+    "uploadDate": "2026-01-01",
     "duration": "PT2M",
     "contentUrl": "", // Dodaj URL gdy masz film
     "embedUrl": "", // Dodaj embed URL gdy masz film

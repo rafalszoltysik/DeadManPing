@@ -34,8 +34,8 @@ export default function VerifyCronOutputPage() {
     "url": `${cleanBaseUrl}/blog/verify-cron-output`,
     "headline": "Verify Cron Output: How to Validate Script Output Content",
     "description": "Complete guide on verifying that cron job scripts produce expected output and detecting when output is missing or incorrect.",
-    "datePublished": "2024-12-01",
-    "dateModified": "2024-12-01",
+    "datePublished": "2026-01-15",
+    "dateModified": "2026-01-15",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",

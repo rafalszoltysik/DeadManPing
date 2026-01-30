@@ -35,8 +35,8 @@ export default function SilentCronFailuresPage() {
     "headline": "Silent Cron Failures: How to Detect Jobs That Fail Without Logging",
     "description": "Complete guide on detecting cron jobs that fail silently without producing error logs or exit codes.",
     "url": `${cleanBaseUrl}/blog/silent-cron-failures`,
-    "datePublished": "2024-12-01",
-    "dateModified": "2024-12-01",
+    "datePublished": "2026-01-15",
+    "dateModified": "2026-01-15",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",

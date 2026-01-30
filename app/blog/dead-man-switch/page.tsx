@@ -36,8 +36,8 @@ export default function DeadManSwitchPage() {
     "headline": "Dead Man Switch for Backups: Never Miss a Failed Backup Again",
     "description": "How to implement dead man switch monitoring for backup jobs to detect failures immediately.",
     "url": `${cleanBaseUrl}/blog/dead-man-switch`,
-    "datePublished": "2024-12-01",
-    "dateModified": "2024-12-01",
+    "datePublished": "2026-01-15",
+    "dateModified": "2026-01-15",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",

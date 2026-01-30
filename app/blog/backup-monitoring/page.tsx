@@ -35,8 +35,8 @@ export default function BackupMonitoringPage() {
     "url": `${cleanBaseUrl}/blog/backup-monitoring`,
     "headline": "Backup Monitoring Service: Never Miss a Failed Backup",
     "description": "How to set up automated monitoring for backup jobs to detect failures immediately.",
-    "datePublished": "2024-12-01",
-    "dateModified": "2024-12-01",
+    "datePublished": "2026-01-15",
+    "dateModified": "2026-01-15",
     "author": {
       "@type": "Organization",
       "name": "DeadManPing",
