@@ -45,7 +45,7 @@ export const metadata: Metadata = {
         url: `${cleanBaseUrl}/icon.png`,
         width: 1200,
         height: 1200,
-        alt: "DeadManPing - Cron Job Monitoring",
+        alt: "DeadManPing - Backup Dead Man Switch",
       },
     ],
   },
@@ -77,10 +77,10 @@ const STRUCTURED_DATA = {
     "url": cleanBaseUrl,
     "datePublished": "2026-01-01",
     "dateModified": new Date().toISOString().split('T')[0],
-    "description": "Dead man switch monitoring service for cron jobs and scheduled tasks. Monitor your backups, reports, and sync jobs without changing your existing setup. One curl line. Your job logic stays the same. Get instant alerts when your jobs don't run or produce incorrect results.",
+    "description": "Backup dead man switch monitoring service. Monitor your backups without changing your existing setup. One curl line. Your backup logic stays the same. Get instant alerts when backups fail, are empty, or don't run.",
     "screenshot": `${cleanBaseUrl}/icon.svg`,
     "softwareVersion": "1.0",
-    "releaseNotes": "Result-aware monitoring for cron jobs. Verify job outcomes, not just execution. Payload validation rules. State-aware alerts.",
+    "releaseNotes": "Backup dead man switch monitoring. Verify backup outcomes, not just execution. Payload validation rules for empty backup files. State-aware alerts.",
     "offers": [
       {
         "@type": "Offer",
@@ -172,7 +172,7 @@ const STRUCTURED_DATA = {
         "height": 1200
       }
     },
-    "keywords": "cron monitoring, dead man switch, job monitoring, scheduled tasks, backup monitoring, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring, multi-currency pricing, USD pricing, EUR pricing",
+    "keywords": "backup dead man switch, dead man switch backup, backup monitoring, detect empty backup file, backup failure detection, backup monitoring without infrastructure, empty backup file detection, backup file zero bytes, dead man switch for backups, monitor backup jobs, cron monitoring, dead man switch, job monitoring, scheduled tasks, cron job alerts, payload validation, result-aware monitoring, job outcome verification, devops monitoring, multi-currency pricing, USD pricing, EUR pricing",
     "inLanguage": "en",
     "isAccessibleForFree": true,
     "freeTierAvailable": true
@@ -200,7 +200,7 @@ export default function Home() {
     "@context": "https://schema.org",
     "@type": "VideoObject",
     "name": "DeadManPing - Quick Start Guide",
-    "description": "Learn how to set up DeadManPing monitoring for your cron jobs in 2 minutes. One curl line. Your job logic stays the same.",
+    "description": "Learn how to set up DeadManPing backup dead man switch monitoring in 2 minutes. One curl line. Your backup logic stays the same.",
     "thumbnailUrl": "https://deadmanping.com/icon.svg",
     "uploadDate": "2026-01-01",
     "duration": "PT2M",
@@ -253,7 +253,7 @@ export default function Home() {
             <AnimatedItem delay={300} direction="up" duration={800}>
               <div className="flex flex-col items-center gap-3 sm:gap-4 mb-12 sm:mb-16 px-4">
                 <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium transition-smooth hover-lift-smooth shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover-scale">
-                  Start monitoring in 2 minutes
+                  Start monitoring backups in 2 minutes
                 </CTAButton>
                 <p className="text-sm text-muted-foreground">
                   14-day free trial · No credit card required
@@ -276,11 +276,11 @@ export default function Home() {
         <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={600} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
-              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Four Ways to Monitor</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Four Ways to Monitor Backups</h2>
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-center text-base sm:text-lg text-muted-foreground mb-8 sm:mb-12">
-                Choose the monitoring mode that fits your needs
+                Choose the backup monitoring mode that fits your needs
               </p>
             </AnimatedItem>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6" staggerDelay={100}>
@@ -290,7 +290,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold mb-3 text-center">Simple Ping</h3>
                 <p className="text-sm text-muted-foreground mb-4 text-center">
-                  Just verify that your job executed. One curl line confirms completion.
+                  Just verify that your backup executed. One curl line confirms completion.
                 </p>
               </div>
 
@@ -300,7 +300,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold mb-3 text-center">Ping with Payload</h3>
                 <p className="text-sm text-muted-foreground mb-4 text-center">
-                  Verify correctness. Send data from execution and validate results in the dashboard.
+                  Verify backup correctness. Send backup file size and validate in the dashboard. Detect empty backups automatically.
                 </p>
               </div>
 
@@ -310,7 +310,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold mb-3 text-center">Start/Stop Tracking</h3>
                 <p className="text-sm text-muted-foreground mb-4 text-center">
-                  Measure execution time. Track job duration and optionally include payload validation.
+                  Measure backup execution time. Track backup duration and optionally include payload validation.
                 </p>
               </div>
 
@@ -320,7 +320,7 @@ export default function Home() {
                 </div>
                 <h3 className="text-lg font-semibold mb-3 text-center">Start/Stop with Payload</h3>
                 <p className="text-sm text-muted-foreground mb-4 text-center">
-                  Track duration and validate payload data for complete monitoring.
+                  Track backup duration and validate backup file size for complete monitoring.
                 </p>
               </div>
             </StaggerContainer>
@@ -385,7 +385,7 @@ export default function Home() {
                   </h3>
                 <ul className="space-y-2 text-muted-foreground mb-4">
                   <li>• You must write your own connectors</li>
-                  <li>• No "job didn't run" detection</li>
+                  <li>• No "backup didn't run" detection</li>
                 </ul>
                 <p className="text-sm font-medium">
                   DeadManPing = Stop writing connectors. One curl line. Rest in the dashboard.
@@ -401,7 +401,7 @@ export default function Home() {
                   <li>• No concept of "wrong result"</li>
                 </ul>
                 <p className="text-sm font-medium">
-                  If your job returns count = 3 instead of 100, error trackers are silent.
+                  If your backup file is 0 bytes instead of 2GB, error trackers are silent.
                 </p>
                 </div>
 
@@ -414,7 +414,7 @@ export default function Home() {
                   <li>• Zero awareness of results</li>
                 </ul>
                 <p className="text-sm font-medium">
-                  "The cron ran" is not the same as "The cron did its job."
+                  "The backup ran" is not the same as "The backup did its job."
                 </p>
                 </div>
 
@@ -427,7 +427,7 @@ export default function Home() {
                   <li>• Complex setup and maintenance</li>
                 </ul>
                 <p className="text-sm font-medium">
-                  DeadManPing works with your existing cron. No migration needed. Just add one curl line.
+                  DeadManPing works with your existing backup scripts. No migration needed. Just add one curl line.
                 </p>
                 </div>
             </StaggerContainer>
@@ -447,11 +447,11 @@ export default function Home() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-muted-foreground">
                     <div className="flex items-center justify-center gap-3 transition-all duration-300 hover:translate-x-1 hover:text-foreground">
                       <span className="text-muted-foreground/60 text-lg flex-shrink-0 transition-transform duration-300 hover:scale-125">•</span>
-                      <span className="text-base sm:text-lg">Not a job scheduler</span>
+                      <span className="text-base sm:text-lg">Not a backup scheduler</span>
                     </div>
                     <div className="flex items-center justify-center gap-3 transition-all duration-300 hover:translate-x-1 hover:text-foreground" style={{ transitionDelay: '50ms' }}>
                       <span className="text-muted-foreground/60 text-lg flex-shrink-0 transition-transform duration-300 hover:scale-125">•</span>
-                      <span className="text-base sm:text-lg">Does not run your jobs</span>
+                      <span className="text-base sm:text-lg">Does not run your backups</span>
                     </div>
                     <div className="flex items-center justify-center gap-3 transition-all duration-300 hover:translate-x-1 hover:text-foreground" style={{ transitionDelay: '100ms' }}>
                       <span className="text-muted-foreground/60 text-lg flex-shrink-0 transition-transform duration-300 hover:scale-125">•</span>
@@ -459,7 +459,7 @@ export default function Home() {
                     </div>
                     <div className="flex items-center justify-center gap-3 transition-all duration-300 hover:translate-x-1 hover:text-foreground" style={{ transitionDelay: '150ms' }}>
                       <span className="text-muted-foreground/60 text-lg flex-shrink-0 transition-transform duration-300 hover:scale-125">•</span>
-                      <span className="text-base sm:text-lg">Does not touch execution</span>
+                      <span className="text-base sm:text-lg">Does not touch backup execution</span>
                     </div>
                   </div>
                 </div>
@@ -472,10 +472,10 @@ export default function Home() {
                     </div>
                     <div className="text-center">
                       <p className="text-lg sm:text-xl font-semibold mb-2 transition-colors duration-300 hover:text-primary">
-                        We only observe the effects of execution
+                        We only observe the effects of backup execution
                       </p>
                       <p className="text-sm sm:text-base text-muted-foreground transition-colors duration-300 hover:text-foreground">
-                        Your cron runs your scripts. We verify the results.
+                        Your cron runs your backup scripts. We verify the backup results.
                       </p>
                     </div>
                   </div>
@@ -499,7 +499,7 @@ export default function Home() {
                 </div>
                 <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth">
                   <p className="text-muted-foreground mb-2">
-                    Logic to check if job executed
+                    Logic to check if backup executed
                   </p>
                   <p className="text-sm text-muted-foreground">DeadManPing does this automatically</p>
                 </div>
@@ -669,13 +669,13 @@ export default function Home() {
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl mb-4 sm:mb-6 text-muted-foreground">
-                We separate execution from evaluation.
+                We separate backup execution from evaluation.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={700}>
               <p className="text-lg sm:text-xl mb-8 sm:mb-12">
-                Your cron runs your scripts.<br />
-                Your scripts send facts.<br />
+                Your cron runs your backup scripts.<br />
+                Your backup scripts send facts (file size, status).<br />
                 We verify if that's OK.
               </p>
             </AnimatedItem>
@@ -703,7 +703,7 @@ export default function Home() {
                 </div>
                 <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Missing-run detection</h3>
-                  <p className="text-muted-foreground">If your cron never executes — you still get alerted.</p>
+                  <p className="text-muted-foreground">If your backup never executes — you still get alerted.</p>
                 </div>
                 <div className="bg-background border border-border rounded-lg p-6 card-hover hover-lift-smooth h-full">
                   <h3 className="text-lg font-semibold mb-3">Zero custom logic per customer</h3>
@@ -734,13 +734,19 @@ export default function Home() {
                   </thead>
                   <tbody className="divide-y divide-border">
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
-                      <td className="p-4 text-muted-foreground">Detect job didn't run</td>
+                      <td className="p-4 text-muted-foreground">Detect backup didn't run</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
                     </tr>
                     <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '250ms' }}>
-                      <td className="p-4 text-muted-foreground">Inspect job results</td>
+                      <td className="p-4 text-muted-foreground">Detect empty backup file</td>
+                      <td className="p-4 text-center">
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                      </td>
+                    </tr>
+                    <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '275ms' }}>
+                      <td className="p-4 text-muted-foreground">Inspect backup results</td>
                       <td className="p-4 text-center">
                         <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
                       </td>
@@ -850,23 +856,23 @@ export default function Home() {
                   <ul className="space-y-3 text-muted-foreground">
                     <li className="flex items-start gap-2">
                       <span className="text-success text-sm mt-1">•</span>
+                      <span>DevOps managing backups</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-success text-sm mt-1">•</span>
+                      <span>MSP (Managed Service Providers)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-success text-sm mt-1">•</span>
+                      <span>Infra & ops teams</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-success text-sm mt-1">•</span>
                       <span>Backend developers</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-success text-sm mt-1">•</span>
-                      <span>Solo founders</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-success text-sm mt-1">•</span>
-                      <span>Infra & ops</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-success text-sm mt-1">•</span>
-                      <span>Data pipelines</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <span className="text-success text-sm mt-1">•</span>
-                      <span>Maintenance & batch jobs</span>
+                      <span>VPS & bare metal server admins</span>
                     </li>
                   </ul>
                 </div>
@@ -903,7 +909,7 @@ export default function Home() {
                     It's not an error tracker.
                   </p>
                   <p className="text-lg sm:text-xl font-semibold text-primary">
-                    It's a job outcome verifier.
+                    It's a backup outcome verifier.
                   </p>
                 </div>
               </AnimatedItem>
@@ -915,7 +921,7 @@ export default function Home() {
           <div className="max-w-4xl mx-auto px-4 text-center">
             <AnimatedItem delay={300} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl lg:text-3xl font-semibold leading-relaxed">
-                Error trackers tell you when your job crashed.<br />
+                Error trackers tell you when your backup crashed.<br />
                 <span className="text-foreground">DeadMan</span><span className="text-primary">Ping</span> tells you when it succeeded… incorrectly.
               </p>
             </AnimatedItem>
@@ -960,12 +966,12 @@ export default function Home() {
           <div className="relative z-10">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-                Stop trusting green checkmarks.
+                Stop trusting that backups just work.
               </h2>
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
-                Monitor results, not assumptions.
+                Monitor backup results, not assumptions.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={700}>

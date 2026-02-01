@@ -67,14 +67,14 @@ function generateScriptExample(payloadFields: MonitorFormData['payloadFields'], 
   const hasExitCode = fields.some(f => f.name === 'exit_code')
   
   // Main script execution - capture result
-  let mainScript = './sync_users_logic.sh'
+  let mainScript = './backup_database.sh'
   let mainScriptWithCapture = mainScript
   
   // Check if we need to capture output for count or other fields
   const needsOutput = fields.some(f => f.name === 'count' || (f.name !== 'exit_code' && f.name !== 'file_size'))
   
   if (needsOutput) {
-    mainScriptWithCapture = `users_synced=$(./sync_users_logic.sh)`
+    mainScriptWithCapture = `backup_result=$(./backup_database.sh)`
   }
   
   fields.forEach(field => {
@@ -85,9 +85,9 @@ function generateScriptExample(payloadFields: MonitorFormData['payloadFields'], 
     } else if (field.name === 'count') {
       // Use the captured output
       if (needsOutput) {
-        varAssignments.push(`COUNT=$users_synced`)
+        varAssignments.push(`COUNT=$backup_result`)
       } else {
-        varAssignments.push(`COUNT=$(./sync_users_logic.sh | wc -l)`)
+        varAssignments.push(`COUNT=$(./backup_database.sh | wc -l)`)
       }
     } else if (field.name === 'file_size') {
       // Example: check backup file size
@@ -125,7 +125,7 @@ export function HowItWorksSection() {
     intervalValue: 24,
     intervalUnit: 'hours',
     payloadFields: [
-      { id: `field-count-${Date.now()}`, name: 'count', type: 'number', rule: '>=', value: '1', severity: 'error' },
+      { id: `field-file_size-${Date.now()}`, name: 'file_size', type: 'number', rule: '>', value: '0', severity: 'error' },
     ],
   })
 
@@ -134,7 +134,7 @@ export function HowItWorksSection() {
     : generateCronExpression(formData.intervalValue, formData.intervalUnit)
   const monitorId = 'abc123' // Demo monitor ID
   const scriptExample = generateScriptExample(formData.payloadFields, monitorId)
-  const scriptName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'sync_users'
+  const scriptName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '_') || 'backup_database'
 
   return (
     <>
@@ -175,7 +175,7 @@ export function HowItWorksSection() {
             <div className="flex-grow min-w-0 w-full sm:w-auto">
               <h3 className="text-lg sm:text-xl font-semibold mb-3 sm:mb-4">Add one line at the end of your existing script</h3>
               <p className="text-sm sm:text-base text-muted-foreground mb-4 sm:mb-6">
-                Cron runs your script. Your script executes logic and collects data. At the end of your script — one curl line with data from execution.
+                Cron runs your backup script. Your backup script executes and collects data (file size, status). At the end of your script — one curl line with backup data.
               </p>
               
               <AnimatedItem delay={250} direction="up" duration={500}>

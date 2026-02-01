@@ -64,7 +64,7 @@ export default function BackupDeadManSwitchPage() {
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={800}>
               <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-                Backup nie zadziałał — jak się dowiedzieć o 3 w nocy?<br className="hidden sm:block" />Dead man switch. One curl line. Your backup logic stays the same.
+                Backup failed at 3 AM — how do you know?<br className="hidden sm:block" />Dead man switch. One curl line. Your backup logic stays the same.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={800}>
@@ -92,7 +92,7 @@ export default function BackupDeadManSwitchPage() {
                 They succeed… incorrectly.
               </p>
             </AnimatedItem>
-            <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6" staggerDelay={80}>
+            <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6" staggerDelay={80}>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[100px] card-hover hover-lift-smooth">
                 <p className="text-sm text-muted-foreground">empty backup file</p>
               </div>
@@ -224,38 +224,38 @@ curl -X POST "https://deadmanping.com/api/ping/backup-multi?failed_steps=$FAILED
         </AnimatedSection>
 
         {/* How It Works Section */}
-        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" delay={400} direction="up" duration={800}>
+        <AnimatedSection className="pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20 bg-card/50 border-y border-border" delay={400} direction="up" duration={800}>
           <div className="max-w-5xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
               <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">How It Works</h2>
             </AnimatedItem>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8" staggerDelay={100}>
-              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth h-full flex flex-col">
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary text-xl font-bold">1</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-3">Your Backup Runs</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground flex-grow">
                   Your cron job executes your backup script as usual. No changes to your backup logic.
                 </p>
               </div>
 
-              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth h-full flex flex-col">
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary text-xl font-bold">2</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-3">Script Sends Ping</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground flex-grow">
                   At the end of your script, one curl line sends ping with backup data (file size, status, etc.).
                 </p>
               </div>
 
-              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth">
+              <div className="bg-background border border-border rounded-lg p-6 text-center card-hover hover-lift-smooth h-full flex flex-col">
                 <div className="bg-primary/10 rounded-full w-12 h-12 flex items-center justify-center mx-auto mb-4">
                   <span className="text-primary text-xl font-bold">3</span>
                 </div>
                 <h3 className="text-lg font-semibold mb-3">We Validate & Alert</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground flex-grow">
                   DeadManPing validates backup data and alerts if backup fails or is missing.
                 </p>
               </div>
@@ -264,42 +264,46 @@ curl -X POST "https://deadmanping.com/api/ping/backup-multi?failed_steps=$FAILED
         </AnimatedSection>
 
         {/* CTA Section */}
-        <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20 bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl my-12 sm:my-16 lg:my-20 text-center px-4 relative overflow-hidden" delay={500} direction="up" duration={900}>
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
-          <div className="relative z-10">
-            <AnimatedItem delay={100} direction="up" duration={700}>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
-                Stop trusting that backups just work.
-              </h2>
-            </AnimatedItem>
-            <AnimatedItem delay={200} direction="up" duration={700}>
-              <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
-                Monitor backups, not assumptions.
-              </p>
-            </AnimatedItem>
-            <AnimatedItem delay={300} direction="up" duration={700}>
-              <div className="flex flex-col items-center gap-3 sm:gap-4">
-                <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift-smooth hover-scale shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
-                  Get started in 2 minutes
-                </CTAButton>
-                <p className="text-sm text-muted-foreground">
-                  14-day free trial · No credit card required
-                </p>
+        <AnimatedSection className="pt-12 sm:pt-16 lg:pt-20 pb-12 sm:pb-16 lg:pb-20" delay={500} direction="up" duration={900}>
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="bg-card border-2 border-primary/20 rounded-xl sm:rounded-2xl py-8 sm:py-12 text-center relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5 pointer-events-none"></div>
+              <div className="relative z-10">
+                <AnimatedItem delay={100} direction="up" duration={700}>
+                  <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">
+                    Stop trusting that backups just work.
+                  </h2>
+                </AnimatedItem>
+                <AnimatedItem delay={200} direction="up" duration={700}>
+                  <p className="text-base sm:text-xl text-muted-foreground mb-6 sm:mb-8">
+                    Monitor backups, not assumptions.
+                  </p>
+                </AnimatedItem>
+                <AnimatedItem delay={300} direction="up" duration={700}>
+                  <div className="flex flex-col items-center gap-3 sm:gap-4">
+                    <CTAButton className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 sm:px-8 py-3 sm:py-4 rounded-lg text-base sm:text-lg font-medium inline-block transition-smooth hover-lift-smooth hover-scale shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30">
+                      Get started in 2 minutes
+                    </CTAButton>
+                    <p className="text-sm text-muted-foreground">
+                      14-day free trial · No credit card required
+                    </p>
+                  </div>
+                </AnimatedItem>
               </div>
-            </AnimatedItem>
+            </div>
           </div>
         </AnimatedSection>
 
         {/* Related Links */}
         <AnimatedSection className="pt-0 sm:pt-0 lg:pt-0 pb-12 sm:pb-16 lg:pb-20" delay={600} direction="up" duration={800}>
-          <div className="max-w-4xl mx-auto px-4 text-center">
+          <div className="max-w-4xl mx-auto px-4">
             <AnimatedItem delay={100} direction="up" duration={700}>
-              <h2 className="text-2xl sm:text-3xl font-bold mb-8 sm:mb-12">Learn More</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Learn More</h2>
             </AnimatedItem>
             <StaggerContainer className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8" staggerDelay={100}>
               <Link
                 href="/blog/dead-man-switch"
-                className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth text-left"
+                className="block bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth text-left h-full"
               >
                 <h3 className="text-lg font-semibold mb-2">Dead Man Switch for Backups</h3>
                 <p className="text-sm text-muted-foreground">
@@ -308,7 +312,7 @@ curl -X POST "https://deadmanping.com/api/ping/backup-multi?failed_steps=$FAILED
               </Link>
               <Link
                 href="/blog/detect-empty-backup-file"
-                className="bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth text-left"
+                className="block bg-card border border-border rounded-lg p-6 card-hover hover-lift-smooth text-left h-full"
               >
                 <h3 className="text-lg font-semibold mb-2">Detect Empty Backup File</h3>
                 <p className="text-sm text-muted-foreground">
