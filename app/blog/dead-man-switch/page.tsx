@@ -273,12 +273,20 @@ curl -X POST "https://deadmanping.com/api/ping/backup-s3?upload_exit_code=$UPLOA
                   DeadManPing provides dead man switch monitoring for backup jobs. Set up monitoring in 2 minutes, 
                   works with any backup method, and sends alerts via email, Slack, or Discord.
                 </p>
-                <Link
-                  href="/auth/signup"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift"
-                >
-                  Start Free Trial
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Link
+                    href="/auth/signup"
+                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    Start Free Trial
+                  </Link>
+                  <Link
+                    href="/backup-dead-man-switch"
+                    className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                  >
+                    Learn More About Backup Dead Man Switch
+                  </Link>
+                </div>
               </div>
               </section>
             </AnimatedSection>

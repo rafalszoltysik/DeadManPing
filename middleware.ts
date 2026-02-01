@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = [
   '/faq',
   '/docs',
   '/contact',
+  '/backup-dead-man-switch',
 ]
 
 // Old blog routes that should redirect to /blog/

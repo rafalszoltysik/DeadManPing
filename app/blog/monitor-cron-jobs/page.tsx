@@ -145,6 +145,32 @@ export default function MonitorCronJobsPage() {
             </AnimatedSection>
 
             <AnimatedSection>
+              <section className="bg-card border border-primary/20 rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
+                <h2 className="text-xl sm:text-2xl font-semibold mb-4">
+                  Backup Monitoring Use Case
+                </h2>
+              <p className="text-muted-foreground mb-4">
+                <strong>One of the most common use cases for cron monitoring is backup monitoring.</strong> Backups are critical, 
+                but they often fail silently. Your backup script might run, but produce an empty file (0 bytes), or the backup 
+                might not run at all due to cron being disabled.
+              </p>
+              <p className="text-muted-foreground mb-4">
+                Dead man switch monitoring is perfect for backups because:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-muted-foreground mb-4">
+                <li><strong>Detects empty backup files</strong> - Validates backup file size using payload validation</li>
+                <li><strong>Detects missing backups</strong> - Alerts if backup doesn't run within expected interval</li>
+                <li><strong>Works with any backup method</strong> - rsync, tar, database dumps, cloud sync, etc.</li>
+                <li><strong>No infrastructure required</strong> - Perfect for VPS, bare metal, or legacy servers without Kubernetes/Prometheus</li>
+              </ul>
+              <p className="text-muted-foreground mb-4">
+                Learn more about <Link href="/backup-dead-man-switch" className="text-primary hover:underline font-medium">backup dead man switch monitoring</Link> or 
+                how to <Link href="/blog/detect-empty-backup-file" className="text-primary hover:underline font-medium">detect empty backup files</Link>.
+              </p>
+              </section>
+            </AnimatedSection>
+
+            <AnimatedSection>
               <section className="bg-card border border-border rounded-lg sm:rounded-xl p-6 sm:p-8 card-hover">
                 <h2 className="text-xl sm:text-2xl font-semibold mb-4">
                   Solution: Dead Man Switch Monitoring

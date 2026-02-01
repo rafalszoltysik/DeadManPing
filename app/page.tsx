@@ -17,9 +17,9 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Never Miss a Cron Job Again | DeadManPing",
-  description: "Never miss a cron job again. DeadManPing monitors your cron jobs without changing your setup. Monitor outcomes, not just execution. One curl line. Your job logic stays the same.",
-  keywords: "cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, backup monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
+  title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
+  description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+  keywords: "backup dead man switch, dead man switch backup, detect empty backup file, backup monitoring without infrastructure, backup failure detection, empty backup file detection, backup file zero bytes, backup monitoring, dead man switch for backups, monitor backup jobs, cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
   publisher: "DeadManPing",
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Never Miss a Cron Job Again | DeadManPing",
-    description: "Never miss a cron job again. Monitor outcomes, not just execution. DeadManPing monitors your cron jobs without changing your setup. One curl line. Your job logic stays the same.",
+    title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
+    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
     type: "website",
     url: cleanBaseUrl,
     siteName: "DeadManPing",
@@ -51,8 +51,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Never Miss a Cron Job Again | DeadManPing",
-    description: "Never miss a cron job again. Monitor outcomes, not just execution. One curl line. Your job logic stays the same.",
+    title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
+    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
     images: [`${cleanBaseUrl}/icon.png`],
   },
   alternates: {
@@ -242,12 +242,12 @@ export default function Home() {
           <AnimatedSection className="max-w-4xl mx-auto" delay={0} direction="fade" duration={1000}>
             <AnimatedItem delay={100} direction="up" duration={800}>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent leading-relaxed animate-gradient pb-2 overflow-visible">
-                Never Miss a Cron Job Again
+                Never Miss a Failed Backup Again
               </h1>
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={800}>
               <p className="text-base sm:text-xl lg:text-2xl text-muted-foreground max-w-3xl mx-auto mb-6 sm:mb-10 leading-relaxed px-2">
-                Monitor outcomes, not just execution.<br className="hidden sm:block" />One curl line. Your job logic stays the same.
+                Backup dead man switch. One curl line. Your backup logic stays the same.
               </p>
             </AnimatedItem>
             <AnimatedItem delay={300} direction="up" duration={800}>
@@ -342,25 +342,25 @@ export default function Home() {
             </AnimatedItem>
             <AnimatedItem delay={200} direction="up" duration={700}>
               <p className="text-xl sm:text-2xl text-center mb-8 sm:mb-12 text-muted-foreground">
-                Most cron jobs don't fail loudly.<br />
+                Most backups don't fail loudly.<br />
                 They succeed… incorrectly.
               </p>
             </AnimatedItem>
             <StaggerContainer className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6" staggerDelay={80}>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
-                <p className="text-sm text-muted-foreground">zero rows processed</p>
+                <p className="text-sm text-muted-foreground">empty backup file</p>
               </div>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
-                <p className="text-sm text-muted-foreground">partial data</p>
+                <p className="text-sm text-muted-foreground">zero bytes</p>
               </div>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
-                <p className="text-sm text-muted-foreground">wrong counts</p>
+                <p className="text-sm text-muted-foreground">outdated backup</p>
               </div>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
-                <p className="text-sm text-muted-foreground">outdated results</p>
+                <p className="text-sm text-muted-foreground">partial backup</p>
               </div>
               <div className="bg-background border border-border rounded-lg p-4 text-center flex items-center justify-center min-h-[80px] card-hover hover-lift-smooth">
-                <p className="text-sm text-muted-foreground">skipped logic paths</p>
+                <p className="text-sm text-muted-foreground">backup didn't run</p>
               </div>
             </StaggerContainer>
             <AnimatedItem delay={450} direction="up" duration={700}>

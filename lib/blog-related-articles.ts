@@ -78,6 +78,11 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
   ],
   'backup-monitoring': [
     {
+      slug: 'backup-didnt-run-how-to-detect',
+      title: 'Backup Didn\'t Run - How to Detect',
+      description: 'How to detect when backup jobs don\'t run using dead man switch monitoring.'
+    },
+    {
       slug: 'dead-man-switch',
       title: 'Dead Man Switch for Backups',
       description: 'Implement dead man switch monitoring for backup jobs.'
@@ -91,11 +96,50 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
       slug: 'backup-file-zero-bytes',
       title: 'Backup File Zero Bytes',
       description: 'How to detect when backup files are zero bytes.'
+    }
+  ],
+  'backup-didnt-run-how-to-detect': [
+    {
+      slug: 'dead-man-switch',
+      title: 'Dead Man Switch for Backups',
+      description: 'Implement dead man switch monitoring for backup jobs to detect failures immediately.'
     },
     {
-      slug: 'detect-backup-file-missing',
-      title: 'Detect Backup File Missing',
-      description: 'How to detect when backup files are missing after backup jobs complete.'
+      slug: 'backup-monitoring-without-infrastructure',
+      title: 'Backup Monitoring Without Infrastructure',
+      description: 'How to monitor backups without Kubernetes, Prometheus, or complex infrastructure.'
+    },
+    {
+      slug: 'detect-empty-backup-file',
+      title: 'Detect Empty Backup File',
+      description: 'How to detect when backup files are empty or zero bytes.'
+    },
+    {
+      slug: 'backup-monitoring',
+      title: 'Backup Monitoring Service',
+      description: 'Backup monitoring that doesn\'t touch your execution.'
+    }
+  ],
+  'backup-monitoring-without-infrastructure': [
+    {
+      slug: 'backup-didnt-run-how-to-detect',
+      title: 'Backup Didn\'t Run - How to Detect',
+      description: 'How to detect when backup jobs don\'t run using dead man switch monitoring.'
+    },
+    {
+      slug: 'dead-man-switch',
+      title: 'Dead Man Switch for Backups',
+      description: 'Implement dead man switch monitoring for backup jobs to detect failures immediately.'
+    },
+    {
+      slug: 'backup-monitoring',
+      title: 'Backup Monitoring Service',
+      description: 'Backup monitoring that doesn\'t touch your execution.'
+    },
+    {
+      slug: 'detect-empty-backup-file',
+      title: 'Detect Empty Backup File',
+      description: 'How to detect when backup files are empty or zero bytes.'
     }
   ],
   'detect-empty-backup-file': [

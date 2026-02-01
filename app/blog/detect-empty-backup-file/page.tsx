@@ -236,14 +236,22 @@ export default function DetectEmptyBackupFilePage() {
                     Start Detecting Empty Backup Files
                   </h2>
                   <p className="text-muted-foreground mb-4">
-                    DeadManPing monitors whether your backup file verification completes. Set up monitoring in 2 minutes, get alerts when backups are empty or too small.
+                    DeadManPing monitors whether your backup file verification completes. Set up monitoring in 2 minutes, get alerts when backups are empty or too small. Use dead man switch to monitor empty backups automatically.
                   </p>
-                  <Link
-                    href="/auth/signup"
-                    className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift"
-                  >
-                    Start Monitoring Free
-                  </Link>
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <Link
+                      href="/auth/signup"
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                    >
+                      Start Monitoring Free
+                    </Link>
+                    <Link
+                      href="/backup-dead-man-switch"
+                      className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
+                    >
+                      Learn About Backup Dead Man Switch
+                    </Link>
+                  </div>
                 </div>
               </section>
             </AnimatedSection>

@@ -291,10 +291,10 @@ export default function BackupMonitoringPage() {
                     Start Free Trial
                   </Link>
                   <Link
-                    href="/faq"
+                    href="/backup-dead-man-switch"
                     className="border border-border text-foreground hover:bg-muted px-6 py-3 rounded-lg font-medium inline-block transition-smooth hover-lift text-center"
                   >
-                    View FAQ
+                    Learn About Backup Dead Man Switch
                   </Link>
                 </div>
               </div>
