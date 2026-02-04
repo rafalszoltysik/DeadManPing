@@ -815,7 +815,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                       // Determine ping display status based on ping.status and message
                       let displayStatus: 'ok' | 'warn' | 'fail' = 'ok'
                       let statusClass = 'bg-success/10 text-success border-success/20'
-                      let statusText = 'OK'
+                      let statusText = '✓'
                       
                       if (ping.status === 'fail') {
                         // Check if it's a "late" warning, payload warning, or a "failed" error
@@ -831,7 +831,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                         } else {
                           displayStatus = 'fail'
                           statusClass = 'bg-error/10 text-error border-error/20'
-                          statusText = 'FAIL'
+                          statusText = '✗'
                         }
                       }
                       

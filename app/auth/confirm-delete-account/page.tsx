@@ -210,19 +210,19 @@ function ConfirmDeleteAccountForm() {
                 </p>
                 <ul className="text-sm text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">OK</span>
+                    <span className="text-primary">✓</span>
                     <span><strong>Reliable monitoring:</strong> Get instant alerts when your cron jobs fail</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">OK</span>
+                    <span className="text-primary">✓</span>
                     <span><strong>Peace of mind:</strong> Never worry about missed scheduled tasks</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">OK</span>
+                    <span className="text-primary">✓</span>
                     <span><strong>Easy setup:</strong> Get started in minutes with simple webhook integration</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">OK</span>
+                    <span className="text-primary">✓</span>
                     <span><strong>Free tier available:</strong> Monitor up to 5 jobs for free</span>
                   </li>
                 </ul>

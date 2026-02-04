@@ -66,13 +66,13 @@ function getStatusColor(status: string) {
 function getStatusLabel(status: string) {
   switch (status) {
     case 'healthy':
-      return 'OK'
+      return '✓'
     case 'late':
       return 'LATE'
     case 'warn':
       return 'WARN'
     case 'failed':
-      return 'ERROR'
+      return '✗'
     default:
       return 'PENDING'
   }

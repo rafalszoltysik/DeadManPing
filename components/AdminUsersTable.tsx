@@ -190,9 +190,9 @@ export function AdminUsersTable({ initialUsers, initialPagination }: AdminUsersT
                         </td>
                         <td className="px-4 py-3 text-sm">
                           {user.email_verified ? (
-                            <span className="text-green-600 dark:text-green-400">OK</span>
+                            <span className="text-green-600 dark:text-green-400">✓</span>
                           ) : (
-                            <span className="text-muted-foreground">NO</span>
+                            <span className="text-muted-foreground">✗</span>
                           )}
                         </td>
                         <td className="px-4 py-3 text-sm text-muted-foreground">
