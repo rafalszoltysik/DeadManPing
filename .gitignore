@@ -45,4 +45,6 @@ examples/**/*.pyc
 # generated social media posts
 social-posts/
 
+# icon files
 icon.af
+icon2.af
