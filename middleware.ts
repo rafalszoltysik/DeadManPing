@@ -64,14 +64,14 @@ export async function middleware(request: NextRequest) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
   const canonicalHost = baseUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/^https?:\/\//, '')
   
-  // Redirect HTTP to HTTPS (301 permanent)
-  if (protocol === 'http' && process.env.NODE_ENV === 'production') {
-    url.protocol = 'https:'
-    return NextResponse.redirect(url, 301)
-  }
+  // Check if we need to redirect to canonical URL (HTTPS, non-www)
+  // Combine both checks to avoid chain redirects
+  const needsRedirect = 
+    (protocol === 'http' && process.env.NODE_ENV === 'production') || 
+    hostname.startsWith('www.')
   
-  // Redirect www to non-www (301 permanent)
-  if (hostname.startsWith('www.')) {
+  if (needsRedirect) {
+    // Redirect to canonical URL (HTTPS, non-www) in a single redirect
     url.hostname = canonicalHost
     url.protocol = 'https:'
     return NextResponse.redirect(url, 301)
@@ -88,7 +88,9 @@ export async function middleware(request: NextRequest) {
   // Redirect old blog routes to /blog/
   if (OLD_BLOG_ROUTES.includes(pathname)) {
     const slug = pathname.replace(/^\//, '')
-    const newUrl = new URL(`/blog/${slug}`, request.url)
+    // Use canonical base URL to avoid chain redirects
+    const canonicalBaseUrl = `https://${canonicalHost}`
+    const newUrl = new URL(`/blog/${slug}`, canonicalBaseUrl)
     // Preserve query params
     request.nextUrl.searchParams.forEach((value, key) => {
       newUrl.searchParams.set(key, value)

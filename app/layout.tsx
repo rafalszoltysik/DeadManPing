@@ -77,7 +77,7 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "DeadManPing",
-    "url": baseUrl,
+    "url": canonicalBaseUrl,
     "logo": {
       "@type": "ImageObject",
       "url": `${canonicalBaseUrl}/icon.png`,
@@ -93,7 +93,7 @@ export default function RootLayout({
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Support",
-      "url": `${baseUrl}/contact`
+      "url": `${canonicalBaseUrl}/contact`
     },
     "areaServed": "Worldwide",
     "paymentAccepted": "USD, EUR",
@@ -112,18 +112,18 @@ export default function RootLayout({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "DeadManPing",
-    "url": baseUrl,
+    "url": canonicalBaseUrl,
     "description": "Dead man switch monitoring for cron jobs and scheduled tasks. Monitor job outcomes, not just execution.",
     "publisher": {
       "@type": "Organization",
       "name": "DeadManPing",
-      "url": baseUrl
+      "url": canonicalBaseUrl
     },
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
         "@type": "EntryPoint",
-        "urlTemplate": `${baseUrl}/docs?q={search_term_string}`
+        "urlTemplate": `${canonicalBaseUrl}/docs?q={search_term_string}`
       },
       "query-input": "required name=search_term_string"
     },
