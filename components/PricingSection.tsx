@@ -171,19 +171,19 @@ export function PricingSection() {
                 </p>
                 <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     {starterPlan.monitors} monitors
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Min interval: {getIntervalText(starterPlan.minInterval)}
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Email alerts
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Slack/Discord integrations
                   </li>
                 </ul>
@@ -219,23 +219,23 @@ export function PricingSection() {
                 </p>
                 <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     {proPlan.monitors} monitors
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Min interval: {getIntervalText(proPlan.minInterval)}
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Email alerts
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Slack/Discord integrations
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Up to {proPlan.maxMembers} team members
                   </li>
                 </ul>
@@ -264,27 +264,27 @@ export function PricingSection() {
                 </p>
                 <ul className="space-y-2 sm:space-y-3 mb-6 flex-grow">
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     {teamPlan.monitors} monitors
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Min interval: {getIntervalText(teamPlan.minInterval)}
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Email alerts
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Slack/Discord integrations
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Custom webhooks
                   </li>
                   <li className="flex items-center text-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Up to {teamPlan.maxMembers} team members
                   </li>
                 </ul>

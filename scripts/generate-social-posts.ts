@@ -331,7 +331,7 @@ function main() {
     const needsThreads = !threadsExists && !isPublished.threads
     
     if (!needsHN && !needsX && !needsThreads) {
-      console.log(`⏭️  Skipping ${post.slug} - already generated/published`)
+      console.log(`Skipping ${post.slug} - already generated/published`)
       return
     }
 
@@ -340,7 +340,7 @@ function main() {
     // Generate Hacker News post
     if (needsHN) {
       const hnPost = generateHNPost(post)
-      const status = isPublished.hn ? '✅ Published' : '⏳ Not published'
+      const status = isPublished.hn ? 'Published' : 'Not published'
       const hnContent = `# ${hnPost.title}\n\n**Link:**\n${hnPost.url}\n\n**Instructions:**\n1. Go to https://news.ycombinator.com/submit\n2. Paste title in "title" field\n3. Paste link in "url" field\n4. Submit (no body text needed)\n5. Optionally add a comment after publishing if thread gets attention\n\n**Timing:** 12:00-14:00 UTC (13:00-15:00 CET) - wtorek-czwartek\n\n**Status:** ${status}\n`
       writeFileSync(join(postDir, 'hn.md'), hnContent, 'utf-8')
     }
@@ -348,7 +348,7 @@ function main() {
     // Generate Twitter/X post
     if (needsX) {
       const twitterPost = generateTwitterPost(post)
-      const status = isPublished.x ? '✅ Published' : '⏳ Not published'
+      const status = isPublished.x ? 'Published' : 'Not published'
       const xContent = `# Twitter/X Post\n\n**Post:**\n\`\`\`\n${twitterPost}\n\`\`\`\n\n**Length:** ${twitterPost.length} characters\n\n**Instructions:**\n1. Copy post above\n2. Paste directly into Twitter/X\n3. Adjust hashtags if needed (#DevOps #CronJobs #Monitoring)\n4. Post\n\n**Timing:** 14:00-19:00 UTC (15:00-20:00 CET)\n\n**Status:** ${status}\n`
       writeFileSync(join(postDir, 'x.md'), xContent, 'utf-8')
     }
@@ -356,13 +356,13 @@ function main() {
     // Generate Threads post
     if (needsThreads) {
       const threadsPost = generateThreadsPost(post)
-      const status = isPublished.threads ? '✅ Published' : '⏳ Not published'
+      const status = isPublished.threads ? 'Published' : 'Not published'
       const threadsContent = `# Threads Post\n\n**Post:**\n\`\`\`\n${threadsPost}\n\`\`\`\n\n**Length:** ${threadsPost.length} characters\n\n**Instructions:**\n1. Copy post above\n2. Paste directly into Threads\n3. Post\n\n**Timing:** 15:00-20:00 UTC (16:00-21:00 CET)\n\n**Status:** ${status}\n`
       writeFileSync(join(postDir, 'threads.md'), threadsContent, 'utf-8')
     }
 
     // Create README for this post
-    const readmeContent = `# Post ${postNum}: ${post.slug}\n\n**Title:** ${post.title}\n**Description:** ${post.description}\n**URL:** ${post.url}\n\n## Files\n\n- \`hn.md\` - Hacker News post ${isPublished.hn ? '✅ Published' : '⏳ Not published'}\n- \`x.md\` - Twitter/X post ${isPublished.x ? '✅ Published' : '⏳ Not published'}\n- \`threads.md\` - Threads post ${isPublished.threads ? '✅ Published' : '⏳ Not published'}\n\n## Mark as Published\n\nAfter publishing, update \`.published.json\`:\n\n\`\`\`json\n{\n  "${postKey}": {\n    "hn": true,\n    "x": true,\n    "threads": true\n  }\n}\n\`\`\`\n`
+    const readmeContent = `# Post ${postNum}: ${post.slug}\n\n**Title:** ${post.title}\n**Description:** ${post.description}\n**URL:** ${post.url}\n\n## Files\n\n- \`hn.md\` - Hacker News post ${isPublished.hn ? 'Published' : 'Not published'}\n- \`x.md\` - Twitter/X post ${isPublished.x ? 'Published' : 'Not published'}\n- \`threads.md\` - Threads post ${isPublished.threads ? 'Published' : 'Not published'}\n\n## Mark as Published\n\nAfter publishing, update \`.published.json\`:\n\n\`\`\`json\n{\n  "${postKey}": {\n    "hn": true,\n    "x": true,\n    "threads": true\n  }\n}\n\`\`\`\n`
     writeFileSync(join(postDir, 'README.md'), readmeContent, 'utf-8')
   })
 
@@ -373,8 +373,8 @@ function main() {
   const mainReadme = `# Social Media Posts\n\n**Generated:** ${new Date().toISOString()}\n**Total posts:** ${posts.length}\n**New posts:** ${newPostsCount}\n\n## Structure\n\nEach post has its own folder:\n- \`post-1/\` - First post\n- \`post-2/\` - Second post\n- etc.\n\nEach folder contains:\n- \`hn.md\` - Hacker News post\n- \`x.md\` - Twitter/X post\n- \`threads.md\` - Threads post\n- \`README.md\` - Post info and status\n\n## Tracking Published Posts\n\nEdit \`.published.json\` to mark posts as published:\n\n\`\`\`json\n{\n  "post-slug": {\n    "hn": true,\n    "x": true,\n    "threads": true\n  }\n}\n\`\`\`\n\nAfter marking as published, the script will skip generating those posts.\n`
   writeFileSync(join(outputDir, 'README.md'), mainReadme, 'utf-8')
 
-  console.log(`✅ Generated ${newPostsCount} new posts (${posts.length - newPostsCount} already published)`)
-  console.log(`📁 Output: ${outputDir}`)
+  console.log(`Generated ${newPostsCount} new posts (${posts.length - newPostsCount} already published)`)
+  console.log(`Output: ${outputDir}`)
   console.log(`\nNext steps:`)
   console.log(`1. Check social-posts/post-*/ folders`)
   console.log(`2. Copy content from hn.md, x.md, or threads.md`)

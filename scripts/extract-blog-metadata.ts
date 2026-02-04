@@ -144,8 +144,8 @@ export function getBlogMetadata(slug: string): Metadata | null {
   const outputPath = join(process.cwd(), 'lib', 'blog-metadata.ts')
   writeFileSync(outputPath, output, 'utf-8')
   
-  console.log(`✅ Extracted metadata for ${Object.keys(metadataMap).length} blog posts`)
-  console.log(`📄 Output: ${outputPath}`)
+  console.log(`Extracted metadata for ${Object.keys(metadataMap).length} blog posts`)
+  console.log(`Output: ${outputPath}`)
 }
 
 main()

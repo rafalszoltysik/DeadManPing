@@ -36,7 +36,7 @@ zone_name = "TWOJA_DOMENA.com"
   - Type: `AAAA`
   - Name: `api`
   - IPv6: `100::`
-  - Proxy: **ON** (pomarańczowa chmurka) ⚠️
+  - Proxy: **ON** (pomarańczowa chmurka)
 
 ### 6. Wdróż
 ```bash

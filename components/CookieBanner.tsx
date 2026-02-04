@@ -64,7 +64,7 @@ export function CookieBanner() {
             className="px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-foreground hover:text-foreground/80 transition-smooth flex-shrink-0"
             aria-label="Dismiss banner"
           >
-            ✕
+            Close
           </button>
         </div>
       </div>

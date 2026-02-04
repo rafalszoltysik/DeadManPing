@@ -180,38 +180,38 @@ export function BillingContent({ initialPlans, initialCurrency, initialAvailable
                 </p>
             <ul className="space-y-2 mb-6 flex-grow">
               <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                <span className="mr-2 text-success">✓</span>
+                <span className="mr-2 text-success">OK</span>
                 {plan.monitors} monitors
               </li>
               <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                <span className="mr-2 text-success">✓</span>
+                <span className="mr-2 text-success">OK</span>
                 Min interval: {plan.minInterval >= 60 ? `${plan.minInterval / 60} minutes` : `${plan.minInterval} seconds`}
               </li>
               <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                <span className="mr-2 text-success">✓</span>
+                <span className="mr-2 text-success">OK</span>
                 Email alerts
               </li>
               {(plan.key === 'starter' || plan.key === 'pro' || plan.key === 'team') && (
                 <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                  <span className="mr-2 text-success">✓</span>
+                  <span className="mr-2 text-success">OK</span>
                   Slack/Discord integrations
                 </li>
               )}
               {plan.key === 'team' && (
                 <>
                   <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Custom webhooks
                   </li>
                   <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                    <span className="mr-2 text-success">✓</span>
+                    <span className="mr-2 text-success">OK</span>
                     Up to {plan.maxMembers} team members
                   </li>
                 </>
               )}
               {plan.key === 'pro' && (
                 <li className="flex items-center text-sm sm:text-base text-muted-foreground">
-                  <span className="mr-2 text-success">✓</span>
+                  <span className="mr-2 text-success">OK</span>
                   Up to {plan.maxMembers} team members
                 </li>
               )}

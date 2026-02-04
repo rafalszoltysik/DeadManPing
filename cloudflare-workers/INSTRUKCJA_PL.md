@@ -120,7 +120,7 @@ zone_name = "deadmanping.com"
    - **Type**: `AAAA`
    - **Name**: `api` (lub inny subdomen, który chcesz użyć)
    - **IPv6 address**: `100::`
-   - **Proxy status**: **Proxied** (pomarańczowa chmurka) ⚠️ **TO JEST WAŻNE!**
+   - **Proxy status**: **Proxied** (pomarańczowa chmurka) **TO JEST WAŻNE!**
    - **TTL**: Auto
 6. Kliknij **Save**
 
@@ -282,10 +282,10 @@ npm run deploy
 
 ## Bezpieczeństwo
 
-- ✅ `SUPABASE_ANON_KEY` jest bezpieczny do użycia publicznie (respektuje RLS)
-- ✅ Worker automatycznie dodaje `apikey` header
-- ✅ CORS headers są konfigurowalne (domyślnie `*`)
-- ⚠️ **NIE** używaj `SUPABASE_SERVICE_ROLE_KEY` - to klucz z pełnymi uprawnieniami!
+- `SUPABASE_ANON_KEY` jest bezpieczny do użycia publicznie (respektuje RLS)
+- Worker automatycznie dodaje `apikey` header
+- CORS headers są konfigurowalne (domyślnie `*`)
+- **NIE** używaj `SUPABASE_SERVICE_ROLE_KEY` - to klucz z pełnymi uprawnieniami!
 
 ## Wsparcie
 

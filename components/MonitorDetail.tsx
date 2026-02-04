@@ -880,19 +880,19 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
               let statusText = ''
               
               if (isRunning) {
-                statusBadge = '⏳'
+                statusBadge = ''
                 statusClass = 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                 statusText = 'RUNNING'
               } else if (isCompleted) {
-                statusBadge = '✓'
+                statusBadge = ''
                 statusClass = 'bg-success/10 text-success border-success/20'
                 statusText = 'COMPLETED'
               } else if (isTimeout) {
-                statusBadge = '⚠️'
+                statusBadge = ''
                 statusClass = 'bg-warning/10 text-warning border-warning/20'
                 statusText = 'TIMEOUT'
               } else if (isFailed) {
-                statusBadge = '✗'
+                statusBadge = ''
                 statusClass = 'bg-error/10 text-error border-error/20'
                 statusText = 'FAILED'
               }
@@ -921,7 +921,7 @@ curl -X POST "${pingUrl}?run_id=$RUN_ID"`}
                           <p className="text-xs text-muted-foreground mt-1">
                             Running for: {Math.floor(runningDurationSeconds / 60)}m {runningDurationSeconds % 60}s
                             {exceedsMaxTime && (
-                              <span className="ml-2 text-warning">⚠️ Exceeds max execution time</span>
+                              <span className="ml-2 text-warning">WARNING: Exceeds max execution time</span>
                             )}
                           </p>
                         )}

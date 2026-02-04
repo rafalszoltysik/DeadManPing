@@ -468,7 +468,7 @@ export default function Home() {
                 <div className="bg-background border border-border rounded-lg p-6 sm:p-8 card-hover hover-lift-smooth">
                   <div className="flex items-center justify-center gap-4">
                     <div className="bg-primary/10 rounded-full w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center flex-shrink-0 transition-all duration-300 hover:bg-primary/20 hover:scale-110 hover:rotate-12">
-                      <span className="text-primary text-lg sm:text-xl font-bold transition-transform duration-300 hover:scale-125">✓</span>
+                      <span className="text-primary text-lg sm:text-xl font-bold transition-transform duration-300 hover:scale-125">OK</span>
                     </div>
                     <div className="text-center">
                       <p className="text-lg sm:text-xl font-semibold mb-2 transition-colors duration-300 hover:text-primary">
@@ -736,49 +736,49 @@ export default function Home() {
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '200ms' }}>
                       <td className="p-4 text-muted-foreground">Detect backup didn't run</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '250ms' }}>
                       <td className="p-4 text-muted-foreground">Detect empty backup file</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '275ms' }}>
                       <td className="p-4 text-muted-foreground">Inspect backup results</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '300ms' }}>
                       <td className="p-4 text-muted-foreground">Payload-based rules</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '350ms' }}>
                       <td className="p-4 text-muted-foreground">Thresholds in UI</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '400ms' }}>
                       <td className="p-4 text-muted-foreground">OK → FAIL tracking</td>
                       <td className="p-4 text-center">
-                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">✓</span>
+                        <span className="text-success text-xl transition-transform duration-200 hover:scale-125 inline-block">OK</span>
                       </td>
                     </tr>
                     <tr className="bg-background/50 transition-all duration-200 hover:bg-background/40 animate-fade-in" style={{ animationDelay: '450ms' }}>
                       <td className="p-4 text-muted-foreground">Requires SDK</td>
                       <td className="p-4 text-center">
-                        <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">✗</span>
+                        <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">NO</span>
                       </td>
                     </tr>
                     <tr className="transition-all duration-200 hover:bg-background/30 animate-fade-in" style={{ animationDelay: '500ms' }}>
                       <td className="p-4 text-muted-foreground">Requires code logic</td>
                       <td className="p-4 text-center">
-                        <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">✗</span>
+                        <span className="text-destructive text-xl transition-transform duration-200 hover:scale-125 inline-block">NO</span>
                       </td>
                     </tr>
                   </tbody>
@@ -849,7 +849,7 @@ export default function Home() {
                 <div className="bg-background border border-success/30 rounded-lg p-6 sm:p-8 h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-success/50">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-success text-xl">✓</span>
+                      <span className="text-success text-xl">OK</span>
                     </div>
                     <h3 className="text-xl font-semibold">Built for:</h3>
                   </div>
@@ -879,7 +879,7 @@ export default function Home() {
                 <div className="bg-background border border-error/30 rounded-lg p-6 sm:p-8 h-full transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-error/50">
                   <div className="flex items-center gap-3 mb-6">
                     <div className="w-10 h-10 rounded-lg bg-error/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-error text-xl">✗</span>
+                      <span className="text-error text-xl">NO</span>
                     </div>
                     <h3 className="text-xl font-semibold">Not for:</h3>
                   </div>

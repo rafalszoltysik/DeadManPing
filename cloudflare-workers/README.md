@@ -88,7 +88,7 @@ zone_name = "deadmanping.com"
    - **Type**: `AAAA`
    - **Name**: `api` (lub inny subdomen, który chcesz użyć)
    - **IPv6 address**: `100::`
-   - **Proxy status**: **Proxied** (pomarańczowa chmurka) ⚠️ **WAŻNE!**
+   - **Proxy status**: **Proxied** (pomarańczowa chmurka) **WAŻNE!**
    - **TTL**: Auto
 
 > **Uwaga**: `100::` to placeholder - traffic nigdy tam nie trafi, bo Worker przechwytuje go wcześniej. Ważne jest, żeby chmurka była **pomarańczowa** (Proxied), nie szara (DNS only).
@@ -271,10 +271,10 @@ Jeśli masz już kod używający Supabase URL:
 
 ## Bezpieczeństwo
 
-- ✅ `SUPABASE_ANON_KEY` jest bezpieczny do użycia publicznie (respektuje RLS)
-- ✅ Worker automatycznie dodaje `apikey` header
-- ✅ CORS headers są konfigurowalne (domyślnie `*`, możesz zmienić w kodzie)
-- ⚠️ **NIE** używaj `SUPABASE_SERVICE_ROLE_KEY` w Workerze - to klucz z pełnymi uprawnieniami!
+- `SUPABASE_ANON_KEY` jest bezpieczny do użycia publicznie (respektuje RLS)
+- Worker automatycznie dodaje `apikey` header
+- CORS headers są konfigurowalne (domyślnie `*`, możesz zmienić w kodzie)
+- **NIE** używaj `SUPABASE_SERVICE_ROLE_KEY` w Workerze - to klucz z pełnymi uprawnieniami!
 
 ## Wsparcie
 
