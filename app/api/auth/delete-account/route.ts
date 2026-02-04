@@ -1,8 +1,28 @@
+/**
+ * Immediate account deletion API endpoint (admin/internal use).
+ * 
+ * Permanently deletes user account, cancels Stripe subscriptions, and removes
+ * all associated data. Used for admin actions or internal cleanup. Requires
+ * authentication. Does not require confirmation token.
+ * 
+ * WARNING: This is a destructive operation. Use request-delete-account for
+ * user-initiated deletions with confirmation flow.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 
+/**
+ * Immediately deletes authenticated user's account.
+ * 
+ * Cancels Stripe subscriptions, deletes user data, and removes auth record.
+ * Side effects: Stripe API calls, DB deletions, user data removal.
+ * 
+ * @param request - HTTP request (unused, but required by Next.js)
+ * @returns Deletion result
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

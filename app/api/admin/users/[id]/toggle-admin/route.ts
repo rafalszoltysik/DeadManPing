@@ -1,9 +1,28 @@
+/**
+ * Admin status toggle API endpoint.
+ * 
+ * Allows administrators to grant or revoke admin privileges for other users.
+ * Prevents admins from modifying their own admin status. Updates user profile
+ * with admin flag. Requires admin authentication.
+ * 
+ * Does not handle workspace admin roles - only application admin status.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Toggles admin status for specified user.
+ * 
+ * Updates user profile with admin flag. Side effects: DB write (profiles table).
+ * 
+ * @param request - HTTP request with is_admin boolean in JSON body
+ * @param params - Route parameters with user ID
+ * @returns Update result
+ */
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

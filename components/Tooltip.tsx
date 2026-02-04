@@ -1,3 +1,14 @@
+/**
+ * Tooltip component with positioning and viewport boundary detection.
+ * 
+ * Displays contextual information on hover/focus with automatic positioning
+ * (top, bottom, left, right) and viewport boundary detection. Supports multiple
+ * variants (default, warning, info, error) with styled arrows. Includes delay
+ * and scroll/resize handling for dynamic positioning.
+ * 
+ * Does not handle tooltip content rendering - only positioning and display logic.
+ */
+
 'use client'
 
 import { useState, useRef, useEffect, useCallback } from 'react'
@@ -11,6 +22,19 @@ interface TooltipProps {
   className?: string
 }
 
+/**
+ * Renders tooltip with dynamic positioning and viewport detection.
+ * 
+ * Calculates position based on trigger element, adjusts for viewport boundaries,
+ * and handles scroll/resize events. Side effects: DOM measurements, event listeners.
+ * 
+ * @param content - Tooltip content (string or React node)
+ * @param children - Trigger element that shows tooltip on hover/focus
+ * @param variant - Visual variant (default, warning, info, error)
+ * @param position - Preferred position (top, bottom, left, right)
+ * @param delay - Delay before showing tooltip in milliseconds
+ * @param className - Additional CSS classes for trigger element
+ */
 export function Tooltip({ 
   content, 
   children, 
@@ -183,7 +207,11 @@ export function Tooltip({
   )
 }
 
-// Convenience component for warning tooltips
+/**
+ * Convenience component for warning tooltips.
+ * 
+ * Pre-configured Tooltip with warning variant styling.
+ */
 export function WarningTooltip({ content, children, ...props }: Omit<TooltipProps, 'variant'>) {
   return (
     <Tooltip content={content} variant="warning" {...props}>
@@ -192,7 +220,11 @@ export function WarningTooltip({ content, children, ...props }: Omit<TooltipProp
   )
 }
 
-// Convenience component for info tooltips
+/**
+ * Convenience component for info tooltips.
+ * 
+ * Pre-configured Tooltip with info variant styling.
+ */
 export function InfoTooltip({ content, children, ...props }: Omit<TooltipProps, 'variant'>) {
   return (
     <Tooltip content={content} variant="info" {...props}>

@@ -1,3 +1,13 @@
+/**
+ * Generic React hook for making API calls with state management.
+ * 
+ * Handles loading states, error handling, data transformation, and automatic
+ * error tracking to Sentry. Provides execute function for making requests and
+ * reset function for clearing state.
+ * 
+ * Does not handle authentication - redirects to login on 401 responses.
+ */
+
 import { useState, useCallback } from 'react'
 import { captureApiError } from '@/lib/sentry/client'
 
@@ -16,8 +26,13 @@ export interface UseApiResult<T> {
 }
 
 /**
- * Generic hook for making API calls
- * Handles loading state, error handling, and data transformation
+ * Executes API calls with loading state, error handling, and data transformation.
+ * 
+ * Tracks errors to Sentry, handles 401 redirects, and supports optional data
+ * transformation and success/error callbacks.
+ * 
+ * @param options - Configuration including callbacks and data transformer
+ * @returns API state (data, loading, error) and execute/reset functions
  */
 export function useApi<T = unknown>(
   options: UseApiOptions<T> = {}

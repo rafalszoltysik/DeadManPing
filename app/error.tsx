@@ -1,9 +1,28 @@
+/**
+ * Error boundary component for route-level error handling.
+ * 
+ * Client component that catches errors in route segments and displays
+ * error UI with retry option. Captures errors to Sentry for monitoring.
+ * Used by Next.js App Router for error boundaries.
+ * 
+ * Does not catch errors in root layout - see global-error.tsx for that.
+ */
+
 'use client'
 
 import { useEffect } from 'react'
 import Link from 'next/link'
 import { captureFrontendError } from '@/lib/sentry/client'
 
+/**
+ * Renders error boundary UI with retry functionality.
+ * 
+ * Displays error message and retry button. Side effects: Sentry error
+ * tracking.
+ * 
+ * @param error - Error object with optional digest
+ * @param reset - Function to retry rendering
+ */
 export default function Error({
   error,
   reset,

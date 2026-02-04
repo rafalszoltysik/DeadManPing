@@ -1,8 +1,24 @@
+/**
+ * Global error handler component for OAuth and authentication errors.
+ * 
+ * Monitors URL hash and query parameters for Supabase OAuth errors (e.g., expired
+ * OTP) and redirects to login page with appropriate error messages. Handles both
+ * hash-based (Supabase default) and query parameter error formats.
+ * 
+ * Does not handle React error boundaries - only URL-based error detection.
+ */
+
 'use client'
 
 import { useEffect } from 'react'
 import { logger } from '@/lib/logger'
 
+/**
+ * Monitors and handles authentication errors from URL parameters.
+ * 
+ * Checks for expired OTP and other auth errors, redirects to login with error
+ * messages. Side effects: URL parsing, redirects, logger calls.
+ */
 export function ErrorHandler() {
   useEffect(() => {
     // Check for OTP expired errors in URL hash and query params (Supabase redirects with hash)

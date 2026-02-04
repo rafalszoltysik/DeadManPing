@@ -1,3 +1,14 @@
+/**
+ * Blog article listing component with search and filtering.
+ * 
+ * Displays paginated list of blog articles with category filtering and search
+ * functionality. Supports featured articles highlighting and category-based
+ * organization. Integrates with BlogSearch and BlogCard components. Memoized
+ * for performance.
+ * 
+ * Does not fetch articles - receives them as props.
+ */
+
 'use client'
 
 import { useState, useMemo, memo } from 'react'

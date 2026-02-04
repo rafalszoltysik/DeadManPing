@@ -1,3 +1,13 @@
+/**
+ * Backup dead man switch marketing page.
+ * 
+ * Landing page specifically for backup monitoring use case. Includes feature
+ * highlights, code examples, and call-to-action. SEO optimized with structured
+ * data. Static generation with hourly revalidation.
+ * 
+ * Does not require authentication - public marketing page.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

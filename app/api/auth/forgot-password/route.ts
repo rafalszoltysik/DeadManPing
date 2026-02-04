@@ -1,7 +1,22 @@
+/**
+ * Password reset request endpoint.
+ * 
+ * Initiates password reset flow by sending reset email via Supabase Auth.
+ * Applies rate limiting per IP and email to prevent abuse. Does not reveal
+ * whether email exists in system (security best practice).
+ * 
+ * Does not reset password - only sends reset link. See reset-password route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Creates Supabase client for password reset operations.
+ * 
+ * @returns Supabase client with anon key
+ */
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -13,6 +28,15 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey)
 }
 
+/**
+ * Sends password reset email.
+ * 
+ * Validates email, checks rate limits, and triggers Supabase password reset email.
+ * Always returns success (doesn't reveal if email exists). Side effects: Email delivery, rate limiting.
+ * 
+ * @param request - HTTP request with email in JSON body
+ * @returns Success message (always, for security)
+ */
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()

@@ -1,18 +1,29 @@
+/**
+ * Combined cron job endpoint for Vercel Hobby plan (single cron job limit).
+ * 
+ * Executes two maintenance tasks: always checks monitor timeouts (every minute),
+ * and checks trial expiry once per day at midnight. Designed to work within
+ * Vercel Hobby plan's single cron job constraint.
+ * Integrates with Supabase for data updates and internal alert API for notifications.
+ * 
+ * Does not handle ping processing - only status updates and trial management.
+ */
+
 import { NextRequest } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { verifyCronSecret } from '@/lib/api/auth'
 import { shouldMarkAsLate, shouldMarkAsFailed } from '@/lib/monitor-utils'
 import { errorResponse, successResponse, unauthorizedResponse } from '@/lib/api/response'
 import { compareSecrets } from '@/lib/security'
-
 /**
- * Combined cron job endpoint for Vercel Hobby plan (1 cron job limit)
+ * Executes combined cron maintenance tasks for monitor timeouts and trial expiry.
  * 
- * This endpoint:
- * 1. Always checks monitor timeouts (critical - runs every minute)
- * 2. Additionally checks trial expiry once per day (at midnight)
+ * Always checks for late/failed monitors and updates their status. At midnight,
+ * also expires trials, sets grace periods, and blocks excess monitors.
+ * Side effects: DB writes (monitors, profiles, workspaces, pings), async alert triggers.
  * 
- * Schedule: * * * * * (every minute)
+ * @param request - HTTP request with Authorization header containing CRON_SECRET
+ * @returns Response with execution results for both tasks
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret

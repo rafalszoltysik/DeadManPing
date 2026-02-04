@@ -1,3 +1,13 @@
+/**
+ * Rate limiting utility with Redis backend and in-memory fallback.
+ * 
+ * Provides time-window based rate limiting using Upstash Redis for production
+ * (shared across serverless instances) and in-memory Map for development.
+ * Supports clearing rate limits and automatic cleanup of old entries.
+ * 
+ * Does not enforce rate limits - returns results for callers to handle.
+ */
+
 import { Redis } from '@upstash/redis'
 
 // In-memory fallback for development (when Redis is not configured)
@@ -14,12 +24,15 @@ if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) 
 }
 
 /**
- * Rate limiting utility with Redis support
- * Falls back to in-memory Map if Redis is not configured
+ * Checks if request is within rate limit window.
  * 
- * @param key - Unique key for rate limiting (e.g., `monitor:${monitorId}`)
+ * Uses Redis in production for shared state across serverless instances,
+ * falls back to in-memory store if Redis unavailable. Returns remaining
+ * time in window if rate limited.
+ * 
+ * @param key - Unique identifier for rate limiting (e.g., `monitor:${monitorId}`)
  * @param windowMs - Time window in milliseconds (e.g., 10000 for 10 seconds)
- * @returns true if allowed, false if rate limited
+ * @returns Result with allowed status and remaining time
  */
 export async function checkRateLimit(
   key: string,
@@ -76,9 +89,11 @@ export async function checkRateLimit(
 }
 
 /**
- * Clear a rate limit key (useful when an action completes successfully)
+ * Clears a rate limit key from both Redis and in-memory store.
  * 
- * @param key - The rate limit key to clear
+ * Useful when an action completes successfully and rate limit should be reset.
+ * 
+ * @param key - Rate limit key to clear
  */
 export async function clearRateLimit(key: string): Promise<void> {
   if (redisClient) {

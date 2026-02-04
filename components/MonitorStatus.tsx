@@ -1,3 +1,12 @@
+/**
+ * Monitor status badge components for UI display.
+ * 
+ * Provides reusable status badges with icons, labels, and customizable sizes.
+ * Used throughout the application to display monitor health status consistently.
+ * 
+ * Does not calculate status - uses status from monitor object.
+ */
+
 'use client'
 
 import { MonitorStatus as MonitorStatusType } from '@/lib/types/monitor'
@@ -35,6 +44,15 @@ const sizeClasses = {
   },
 }
 
+/**
+ * Renders monitor status badge with icon and label.
+ * 
+ * @param status - Monitor status value
+ * @param size - Badge size (sm, md, lg)
+ * @param showLabel - Whether to show status label
+ * @param showIcon - Whether to show status icon
+ * @param className - Additional CSS classes
+ */
 export function MonitorStatus({
   status,
   size = 'md',
@@ -79,6 +97,12 @@ interface MonitorStatusIconProps {
   className?: string
 }
 
+/**
+ * Renders only the status icon without badge styling.
+ * 
+ * @param status - Monitor status value
+ * @param className - CSS classes for icon sizing
+ */
 export function MonitorStatusIcon({ status, className = 'w-5 h-5' }: MonitorStatusIconProps) {
   const iconName = getStatusIconName(status)
   const iconProps = { className }
@@ -101,6 +125,13 @@ interface MonitorStatusBadgeProps {
   className?: string
 }
 
+/**
+ * Renders complete status badge (icon + label) with default styling.
+ * 
+ * @param status - Monitor status value
+ * @param size - Badge size (sm, md, lg)
+ * @param className - Additional CSS classes
+ */
 export function MonitorStatusBadge({
   status,
   size = 'md',

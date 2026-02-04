@@ -1,3 +1,13 @@
+/**
+ * Blog listing page with article search and filtering.
+ * 
+ * Server component that renders blog article listing with search and category
+ * filtering. Uses blog metadata for article information. Includes SEO metadata
+ * and structured data. Static generation with hourly revalidation.
+ * 
+ * Does not fetch articles dynamically - uses static blog metadata.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

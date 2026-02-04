@@ -1,8 +1,21 @@
-// This file configures the initialization of Sentry for server and edge runtimes.
-// https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/#create-initialization-config-files
+/**
+ * Server-side Sentry initialization for error tracking.
+ * 
+ * Configures Sentry for Node.js and Edge runtimes. Filters out expected
+ * errors (auth session issues, network timeouts), sets up error filtering,
+ * and configures integrations. Only initializes in production.
+ * 
+ * Does not handle client-side Sentry - see instrumentation-client.ts for that.
+ */
 
 import * as Sentry from "@sentry/nextjs";
 
+/**
+ * Registers Sentry for server and edge runtimes.
+ * 
+ * Initializes Sentry with error filtering and integrations. Side effects:
+ * Sentry initialization, error tracking setup.
+ */
 export async function register() {
   // Skip Sentry initialization in development
   if (process.env.NODE_ENV !== 'production') {

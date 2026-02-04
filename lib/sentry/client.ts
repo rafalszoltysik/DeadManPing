@@ -1,15 +1,22 @@
 /**
- * Sentry error tracking for client-side
+ * Sentry error tracking for client-side components and hooks.
  * 
- * IMPORTANT: This is SEPARATE from analytics (PostHog)
- * - Analytics = user behavior
- * - Error tracking = system failures
+ * Captures frontend errors, API errors, and soft errors with context.
+ * Separate from PostHog analytics (errors vs behavior). Disabled in development.
+ * 
+ * Does not track user behavior - see PostHog for analytics.
  */
 
 import * as Sentry from '@sentry/nextjs'
 
 /**
- * Capture a frontend error with context
+ * Captures frontend error with context for Sentry.
+ * 
+ * Adds route, action, and additional data as tags/context. Logs to console
+ * in development. Side effects: Sentry API call (production only).
+ * 
+ * @param error - Error object or unknown error
+ * @param context - Error context (route, action, additionalData)
  */
 export function captureFrontendError(
   error: Error | unknown,
@@ -55,7 +62,15 @@ export function captureFrontendError(
 }
 
 /**
- * Capture API error from frontend (4xx/5xx)
+ * Captures API error from frontend HTTP requests.
+ * 
+ * Filters out 404, 401, 403 (too noisy or expected). Only tracks 5xx and
+ * critical 4xx errors. Side effects: Sentry API call (production only).
+ * 
+ * @param route - API route that failed
+ * @param statusCode - HTTP status code
+ * @param error - Error object or message
+ * @param context - Additional context (action, requestBody)
  */
 export function captureApiError(
   route: string,
@@ -91,7 +106,13 @@ export function captureApiError(
 }
 
 /**
- * Capture soft error from frontend (product issue, not a bug)
+ * Captures soft error (product issue, not a bug) as warning.
+ * 
+ * Tracks user-facing issues that aren't code bugs (e.g., validation failures,
+ * business logic errors). Logs to console in development.
+ * 
+ * @param eventName - Soft error event name
+ * @param properties - Event properties (route, action, etc.)
  */
 export function captureSoftError(
   eventName: string,

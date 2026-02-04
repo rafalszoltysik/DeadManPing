@@ -1,3 +1,13 @@
+/**
+ * Workspace members management API endpoint.
+ * 
+ * Handles listing, adding, and removing workspace members. Supports both
+ * existing users (immediate addition) and invitations (via Supabase Auth).
+ * Enforces member limits, role-based permissions, and rate limiting.
+ * 
+ * Does not handle invitation acceptance - see members/accept-invitation route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
@@ -5,6 +15,11 @@ import { checkMemberLimit } from '@/lib/limits'
 import { getAppUrl } from '@/lib/get-app-url'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Creates Supabase admin client for database operations.
+ * 
+ * @returns Supabase client with service role key
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -21,7 +36,15 @@ function getSupabaseAdmin() {
   })
 }
 
-// GET: List workspace members
+/**
+ * Lists all workspace members and pending invitations.
+ * 
+ * Returns members with their roles, status, and profile information.
+ * Side effects: DB read (workspace_members, profiles).
+ * 
+ * @param request - HTTP request (unused)
+ * @returns Array of workspace members
+ */
 export async function GET(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin()
@@ -103,7 +126,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Add member to workspace
+/**
+ * Adds member to workspace or sends invitation.
+ * 
+ * If user exists, adds immediately. If not, sends invitation email via Supabase Auth.
+ * Checks member limits, validates permissions, and applies rate limiting.
+ * Side effects: DB write, email delivery (if invitation), rate limiting.
+ * 
+ * @param request - HTTP request with email in body
+ * @returns Created member or invitation record
+ */
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin()
@@ -374,7 +406,15 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE: Remove member from workspace
+/**
+ * Removes member from workspace.
+ * 
+ * Validates permissions (owner/admin only), prevents removing owner or last admin,
+ * and applies rate limiting. Side effects: DB delete, rate limiting.
+ * 
+ * @param request - HTTP request with memberId query parameter
+ * @returns Success status
+ */
 export async function DELETE(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin()

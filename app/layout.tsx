@@ -1,3 +1,13 @@
+/**
+ * Root layout component for Next.js application.
+ * 
+ * Defines global metadata, structured data (Organization, WebSite schemas),
+ * and wraps all pages with ThemeProvider and analytics. Sets dark mode as default.
+ * Includes cookie banner and client-side analytics wrapper.
+ * 
+ * Does not handle routing - Next.js App Router handles page routing.
+ */
+
 import type { Metadata } from "next";
 import "./globals.css";
 import { CookieBanner } from '@/components/CookieBanner'
@@ -64,6 +74,14 @@ export const metadata: Metadata = {
   classification: "Developer Tools, Monitoring Software",
 };
 
+/**
+ * Renders root HTML layout with metadata and global providers.
+ * 
+ * Includes structured data for SEO, theme provider, cookie banner, and analytics.
+ * 
+ * @param children - React children (page content)
+ * @returns Root HTML layout
+ */
 export default function RootLayout({
   children,
 }: Readonly<{

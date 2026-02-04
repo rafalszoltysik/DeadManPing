@@ -1,7 +1,24 @@
+/**
+ * Trial expiry and account cleanup cron job endpoint.
+ * 
+ * Expires trial periods after 14 days, sets grace periods, blocks excess monitors
+ * after grace period ends, and deletes unverified accounts older than 14 days.
+ * Updates monitor intervals to free tier minimums and cleans up webhook URLs.
+ * Integrates with Supabase for data updates and Stripe customer verification.
+ * 
+ * Does not handle monitor timeout checking - see check-timeouts endpoint.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { compareSecrets } from '@/lib/security'
 
+/**
+ * Creates Supabase admin client with service role key for elevated permissions.
+ * 
+ * @returns Supabase client with admin privileges
+ * @throws Error if environment variables are missing
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,17 +36,15 @@ function getSupabaseAdmin() {
 }
 
 /**
- * Cron job to check and expire trial periods and grace periods
+ * Executes trial expiry and account cleanup tasks.
  * 
- * This endpoint should be called daily (e.g., via Vercel Cron Jobs)
- * to automatically:
- * 1. Delete unverified accounts older than 7 days
- * 2. Expire trial periods after 14 days (set grace_period_ends_at to 7 days from now)
- * 3. Block oldest monitors after grace period ends
+ * Deletes unverified accounts older than 14 days, expires trials after 14 days,
+ * sets 7-day grace periods, blocks excess monitors after grace period ends,
+ * and adjusts monitor intervals to free tier minimums.
+ * Side effects: DB writes (profiles, workspaces, monitors), auth user deletion.
  * 
- * Usage:
- * GET /api/cron/check-trial-expiry
- * Headers: Authorization: Bearer {CRON_SECRET}
+ * @param request - HTTP request with Authorization header containing CRON_SECRET
+ * @returns Response with execution results and counts
  */
 export async function GET(request: NextRequest) {
   // Verify cron secret using timing-safe comparison

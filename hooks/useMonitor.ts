@@ -1,3 +1,13 @@
+/**
+ * React hook for fetching and polling monitor data with real-time status updates.
+ * 
+ * Provides monitor and ping history with automatic polling, client-side status
+ * calculation, and server synchronization when status changes. Used in monitor
+ * detail pages for live status display.
+ * 
+ * Does not handle monitor creation or updates - only data fetching and polling.
+ */
+
 import { useState, useEffect, useCallback } from 'react'
 import { Monitor, Ping } from '@/lib/types/monitor'
 import { checkMonitorStatus } from '@/lib/monitor-utils'
@@ -20,8 +30,14 @@ export interface UseMonitorResult {
 }
 
 /**
- * Hook for fetching and polling monitor data
- * Automatically checks monitor status and updates if needed
+ * Fetches and polls monitor data with automatic status checking.
+ * 
+ * Polls monitor endpoint at specified interval, calculates client-side status
+ * (late/failed), and syncs status changes to server. Handles authentication
+ * redirects and error states.
+ * 
+ * @param options - Configuration including slug, polling interval, and callbacks
+ * @returns Monitor data, pings, loading state, error, and refresh function
  */
 export function useMonitor(options: UseMonitorOptions): UseMonitorResult {
   const {

@@ -1,3 +1,13 @@
+/**
+ * Payload parsing utilities for monitor ping requests.
+ * 
+ * Extracts and parses payload data from HTTP requests across multiple formats
+ * (GET query params, POST JSON, form-urlencoded). Enforces size limits and
+ * type coercion. Used by ping endpoint to extract validation data from requests.
+ * 
+ * Does not validate payloads - see payload-validator.ts for validation logic.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 
 const MAX_PAYLOAD_SIZE = 2048 // 2KB
@@ -17,8 +27,15 @@ export interface ParsePayloadError {
 export type ParsePayloadResponse = ParsePayloadResult | ParsePayloadError
 
 /**
- * Parse payload from request based on HTTP method and content type
- * Supports GET/HEAD (query params), POST/PUT (JSON), and form-urlencoded
+ * Parses payload from HTTP request based on method and content type.
+ * 
+ * Handles GET/HEAD (query parameters), POST/PUT (JSON body), and form-urlencoded.
+ * Performs type coercion (string to number/boolean) and enforces size limits.
+ * Returns structured error responses for invalid payloads.
+ * 
+ * @param request - Next.js request object
+ * @param method - HTTP method (GET, POST, HEAD, etc.)
+ * @returns Parsed payload object or error response
  */
 export async function parsePayload(
   request: NextRequest,
@@ -94,8 +111,15 @@ export async function parsePayload(
 }
 
 /**
- * Extract only declared fields from payload based on validation rules
- * This ensures we only process fields that are configured in the monitor
+ * Extracts only fields declared in validation rules from payload.
+ * 
+ * Filters payload to include only fields that are configured in monitor's
+ * validation rules, ignoring all other fields. Ensures security and prevents
+ * processing of unexpected data.
+ * 
+ * @param payload - Full payload object from request
+ * @param validationRules - Monitor's validation rules configuration
+ * @returns Filtered payload containing only declared fields
  */
 export function extractDeclaredFields(
   payload: Record<string, any>,

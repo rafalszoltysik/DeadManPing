@@ -1,8 +1,24 @@
+/**
+ * Security utilities for timing-safe secret comparison.
+ * 
+ * Provides timing-safe string comparison to prevent timing attacks on
+ * secret/token validation. Uses constant-time comparison that always takes
+ * the same amount of time regardless of string content.
+ * 
+ * Does not handle encryption, hashing, or token generation - only comparison.
+ */
+
 import { timingSafeEqual } from 'crypto'
 
 /**
- * Timing-safe string comparison to prevent timing attacks
- * Use this for comparing secrets, tokens, passwords, etc.
+ * Performs timing-safe string comparison to prevent timing attacks.
+ * 
+ * Uses constant-time comparison for secrets, tokens, and passwords.
+ * Always takes same amount of time regardless of string content.
+ * 
+ * @param a - First string to compare
+ * @param b - Second string to compare
+ * @returns True if strings match, false otherwise
  */
 export function compareSecrets(a: string, b: string): boolean {
   try {
@@ -27,11 +43,4 @@ export function compareSecrets(a: string, b: string): boolean {
   }
 }
 
-/**
- * Generate cryptographically secure random string
- */
-export function generateSecureToken(bytes: number = 32): string {
-  const crypto = require('crypto')
-  return crypto.randomBytes(bytes).toString('hex')
-}
 

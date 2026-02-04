@@ -1,3 +1,13 @@
+/**
+ * User registration endpoint for email/password signup.
+ * 
+ * Creates new user account with Supabase Auth, validates password strength,
+ * checks for existing accounts, creates profile with trial status, and manages
+ * email verification flow. Integrates with Supabase, PostHog analytics, and Sentry.
+ * 
+ * Does not handle OAuth signup - see google route for OAuth registration.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
@@ -7,6 +17,16 @@ import { captureSignupCompleted, captureSignupFailed } from '@/lib/posthog/serve
 import { getAppUrl } from '@/lib/get-app-url'
 import { captureBackendError, captureApiError } from '@/lib/sentry/server'
 
+/**
+ * Creates a new user account with email and password.
+ * 
+ * Validates password strength, checks for existing accounts, creates Supabase Auth
+ * user and profile record, and establishes session. Handles email confirmation flow.
+ * Side effects: DB write (profiles), Supabase Auth user creation, analytics events.
+ * 
+ * @param request - HTTP request with email, password, and optional redirect in JSON body
+ * @returns Response with success status, redirect URL, and email confirmation requirement
+ */
 export async function POST(request: NextRequest) {
   try {
     const { email, password, redirect = '/dashboard' } = await request.json()

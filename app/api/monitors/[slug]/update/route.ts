@@ -1,3 +1,14 @@
+/**
+ * Monitor update and retrieval endpoint.
+ * 
+ * Handles GET (fetch monitor with pings), PUT (update configuration), and DELETE operations.
+ * Enforces optimistic locking to prevent concurrent modification conflicts.
+ * Validates tier limits, webhook URLs, and payload rules on updates.
+ * Integrates with Supabase for data access and analytics for deletion tracking.
+ * 
+ * Does not process pings - only manages monitor configuration.
+ */
+
 import { NextRequest } from 'next/server'
 import { validatePayloadRules } from '@/lib/payload-validator'
 import { checkIntervalLimitByWorkspace } from '@/lib/limits'
@@ -8,6 +19,17 @@ import { errorResponse, successResponse, conflictResponse, badRequestResponse } 
 import { validateWebhookUrl, validateCustomWebhookUrl } from '@/lib/webhooks-validator'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Retrieves monitor details with recent ping history.
+ * 
+ * Fetches monitor configuration and last 50 pings for display in dashboard.
+ * Verifies user has access to monitor via workspace membership.
+ * Side effects: DB read (monitors, pings).
+ * 
+ * @param request - HTTP request object
+ * @param params - Route parameters with monitor slug
+ * @returns Response with monitor and pings array
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -47,6 +69,18 @@ export async function GET(
   }
 }
 
+/**
+ * Updates monitor configuration with optimistic locking.
+ * 
+ * Validates all input fields, checks tier limits, and updates monitor record.
+ * Uses optimistic locking (expectedUpdatedAt) to prevent concurrent modification conflicts.
+ * Can trigger alerts if status changes to late/failed (for timeout checker integration).
+ * Side effects: DB write (monitors, pings), async alert triggers, analytics.
+ * 
+ * @param request - HTTP request with update fields in JSON body
+ * @param params - Route parameters with monitor slug
+ * @returns Response with updated monitor or conflict error
+ */
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -302,6 +336,17 @@ export async function PUT(
   }
 }
 
+/**
+ * Deletes a monitor and all associated data.
+ * 
+ * Removes monitor record (cascades to pings and alerts via DB constraints).
+ * Verifies user access before deletion. Tracks deletion event for analytics.
+ * Side effects: DB delete (monitors cascade), analytics event.
+ * 
+ * @param request - HTTP request object
+ * @param params - Route parameters with monitor slug
+ * @returns Response confirming deletion
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

@@ -1,3 +1,13 @@
+/**
+ * Monitor detail page component with real-time status updates.
+ * 
+ * Displays monitor configuration, ping history, job runs, and curl command examples.
+ * Polls for updates, calculates client-side status, and syncs status changes to server.
+ * Handles monitor deletion, interval settings, payload validation, and alert channels.
+ * 
+ * Does not handle monitor creation - see monitors/new page for that.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -18,6 +28,12 @@ import { MonitorIntervalSettings } from './MonitorIntervalSettings'
 import { MonitorPayloadValidation } from './MonitorPayloadValidation'
 import { MonitorAlertChannels } from './MonitorAlertChannels'
 
+/**
+ * Returns status icon component for monitor status.
+ * 
+ * @param status - Monitor status value
+ * @returns React icon component
+ */
 function getStatusIcon(status: string) {
   switch (status) {
     case 'healthy':
@@ -30,21 +46,6 @@ function getStatusIcon(status: string) {
       return <StatusPendingIcon className="w-5 h-5" />
     default:
       return <StatusPendingIcon className="w-5 h-5" />
-  }
-}
-
-function getStatusColor(status: string) {
-  switch (status) {
-    case 'healthy':
-      return 'bg-success/10 text-success border-success/20'
-    case 'late':
-      return 'bg-warning/10 text-warning border-warning/20'
-    case 'failed':
-      return 'bg-error/10 text-error border-error/20'
-    case 'paused':
-      return 'bg-muted text-muted-foreground border-border'
-    default:
-      return 'bg-muted text-muted-foreground border-border'
   }
 }
 
@@ -83,6 +84,12 @@ type CurlCommands =
       examplePayload: null
     }
 
+/**
+ * Returns human-readable label for monitor status.
+ * 
+ * @param status - Monitor status value
+ * @returns Display label string
+ */
 function getStatusLabel(status: string) {
   switch (status) {
     case 'healthy':
@@ -99,6 +106,20 @@ function getStatusLabel(status: string) {
 }
 
 
+/**
+ * Main monitor detail component with configuration and history display.
+ * 
+ * Manages monitor state, polling, status calculation, and sub-component rendering.
+ * Handles deletion, updates, and displays curl command examples based on monitor configuration.
+ * Side effects: API polling, status sync to server, tier polling.
+ * 
+ * @param initialMonitor - Initial monitor data from server
+ * @param initialPings - Initial ping history
+ * @param initialJobRuns - Initial job run history
+ * @param pingUrl - Ping endpoint URL for curl examples
+ * @param isOnboarding - Whether user is in onboarding flow
+ * @param initialUserTier - User's subscription tier
+ */
 export function MonitorDetail({ monitor: initialMonitor, pings: initialPings, jobRuns: initialJobRuns = [], pingUrl, isOnboarding, userTier: initialUserTier = 'free' }: MonitorDetailProps) {
   const [monitor, setMonitor] = useState(initialMonitor)
   const [pings, setPings] = useState(initialPings)

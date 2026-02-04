@@ -1,29 +1,50 @@
+/**
+ * Subscription tier limits and validation utilities.
+ * 
+ * Defines limits for monitors, intervals, and team members per subscription tier.
+ * Provides functions to check limits by workspace (preferred) or user ID (legacy).
+ * Handles grace period logic for trial expiration and downgrades.
+ * 
+ * Does not enforce limits - returns validation results for callers to handle.
+ */
+
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
+/**
+ * Subscription tier limits configuration.
+ * Defines monitors, minimum intervals, and max members per tier.
+ */
 export const TIER_LIMITS = {
   free: {
-    monitors: 20,  // Updated from 10 (Option A: Aggressive pricing)
-    minInterval: 300, // 5 minutes
+    monitors: 20,
+    minInterval: 300,
     maxMembers: 1,
   },
   starter: {
-    monitors: 30,  // Updated from 25
-    minInterval: 300, // 5 minutes
+    monitors: 30,
+    minInterval: 300, 
     maxMembers: 1,
   },
   pro: {
-    monitors: 150,  // Updated from 100
-    minInterval: 60, // 1 minute
+    monitors: 150,
+    minInterval: 60,
     maxMembers: 3,
   },
   team: {
-    monitors: 1000,  // Updated from 500
-    minInterval: 60, // 1 minute (cron checks every 60s, so 30s interval is not achievable)
+    monitors: 1000,
+    minInterval: 60,
     maxMembers: 10,
   },
 } as const
 
-// Legacy support: check by userId (for backward compatibility)
+/**
+ * Checks monitor count limit for a user (legacy, workspace-based preferred).
+ * 
+ * Falls back to profile tier if no workspace exists. Counts only active monitors.
+ * 
+ * @param userId - User identifier
+ * @returns Limit check result with current count and tier
+ */
 export async function checkMonitorLimit(userId: string): Promise<{
   allowed: boolean
   current: number
@@ -67,7 +88,15 @@ export async function checkMonitorLimit(userId: string): Promise<{
   return checkMonitorLimitByWorkspace(workspace.id)
 }
 
-// New: check by workspaceId
+/**
+ * Checks monitor count limit for a workspace (preferred method).
+ * 
+ * Respects grace period - allows creation if within grace period even if over limit.
+ * Counts only active monitors (excludes paused).
+ * 
+ * @param workspaceId - Workspace identifier
+ * @returns Limit check result with grace period status
+ */
 export async function checkMonitorLimitByWorkspace(workspaceId: string): Promise<{
   allowed: boolean
   current: number
@@ -117,6 +146,13 @@ export async function checkMonitorLimitByWorkspace(workspaceId: string): Promise
   }
 }
 
+/**
+ * Checks minimum interval limit for a user (legacy, workspace-based preferred).
+ * 
+ * @param userId - User identifier
+ * @param intervalSeconds - Requested interval in seconds
+ * @returns Limit check result with minimum allowed interval
+ */
 export async function checkIntervalLimit(
   userId: string,
   intervalSeconds: number
@@ -152,7 +188,13 @@ export async function checkIntervalLimit(
   return checkIntervalLimitByWorkspace(workspace.id, intervalSeconds)
 }
 
-// New: check interval by workspaceId
+/**
+ * Checks minimum interval limit for a workspace (preferred method).
+ * 
+ * @param workspaceId - Workspace identifier
+ * @param intervalSeconds - Requested interval in seconds
+ * @returns Limit check result with minimum allowed interval
+ */
 export async function checkIntervalLimitByWorkspace(
   workspaceId: string,
   intervalSeconds: number
@@ -175,7 +217,12 @@ export async function checkIntervalLimitByWorkspace(
   }
 }
 
-// Check member limit
+/**
+ * Checks team member limit for a workspace.
+ * 
+ * @param workspaceId - Workspace identifier
+ * @returns Limit check result with current member count
+ */
 export async function checkMemberLimit(workspaceId: string): Promise<{
   allowed: boolean
   current: number

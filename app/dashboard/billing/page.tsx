@@ -1,3 +1,14 @@
+/**
+ * Billing management page for subscription plans.
+ * 
+ * Server component that fetches Stripe pricing data and renders billing
+ * management interface. Detects currency from request headers, handles
+ * price fetching errors gracefully, and passes data to BillingContent.
+ * Requires authentication.
+ * 
+ * Does not handle payment processing - Stripe Checkout handles that.
+ */
+
 import { Suspense } from 'react'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
@@ -7,6 +18,12 @@ import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 import { headers } from 'next/headers'
 import { BillingContent } from '@/components/BillingContent'
 
+/**
+ * Fetches billing data and renders billing content.
+ * 
+ * Detects currency, fetches Stripe prices, and prepares plan data.
+ * Side effects: Stripe API calls (cached), database queries.
+ */
 async function BillingPageContent() {
   const user = await getSupabaseUser()
 

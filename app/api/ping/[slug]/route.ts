@@ -1,3 +1,13 @@
+/**
+ * Core ping endpoint for monitor heartbeat tracking.
+ * 
+ * Handles GET, POST, and HEAD requests to receive pings from cron jobs and update monitor status.
+ * Validates payloads, tracks job runs, calculates monitor health status, and triggers alerts.
+ * Integrates with Supabase for data persistence, rate limiting, and analytics tracking.
+ * 
+ * Does not handle authentication (public endpoint) but enforces rate limits and subscription checks.
+ */
+
 import { NextRequest } from 'next/server'
 import { validatePayload } from '@/lib/payload-validator'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -9,6 +19,13 @@ import { captureBackendError, captureApiError, captureSoftError } from '@/lib/se
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Handles GET requests for ping endpoint.
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters containing monitor slug
+ * @returns Response with ping result
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -17,6 +34,13 @@ export async function GET(
   return handlePing(request, slug, 'GET')
 }
 
+/**
+ * Handles POST requests for ping endpoint with optional payload.
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters containing monitor slug
+ * @returns Response with ping result
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -25,6 +49,13 @@ export async function POST(
   return handlePing(request, slug, 'POST')
 }
 
+/**
+ * Handles HEAD requests for ping endpoint (lightweight check).
+ * 
+ * @param request - Next.js request object
+ * @param params - Route parameters containing monitor slug
+ * @returns Response with ping result
+ */
 export async function HEAD(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }
@@ -33,6 +64,18 @@ export async function HEAD(
   return handlePing(request, slug, 'HEAD')
 }
 
+/**
+ * Core ping handler that processes heartbeat signals from cron jobs.
+ * 
+ * Validates monitor existence, subscription status, rate limits, and payload rules.
+ * Updates monitor status (pending/healthy/late/failed), tracks job runs, and triggers alerts.
+ * Side effects: DB writes (monitors, pings, job_runs), analytics events, async alert triggers.
+ * 
+ * @param request - HTTP request object
+ * @param slug - Monitor identifier slug
+ * @param method - HTTP method used (GET/POST/HEAD)
+ * @returns JSON response with ping result
+ */
 async function handlePing(
   request: NextRequest,
   slug: string,

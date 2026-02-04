@@ -1,21 +1,26 @@
+/**
+ * Test endpoint for verifying Stripe connection and configuration.
+ * 
+ * Development/testing utility to check Stripe API connectivity, verify API keys,
+ * and validate product/price ID configuration. Returns detailed connection status
+ * and configuration information.
+ * 
+ * SECURITY: Disabled in production. No authentication required (test endpoint).
+ */
+
 import { NextResponse } from 'next/server'
 import { stripe, PRICING_PLANS } from '@/lib/stripe'
 
-/**
- * Test endpoint to verify Stripe connection and configuration
- * 
- * Usage:
- * GET /api/test/stripe-connection
- * 
- * This endpoint checks:
- * - If Stripe API keys are configured
- * - If connection to Stripe works
- * - If products/price IDs are configured correctly
- * 
- * SECURITY: This endpoint is disabled in production
- */
 export const dynamic = 'force-dynamic'
 
+/**
+ * Verifies Stripe connection and returns configuration status.
+ * 
+ * Tests API connectivity, validates keys, and checks product/price configuration.
+ * Side effects: Stripe API calls (test mode).
+ * 
+ * @returns Stripe connection and configuration status
+ */
 export async function GET() {
   // Block in production - check both NODE_ENV and VERCEL_ENV for safety
   const isProduction = process.env.NODE_ENV === 'production' || 

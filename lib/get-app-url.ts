@@ -1,12 +1,19 @@
 /**
- * Get the application URL based on environment
- * - Uses NEXT_PUBLIC_APP_URL if set
- * - Falls back to VERCEL_URL for Vercel deployments
- * - Falls back to localhost for development
- * - Uses production domain for production
+ * Application URL resolution utility.
  * 
- * IMPORTANT: The returned URL must be in Supabase Redirect URLs list
- * for emailRedirectTo to work properly.
+ * Determines application base URL based on environment variables and deployment
+ * platform. Used for email redirects, OAuth callbacks, and absolute URL generation.
+ * Must match Supabase Redirect URLs configuration.
+ * 
+ * Does not validate URL format - assumes environment variables are correct.
+ */
+
+/**
+ * Gets application base URL from environment or deployment platform.
+ * 
+ * Priority: NEXT_PUBLIC_APP_URL > VERCEL_URL > production domain > localhost.
+ * 
+ * @returns Application base URL (e.g., https://deadmanping.com)
  */
 export function getAppUrl(): string {
   // If explicitly set, use it

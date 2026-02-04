@@ -1,3 +1,14 @@
+/**
+ * Profile settings component for user account management.
+ * 
+ * Handles Google OAuth account linking and password management. Displays
+ * current authentication methods and allows adding password to OAuth accounts
+ * or linking Google to email accounts. Integrates with PasswordSettings component.
+ * Memoized for performance.
+ * 
+ * Does not handle email changes - only authentication method management.
+ */
+
 'use client'
 
 import React, { useState, useCallback } from 'react'

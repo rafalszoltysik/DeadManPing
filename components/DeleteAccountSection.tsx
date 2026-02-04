@@ -1,3 +1,13 @@
+/**
+ * Account deletion section component for settings page.
+ * 
+ * Initiates account deletion flow by requesting deletion token via email.
+ * Shows confirmation prompt and handles deletion request state. Does not
+ * immediately delete account - requires email confirmation. Memoized for performance.
+ * 
+ * Does not delete account - only initiates deletion request flow.
+ */
+
 'use client'
 
 import React, { useState, useCallback } from 'react'
@@ -7,6 +17,14 @@ interface DeleteAccountSectionProps {
   email: string
 }
 
+/**
+ * Renders account deletion section with confirmation flow.
+ * 
+ * Requests deletion token and sends confirmation email. Side effects:
+ * API calls, email sending.
+ * 
+ * @param email - User's email address for deletion confirmation
+ */
 export const DeleteAccountSection = React.memo(function DeleteAccountSection({ email }: DeleteAccountSectionProps) {
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false)
   const [deleteAccountError, setDeleteAccountError] = useState<string | null>(null)

@@ -1,3 +1,13 @@
+/**
+ * Client-side pricing section wrapper with skeleton loader.
+ * 
+ * Dynamically imports PricingSection component with loading skeleton to reduce
+ * initial bundle size. Client-side only (no SSR) since it fetches prices from
+ * Stripe API. Used in lazy-loaded pricing sections.
+ * 
+ * Does not fetch prices immediately - loads component on demand.
+ */
+
 'use client'
 
 import dynamic from 'next/dynamic'
@@ -18,6 +28,11 @@ const PricingSection = dynamic(() => import('@/components/PricingSection').then(
   ssr: false, // Client-side only since it fetches prices
 })
 
+/**
+ * Wraps pricing section with skeleton loader.
+ * 
+ * @returns Lazy-loaded PricingSection with loading state
+ */
 export default function PricingSectionClient() {
   return <PricingSection />
 }

@@ -1,3 +1,13 @@
+/**
+ * New monitor creation page.
+ * 
+ * Server component that fetches user tier (workspace or profile) and renders
+ * monitor creation form. Redirects unauthenticated users to login. Tier is
+ * used to enforce limits in the form component.
+ * 
+ * Does not handle form submission - delegated to NewMonitorForm client component.
+ */
+
 import { Suspense } from 'react'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
@@ -6,6 +16,12 @@ import { TIER_LIMITS } from '@/lib/limits'
 import { NewMonitorForm } from './NewMonitorForm'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Fetches user tier and renders monitor creation form.
+ * 
+ * Checks workspace tier first, falls back to profile tier. Side effects:
+ * database queries for workspace and profile.
+ */
 async function NewMonitorPageContent() {
   const user = await getSupabaseUser()
 

@@ -1,3 +1,13 @@
+/**
+ * User signup page with email/password and Google OAuth registration.
+ * 
+ * Client component handling signup form, password validation, OAuth flow,
+ * email confirmation flow, and security checks (removes credentials from URL).
+ * Tracks signup events for analytics. Redirects to dashboard or billing page.
+ * 
+ * Does not handle user creation - delegated to /api/auth/signup API route.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -10,6 +20,13 @@ import { InfoTooltip, WarningTooltip } from '@/components/Tooltip'
 import { InfoIcon, WarningIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Signup page component with form state and validation.
+ * 
+ * Handles email/password signup, Google OAuth, password strength validation,
+ * email confirmation flow, and analytics tracking. Side effects: API calls,
+ * redirects, OAuth navigation, PostHog events.
+ */
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

@@ -1,8 +1,24 @@
+/**
+ * Stripe Customer Portal session creation endpoint.
+ * 
+ * Creates a Stripe Customer Portal session for managing subscriptions, payment methods,
+ * and billing history. Requires existing Stripe customer ID from workspace or profile.
+ * Integrates with Stripe API and Supabase for customer lookup.
+ * 
+ * Does not create subscriptions - only provides access to existing customer portal.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createCustomerPortalSession } from '@/lib/stripe'
 
+/**
+ * Creates Supabase admin client with service role key.
+ * 
+ * @returns Supabase client with admin privileges
+ * @throws Error if environment variables are missing
+ */
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,6 +35,17 @@ function getSupabaseClient() {
   })
 }
 
+/**
+ * Creates a Stripe Customer Portal session for subscription management.
+ * 
+ * Retrieves Stripe customer ID from workspace (preferred) or profile, then creates
+ * portal session. Users can manage subscriptions, update payment methods, and view
+ * billing history through the portal.
+ * Side effects: DB read (workspaces, profiles), Stripe API call.
+ * 
+ * @param request - HTTP request object
+ * @returns Response with portal session URL or error
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

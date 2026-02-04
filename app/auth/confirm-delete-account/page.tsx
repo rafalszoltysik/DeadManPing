@@ -1,3 +1,14 @@
+/**
+ * Account deletion confirmation page with token validation.
+ * 
+ * Client component that validates deletion token from email link and allows
+ * users to confirm account deletion. Includes deletion reason collection for
+ * feedback. Validates token, shows confirmation steps, and executes deletion.
+ * Used after user clicks deletion link from email.
+ * 
+ * Does not send deletion emails - see request-delete-account API for that.
+ */
+
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -5,6 +16,12 @@ import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 
+/**
+ * Renders account deletion confirmation form with token validation.
+ * 
+ * Validates token from URL, collects deletion reason, and executes deletion.
+ * Side effects: API calls, account deletion, subscription cancellation.
+ */
 function ConfirmDeleteAccountForm() {
   const searchParams = useSearchParams()
   const router = useRouter()

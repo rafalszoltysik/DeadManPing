@@ -1,3 +1,13 @@
+/**
+ * Admin users management table component.
+ * 
+ * Displays paginated table of all users with search, filtering, and admin
+ * status management. Supports user deletion, admin status toggling, and
+ * pagination. Used in admin dashboard for user management.
+ * 
+ * Does not handle authentication - requires admin access via middleware.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

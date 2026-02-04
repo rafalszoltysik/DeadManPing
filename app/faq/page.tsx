@@ -1,3 +1,13 @@
+/**
+ * Frequently Asked Questions page.
+ * 
+ * Static page displaying FAQ sections with accordion interface. Includes
+ * questions about getting started, pricing, features, and technical details.
+ * SEO optimized with metadata. Static generation with hourly revalidation.
+ * 
+ * Does not fetch FAQ data dynamically - uses static FAQ content.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

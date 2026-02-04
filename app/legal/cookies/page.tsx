@@ -1,8 +1,21 @@
+/**
+ * Cookie Policy page.
+ * 
+ * Static page displaying cookie policy and analytics usage information.
+ * Includes details about cookie types, analytics tracking, and user opt-out
+ * options. Static generation for performance.
+ * 
+ * Does not handle cookie consent - only displays policy.
+ */
+
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 
+/**
+ * Renders cookie policy page.
+ */
 export default function CookiesPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">

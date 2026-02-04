@@ -1,3 +1,13 @@
+/**
+ * PostHog page view tracking component.
+ * 
+ * Automatically tracks page navigation events for PostHog analytics. Waits for
+ * PostHog initialization, debounces rapid navigation, and includes UTM parameter
+ * tracking. Used in AnalyticsWrapper for automatic page view tracking.
+ * 
+ * Does not track errors - see Sentry for error tracking.
+ */
+
 'use client'
 
 import { useEffect, useRef } from 'react'
@@ -7,8 +17,12 @@ import { capturePageView, isPostHogEnabled } from '@/lib/posthog/client'
 let debounceTimer: NodeJS.Timeout | null = null
 
 /**
- * Wait for PostHog to be ready before capturing page view
- * Retries up to 10 times with 200ms intervals (max 2 seconds wait)
+ * Waits for PostHog to be ready before capturing page view.
+ * 
+ * Retries up to 10 times with 200ms intervals (max 2 seconds wait).
+ * 
+ * @param callback - Function to call when PostHog is ready
+ * @param retries - Number of retries remaining
  */
 function waitForPostHog(callback: () => void, retries = 10): void {
   if (isPostHogEnabled()) {
@@ -23,6 +37,13 @@ function waitForPostHog(callback: () => void, retries = 10): void {
   }
 }
 
+/**
+ * Tracks page views for PostHog analytics.
+ * 
+ * Monitors pathname and search params changes, debounces rapid navigation,
+ * and captures page view events with UTM parameter tracking. Side effects:
+ * PostHog API calls, localStorage checks.
+ */
 export function PostHogPageView() {
   const pathname = usePathname()
   const searchParams = useSearchParams()

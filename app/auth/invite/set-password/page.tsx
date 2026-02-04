@@ -1,3 +1,14 @@
+/**
+ * Password setup page for workspace invitations.
+ * 
+ * Client component that allows users invited to workspace to set their
+ * password. Validates invitation token, enforces password strength, and
+ * completes invitation acceptance. Used when users click invitation links
+ * and need to create account password.
+ * 
+ * Does not handle workspace invitation - only password setup for invited users.
+ */
+
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -10,6 +21,12 @@ import { InfoTooltip } from '@/components/Tooltip'
 import { InfoIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Renders password setup form for invited users.
+ * 
+ * Validates invitation token, enforces password strength, and sets password.
+ * Side effects: Supabase Auth API calls, password creation, invitation acceptance.
+ */
 function SetPasswordForm() {
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')

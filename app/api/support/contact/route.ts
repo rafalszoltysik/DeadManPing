@@ -1,8 +1,23 @@
+/**
+ * Support contact form API endpoint.
+ * 
+ * Handles support requests from authenticated and public users. Validates input,
+ * applies rate limiting (stricter for public users), and sends email via Resend
+ * to configured receiving address. Supports both dashboard and public contact forms.
+ * 
+ * Does not store messages in database - only sends email.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Creates Resend client for email delivery.
+ * 
+ * @returns Resend client instance
+ */
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -16,6 +31,15 @@ function getResendClient() {
 // REQUIRED: Set RESEND_RECEIVING_EMAIL environment variable
 // No fallback - this must be configured in your environment
 
+/**
+ * Processes support contact form submission.
+ * 
+ * Validates email, subject, and message. Applies rate limiting per user/IP/email.
+ * Sends formatted email to Resend receiving address. Side effects: Email delivery, rate limiting.
+ * 
+ * @param request - HTTP request with subject, message, and optional email (for public users)
+ * @returns Success message or error
+ */
 export async function POST(request: NextRequest) {
   try {
     // Validate required environment variable

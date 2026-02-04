@@ -1,3 +1,13 @@
+/**
+ * Monitors listing page for user dashboard.
+ * 
+ * Server component that fetches all monitors for user's workspaces and renders
+ * monitor list. Checks monitor limits, displays warnings if exceeded, and shows
+ * account linking banner if applicable. Requires authentication.
+ * 
+ * Does not handle monitor creation - see monitors/new page for that.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -8,6 +18,12 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AccountLinkedBanner } from '@/components/AccountLinkedBanner'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Renders monitors listing page with workspace data.
+ * 
+ * Fetches monitors from all user's workspaces, checks limits, and displays
+ * warnings. Side effects: database queries, limit checks.
+ */
 export default async function MonitorsPage() {
   const user = await getSupabaseUser()
 

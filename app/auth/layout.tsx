@@ -1,3 +1,13 @@
+/**
+ * Authentication layout component with metadata.
+ * 
+ * Wraps all authentication pages (login, signup, password reset) with
+ * consistent metadata. Sets noindex/nofollow for SEO. Does not add any
+ * visual layout - only provides metadata.
+ * 
+ * Does not handle authentication - only provides metadata wrapper.
+ */
+
 import type { Metadata } from 'next'
 
 // Default metadata for auth pages

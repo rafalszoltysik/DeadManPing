@@ -1,5 +1,20 @@
+/**
+ * XML sitemap generator for search engines.
+ * 
+ * Defines all public pages with priorities and change frequencies for SEO.
+ * Includes landing pages, blog posts, documentation, and legal pages.
+ * Used by Next.js App Router for /sitemap.xml route.
+ * 
+ * Does not handle dynamic blog posts - only static pages.
+ */
+
 import { MetadataRoute } from 'next'
 
+/**
+ * Generates XML sitemap with all public pages.
+ * 
+ * @returns Sitemap entries with URLs, priorities, and change frequencies
+ */
 export default function sitemap(): MetadataRoute.Sitemap {
   let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
   // Ensure baseUrl is without www for SEO consistency

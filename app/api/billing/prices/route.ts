@@ -1,9 +1,28 @@
+/**
+ * API route for fetching subscription prices (authenticated).
+ * 
+ * Returns pricing plans with currency detection and Stripe price lookup.
+ * Falls back to environment variables if Stripe prices unavailable.
+ * Requires authentication - used in dashboard settings.
+ * 
+ * Does not handle checkout - see create-checkout route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-prices'
 import { PLAN_FEATURES } from '@/lib/stripe'
 import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 
+/**
+ * Returns pricing plans for authenticated user.
+ * 
+ * Detects currency from headers or query param, fetches Stripe prices,
+ * and returns plans with features. Side effects: Stripe API call (cached).
+ * 
+ * @param request - HTTP request with optional currency query param
+ * @returns Pricing plans with currency information
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

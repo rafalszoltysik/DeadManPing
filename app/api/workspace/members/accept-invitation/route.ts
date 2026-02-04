@@ -1,8 +1,24 @@
+/**
+ * Workspace invitation acceptance API endpoint.
+ * 
+ * Handles workspace invitation acceptance via token. Validates invitation token,
+ * creates workspace membership, and updates user profile. Includes rate limiting
+ * and token expiration checks. Used when users click invitation links.
+ * 
+ * Does not send invitations - see workspace/members route for that.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Creates Supabase admin client for workspace operations.
+ * 
+ * @returns Supabase client with service role
+ * @throws Error if environment variables not configured
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,6 +35,15 @@ function getSupabaseAdmin() {
   })
 }
 
+/**
+ * Accepts workspace invitation using token.
+ * 
+ * Validates token, creates membership, and updates user profile. Side effects:
+ * DB writes (workspace_members, profiles), rate limiting checks.
+ * 
+ * @param request - HTTP request with invitation_token in JSON body
+ * @returns Acceptance result
+ */
 export async function POST(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin()

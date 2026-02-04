@@ -1,7 +1,26 @@
+/**
+ * Account deletion confirmation API endpoint.
+ * 
+ * Verifies deletion token from email link and permanently deletes user account.
+ * Cancels Stripe subscriptions, removes all user data, and deletes auth record.
+ * Token must match stored token and not be expired.
+ * 
+ * Does not require authentication - token provides authorization.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { stripe } from '@/lib/stripe'
 
+/**
+ * Confirms and executes account deletion using token.
+ * 
+ * Validates token, cancels subscriptions, and deletes all user data.
+ * Side effects: Stripe API calls, DB deletions, user data removal.
+ * 
+ * @param request - HTTP request with token and optional reason in JSON body
+ * @returns Deletion result
+ */
 export async function POST(request: NextRequest) {
   try {
     const { token, reason } = await request.json()

@@ -1,9 +1,24 @@
+/**
+ * Admin dashboard sidebar navigation component.
+ * 
+ * Renders navigation links for admin sections (dashboard, users, monitors,
+ * workspaces, subscriptions). Highlights active route based on pathname.
+ * Used in admin layout sidebar. Requires admin authentication.
+ * 
+ * Does not handle routing - only displays navigation links.
+ */
+
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { MonitorIcon, SettingsIcon, TeamIcon } from './Icons'
 
+/**
+ * Renders admin navigation sidebar.
+ * 
+ * @returns Admin navigation component with active route highlighting
+ */
 export function AdminNav() {
   const pathname = usePathname()
   

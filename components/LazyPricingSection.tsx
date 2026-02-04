@@ -1,3 +1,13 @@
+/**
+ * Lazy-loaded pricing section wrapper for performance.
+ * 
+ * Dynamically imports PricingSectionClient with skeleton loader to reduce
+ * initial bundle size. Client-side only (no SSR) since it fetches prices.
+ * Used on landing page to defer loading of pricing component.
+ * 
+ * Does not render pricing immediately - loads on demand with skeleton.
+ */
+
 'use client'
 
 import dynamic from 'next/dynamic'
@@ -18,6 +28,11 @@ const LazyPricingSection = dynamic(() => import('@/components/PricingSectionClie
   ssr: false, // Client-side only to reduce initial bundle
 })
 
+/**
+ * Wraps lazy-loaded pricing section component.
+ * 
+ * @returns Lazy-loaded PricingSectionClient with skeleton loader
+ */
 export default function LazyPricingSectionWrapper() {
   return <LazyPricingSection />
 }

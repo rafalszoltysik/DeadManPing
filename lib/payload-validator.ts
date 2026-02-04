@@ -1,19 +1,12 @@
 /**
- * New payload validation rules structure:
- * {
- *   fields: [
- *     {
- *       name: string,           // Field name in payload (e.g., "count")
- *       type: "number" | "boolean" | "string",
- *       rule: ">" | "<" | ">=" | "<=" | "==" | "!=",
- *       value: number | boolean | string,  // Value to compare against
- *       severity?: "warn" | "error"       // Optional, defaults to "error"
- *     }
- *   ]
- * }
+ * Payload validation utilities for monitor ping data.
  * 
- * Max 5 fields (MVP: 1 field)
- * Only declared fields are processed, rest is ignored
+ * Validates cron job payloads against user-defined rules with support for
+ * multiple field types, comparison operators, and severity levels (warn/error).
+ * Only processes fields declared in validation rules, ignoring all others.
+ * Used by ping endpoint to verify job execution results.
+ * 
+ * Does not parse payloads - see payload-parser.ts for parsing logic.
  */
 
 export interface PayloadField {
@@ -45,8 +38,15 @@ interface ValidationResult {
 const MAX_FIELDS = 5 // Max fields per monitor (MVP can start with 1)
 
 /**
- * Validate payload against validation rules
- * Only processes fields declared in rules, ignores everything else
+ * Validates payload data against configured validation rules.
+ * 
+ * Checks field existence, types, and comparison rules. Supports severity levels
+ * (warn/error) to distinguish critical failures from warnings. Returns detailed
+ * validation results including which fields failed and their severity.
+ * 
+ * @param payload - Payload data object from ping request
+ * @param rules - Validation rules configuration or null
+ * @returns Validation result with errors, warnings, and field-level details
  */
 export function validatePayload(
   payload: PayloadData,
@@ -154,7 +154,14 @@ export function validatePayload(
 }
 
 /**
- * Validate and sanitize payload validation rules structure
+ * Validates and sanitizes payload validation rules configuration.
+ * 
+ * Ensures rules structure is valid, fields are properly configured, and
+ * constraints are met (max 5 fields, valid types/rules/severities).
+ * Returns sanitized rules ready for storage in database.
+ * 
+ * @param rules - Raw rules object from API request
+ * @returns Validation result with sanitized rules or error message
  */
 export function validatePayloadRules(rules: any): {
   valid: boolean

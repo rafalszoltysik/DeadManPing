@@ -1,9 +1,29 @@
+/**
+ * User authentication login endpoint.
+ * 
+ * Handles email/password authentication via Supabase Auth with rate limiting
+ * and profile management. Creates profile if missing, updates email verification
+ * status, and manages session cookies. Integrates with Supabase Auth and database.
+ * 
+ * Does not handle OAuth - see google route for OAuth authentication.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Authenticates user with email and password.
+ * 
+ * Validates credentials, checks rate limits (per IP and email), creates/updates
+ * profile, and establishes session via Supabase Auth cookies.
+ * Side effects: DB read/write (profiles), rate limit check, session cookie creation.
+ * 
+ * @param request - HTTP request with email and password in JSON body
+ * @returns Response with success status and redirect URL or error
+ */
 export async function POST(request: NextRequest) {
   try {
     const { email, password, redirect = '/dashboard' } = await request.json()

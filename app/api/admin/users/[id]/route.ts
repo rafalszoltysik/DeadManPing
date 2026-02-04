@@ -1,9 +1,29 @@
+/**
+ * Admin user deletion API endpoint.
+ * 
+ * Allows administrators to permanently delete user accounts. Cancels Stripe
+ * subscriptions, removes all user data, and deletes auth record. Prevents
+ * admins from deleting themselves. Requires admin authentication.
+ * 
+ * Does not require user confirmation - immediate deletion.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Deletes user account by ID (admin only).
+ * 
+ * Cancels subscriptions, removes data, and deletes auth record. Side effects:
+ * Stripe API calls, DB deletions, user data removal.
+ * 
+ * @param request - HTTP request (unused, but required by Next.js)
+ * @param params - Route parameters with user ID
+ * @returns Deletion result
+ */
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

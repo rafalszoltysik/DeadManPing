@@ -1,9 +1,26 @@
+/**
+ * Admin monitors overview page with system-wide monitor list.
+ * 
+ * Server component that fetches all monitors across all workspaces with
+ * workspace and user information. Requires admin authentication. Displays
+ * monitors table with status, intervals, and ownership info.
+ * 
+ * Does not handle monitor updates - only displays information.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/auth/admin'
 import { AdminMonitorsTable } from '@/components/AdminMonitorsTable'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
+/**
+ * Fetches all monitors with workspace and user information.
+ * 
+ * Side effects: database queries (monitors, workspaces, profiles).
+ * 
+ * @returns Monitors list with related workspace and user data
+ */
 async function getMonitors() {
   const supabaseAdmin = getSupabaseAdmin()
 

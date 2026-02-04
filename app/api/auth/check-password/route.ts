@@ -1,8 +1,24 @@
+/**
+ * Password existence check API endpoint.
+ * 
+ * Checks if authenticated user has a password set (email provider) or only
+ * OAuth authentication. Used by settings page to show/hide password change
+ * options. Returns list of authentication providers.
+ * 
+ * Does not validate password - only checks if password exists.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Checks if user has password authentication configured.
+ * 
+ * @param request - HTTP request (unused, but required by Next.js)
+ * @returns Password existence status and authentication providers
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

@@ -1,6 +1,11 @@
 /**
- * PostHog Event Type Definitions
- * All events use snake_case and enum values as per specification
+ * PostHog analytics event type definitions.
+ * 
+ * Defines TypeScript interfaces and types for all analytics events tracked
+ * in the application. Events use snake_case naming convention per PostHog
+ * best practices. Used by both client and server-side PostHog integrations.
+ * 
+ * Does not contain event tracking logic - only type definitions.
  */
 
 export type CTAType = 'signup' | 'login' | 'create_heartbeat'

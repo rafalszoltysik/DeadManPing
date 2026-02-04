@@ -1,3 +1,13 @@
+/**
+ * DeadManPing logo component with theme-aware rendering.
+ * 
+ * Displays application logo with optional text. Handles client-side hydration
+ * to prevent SSR mismatches. Supports icon-only and with-text variants.
+ * Used in navigation, headers, and branding sections.
+ * 
+ * Does not handle logo file loading - Next.js Image handles optimization.
+ */
+
 'use client'
 
 import { useTheme } from './ThemeProvider'
@@ -10,6 +20,15 @@ interface LogoProps {
   variant?: 'icon-only' | 'with-text'
 }
 
+/**
+ * Renders DeadManPing logo with optional text.
+ * 
+ * Handles hydration to prevent SSR mismatches. Side effects: theme subscription.
+ * 
+ * @param className - Additional CSS classes
+ * @param showText - Whether to display text alongside icon
+ * @param variant - Display variant (icon-only or with-text)
+ */
 export function Logo({ className = '', showText = true, variant = 'with-text' }: LogoProps) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)
@@ -56,7 +75,14 @@ export function Logo({ className = '', showText = true, variant = 'with-text' }:
   )
 }
 
-// Icon-only version for favicon and small spaces
+/**
+ * Icon-only logo component for small spaces.
+ * 
+ * Renders logo icon without text. Used for favicons, small headers, and compact layouts.
+ * 
+ * @param className - Additional CSS classes
+ * @param size - Icon size in pixels
+ */
 export function LogoIcon({ className = '', size = 32 }: { className?: string; size?: number }) {
   const { theme } = useTheme()
   const [mounted, setMounted] = useState(false)

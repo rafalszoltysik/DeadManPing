@@ -1,3 +1,13 @@
+/**
+ * User login page with email/password and Google OAuth authentication.
+ * 
+ * Client component handling login form, OAuth flow, invitation token processing,
+ * email verification resend, and security checks (removes credentials from URL).
+ * Redirects authenticated users and handles various error states from URL params.
+ * 
+ * Does not handle session creation - delegated to /api/auth/login API route.
+ */
+
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -8,6 +18,13 @@ import { PageNav } from '@/components/PageNav'
 import { EyeIcon, EyeOffIcon } from '@/components/Icons'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Login form component with state management and authentication handlers.
+ * 
+ * Handles email/password login, Google OAuth, invitation tokens, verification
+ * resend, and URL parameter processing. Side effects: API calls, redirects, OAuth
+ * navigation, localStorage checks.
+ */
 function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')

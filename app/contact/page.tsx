@@ -1,3 +1,13 @@
+/**
+ * Contact page for support requests.
+ * 
+ * Static page with contact form for user support inquiries. Renders
+ * ContactForm component for message submission. Includes SEO metadata.
+ * Static generation with hourly revalidation.
+ * 
+ * Does not handle email sending - ContactForm component handles that.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

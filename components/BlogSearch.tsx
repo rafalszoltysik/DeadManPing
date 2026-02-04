@@ -1,3 +1,13 @@
+/**
+ * Blog search and filter component.
+ * 
+ * Provides search input and category filtering for blog articles. Filters
+ * articles by search query (title/description/keywords) and selected category.
+ * Calls optional callback when filters change. Memoized for performance.
+ * 
+ * Does not fetch articles - filters provided articles array.
+ */
+
 'use client'
 
 import { useState, useMemo, memo, useCallback } from 'react'

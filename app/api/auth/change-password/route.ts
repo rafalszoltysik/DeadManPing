@@ -1,8 +1,26 @@
+/**
+ * Password change endpoint for authenticated users.
+ * 
+ * Validates current password, checks new password strength, and updates password
+ * via Supabase Auth. Requires re-authentication to verify current password.
+ * 
+ * Does not handle password reset (forgot password) - see forgot-password route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { validatePassword } from '@/lib/password-validator'
 import { createClient } from '@/lib/supabase/server'
 
+/**
+ * Changes user's password after verifying current password.
+ * 
+ * Validates new password strength, verifies current password by attempting sign-in,
+ * then updates password. Side effects: Supabase Auth API calls, password validation.
+ * 
+ * @param request - HTTP request with currentPassword and newPassword in body
+ * @returns Success message or error
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

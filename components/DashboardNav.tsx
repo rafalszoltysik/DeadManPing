@@ -1,3 +1,13 @@
+/**
+ * Dashboard sidebar navigation component.
+ * 
+ * Renders navigation links for monitors, team (Pro/Team only), and settings.
+ * Highlights active route and shows tier-based access restrictions. Used in
+ * dashboard layout sidebar.
+ * 
+ * Does not handle routing - only displays navigation links.
+ */
+
 'use client'
 
 import Link from 'next/link'
@@ -8,6 +18,11 @@ interface DashboardNavProps {
   subscriptionTier?: string
 }
 
+/**
+ * Renders dashboard navigation sidebar.
+ * 
+ * @param subscriptionTier - User's subscription tier for access control
+ */
 export function DashboardNav({ subscriptionTier = 'free' }: DashboardNavProps) {
   const pathname = usePathname()
   

@@ -1,3 +1,13 @@
+/**
+ * Documentation page with API reference, quick start guide, and integration examples.
+ * 
+ * Server component rendering static documentation content including code examples
+ * for bash, Python, Node.js, and Docker. Includes structured data (BreadcrumbList,
+ * HowTo) for SEO. No authentication required.
+ * 
+ * Does not handle API calls or dynamic content - purely static documentation.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

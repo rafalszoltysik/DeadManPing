@@ -1,3 +1,14 @@
+/**
+ * Monitor creation endpoint for user dashboard.
+ * 
+ * Creates a new cron job monitor with validation rules, alert channels, and scheduling.
+ * Enforces tier limits (monitor count, minimum intervals), validates webhook URLs,
+ * and creates workspace if needed. Supports both interval-based and cron expression scheduling.
+ * Integrates with Supabase, Stripe tier checking, and analytics tracking.
+ * 
+ * Does not handle ping processing - only monitor configuration.
+ */
+
 import { NextRequest } from 'next/server'
 import { randomBytes } from 'crypto'
 import { checkMonitorLimitByWorkspace, checkIntervalLimitByWorkspace } from '@/lib/limits'
@@ -10,10 +21,25 @@ import { checkRateLimit } from '@/lib/rate-limit'
 import { captureHeartbeatCreated, captureHeartbeatCreateFailed } from '@/lib/posthog/server'
 import { captureBackendError, captureApiError, captureSoftError } from '@/lib/sentry/server'
 
+/**
+ * Generates a cryptographically secure random slug for monitor identification.
+ * 
+ * @returns 64-character hexadecimal string
+ */
 function generateSlug(): string {
   return randomBytes(32).toString('hex')
 }
 
+/**
+ * Creates a new monitor with validated configuration.
+ * 
+ * Validates input (name, intervals, payload rules, webhooks), checks tier limits,
+ * generates unique slug, and persists monitor to database. Creates workspace if missing.
+ * Side effects: DB writes (monitors, workspaces, workspace_members), analytics events.
+ * 
+ * @param request - HTTP request with monitor configuration in JSON body
+ * @returns Response with created monitor object or error
+ */
 export async function POST(request: NextRequest) {
   try {
     // CSRF protection: verify origin

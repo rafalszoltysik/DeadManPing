@@ -1,7 +1,11 @@
 /**
- * Professional email templates for DeadManPing alerts
- * Designed to be compatible with all major email clients (Gmail, Outlook, Apple Mail, etc.)
- * Uses table-based layout and inline styles for maximum compatibility
+ * Email template generation for monitor alert notifications.
+ * 
+ * Generates HTML and plain text email templates compatible with major email clients.
+ * Uses table-based layouts and inline styles for maximum compatibility.
+ * Supports multiple alert types (missing, failed, recovered, warn) with color coding.
+ * 
+ * Does not send emails - see alerts.ts for email delivery.
  */
 
 interface EmailTemplateData {
@@ -21,6 +25,12 @@ interface AlertConfig {
   borderColor: string
 }
 
+/**
+ * Returns alert configuration (colors, messages) for alert type.
+ * 
+ * @param alertType - Alert type (missing, failed, recovered, warn)
+ * @returns Alert configuration object
+ */
 function getAlertConfig(alertType: string): AlertConfig {
   switch (alertType) {
     case 'missing':
@@ -71,6 +81,15 @@ function getAlertConfig(alertType: string): AlertConfig {
   }
 }
 
+/**
+ * Generates HTML email template for monitor alerts.
+ * 
+ * Creates responsive, email-client-compatible HTML with table-based layout.
+ * Includes alert-specific styling, monitor details, and CTA button.
+ * 
+ * @param data - Email template data (monitor name, status, URL, etc.)
+ * @returns HTML email template string
+ */
 export function generateEmailTemplate(data: EmailTemplateData): string {
   const config = getAlertConfig(data.alertType)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
@@ -272,6 +291,12 @@ export function generateEmailTemplate(data: EmailTemplateData): string {
   `.trim()
 }
 
+/**
+ * Escapes HTML special characters to prevent XSS.
+ * 
+ * @param text - Text to escape
+ * @returns Escaped HTML string
+ */
 function escapeHtml(text: string): string {
   const map: { [key: string]: string } = {
     '&': '&amp;',
@@ -283,6 +308,12 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (m) => map[m])
 }
 
+/**
+ * Formats date string for email display.
+ * 
+ * @param dateString - ISO date string
+ * @returns Formatted date string or original if parsing fails
+ */
 function formatDate(dateString: string): string {
   try {
     const date = new Date(dateString)
@@ -299,6 +330,14 @@ function formatDate(dateString: string): string {
   }
 }
 
+/**
+ * Generates plain text email template for monitor alerts.
+ * 
+ * Creates plain text version for email clients that don't support HTML.
+ * 
+ * @param data - Email template data
+ * @returns Plain text email template string
+ */
 export function generateEmailText(data: EmailTemplateData): string {
   const config = getAlertConfig(data.alertType)
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

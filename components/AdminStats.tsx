@@ -1,3 +1,13 @@
+/**
+ * Admin statistics display component.
+ * 
+ * Displays admin dashboard statistics with stat cards showing key metrics
+ * (users, monitors, workspaces, subscriptions). Includes StatCard component
+ * for individual metric display with optional trends and icons.
+ * 
+ * Does not fetch data - receives statistics as props.
+ */
+
 'use client'
 
 interface StatCardProps {
@@ -11,6 +21,15 @@ interface StatCardProps {
   }
 }
 
+/**
+ * Renders individual statistic card with optional trend indicator.
+ * 
+ * @param title - Statistic title/label
+ * @param value - Statistic value (number or string)
+ * @param subtitle - Optional subtitle text
+ * @param icon - Optional icon component
+ * @param trend - Optional trend data with value and label
+ */
 export function StatCard({ title, value, subtitle, icon, trend }: StatCardProps) {
   return (
     <div className="bg-card border border-border rounded-lg p-6">

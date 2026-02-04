@@ -1,3 +1,13 @@
+/**
+ * Analytics opt-out page for GDPR compliance.
+ * 
+ * Static page that allows users to opt-out of PostHog analytics tracking.
+ * Renders OptOutControls component for analytics management. Includes SEO
+ * metadata. Static generation with hourly revalidation.
+ * 
+ * Does not handle cookie consent - only analytics opt-out.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { PageNav } from '@/components/PageNav'

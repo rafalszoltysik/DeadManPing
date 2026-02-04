@@ -1,11 +1,22 @@
+/**
+ * Vercel Analytics wrapper with cookie consent support.
+ * 
+ * Conditionally renders Vercel Analytics component based on cookie consent
+ * preference stored in localStorage. Only renders in production environment.
+ * Disabled in development to avoid sending test data.
+ * 
+ * NOTE: This component is legacy - AnalyticsWrapper is the preferred implementation.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
 import { Analytics } from "@vercel/analytics/next"
 
 /**
- * Vercel Analytics wrapper that respects cookie consent
- * Only renders Analytics component if user has accepted cookies
+ * Renders Vercel Analytics if user accepted cookies.
+ * 
+ * Checks localStorage for cookie consent. Side effects: Analytics initialization.
  */
 export function VercelAnalytics() {
   const [shouldRender, setShouldRender] = useState(false)

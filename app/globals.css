@@ -1,3 +1,13 @@
+/**
+ * Global CSS styles and Tailwind CSS configuration.
+ * 
+ * Imports Tailwind base, components, and utilities. Defines CSS custom properties
+ * for light and dark mode colors used by Tailwind theme. Dark mode is enforced
+ * via class selector. Contains global styles and design system tokens.
+ * 
+ * Does not contain component-specific styles - only global and theme definitions.
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

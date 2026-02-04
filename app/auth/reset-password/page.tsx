@@ -1,3 +1,14 @@
+/**
+ * Password reset page with token validation.
+ * 
+ * Client component that validates password reset token from URL and allows
+ * users to set new password. Validates token via Supabase Auth, enforces
+ * password strength requirements, and handles reset flow. Used after user
+ * clicks password reset link from email.
+ * 
+ * Does not send reset emails - see forgot-password page for that.
+ */
+
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -9,6 +20,12 @@ import { validatePassword } from '@/lib/password-validator'
 import { InfoTooltip } from '@/components/Tooltip'
 import { InfoIcon, EyeIcon, EyeOffIcon } from '@/components/Icons'
 
+/**
+ * Renders password reset form with token validation.
+ * 
+ * Validates token from URL, enforces password strength, and updates password.
+ * Side effects: Supabase Auth API calls, password updates.
+ */
 function ResetPasswordForm() {
   const [password, setPassword] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')

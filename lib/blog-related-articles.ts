@@ -1,6 +1,10 @@
 /**
- * Related Articles Mapping for Blog Posts
- * Maps each blog article to 3-5 related articles for internal linking
+ * Related articles mapping for blog internal linking.
+ * 
+ * Maps each blog post slug to 3-5 related articles for SEO and user navigation.
+ * Used to display "Related Articles" sections on blog post pages.
+ * 
+ * Does not calculate relatedness - uses manually curated mappings.
  */
 
 export interface RelatedArticle {
@@ -584,6 +588,15 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
   ]
 }
 
+/**
+ * Retrieves related articles for a blog post.
+ * 
+ * Returns array of related article objects with slug, title, and description.
+ * Returns empty array if no related articles found.
+ * 
+ * @param slug - Blog post slug
+ * @returns Array of related article objects
+ */
 export function getRelatedArticles(slug: string): RelatedArticle[] {
   return relatedArticles[slug] || []
 }

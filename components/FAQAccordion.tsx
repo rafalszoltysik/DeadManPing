@@ -1,3 +1,13 @@
+/**
+ * FAQ accordion component with expandable questions.
+ * 
+ * Displays frequently asked questions in accordion format with expand/collapse
+ * functionality. Supports multiple open items simultaneously. Includes optional
+ * links in answers. Used on landing page and FAQ page. Memoized for performance.
+ * 
+ * Does not fetch FAQ data - receives items as props.
+ */
+
 'use client'
 
 import { useState, memo, useCallback } from 'react'
@@ -15,6 +25,12 @@ interface FAQAccordionProps {
   startIndex: number
 }
 
+/**
+ * Renders FAQ accordion with expandable items.
+ * 
+ * @param items - Array of FAQ items (question, answer, optional links)
+ * @param startIndex - Starting index for item numbering
+ */
 export const FAQAccordion = memo(function FAQAccordion({ items, startIndex }: FAQAccordionProps) {
   const [openItems, setOpenItems] = useState<Set<number>>(new Set())
 

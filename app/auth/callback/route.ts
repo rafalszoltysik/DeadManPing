@@ -1,8 +1,31 @@
+/**
+ * OAuth and email verification callback handler.
+ * 
+ * Handles callbacks from Google OAuth, email verification, and account linking.
+ * Processes OAuth codes, verifies email tokens, creates/updates user profiles,
+ * and manages workspace invitations. Redirects users to appropriate pages
+ * (dashboard, invitation acceptance, account linking confirmation).
+ * 
+ * Does not initiate OAuth - see /api/auth/google for that.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { NextResponse, type NextRequest } from 'next/server'
 import { captureSignupCompleted } from '@/lib/posthog/server'
 
+/**
+ * Handles email verification token processing.
+ * 
+ * Verifies OTP token, creates/updates user profile, and sets session cookies.
+ * Side effects: Supabase Auth API calls, DB writes (profiles), cookie setting.
+ * 
+ * @param request - HTTP request
+ * @param requestUrl - Request URL object
+ * @param token - Email verification token
+ * @param redirect - Redirect URL after verification
+ * @returns Redirect response with session cookies
+ */
 async function handleEmailVerification(
   request: NextRequest,
   requestUrl: URL,
@@ -182,6 +205,17 @@ async function handleEmailVerification(
   return response
 }
 
+/**
+ * Handles OAuth and email verification callbacks.
+ * 
+ * Processes Google OAuth callbacks, email verification links, and account
+ * linking. Creates/updates profiles, handles workspace invitations, and
+ * tracks signup completion. Side effects: Supabase Auth API calls, DB writes,
+ * cookie setting, PostHog tracking, redirects.
+ * 
+ * @param request - HTTP request with OAuth code or verification token
+ * @returns Redirect response to dashboard or invitation page
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')

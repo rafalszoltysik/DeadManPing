@@ -1,9 +1,25 @@
+/**
+ * Main navigation component for public pages.
+ * 
+ * Displays logo, navigation links, and authentication buttons. Dynamically
+ * shows login/signup or profile link based on authentication state. Uses
+ * Supabase client-side session management for auth state.
+ * 
+ * Does not handle authentication - only displays auth state.
+ */
+
 'use client'
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+/**
+ * Renders main navigation bar with logo and auth links.
+ * 
+ * Monitors Supabase auth state and updates UI accordingly.
+ * Side effects: Supabase session check, auth state subscription.
+ */
 export function PageNav() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [loading, setLoading] = useState(true)

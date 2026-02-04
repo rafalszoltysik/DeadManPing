@@ -1,3 +1,13 @@
+/**
+ * Pricing section component for landing page.
+ * 
+ * Displays subscription plans with features, pricing, and call-to-action buttons.
+ * Fetches prices from Stripe API with currency detection. Supports currency
+ * switching and plan selection. Used on landing page for marketing.
+ * 
+ * Does not handle checkout - redirects to signup/billing pages.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

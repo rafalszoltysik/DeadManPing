@@ -1,9 +1,22 @@
+/**
+ * Authentication and authorization utilities for API routes.
+ * 
+ * Provides functions for verifying user sessions, cron secrets, internal API secrets,
+ * and CSRF protection via origin verification. Used across protected API endpoints.
+ * 
+ * Does not handle password validation or OAuth - see auth routes for those.
+ */
+
 import { NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
 /**
- * Verify session and return user or error response
- * Use this in API routes that require authentication
+ * Verifies user session and returns authenticated user or error response.
+ * 
+ * Used in API routes that require authentication. Returns user object on success
+ * or error response on failure.
+ * 
+ * @returns User object on success, error response on failure
  */
 export async function requireAuth(): Promise<
   | { success: true; user: { id: string; email?: string; email_confirmed_at?: string | null } }
@@ -29,8 +42,12 @@ export async function requireAuth(): Promise<
 }
 
 /**
- * Verify cron secret from Authorization header
- * Use this in cron job endpoints
+ * Verifies cron job secret using timing-safe comparison.
+ * 
+ * Used to protect cron job endpoints from unauthorized access.
+ * 
+ * @param authHeader - Authorization header value (Bearer token)
+ * @returns True if secret matches, false otherwise
  */
 export function verifyCronSecret(authHeader: string | null): boolean {
   const expectedAuth = `Bearer ${process.env.CRON_SECRET}`
@@ -47,30 +64,6 @@ export function verifyCronSecret(authHeader: string | null): boolean {
   let result = 0
   for (let i = 0; i < authHeader.length; i++) {
     result |= authHeader.charCodeAt(i) ^ expectedAuth.charCodeAt(i)
-  }
-
-  return result === 0
-}
-
-/**
- * Verify internal API secret from X-Internal-Secret header
- * Use this in internal API endpoints
- */
-export function verifyInternalSecret(secretHeader: string | null): boolean {
-  const expectedSecret = process.env.INTERNAL_API_SECRET
-  
-  if (!secretHeader || !expectedSecret) {
-    return false
-  }
-
-  // Use timing-safe comparison
-  if (secretHeader.length !== expectedSecret.length) {
-    return false
-  }
-
-  let result = 0
-  for (let i = 0; i < secretHeader.length; i++) {
-    result |= secretHeader.charCodeAt(i) ^ expectedSecret.charCodeAt(i)
   }
 
   return result === 0

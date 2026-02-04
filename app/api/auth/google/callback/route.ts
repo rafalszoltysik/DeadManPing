@@ -1,8 +1,24 @@
+/**
+ * Google OAuth callback handler for authentication.
+ * 
+ * Processes OAuth callback from Google, exchanges code for user info, creates/updates
+ * user in Supabase, and redirects to dashboard or specified redirect URL. Handles
+ * account linking for existing email accounts. Uses service role key for user creation.
+ * 
+ * Does not handle OAuth initiation - see /api/auth/google for that.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getGoogleUserInfo } from '@/lib/auth/google-oauth'
 import { createClient } from '@supabase/supabase-js'
 import { randomUUID } from 'crypto'
 
+/**
+ * Creates Supabase client with service role for user management.
+ * 
+ * @returns Supabase client with elevated privileges
+ * @throws Error if environment variables not configured
+ */
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -19,6 +35,16 @@ function getSupabaseClient() {
   })
 }
 
+/**
+ * Handles Google OAuth callback and creates/updates user session.
+ * 
+ * Exchanges OAuth code for user info, creates user if needed, links accounts,
+ * and redirects to dashboard. Side effects: DB writes (user creation), session
+ * creation, redirects.
+ * 
+ * @param request - HTTP request with OAuth code and state in query params
+ * @returns Redirect response to dashboard or error page
+ */
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')

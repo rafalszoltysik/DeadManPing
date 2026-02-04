@@ -1,5 +1,17 @@
+/**
+ * 404 Not Found page component.
+ * 
+ * Server component that displays 404 error page when route is not found.
+ * Used by Next.js App Router for unmatched routes. Static component.
+ * 
+ * Does not handle routing - Next.js handles route matching.
+ */
+
 import Link from 'next/link'
 
+/**
+ * Renders 404 not found page.
+ */
 export default function NotFound() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent">

@@ -1,3 +1,14 @@
+/**
+ * Alert channel settings component for user profile.
+ * 
+ * Manages alert delivery channels (email, Slack, Discord, custom webhook) at
+ * profile level. Validates webhook URLs, enforces tier-based access (custom
+ * webhooks require Team plan), and updates profile via API. Supports email
+ * alert disabling. Memoized for performance.
+ * 
+ * Does not send alerts - only configures alert channels.
+ */
+
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'

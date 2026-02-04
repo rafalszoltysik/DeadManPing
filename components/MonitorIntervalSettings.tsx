@@ -1,3 +1,13 @@
+/**
+ * Monitor interval and grace period settings component.
+ * 
+ * Allows editing monitor expected interval, grace period, and max execution time.
+ * Validates against tier limits, shows tier-based minimums, and updates monitor
+ * via API. Uses modal for editing with portal rendering. Memoized for performance.
+ * 
+ * Does not create monitors - only updates existing monitor settings.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'

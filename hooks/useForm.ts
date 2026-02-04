@@ -1,3 +1,14 @@
+/**
+ * React hook for form submission handling with state management.
+ * 
+ * Provides loading, error, and success states for form submissions. Handles
+ * validation, API calls, error tracking to Sentry, and automatic success message
+ * reset. Supports optimistic locking conflict handling (409 responses). Used
+ * throughout application for consistent form handling.
+ * 
+ * Does not handle form field state - only submission logic.
+ */
+
 import { useState, useCallback, FormEvent } from 'react'
 import { useApi } from './useApi'
 import { captureApiError, captureFrontendError } from '@/lib/sentry/client'
@@ -20,7 +31,14 @@ export interface UseFormResult<T> {
 }
 
 /**
- * Hook for handling form submissions with loading, error, and success states
+ * Manages form submission state and handles API calls.
+ * 
+ * Validates data, submits to API, tracks errors to Sentry, and manages loading/
+ * success states. Handles 401 redirects and 409 conflicts. Side effects: API
+ * calls, Sentry error tracking, redirects on 401.
+ * 
+ * @param options - Configuration (onSubmit, validation, callbacks)
+ * @returns Form state (loading, error, success) and submit/reset functions
  */
 export function useForm<T = unknown>(
   options: UseFormOptions<T>

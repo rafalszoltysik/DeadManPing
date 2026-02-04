@@ -1,9 +1,25 @@
+/**
+ * Admin dashboard page with system statistics.
+ * 
+ * Server component that fetches system-wide statistics (users, monitors,
+ * workspaces, subscriptions) and renders admin dashboard. Requires admin
+ * authentication. Displays key metrics and trends.
+ * 
+ * Does not handle user/monitor management - see admin/users and admin/monitors.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/auth/admin'
 import { AdminStats } from '@/components/AdminStats'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
+/**
+ * Fetches system-wide statistics for admin dashboard.
+ * 
+ * Queries users, monitors, workspaces, and subscriptions in parallel.
+ * Side effects: database queries (multiple tables).
+ */
 async function getStats() {
   const supabaseAdmin = getSupabaseAdmin()
 

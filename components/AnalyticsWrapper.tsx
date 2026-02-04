@@ -1,3 +1,14 @@
+/**
+ * Analytics wrapper component with opt-out support.
+ * 
+ * Conditionally renders Vercel Analytics, Speed Insights, and PostHog page view
+ * tracking based on user preferences and developer flags. Analytics enabled by
+ * default under GDPR "legitimate interest" (Art. 6(1)(f)). Both services run in
+ * cookieless/anonymized mode. Respects localStorage opt-out flags.
+ * 
+ * Does not track errors - see Sentry for error tracking.
+ */
+
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
@@ -6,12 +17,10 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PostHogPageView } from '@/components/PostHogPageView'
 
 /**
- * Wrapper component that conditionally renders analytics
- * Analytics (Vercel Analytics and PostHog) are enabled by default as "legitimate interest" (GDPR Art. 6(1)(f))
- * Both services run in cookieless/anonymized mode and don't require explicit consent
+ * Renders analytics components based on opt-out preferences.
  * 
- * Developers can block analytics by setting: localStorage.setItem('blockAnalytics', 'true')
- * Users can opt-out via the opt-out page: /legal/opt-out
+ * Checks localStorage for developer and user opt-out flags. Side effects:
+ * Analytics initialization, page view tracking.
  */
 export function AnalyticsWrapper() {
   const [shouldRender, setShouldRender] = useState(false)

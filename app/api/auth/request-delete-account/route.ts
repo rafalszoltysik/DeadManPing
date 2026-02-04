@@ -1,9 +1,26 @@
+/**
+ * Account deletion request API endpoint.
+ * 
+ * Initiates account deletion flow by generating secure deletion token and
+ * sending confirmation email. Token is stored in database and must be confirmed
+ * via /api/auth/confirm-delete-account before actual deletion. Includes rate
+ * limiting and security measures.
+ * 
+ * Does not delete account - only sends confirmation email with token.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { Resend } from 'resend'
 import { randomBytes } from 'crypto'
 
+/**
+ * Creates Resend client for email delivery.
+ * 
+ * @returns Resend client instance
+ * @throws Error if RESEND_API_KEY not configured
+ */
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -12,6 +29,16 @@ function getResendClient() {
   return new Resend(apiKey)
 }
 
+/**
+ * Handles account deletion request and sends confirmation email.
+ * 
+ * Generates secure deletion token, stores in database, and sends confirmation
+ * email. Token must be confirmed before actual deletion. Side effects: DB write,
+ * email sending, rate limiting.
+ * 
+ * @param request - HTTP request with optional reason in JSON body
+ * @returns Success response with deletion token
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

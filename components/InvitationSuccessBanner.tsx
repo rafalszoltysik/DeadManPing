@@ -1,3 +1,13 @@
+/**
+ * Workspace invitation success banner component.
+ * 
+ * Displays success message when user successfully joins workspace via invitation.
+ * Shows workspace name if available and can be dismissed. Removes invitation
+ * query parameters from URL. Used in dashboard after accepting invitation.
+ * 
+ * Does not handle invitation acceptance - only displays success message.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -8,6 +18,14 @@ interface InvitationSuccessBannerProps {
   workspaceName?: string
 }
 
+/**
+ * Renders workspace invitation success banner.
+ * 
+ * Checks URL parameters and displays success message. Side effects: URL
+ * parameter removal.
+ * 
+ * @param workspaceName - Optional workspace name to display
+ */
 export function InvitationSuccessBanner({ workspaceName }: InvitationSuccessBannerProps) {
   const router = useRouter()
   const searchParams = useSearchParams()

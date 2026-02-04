@@ -1,9 +1,26 @@
+/**
+ * Admin users management page with pagination and search.
+ * 
+ * Server component that fetches paginated user list with search functionality.
+ * Requires admin authentication. Displays users table with admin status,
+ * subscription info, and creation dates. Supports pagination and email search.
+ * 
+ * Does not handle user deletion - see admin/users/[id] route for that.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/auth/admin'
 import { AdminUsersTable } from '@/components/AdminUsersTable'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
+/**
+ * Fetches paginated user list with optional search.
+ * 
+ * @param page - Page number (1-indexed)
+ * @param search - Email search query
+ * @returns Users list and pagination metadata
+ */
 async function getUsers(page: number = 1, search: string = '') {
   const supabaseAdmin = getSupabaseAdmin()
   const limit = 50

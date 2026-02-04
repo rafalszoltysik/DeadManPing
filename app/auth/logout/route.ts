@@ -1,14 +1,45 @@
+/**
+ * User logout API endpoint.
+ * 
+ * Handles user logout by clearing Supabase auth session and cookies.
+ * Supports both GET and POST methods. Manually clears all Supabase-related
+ * cookies to ensure complete logout. Used by LogoutButton component.
+ * 
+ * Does not handle redirects - client handles navigation after logout.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+/**
+ * Handles logout request (POST method).
+ * 
+ * @param request - HTTP request
+ * @returns Logout result
+ */
 export async function POST(request: NextRequest) {
   return handleLogout(request)
 }
 
+/**
+ * Handles logout request (GET method).
+ * 
+ * @param request - HTTP request
+ * @returns Logout result
+ */
 export async function GET(request: NextRequest) {
   return handleLogout(request)
 }
 
+/**
+ * Processes logout and clears session cookies.
+ * 
+ * Signs out from Supabase and manually clears auth cookies. Side effects:
+ * Supabase API calls, cookie deletion.
+ * 
+ * @param request - HTTP request
+ * @returns Logout response with success status
+ */
 async function handleLogout(request: NextRequest) {
   try {
     // Create response object for setting cookies

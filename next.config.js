@@ -1,3 +1,13 @@
+/**
+ * Next.js configuration with Sentry and bundle analyzer integration.
+ * 
+ * Configures build optimizations, security headers, image optimization,
+ * and webpack customizations. Wraps config with Sentry source map upload
+ * and bundle analyzer for performance monitoring.
+ * 
+ * Does not handle routing or API logic - only build configuration.
+ */
+
 // Injected by Sentry
 const { withSentryConfig } = require('@sentry/nextjs')
 const withBundleAnalyzer = require('@next/bundle-analyzer')({

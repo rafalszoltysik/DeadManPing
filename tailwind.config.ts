@@ -1,3 +1,13 @@
+/**
+ * Tailwind CSS configuration for DeadManPing design system.
+ * 
+ * Defines custom colors, fonts, animations, and design tokens using CSS
+ * variables for theme support. Colors are defined in globals.css and referenced
+ * here via CSS variables. Dark mode is locked via class selector.
+ * 
+ * Does not define component styles - only design tokens and utilities.
+ */
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {

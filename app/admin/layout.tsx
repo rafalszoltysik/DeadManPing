@@ -1,3 +1,13 @@
+/**
+ * Admin layout component with sidebar navigation.
+ * 
+ * Server component that wraps all admin pages with sidebar navigation and
+ * admin authentication check. Requires admin privileges and redirects
+ * non-admin users. Used for all admin dashboard pages.
+ * 
+ * Does not handle page routing - Next.js App Router handles that.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -5,6 +15,12 @@ import { LogoutButton } from '@/components/LogoutButton'
 import { AdminNav, AdminMobileNav } from '@/components/AdminNav'
 import { isAdmin } from '@/lib/auth/admin'
 
+/**
+ * Renders admin layout with navigation and admin check.
+ * 
+ * Verifies admin status and renders sidebar. Side effects: database queries,
+ * redirects if not admin or unauthorized.
+ */
 export default async function AdminLayout({
   children,
 }: {

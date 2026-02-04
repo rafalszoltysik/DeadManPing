@@ -1,3 +1,13 @@
+/**
+ * PostHog analytics client for browser-side event tracking.
+ * 
+ * Provides functions to capture user behavior events (page views, CTA clicks,
+ * signups) from client components. Respects user opt-out preferences and
+ * developer block flags. Disabled in development environment.
+ * 
+ * Does not track errors - see Sentry for error tracking.
+ */
+
 'use client'
 
 import posthog from 'posthog-js'
@@ -9,10 +19,11 @@ import type {
 } from './events'
 
 /**
- * Check if PostHog is initialized and opt-out is not set
+ * Checks if PostHog analytics is enabled and should track events.
  * 
- * Developers can block analytics by setting: localStorage.setItem('blockAnalytics', 'true')
- * Users can opt-out via the opt-out page: /legal/opt-out
+ * Returns false in development, if user opted out, or if developer block flag is set.
+ * 
+ * @returns True if PostHog should track events
  */
 export function isPostHogEnabled(): boolean {
   // Disable PostHog in development to avoid sending test data
@@ -35,7 +46,12 @@ export function isPostHogEnabled(): boolean {
 }
 
 /**
- * Capture a page view event
+ * Captures page view event with UTM parameter tracking.
+ * 
+ * Tracks page navigation and persists UTM parameters as user properties
+ * for first-touch attribution. Side effects: PostHog API call.
+ * 
+ * @param event - Page view event data (path, referrer, UTM params)
  */
 export function capturePageView(event: PageViewEvent): void {
   if (!isPostHogEnabled()) return
@@ -71,7 +87,9 @@ export function capturePageView(event: PageViewEvent): void {
 }
 
 /**
- * Capture a CTA click event
+ * Captures call-to-action button click event.
+ * 
+ * @param event - CTA click event data
  */
 export function captureCTAClicked(event: CTAClickedEvent): void {
   if (!isPostHogEnabled()) return
@@ -82,7 +100,9 @@ export function captureCTAClicked(event: CTAClickedEvent): void {
 }
 
 /**
- * Capture a signup started event
+ * Captures signup initiation event.
+ * 
+ * @param event - Signup started event data (method: email/google)
  */
 export function captureSignupStarted(event: SignupStartedEvent): void {
   if (!isPostHogEnabled()) return
@@ -93,7 +113,9 @@ export function captureSignupStarted(event: SignupStartedEvent): void {
 }
 
 /**
- * Capture a heartbeat URL copied event
+ * Captures heartbeat URL copy event.
+ * 
+ * @param event - Heartbeat URL copied event data
  */
 export function captureHeartbeatUrlCopied(event: HeartbeatUrlCopiedEvent): void {
   if (!isPostHogEnabled()) return
@@ -104,7 +126,11 @@ export function captureHeartbeatUrlCopied(event: HeartbeatUrlCopiedEvent): void 
 }
 
 /**
- * Set or unset PostHog opt-out
+ * Sets or removes PostHog opt-out preference.
+ * 
+ * Updates localStorage and PostHog opt-out state. Used by opt-out page.
+ * 
+ * @param optOut - True to opt out, false to opt in
  */
 export function setPostHogOptOut(optOut: boolean): void {
   if (typeof window === 'undefined') return
@@ -125,7 +151,9 @@ export function setPostHogOptOut(optOut: boolean): void {
 }
 
 /**
- * Check if user has opted out
+ * Checks if user has opted out of PostHog analytics.
+ * 
+ * @returns True if user has opted out
  */
 export function isPostHogOptedOut(): boolean {
   if (typeof window === 'undefined') return false

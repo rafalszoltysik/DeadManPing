@@ -1,7 +1,17 @@
+/**
+ * React hook for monitoring user activity and automatic logout on inactivity.
+ * 
+ * Tracks user activity events (mouse, keyboard, scroll, touch) and automatically
+ * logs out user after specified inactivity period. Includes debouncing to prevent
+ * excessive timeout resets. Handles visibility changes (tab switching). Used
+ * in ActivityMonitor component for security.
+ * 
+ * Does not handle session management - only triggers logout redirect.
+ */
+
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
 
 interface UseActivityTimeoutOptions {
   /**
@@ -21,8 +31,13 @@ interface UseActivityTimeoutOptions {
 }
 
 /**
- * Hook to monitor user activity and automatically log out after inactivity
- * Tracks: mouse movements, clicks, keyboard presses, scroll events
+ * Monitors user activity and triggers logout on inactivity.
+ * 
+ * Sets up event listeners for activity detection and manages timeout. Side effects:
+ * Event listeners, timeout management, logout redirect.
+ * 
+ * @param options - Configuration (timeout, enabled, callback)
+ * @returns Functions to reset timeout and get time since last activity
  */
 export function useActivityTimeout(options: UseActivityTimeoutOptions = {}) {
   const {
@@ -30,8 +45,6 @@ export function useActivityTimeout(options: UseActivityTimeoutOptions = {}) {
     enabled = true,
     onTimeout,
   } = options
-
-  const router = useRouter()
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
   const lastActivityRef = useRef<number>(Date.now())
 
@@ -68,7 +81,7 @@ export function useActivityTimeout(options: UseActivityTimeoutOptions = {}) {
         window.location.href = '/auth/login?reason=inactivity'
       }
     }, timeoutMs)
-  }, [enabled, timeoutMs, onTimeout, router])
+  }, [enabled, timeoutMs, onTimeout])
 
   const handleActivity = useCallback(() => {
     // Only reset if enough time has passed (debounce rapid events)

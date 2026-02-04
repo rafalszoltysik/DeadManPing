@@ -1,3 +1,13 @@
+/**
+ * Billing settings component for subscription management.
+ * 
+ * Displays current subscription tier and status, provides links to Stripe
+ * Customer Portal for subscription management, and handles currency preference
+ * updates. Shows upgrade prompts for free tier users. Memoized for performance.
+ * 
+ * Does not handle payment processing - Stripe Portal handles that.
+ */
+
 'use client'
 
 import React, { useState, useCallback } from 'react'

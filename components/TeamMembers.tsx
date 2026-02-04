@@ -1,3 +1,13 @@
+/**
+ * Workspace team members management component.
+ * 
+ * Displays workspace members, handles invitations, and manages member roles.
+ * Enforces tier-based member limits and role-based permissions. Supports
+ * invitation sending, member removal, and role changes. Memoized for performance.
+ * 
+ * Does not handle workspace creation - only manages members of existing workspace.
+ */
+
 'use client'
 
 import { useState, useEffect, memo } from 'react'

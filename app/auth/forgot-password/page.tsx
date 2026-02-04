@@ -1,3 +1,13 @@
+/**
+ * Password reset request page.
+ * 
+ * Client component that allows users to request password reset via email.
+ * Validates email format, sends reset email through Supabase Auth, and
+ * displays success message. Always shows success to prevent email enumeration.
+ * 
+ * Does not reset password - see reset-password page for that.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -6,6 +16,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 
+/**
+ * Renders password reset request form.
+ * 
+ * Validates email and sends reset link. Side effects: Supabase Auth API
+ * calls, email sending.
+ */
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)

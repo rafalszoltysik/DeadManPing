@@ -1,3 +1,13 @@
+/**
+ * Admin workspaces overview page with system-wide workspace list.
+ * 
+ * Server component that fetches all workspaces with owner information and
+ * subscription details. Requires admin authentication. Displays workspaces
+ * table with tier, status, and creation dates.
+ * 
+ * Does not handle workspace updates - only displays information.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/auth/admin'
@@ -5,6 +15,13 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { formatDistanceToNow } from 'date-fns'
 
+/**
+ * Fetches all workspaces with owner information.
+ * 
+ * Side effects: database queries (workspaces, profiles).
+ * 
+ * @returns Workspaces list with owner email
+ */
 async function getWorkspaces() {
   const supabaseAdmin = getSupabaseAdmin()
 

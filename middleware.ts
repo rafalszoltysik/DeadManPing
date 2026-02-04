@@ -1,3 +1,13 @@
+/**
+ * Next.js middleware for request routing, authentication, and URL canonicalization.
+ * 
+ * Handles HTTPS/www redirects, old blog route redirects, authentication checks
+ * for protected routes, admin access verification, and OAuth callback routing.
+ * Integrates with Supabase Auth for session management and profile checks.
+ * 
+ * Does not handle API route authentication - see individual API routes.
+ */
+
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
@@ -55,6 +65,17 @@ const isPublicRoute = (pathname: string): boolean => {
   return false
 }
 
+/**
+ * Processes all incoming requests for routing, auth, and redirects.
+ * 
+ * Performs canonical URL redirects (HTTPS, non-www), old blog route redirects,
+ * authentication checks for protected routes, admin verification, and OAuth
+ * callback handling. Skips auth checks for public routes to improve performance.
+ * Side effects: HTTP redirects, session refresh, cookie management.
+ * 
+ * @param request - Next.js request object
+ * @returns Response with redirects or pass-through
+ */
 export async function middleware(request: NextRequest) {
   const url = request.nextUrl.clone()
   const hostname = request.headers.get('host') || ''

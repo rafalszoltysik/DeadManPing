@@ -1,3 +1,13 @@
+/**
+ * Main settings form component with tabbed interface.
+ * 
+ * Combines multiple settings sections (billing, profile, alerts, account deletion,
+ * support) into tabbed interface. Manages active tab state and coordinates between
+ * child components. Used in dashboard settings page.
+ * 
+ * Does not handle individual settings updates - delegated to child components.
+ */
+
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'

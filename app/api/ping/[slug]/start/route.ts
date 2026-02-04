@@ -1,3 +1,13 @@
+/**
+ * Start tracking endpoint for job execution monitoring.
+ * 
+ * Creates a job run record when a cron job begins execution, enabling duration tracking
+ * and timeout detection. Returns a run_id that must be sent with the completion ping.
+ * Integrates with Supabase for persistence and rate limiting for abuse prevention.
+ * 
+ * Does not validate payload or monitor status - only creates tracking record.
+ */
+
 import { NextRequest } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { errorResponse, successResponse } from '@/lib/api/response'
@@ -7,6 +17,17 @@ import { randomUUID } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Creates a new job run tracking record for start/stop monitoring.
+ * 
+ * Validates monitor exists and subscription is active, then creates a job_runs record
+ * with status 'running'. Returns run_id for use in completion ping.
+ * Side effects: DB insert (job_runs), rate limit check.
+ * 
+ * @param request - HTTP request with optional body containing run_id and metadata
+ * @param params - Route parameters with monitor slug
+ * @returns Response with run_id for tracking
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

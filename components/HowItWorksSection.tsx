@@ -1,3 +1,14 @@
+/**
+ * "How it works" section component for landing page.
+ * 
+ * Interactive demonstration of monitor creation with live curl command preview.
+ * Shows step-by-step process of creating monitors and generating integration
+ * commands. Includes MonitorFormDemo for interactive form and CodeBlock for
+ * command display. Used for marketing and user education.
+ * 
+ * Does not create monitors - only demonstrates the process.
+ */
+
 'use client'
 
 import { useState } from 'react'
@@ -6,6 +17,15 @@ import { CTAButton } from './CTAButton'
 import { AnimatedItem, StaggerContainer } from './AnimatedSection'
 import { CodeBlock } from './CodeBlock'
 
+/**
+ * Generates cron expression from interval value and unit.
+ * 
+ * Converts interval-based scheduling to cron syntax for display purposes.
+ * 
+ * @param intervalValue - Interval numeric value
+ * @param intervalUnit - Interval unit (hours or minutes)
+ * @returns Cron expression string
+ */
 function generateCronExpression(intervalValue: number, intervalUnit: 'hours' | 'minutes'): string {
   if (intervalUnit === 'minutes') {
     if (intervalValue === 1) {

@@ -1,13 +1,17 @@
 /**
- * Centralized logging utility
- * Provides consistent logging across the application
- * Automatically filters console.log in production while keeping errors
+ * Centralized logging utility with environment-aware behavior.
+ * 
+ * Provides consistent logging interface that automatically filters non-error
+ * logs in production. Errors are always logged regardless of environment.
+ * Used throughout the application for consistent logging behavior.
+ * 
+ * Does not send logs to external services - only console logging.
  */
 
 const isDevelopment = process.env.NODE_ENV === 'development'
 
 /**
- * Logger utility with environment-aware logging
+ * Logger object with environment-aware logging methods.
  */
 export const logger = {
   /**

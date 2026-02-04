@@ -1,7 +1,18 @@
-// Currency detection based on country/region
+/**
+ * Currency detection and formatting utilities.
+ * 
+ * Detects user's currency based on country code (from Vercel geo headers),
+ * formats prices for display, and provides currency information. Used for
+ * multi-currency pricing display in billing and pricing pages.
+ * 
+ * Does not handle currency conversion - only detection and formatting.
+ */
+
 export type Currency = 'usd' | 'eur' | 'pln'
 
-// Map country codes to currencies
+/**
+ * Maps ISO country codes to supported currencies.
+ */
 const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   // EUR countries
   AT: 'eur', BE: 'eur', CY: 'eur', EE: 'eur', FI: 'eur',
@@ -9,16 +20,16 @@ const COUNTRY_TO_CURRENCY: Record<string, Currency> = {
   LV: 'eur', LT: 'eur', LU: 'eur', MT: 'eur', NL: 'eur',
   PT: 'eur', SK: 'eur', SI: 'eur', ES: 'eur', HR: 'eur',
   
-  // PLN countries - wyłączone, używamy USD
-  // PL: 'pln', // Wyłączone - używamy USD
-  
   // USD countries (default for most, w tym PL)
   US: 'usd', GB: 'usd', CA: 'usd', AU: 'usd', NZ: 'usd', PL: 'usd',
   // Add more as needed
 }
 
 /**
- * Detect currency from country code
+ * Detects currency from ISO country code.
+ * 
+ * @param countryCode - ISO 3166-1 alpha-2 country code (e.g., 'US', 'DE')
+ * @returns Detected currency or 'usd' as default
  */
 export function getCurrencyFromCountry(countryCode?: string | null): Currency {
   if (!countryCode) return 'usd'
@@ -26,7 +37,12 @@ export function getCurrencyFromCountry(countryCode?: string | null): Currency {
 }
 
 /**
- * Get currency from request headers (Vercel geo headers)
+ * Detects currency from Vercel geo headers.
+ * 
+ * Extracts country code from x-vercel-ip-country header and maps to currency.
+ * 
+ * @param headers - HTTP request headers
+ * @returns Detected currency or 'usd' as default
  */
 export function getCurrencyFromHeaders(headers: Headers): Currency {
   const country = headers.get('x-vercel-ip-country')
@@ -34,8 +50,14 @@ export function getCurrencyFromHeaders(headers: Headers): Currency {
 }
 
 /**
- * Format price for display
- * Removes .00 for whole numbers
+ * Formats price amount for display.
+ * 
+ * Converts cents to currency units, removes .00 for whole numbers, and adds
+ * currency symbol. Handles USD, EUR, and PLN formatting.
+ * 
+ * @param amountInCents - Price in smallest currency unit (cents/grosze)
+ * @param currency - Currency code
+ * @returns Formatted price string (e.g., "$7", "€24.00")
  */
 export function formatPrice(amountInCents: number, currency: Currency): string {
   const amount = amountInCents / 100
@@ -59,15 +81,4 @@ export function formatPrice(amountInCents: number, currency: Currency): string {
   }
 }
 
-/**
- * Get currency info
- */
-export function getCurrencyInfo(currency: Currency) {
-  const info = {
-    usd: { code: 'USD', symbol: '$', name: 'US Dollar' },
-    eur: { code: 'EUR', symbol: '€', name: 'Euro' },
-    pln: { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
-  }
-  return info[currency]
-}
 

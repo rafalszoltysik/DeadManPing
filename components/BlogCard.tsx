@@ -1,3 +1,13 @@
+/**
+ * Blog post card component for article listings.
+ * 
+ * Displays blog post preview with title, description, category badge, and link.
+ * Extracts category from slug/keywords for categorization. Used in blog list
+ * and search results. Memoized for performance.
+ * 
+ * Does not render full article - only preview card linking to article page.
+ */
+
 import Link from 'next/link'
 import { memo } from 'react'
 import type { BlogPostMetadata } from '@/lib/blog-metadata'
@@ -7,6 +17,12 @@ interface BlogCardProps {
   metadata: BlogPostMetadata
 }
 
+/**
+ * Renders blog post preview card.
+ * 
+ * @param slug - Blog post slug for URL generation
+ * @param metadata - Blog post metadata (title, description, keywords)
+ */
 export const BlogCard = memo(function BlogCard({ slug, metadata }: BlogCardProps) {
   // Extract category from keywords or slug
   const getCategory = () => {

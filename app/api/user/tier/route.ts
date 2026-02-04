@@ -1,9 +1,23 @@
+/**
+ * API route for fetching user's subscription tier.
+ * 
+ * Returns current subscription tier from workspace or profile fallback.
+ * Used by frontend to determine feature availability and limits.
+ * 
+ * Does not handle tier changes - see billing routes for subscription management.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Creates Supabase admin client for database operations.
+ * 
+ * @returns Supabase client with service role key
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -20,6 +34,15 @@ function getSupabaseAdmin() {
   })
 }
 
+/**
+ * Returns user's subscription tier.
+ * 
+ * Checks workspace tier first, falls back to profile tier.
+ * Side effects: DB read (workspaces, profiles).
+ * 
+ * @param request - HTTP request (unused)
+ * @returns Subscription tier (free, starter, pro, team)
+ */
 export async function GET(request: NextRequest) {
   try {
     const supabaseAdmin = getSupabaseAdmin()

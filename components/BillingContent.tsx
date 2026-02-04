@@ -1,3 +1,13 @@
+/**
+ * Billing management component for subscription plans.
+ * 
+ * Displays subscription plans, handles plan changes, and manages Stripe checkout
+ * sessions. Supports currency selection and plan upgrades/downgrades. Used in
+ * dashboard billing page. Handles plan selection from URL parameters.
+ * 
+ * Does not handle payment processing - Stripe Checkout handles that.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'

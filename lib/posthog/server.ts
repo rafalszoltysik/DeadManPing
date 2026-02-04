@@ -1,3 +1,13 @@
+/**
+ * PostHog analytics server-side client for API routes and server components.
+ * 
+ * Provides functions to capture server-side events (signups, monitor creation,
+ * pings, failures) from API routes. Uses singleton pattern with immediate
+ * flush for serverless environments. Disabled in development.
+ * 
+ * Does not track errors - see Sentry for error tracking.
+ */
+
 import { PostHog } from 'posthog-node'
 import type {
   SignupCompletedEvent,
@@ -14,7 +24,12 @@ import type {
 let posthogClient: PostHog | null = null
 
 /**
- * Get or create PostHog server client instance
+ * Gets or creates PostHog server client singleton.
+ * 
+ * Returns null in development or if PostHog not configured. Client is
+ * shutdown after each event for serverless compatibility.
+ * 
+ * @returns PostHog client instance or null
  */
 export function getPostHogClient(): PostHog | null {
   // Disable PostHog in development to avoid sending test data
@@ -43,7 +58,14 @@ export function getPostHogClient(): PostHog | null {
 }
 
 /**
- * Capture an event on the server side
+ * Captures server-side event to PostHog.
+ * 
+ * Shuts down client after capture for serverless compatibility. Side effects:
+ * PostHog API call, client shutdown.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Event name
+ * @param properties - Event properties
  */
 export async function captureServerEvent(
   distinctId: string,
@@ -73,7 +95,10 @@ export async function captureServerEvent(
 }
 
 /**
- * Capture signup completed event
+ * Captures signup completion event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Signup completed event data
  */
 export async function captureSignupCompleted(
   distinctId: string,
@@ -85,7 +110,10 @@ export async function captureSignupCompleted(
 }
 
 /**
- * Capture signup failed event
+ * Captures signup failure event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Signup failed event data
  */
 export async function captureSignupFailed(
   distinctId: string,
@@ -98,7 +126,10 @@ export async function captureSignupFailed(
 }
 
 /**
- * Capture heartbeat created event
+ * Captures monitor creation event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Heartbeat created event data
  */
 export async function captureHeartbeatCreated(
   distinctId: string,
@@ -111,7 +142,10 @@ export async function captureHeartbeatCreated(
 }
 
 /**
- * Capture heartbeat create failed event
+ * Captures monitor creation failure event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Heartbeat create failed event data
  */
 export async function captureHeartbeatCreateFailed(
   distinctId: string,
@@ -123,7 +157,10 @@ export async function captureHeartbeatCreateFailed(
 }
 
 /**
- * Capture heartbeat deleted event
+ * Captures monitor deletion event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Heartbeat deleted event data
  */
 export async function captureHeartbeatDeleted(
   distinctId: string,
@@ -135,7 +172,10 @@ export async function captureHeartbeatDeleted(
 }
 
 /**
- * Capture first success ping event
+ * Captures first successful ping event for new monitor.
+ * 
+ * @param distinctId - User identifier
+ * @param event - First success ping event data
  */
 export async function captureFirstSuccessPing(
   distinctId: string,
@@ -148,7 +188,10 @@ export async function captureFirstSuccessPing(
 }
 
 /**
- * Capture heartbeat missed event
+ * Captures monitor missed ping event.
+ * 
+ * @param distinctId - User identifier
+ * @param event - Heartbeat missed event data
  */
 export async function captureHeartbeatMissed(
   distinctId: string,
@@ -162,7 +205,10 @@ export async function captureHeartbeatMissed(
 }
 
 /**
- * Capture heartbeat recovered event
+ * Captures monitor recovery event (ping received after failure).
+ * 
+ * @param distinctId - User identifier
+ * @param event - Heartbeat recovered event data
  */
 export async function captureHeartbeatRecovered(
   distinctId: string,

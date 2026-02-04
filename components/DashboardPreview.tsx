@@ -1,3 +1,14 @@
+/**
+ * Dashboard preview component for landing page.
+ * 
+ * Displays mock monitor data to demonstrate dashboard functionality on landing
+ * page. Shows various monitor statuses (healthy, late, failed, warn) with
+ * status indicators and call-to-action button. Used for marketing purposes.
+ * Memoized for performance.
+ * 
+ * Does not display real data - only mock preview for marketing.
+ */
+
 'use client'
 
 import { memo } from 'react'

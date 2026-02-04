@@ -1,3 +1,13 @@
+/**
+ * Support contact form component.
+ * 
+ * Allows users to send support messages via email. Validates form input,
+ * applies rate limiting, and sends messages through Resend API. Used in
+ * settings page for user support requests. Memoized for performance.
+ * 
+ * Does not handle support ticket management - only sends emails.
+ */
+
 'use client'
 
 import React, { useState, useCallback } from 'react'
@@ -7,6 +17,14 @@ interface SupportFormProps {
   email: string
 }
 
+/**
+ * Renders support contact form with validation and rate limiting.
+ * 
+ * Handles form submission, validates input, and sends support email.
+ * Side effects: API calls, email sending via Resend.
+ * 
+ * @param email - User's email address (pre-filled)
+ */
 export const SupportForm = React.memo(function SupportForm({ email }: SupportFormProps) {
   const [supportSubject, setSupportSubject] = useState('')
   const [supportMessage, setSupportMessage] = useState('')

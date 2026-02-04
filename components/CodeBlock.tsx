@@ -1,3 +1,13 @@
+/**
+ * Syntax-highlighted code block component with copy functionality.
+ * 
+ * Displays code with syntax highlighting using Prism, includes copy-to-clipboard
+ * button, and custom theme matching DeadManPing design system. Used throughout
+ * the application for displaying curl commands, code examples, and API responses.
+ * 
+ * Does not execute code - only displays formatted code.
+ */
+
 'use client'
 
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
@@ -10,6 +20,14 @@ interface CodeBlockProps {
   className?: string
 }
 
+/**
+ * Renders syntax-highlighted code block with copy button.
+ * 
+ * @param code - Code string to display
+ * @param language - Programming language for syntax highlighting (default: 'bash')
+ * @param showLineNumbers - Whether to show line numbers
+ * @param className - Additional CSS classes
+ */
 export function CodeBlock({ 
   code, 
   language = 'bash', 

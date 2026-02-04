@@ -1,3 +1,13 @@
+/**
+ * Pricing plan selection button component.
+ * 
+ * Handles plan selection with authentication-aware routing. Routes authenticated
+ * users to billing page with selected plan, unauthenticated users to signup.
+ * Used in pricing sections for plan selection. Supports primary and secondary variants.
+ * 
+ * Does not handle checkout - only routes to appropriate page.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -11,6 +21,16 @@ interface PricingButtonProps {
   children: React.ReactNode
 }
 
+/**
+ * Renders pricing button with auth-aware navigation.
+ * 
+ * Checks session and routes to billing or signup. Side effects: session check,
+ * navigation, logger calls.
+ * 
+ * @param plan - Selected subscription plan
+ * @param isPrimary - Whether button uses primary styling
+ * @param children - Button label/content
+ */
 export function PricingButton({ plan, isPrimary = false, children }: PricingButtonProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)

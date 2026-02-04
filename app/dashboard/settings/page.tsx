@@ -1,9 +1,25 @@
+/**
+ * User settings page for account management.
+ * 
+ * Server component that fetches user profile data and renders settings form.
+ * Handles profile creation if missing, checks authentication providers (password,
+ * Google), and passes data to SettingsForm component. Requires authentication.
+ * 
+ * Does not handle settings updates - delegated to SettingsForm component.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { SettingsForm } from '@/components/SettingsForm'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 
+/**
+ * Renders settings page with user profile data.
+ * 
+ * Fetches profile, checks auth providers, and creates profile if missing.
+ * Side effects: database queries, redirects if unauthorized.
+ */
 export default async function SettingsPage() {
   const user = await getSupabaseUser()
 

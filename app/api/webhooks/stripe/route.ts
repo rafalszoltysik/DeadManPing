@@ -1,10 +1,27 @@
+/**
+ * Stripe webhook handler for subscription lifecycle events.
+ * 
+ * Processes checkout completion, subscription updates/deletions, and payment failures.
+ * Updates workspace and profile subscription status, tier, and grace periods.
+ * Automatically adjusts monitor intervals when tier changes and reactivates paused monitors.
+ * Integrates with Stripe API and Supabase for subscription state management.
+ * 
+ * Does not handle payment processing - only updates subscription state from Stripe events.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
-import { stripe, PRICING_PLANS, LEGACY_PLANS } from '@/lib/stripe'
+import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import { TIER_LIMITS } from '@/lib/limits'
 import { clearRateLimit } from '@/lib/rate-limit'
 import Stripe from 'stripe'
 
+/**
+ * Creates Supabase admin client with service role key.
+ * 
+ * @returns Supabase client with admin privileges
+ * @throws Error if environment variables are missing
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -21,6 +38,17 @@ function getSupabaseAdmin() {
   })
 }
 
+/**
+ * Processes Stripe webhook events for subscription management.
+ * 
+ * Verifies webhook signature, routes events by type (checkout.session.completed,
+ * subscription.updated/deleted, invoice.payment_failed), and updates subscription
+ * state in database. Handles tier changes, grace periods, and monitor adjustments.
+ * Side effects: DB writes (workspaces, profiles, monitors), rate limit clearing.
+ * 
+ * @param request - HTTP request with Stripe webhook payload and signature header
+ * @returns Response confirming event processing
+ */
 export async function POST(request: NextRequest) {
   const supabaseAdmin = getSupabaseAdmin()
   

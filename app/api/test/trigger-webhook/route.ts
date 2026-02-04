@@ -1,17 +1,25 @@
+/**
+ * Test endpoint for manually triggering Stripe webhook processing.
+ * 
+ * Development/testing utility to manually process Stripe webhook events for
+ * existing checkout sessions. Fetches session and subscription from Stripe,
+ * then processes checkout.session.completed event. Useful for debugging webhook
+ * issues or testing subscription flows.
+ * 
+ * SECURITY: Disabled in production. Requires authentication.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 
 /**
- * Test endpoint to manually trigger webhook for existing checkout session
+ * Manually triggers webhook processing for checkout session.
  * 
- * Usage:
- * POST /api/test/trigger-webhook
- * Body: { sessionId: "cs_test_..." }
+ * Fetches session from Stripe and processes checkout.session.completed event.
+ * Side effects: Stripe API calls, DB writes (subscription updates).
  * 
- * This will fetch the checkout session and subscription, then manually
- * process the checkout.session.completed event.
- * 
- * SECURITY: This endpoint is disabled in production
+ * @param request - HTTP request with sessionId in JSON body
+ * @returns Webhook processing result
  */
 export async function POST(request: NextRequest) {
   // Block in production - check both NODE_ENV and VERCEL_ENV for safety

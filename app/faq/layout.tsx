@@ -1,3 +1,12 @@
+/**
+ * FAQ layout component with metadata.
+ * 
+ * Wraps FAQ page with consistent metadata. Sets SEO metadata for FAQ page.
+ * Does not add any visual layout - only provides metadata wrapper.
+ * 
+ * Does not handle FAQ content - only provides metadata.
+ */
+
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {

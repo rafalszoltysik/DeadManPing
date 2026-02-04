@@ -1,5 +1,21 @@
+/**
+ * Stripe API client and subscription management utilities.
+ * 
+ * Provides lazy-initialized Stripe client, checkout session creation, customer
+ * portal session creation, and plan feature definitions. Integrates with Stripe
+ * API for subscription management and billing.
+ * 
+ * Does not handle webhook processing - see webhooks/stripe route for that.
+ */
+
 import Stripe from 'stripe'
 
+/**
+ * Creates Stripe client instance with service key.
+ * 
+ * @returns Stripe client instance
+ * @throws Error if STRIPE_SECRET_KEY is not configured
+ */
 function getStripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY
   if (!secretKey) {
@@ -46,12 +62,6 @@ export const PLAN_FEATURES = {
   },
 } as const
 
-// Legacy support - mapowanie starych planów
-export const LEGACY_PLANS = {
-  solo: 'starter',
-  agency: 'pro',
-} as const
-
 // Deprecated: Używaj getCachedPrices() z lib/stripe-prices.ts zamiast tego
 // Zachowane dla backward compatibility
 export const PRICING_PLANS = {
@@ -81,6 +91,18 @@ export const PRICING_PLANS = {
   },
 } as const
 
+/**
+ * Creates Stripe Checkout session for subscription upgrade.
+ * 
+ * Configures session with automatic tax calculation, workspace metadata,
+ * and success/cancel URLs. Returns session with checkout URL.
+ * 
+ * @param customerId - Existing Stripe customer ID or null
+ * @param priceId - Stripe price ID for subscription
+ * @param workspaceId - Workspace identifier for metadata
+ * @param userEmail - User email for new customers
+ * @returns Stripe Checkout session object
+ */
 export async function createCheckoutSession(
   customerId: string | null,
   priceId: string,
@@ -115,6 +137,15 @@ export async function createCheckoutSession(
   return session
 }
 
+/**
+ * Creates Stripe Customer Portal session for subscription management.
+ * 
+ * Allows users to manage subscriptions, update payment methods, and view
+ * billing history through Stripe's hosted portal.
+ * 
+ * @param customerId - Stripe customer ID
+ * @returns Stripe Customer Portal session object
+ */
 export async function createCustomerPortalSession(customerId: string) {
   const stripe = getStripeClient()
   

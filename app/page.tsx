@@ -1,3 +1,13 @@
+/**
+ * Landing page for DeadManPing SaaS platform.
+ * 
+ * Marketing page with hero section, feature highlights, pricing, and call-to-action.
+ * Includes structured data for SEO, lazy-loaded components for performance, and
+ * animated sections for visual appeal. Static generation with hourly revalidation.
+ * 
+ * Does not require authentication - public marketing page.
+ */
+
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
@@ -194,6 +204,12 @@ const FEATURES_ITEM_LIST_SCHEMA = {
   }))
 } as const
 
+/**
+ * Renders landing page with marketing content and feature highlights.
+ * 
+ * Static page with structured data for SEO. Uses lazy loading for performance.
+ * No side effects - pure presentation component.
+ */
 export default function Home() {
   // VideoObject schema placeholder - można użyć gdy dodasz filmy
   const videoSchema = {

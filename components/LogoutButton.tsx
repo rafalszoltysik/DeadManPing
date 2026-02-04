@@ -1,3 +1,13 @@
+/**
+ * Logout button component with session clearing.
+ * 
+ * Handles user logout by calling logout endpoint and clearing session cookies.
+ * Redirects to home page after logout. Supports default and compact variants
+ * for different UI contexts. Includes error handling and development logging.
+ * 
+ * Does not handle authentication - only session clearing and redirect.
+ */
+
 'use client'
 
 import { useRouter } from 'next/navigation'
@@ -8,6 +18,14 @@ interface LogoutButtonProps {
   variant?: 'default' | 'compact'
 }
 
+/**
+ * Renders logout button with session clearing functionality.
+ * 
+ * Calls logout endpoint and redirects to home. Side effects: API calls,
+ * cookie clearing, page redirect.
+ * 
+ * @param variant - Button style variant (default or compact)
+ */
 export function LogoutButton({ variant = 'default' }: LogoutButtonProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)

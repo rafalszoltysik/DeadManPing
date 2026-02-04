@@ -1,3 +1,14 @@
+/**
+ * Dashboard layout component with sidebar navigation and activity monitoring.
+ * 
+ * Server component that wraps all dashboard pages with sidebar navigation,
+ * activity monitoring for automatic logout, and workspace invitation
+ * auto-acceptance. Requires authentication and redirects unauthorized users.
+ * Handles pending invitation acceptance for logged-in users.
+ * 
+ * Does not handle page routing - Next.js App Router handles that.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -6,6 +17,12 @@ import { DashboardNav, DashboardMobileNav } from '@/components/DashboardNav'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { ActivityMonitor } from '@/components/ActivityMonitor'
 
+/**
+ * Renders dashboard layout with navigation and activity monitoring.
+ * 
+ * Fetches user data, auto-accepts pending invitations, and renders sidebar.
+ * Side effects: database queries, invitation updates, redirects if unauthorized.
+ */
 export default async function DashboardLayout({
   children,
 }: {

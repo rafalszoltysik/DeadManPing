@@ -1,12 +1,34 @@
+/**
+ * Supabase Edge Function for checking monitor timeouts.
+ * 
+ * Runs as scheduled function to check monitors that are overdue (past
+ * next_expected_ping_at) and updates their status to 'late'. Triggers alerts
+ * via internal API. Used as alternative to Vercel cron jobs for timeout checking.
+ * 
+ * Does not check grace periods - only marks monitors as late when overdue.
+ */
+
 /// <reference path="../deno.d.ts" />
 // @ts-ignore - Deno URL imports are valid in Deno runtime
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+/**
+ * CORS headers for cross-origin requests.
+ */
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+/**
+ * Edge function handler for checking monitor timeouts.
+ * 
+ * Finds overdue monitors, updates status to 'late', and triggers alerts.
+ * Side effects: DB updates (monitors table), API calls (internal send-alert).
+ * 
+ * @param req - HTTP request (Deno Request object)
+ * @returns Response with check results
+ */
 Deno.serve(async (req) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {

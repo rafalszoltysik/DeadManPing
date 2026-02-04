@@ -1,3 +1,12 @@
+/**
+ * Monitor list component for dashboard display.
+ * 
+ * Renders a list of monitors with status indicators, last ping times, and navigation links.
+ * Uses memoization for performance optimization. Displays monitors sorted by status priority.
+ * 
+ * Does not handle monitor creation or updates - only displays existing monitors.
+ */
+
 'use client'
 
 import Link from 'next/link'
@@ -8,6 +17,11 @@ import { MonitorListProps } from '@/lib/types/monitor'
 import { MonitorStatusIcon, MonitorStatus } from './MonitorStatus'
 import { getStatusColor } from '@/lib/monitor-utils'
 
+/**
+ * Renders a list of monitors with status badges and metadata.
+ * 
+ * @param monitors - Array of monitor objects to display
+ */
 export const MonitorList = memo(function MonitorList({ monitors }: MonitorListProps) {
   // Render immediately visible - animation is handled by AnimatedSection wrapper
   return (

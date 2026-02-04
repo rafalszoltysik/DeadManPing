@@ -1,5 +1,20 @@
+/**
+ * Icon components library for DeadManPing UI.
+ * 
+ * Provides reusable SVG icons for monitor statuses, social platforms, and UI elements.
+ * Mix of custom SVG icons and react-icons wrappers. All icons accept className prop
+ * for styling. Used throughout application for consistent iconography.
+ * 
+ * Does not handle icon state or interactions - only rendering.
+ */
+
 import { FaSlack, FaDiscord, FaEnvelope } from 'react-icons/fa'
 
+/**
+ * Renders healthy status icon (green checkmark).
+ * 
+ * @param className - CSS classes for icon sizing/styling
+ */
 export function StatusHealthyIcon({ className = "w-4 h-4" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 20 20" fill="none">

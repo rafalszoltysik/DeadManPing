@@ -1,8 +1,24 @@
+/**
+ * Test endpoint for manually syncing Stripe subscription data.
+ * 
+ * Development/testing utility to sync subscription status from Stripe to database.
+ * Fetches subscription from Stripe and updates user/workspace records. Useful for
+ * debugging subscription issues or recovering from webhook failures.
+ * 
+ * SECURITY: Disabled in production. Requires authentication.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { stripe } from '@/lib/stripe'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 
+/**
+ * Creates Supabase admin client for subscription operations.
+ * 
+ * @returns Supabase client with service role
+ * @throws Error if environment variables not configured
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY

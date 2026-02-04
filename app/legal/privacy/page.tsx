@@ -1,8 +1,21 @@
+/**
+ * Privacy Policy page.
+ * 
+ * Static page displaying privacy policy and data handling information.
+ * Includes details about data collection, usage, storage, and user rights.
+ * Static generation for performance.
+ * 
+ * Does not handle privacy settings - only displays policy.
+ */
+
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 
+/**
+ * Renders privacy policy page.
+ */
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">

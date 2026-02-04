@@ -1,3 +1,14 @@
+/**
+ * Monitor creation form component with scheduling options.
+ * 
+ * Client component for creating new monitors with interval, cron, or calendar
+ * scheduling. Supports payload validation rules, alert channels, and tier-based
+ * limits. Includes cron expression validation and visual calendar picker.
+ * Used on monitors/new page.
+ * 
+ * Does not handle monitor updates - only creation.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -13,6 +24,14 @@ interface NewMonitorFormProps {
   userTier: keyof typeof TIER_LIMITS
 }
 
+/**
+ * Renders monitor creation form with scheduling and validation options.
+ * 
+ * Handles form submission, validates cron expressions, and creates monitor.
+ * Side effects: API calls, monitor creation, navigation on success.
+ * 
+ * @param userTier - User's subscription tier for limit enforcement
+ */
 export function NewMonitorForm({ userTier: initialUserTier }: NewMonitorFormProps) {
   const [name, setName] = useState('')
   const [userTier, setUserTier] = useState<keyof typeof TIER_LIMITS>(initialUserTier)

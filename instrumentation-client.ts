@@ -1,12 +1,23 @@
+/**
+ * Client-side analytics and error tracking initialization.
+ * 
+ * Initializes PostHog (analytics) and Sentry (error tracking) for browser.
+ * Defers initialization until page is interactive for performance. Respects
+ * developer and user opt-out flags. PostHog runs in cookieless/anonymized mode
+ * for GDPR compliance. Only initializes in production.
+ * 
+ * Does not handle server-side initialization - see instrumentation.ts for that.
+ */
+
 import posthog from 'posthog-js'
 import * as Sentry from "@sentry/nextjs"
 
 /**
- * Client Initialization
- * This file is automatically loaded by Next.js 15.3+ for client-side initialization
- * Handles both PostHog and Sentry client initialization
+ * Initializes client-side analytics and error tracking.
+ * 
+ * Defers initialization until page is interactive. Checks opt-out flags.
+ * Side effects: PostHog initialization, Sentry initialization.
  */
-
 export function init() {
   // Skip initialization in development
   if (process.env.NODE_ENV !== 'production') {

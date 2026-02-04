@@ -1,3 +1,13 @@
+/**
+ * Stripe pricing cache and lookup utilities.
+ * 
+ * Fetches subscription prices from Stripe API and caches them for performance.
+ * Supports multi-currency pricing (USD, EUR, PLN) and provides helper functions
+ * to lookup price IDs and price information by plan and currency.
+ * 
+ * Does not create subscriptions - only fetches and caches pricing data.
+ */
+
 import { stripe } from './stripe'
 import { Currency } from './currency-detection'
 
@@ -21,8 +31,15 @@ let pricesCache: PricesCache | null = null
 const CACHE_TTL = 60 * 60 * 1000 // 1 godzina
 
 /**
- * Pobiera wszystkie ceny z Stripe API i cache'uje je
- * Wymaga aby Products w Stripe miały metadata: { plan_key: 'starter' | 'pro' | 'team' }
+ * Fetches all prices from Stripe API and caches them.
+ * 
+ * Retrieves active products with plan_key metadata and their monthly recurring
+ * prices. Caches results for 1 hour to reduce API calls. Returns stale cache
+ * if API call fails. Side effects: Stripe API calls, in-memory caching.
+ * 
+ * Requires Stripe products to have metadata: { plan_key: 'starter' | 'pro' | 'team' }
+ * 
+ * @returns Map of plan keys to currency-to-price mappings
  */
 export async function getCachedPrices(): Promise<Map<PlanKey, Map<Currency, PriceInfo>>> {
   const now = Date.now()
@@ -97,7 +114,11 @@ export async function getCachedPrices(): Promise<Map<PlanKey, Map<Currency, Pric
 }
 
 /**
- * Pobiera Price ID dla danego planu i waluty
+ * Gets Stripe Price ID for plan and currency.
+ * 
+ * @param planKey - Plan identifier (starter, pro, team)
+ * @param currency - Currency code
+ * @returns Stripe Price ID or null if not found
  */
 export async function getPriceIdForPlan(
   planKey: PlanKey,
@@ -107,29 +128,4 @@ export async function getPriceIdForPlan(
   return prices.get(planKey)?.get(currency)?.priceId || null
 }
 
-/**
- * Pobiera informacje o cenie dla danego planu i waluty
- */
-export async function getPriceInfoForPlan(
-  planKey: PlanKey,
-  currency: Currency
-): Promise<PriceInfo | null> {
-  const prices = await getCachedPrices()
-  return prices.get(planKey)?.get(currency) || null
-}
-
-/**
- * Pobiera wszystkie dostępne ceny dla danego planu
- */
-export async function getAllPricesForPlan(
-  planKey: PlanKey
-): Promise<Map<Currency, PriceInfo>> {
-  const prices = await getCachedPrices()
-  return prices.get(planKey) || new Map()
-}
-
-/**
- * Formatuje cenę do wyświetlenia
- */
-// formatPrice moved to lib/currency-detection.ts
 

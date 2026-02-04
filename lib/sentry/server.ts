@@ -1,15 +1,22 @@
 /**
- * Sentry error tracking for server-side (API routes, server components)
+ * Sentry error tracking for server-side (API routes, server components).
  * 
- * IMPORTANT: This is SEPARATE from analytics (PostHog)
- * - Analytics = user behavior
- * - Error tracking = system failures
+ * Captures backend errors, API errors, timeouts, and integration failures
+ * with context. Separate from PostHog analytics. Disabled in development.
+ * 
+ * Does not track user behavior - see PostHog for analytics.
  */
 
 import * as Sentry from '@sentry/nextjs'
 
 /**
- * Capture a backend error with context
+ * Captures backend error with context for Sentry.
+ * 
+ * Adds endpoint, status code, user ID, and additional data. Logs to console
+ * in development. Side effects: Sentry API call (production only).
+ * 
+ * @param error - Error object or unknown error
+ * @param context - Error context (endpoint, statusCode, userId, action, additionalData)
  */
 export function captureBackendError(
   error: Error | unknown,
@@ -69,8 +76,12 @@ export function captureBackendError(
 }
 
 /**
- * Capture a soft error (product issue, not a bug)
- * These are tracked as events, not exceptions
+ * Captures soft error (product issue, not a bug) as warning.
+ * 
+ * Tracks business logic issues that aren't code bugs. Logs to console in development.
+ * 
+ * @param eventName - Soft error event name
+ * @param properties - Event properties (userId, heartbeatId, monitorId, etc.)
  */
 export function captureSoftError(
   eventName: string,
@@ -110,7 +121,14 @@ export function captureSoftError(
 }
 
 /**
- * Capture API error (4xx/5xx)
+ * Captures API route error with filtering.
+ * 
+ * Filters out 404, 401, 403. Only tracks 5xx and critical 4xx errors.
+ * 
+ * @param endpoint - API endpoint that failed
+ * @param statusCode - HTTP status code
+ * @param error - Error object or message
+ * @param context - Additional context (userId, requestBody, queryParams)
  */
 export function captureApiError(
   endpoint: string,
@@ -148,32 +166,13 @@ export function captureApiError(
 }
 
 /**
- * Capture timeout error
- */
-export function captureTimeout(
-  endpoint: string,
-  timeoutMs: number,
-  context?: {
-    userId?: string
-    action?: string
-  }
-): void {
-  captureBackendError(
-    new Error(`Request timeout after ${timeoutMs}ms`),
-    {
-      endpoint,
-      statusCode: 504,
-      userId: context?.userId,
-      action: context?.action,
-      additionalData: {
-        timeoutMs,
-      },
-    }
-  )
-}
-
-/**
- * Capture integration error (email, webhook, etc.)
+ * Captures external service integration error.
+ * 
+ * Used for email, webhook, and other third-party service failures.
+ * 
+ * @param service - Service name (e.g., 'email', 'slack', 'discord')
+ * @param error - Error object or unknown error
+ * @param context - Additional context (userId, action, additionalData)
  */
 export function captureIntegrationError(
   service: string,

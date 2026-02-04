@@ -1,3 +1,13 @@
+/**
+ * Monitor detail page displaying monitor information, recent pings, and job runs.
+ * 
+ * Server component that verifies user access to monitor, fetches monitor data,
+ * recent pings (last 50), and job runs. Redirects unauthorized users to dashboard.
+ * Handles Next.js 15 async params by unwrapping immediately.
+ * 
+ * Does not handle monitor updates - delegated to MonitorDetail client component.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { MonitorDetail } from '@/components/MonitorDetail'
@@ -5,6 +15,15 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { verifyMonitorAccessBySlug } from '@/lib/api/monitors'
 import { AnimatedSection } from '@/components/AnimatedSection'
 
+/**
+ * Renders monitor detail page with data fetching.
+ * 
+ * Verifies access, fetches monitor, pings, and job runs. Side effects:
+ * database queries, redirects if unauthorized.
+ * 
+ * @param props - Next.js page props with async params and searchParams
+ * @returns Monitor detail page component
+ */
 export default async function MonitorDetailPage(props: {
   params: Promise<{ slug: string }>
   searchParams: Promise<{ onboarding?: string }>

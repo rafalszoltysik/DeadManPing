@@ -1,9 +1,28 @@
+/**
+ * Admin users management API endpoint.
+ * 
+ * Provides paginated list of all users with search functionality. Requires admin
+ * privileges. Used by admin dashboard for user management. Supports pagination
+ * and search by email or user ID.
+ * 
+ * Does not handle user creation or deletion - only listing and search.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Retrieves paginated list of users with optional search.
+ * 
+ * Requires admin privileges. Supports pagination (page, limit) and search by
+ * email or user ID. Side effects: DB read (profiles table).
+ * 
+ * @param request - HTTP request with search params (page, limit, search)
+ * @returns Paginated user list or error response
+ */
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdmin()

@@ -1,3 +1,13 @@
+/**
+ * Lazy-loaded analytics wrapper for performance optimization.
+ * 
+ * Dynamically imports AnalyticsWrapper after page becomes interactive to improve
+ * initial page load performance. Uses requestIdleCallback when available for
+ * optimal loading timing. Client-side only (no SSR) since it checks localStorage.
+ * 
+ * Does not handle analytics initialization - delegated to AnalyticsWrapper.
+ */
+
 'use client'
 
 import dynamic from 'next/dynamic'
@@ -9,6 +19,12 @@ const AnalyticsWrapper = dynamic(() => import('@/components/AnalyticsWrapper').t
   ssr: false, // Client-side only since it checks localStorage
 })
 
+/**
+ * Lazy-loads analytics wrapper after page becomes interactive.
+ * 
+ * Defers loading until page is fully loaded and interactive. Side effects:
+ * Dynamic import, analytics component loading.
+ */
 export default function AnalyticsWrapperClient() {
   const [shouldLoad, setShouldLoad] = useState(false)
 

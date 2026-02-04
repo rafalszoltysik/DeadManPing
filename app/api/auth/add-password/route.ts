@@ -1,8 +1,27 @@
+/**
+ * Add password to OAuth-only account API endpoint.
+ * 
+ * Allows users with Google OAuth accounts to add a password for email/password
+ * authentication. Validates password strength and updates user via Supabase Auth.
+ * Requires authenticated session.
+ * 
+ * Does not handle password changes - see /api/auth/change-password for that.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { validatePassword } from '@/lib/password-validator'
 import { createClient } from '@/lib/supabase/server'
 
+/**
+ * Adds password to authenticated user's account.
+ * 
+ * Validates password strength and updates user via Supabase Auth. Side effects:
+ * password update in Supabase, session refresh.
+ * 
+ * @param request - HTTP request with password in JSON body
+ * @returns Success or error response
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

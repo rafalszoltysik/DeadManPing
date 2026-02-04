@@ -1,8 +1,21 @@
+/**
+ * Terms of Service page.
+ * 
+ * Static page displaying terms of service and user agreement. Includes
+ * legal text about service usage, user responsibilities, and limitations.
+ * Static generation for performance.
+ * 
+ * Does not handle legal agreements - only displays terms.
+ */
+
 import Link from 'next/link'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 
+/**
+ * Renders terms of service page.
+ */
 export default function TermsPage() {
   return (
     <div className="min-h-screen bg-transparent text-foreground relative">

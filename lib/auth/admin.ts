@@ -1,11 +1,24 @@
+/**
+ * Admin authentication and authorization utilities.
+ * 
+ * Provides functions to check admin status and require admin access in API routes.
+ * Used to protect admin-only endpoints and features.
+ * 
+ * Does not handle admin creation - admins must be set manually in database.
+ */
+
 import { NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 /**
- * Check if a user is an admin
+ * Checks if user has admin privileges.
+ * 
+ * Queries database for user's is_admin flag. Returns false on error or if user not found.
+ * Side effects: DB read (profiles table).
+ * 
  * @param userId - User ID to check
- * @returns Promise<boolean> - true if user is admin, false otherwise
+ * @returns True if user is admin, false otherwise
  */
 export async function isAdmin(userId: string): Promise<boolean> {
   try {
@@ -28,9 +41,13 @@ export async function isAdmin(userId: string): Promise<boolean> {
 }
 
 /**
- * Require admin access in API routes
- * Returns user and admin status if authorized, or error response if not
- * @returns Promise with success status, user, and admin status, or error response
+ * Requires admin access for API route execution.
+ * 
+ * Validates user authentication and admin status. Returns user data if authorized,
+ * or error response (401/403) if not. Used as guard in admin API routes.
+ * Side effects: Session read, DB read (profiles).
+ * 
+ * @returns Success result with user data, or error response
  */
 export async function requireAdmin(): Promise<
   | { success: true; user: { id: string; email?: string }; isAdmin: boolean }

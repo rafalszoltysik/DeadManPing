@@ -1,5 +1,19 @@
+/**
+ * Site footer component with navigation links and legal information.
+ * 
+ * Displays product links, account links, contact information, and legal pages.
+ * Used on all public pages. Static component with no side effects.
+ * 
+ * Does not handle user authentication or state - only displays links.
+ */
+
 import Link from 'next/link'
 
+/**
+ * Renders site footer with navigation and legal links.
+ * 
+ * @returns Footer component with links and copyright
+ */
 export function Footer() {
   return (
     <footer className="border-t border-border bg-card/50 mt-12 sm:mt-16 lg:mt-20">

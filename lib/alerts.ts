@@ -1,8 +1,25 @@
+/**
+ * Alert delivery system for monitor notifications.
+ * 
+ * Sends alerts through multiple channels (email, Slack, Discord, custom webhooks)
+ * with tier-based access control and anti-spam rate limiting. Supports monitor-level
+ * overrides and profile defaults. Integrates with Resend for email, Supabase for
+ * alert history, and webhook validation for security.
+ * 
+ * Does not determine when to send alerts - called by cron jobs and ping endpoint.
+ */
+
 import { Resend } from 'resend'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { generateEmailTemplate, generateEmailText } from '@/lib/email-templates'
 import { validateCustomWebhookUrl } from '@/lib/webhooks-validator'
 
+/**
+ * Creates Resend client for email delivery.
+ * 
+ * @returns Resend client instance
+ * @throws Error if RESEND_API_KEY is not configured
+ */
 function getResendClient() {
   const apiKey = process.env.RESEND_API_KEY
   if (!apiKey) {
@@ -16,6 +33,18 @@ interface AlertData {
   alert_type: 'missing' | 'failed' | 'recovered' | 'warn'
 }
 
+/**
+ * Sends alert through configured channels with anti-spam protection.
+ * 
+ * Checks rate limits (max 1 per 24h for same type, max 10 per hour total),
+ * determines channels based on tier and monitor overrides, and sends alerts
+ * through email, Slack, Discord, and custom webhooks. Logs alert history.
+ * Side effects: Email delivery, webhook HTTP calls, DB write (alerts table).
+ * 
+ * @param monitor_id - Monitor identifier
+ * @param alert_type - Alert type (missing, failed, recovered, warn)
+ * @returns Result with success status and channels used
+ */
 export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   const supabaseAdmin = getSupabaseAdmin()
   
@@ -190,6 +219,14 @@ export async function sendAlert({ monitor_id, alert_type }: AlertData) {
   }
 }
 
+/**
+ * Sends email alert via Resend with HTML and text templates.
+ * 
+ * @param email - Recipient email address
+ * @param monitor - Monitor object with status and metadata
+ * @param alertType - Alert type for template selection
+ * @returns Result indicating success or failure
+ */
 export async function sendEmailAlert(email: string, monitor: any, alertType: string) {
   const resend = getResendClient()
   
@@ -232,6 +269,14 @@ export async function sendEmailAlert(email: string, monitor: any, alertType: str
   }
 }
 
+/**
+ * Sends Slack alert via webhook with formatted message and color.
+ * 
+ * @param webhookUrl - Slack webhook URL
+ * @param monitor - Monitor object with status and metadata
+ * @param alertType - Alert type for color coding
+ * @returns Result indicating success or failure
+ */
 export async function sendSlackAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const color = getAlertColorHex(alertType)
@@ -267,6 +312,14 @@ export async function sendSlackAlert(webhookUrl: string, monitor: any, alertType
   }
 }
 
+/**
+ * Sends Discord alert via webhook with embed formatting.
+ * 
+ * @param webhookUrl - Discord webhook URL
+ * @param monitor - Monitor object with status and metadata
+ * @param alertType - Alert type for embed color
+ * @returns Result indicating success or failure
+ */
 export async function sendDiscordAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const color = parseInt(getAlertColorHex(alertType).replace('#', ''), 16)
@@ -303,6 +356,17 @@ export async function sendDiscordAlert(webhookUrl: string, monitor: any, alertTy
   }
 }
 
+/**
+ * Sends custom webhook alert with generic JSON payload (Team plan only).
+ * 
+ * Validates webhook URL for SSRF protection, sends structured JSON payload
+ * compatible with PagerDuty, OpsGenie, etc. Includes 10-second timeout.
+ * 
+ * @param webhookUrl - Custom webhook URL (validated)
+ * @param monitor - Monitor object with status and metadata
+ * @param alertType - Alert type for severity mapping
+ * @returns Result indicating success or failure
+ */
 export async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, alertType: string) {
   const message = getAlertMessage(monitor, alertType)
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/monitors/${monitor.slug}`
@@ -345,21 +409,6 @@ export async function sendCustomWebhookAlert(webhookUrl: string, monitor: any, a
   }
 }
 
-function getAlertEmoji(alertType: string): string {
-  switch (alertType) {
-    case 'missing':
-      return ''
-    case 'failed':
-      return ''
-    case 'warn':
-      return ''
-    case 'recovered':
-      return ''
-    default:
-      return ''
-  }
-}
-
 function getEmailSubject(monitorName: string, alertType: string): string {
   switch (alertType) {
     case 'missing':
@@ -372,21 +421,6 @@ function getEmailSubject(monitorName: string, alertType: string): string {
       return `RECOVERED: ${monitorName} is back online`
     default:
       return `Alert: ${monitorName}`
-  }
-}
-
-function getEmailBody(monitor: any, alertType: string): string {
-  switch (alertType) {
-    case 'missing':
-      return `Your monitor "${monitor.name}" hasn't sent a ping in the expected time window. This could indicate that your cron job or scheduled task didn't run.`
-    case 'failed':
-      return `Your monitor "${monitor.name}" reported a failure status. Please check your job logs.`
-    case 'warn':
-      return `Your monitor "${monitor.name}" is late - ping not received within expected interval. It's still within grace period, but please check your cron job.`
-    case 'recovered':
-      return `Good news! Your monitor "${monitor.name}" is back online and working correctly.`
-    default:
-      return `Alert for monitor "${monitor.name}"`
   }
 }
 

@@ -1,3 +1,13 @@
+/**
+ * Admin monitors overview table component.
+ * 
+ * Displays table of all monitors across all workspaces with status indicators,
+ * last ping times, and links to monitor details. Used in admin dashboard for
+ * system-wide monitor overview. Shows workspace and user information.
+ * 
+ * Does not handle monitor updates - only displays information.
+ */
+
 'use client'
 
 import Link from 'next/link'

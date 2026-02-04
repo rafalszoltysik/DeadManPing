@@ -1,3 +1,13 @@
+/**
+ * Monitor header component with status display and actions.
+ * 
+ * Displays monitor name, status badge, and delete button. Used in monitor
+ * detail page to show monitor information and provide quick actions. Renders
+ * status icon and color-coded badge.
+ * 
+ * Does not handle monitor updates - only displays information and triggers delete.
+ */
+
 'use client'
 
 import Link from 'next/link'
@@ -9,6 +19,12 @@ interface MonitorHeaderProps {
   onDeleteClick: () => void
 }
 
+/**
+ * Returns status icon component for monitor status.
+ * 
+ * @param status - Monitor status value
+ * @returns React icon component
+ */
 function getStatusIcon(status: string) {
   switch (status) {
     case 'healthy':

@@ -1,3 +1,14 @@
+/**
+ * Cookie/analytics consent banner component.
+ * 
+ * Displays non-intrusive informational banner about analytics usage. Analytics
+ * enabled by default under GDPR "legitimate interest" (Art. 6(1)(f)). Users can
+ * opt-out via /legal/opt-out page. Banner shown once per user (stored in localStorage)
+ * and can be dismissed. Adjusts position for dashboard sidebar layout.
+ * 
+ * Does not set cookies - only displays information and tracks dismissal state.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -5,10 +16,10 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 /**
- * Informational banner about analytics (non-intrusive)
- * Analytics are enabled by default as "legitimate interest" (GDPR Art. 6(1)(f))
- * Users can opt-out via /legal/opt-out page
- * This banner is shown once and can be dismissed
+ * Renders analytics consent banner with opt-out link.
+ * 
+ * Checks localStorage for dismissal state, handles Safari private mode gracefully.
+ * Side effects: localStorage read/write for dismissal state.
  */
 export function CookieBanner() {
   const [showBanner, setShowBanner] = useState(false)

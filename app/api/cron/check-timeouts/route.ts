@@ -1,3 +1,14 @@
+/**
+ * Monitor timeout checking cron job endpoint.
+ * 
+ * Checks all active monitors for late/failed status and job execution timeouts.
+ * Updates monitor status, inserts ping records, triggers alerts, and tracks
+ * analytics events. Detects zombie jobs (running beyond max_execution_time).
+ * Integrates with Supabase, internal alert API, PostHog, and Sentry.
+ * 
+ * Does not handle trial expiry - see check-all endpoint for combined execution.
+ */
+
 import { NextRequest } from 'next/server'
 import { compareSecrets } from '@/lib/security'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
@@ -10,7 +21,17 @@ import { captureBackendError, captureIntegrationError, captureSoftError } from '
 // Force dynamic rendering - cron jobs should never be cached
 export const dynamic = 'force-dynamic'
 
-// This endpoint can be called by Vercel Cron Jobs
+/**
+ * Checks monitors for timeout conditions and updates status accordingly.
+ * 
+ * Identifies late monitors (past expected interval), failed monitors (past grace period),
+ * and timed-out job runs (exceeded max_execution_time). Updates status, creates ping
+ * records, and triggers alerts. Tracks analytics for missed heartbeats.
+ * Side effects: DB writes (monitors, pings, job_runs), async alert triggers, analytics.
+ * 
+ * @param request - HTTP request with Authorization header containing CRON_SECRET
+ * @returns Response with counts of checked and updated monitors
+ */
 export async function GET(request: NextRequest) {
   // Verify cron secret (set in Vercel environment variables)
   const authHeader = request.headers.get('authorization')

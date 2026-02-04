@@ -1,3 +1,14 @@
+/**
+ * Monitor payload validation rules configuration component.
+ * 
+ * Allows editing payload validation rules for monitors. Supports number, boolean,
+ * and string field validation with comparison operators and severity levels.
+ * Enforces field limits and name length constraints. Updates monitor via API.
+ * Memoized for performance.
+ * 
+ * Does not validate payloads - only configures validation rules.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'

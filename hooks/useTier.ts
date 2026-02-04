@@ -1,3 +1,13 @@
+/**
+ * React hook for fetching and managing user subscription tier information.
+ * 
+ * Polls tier endpoint, calculates tier-based limits and feature flags, and
+ * refreshes on window focus. Used throughout UI to conditionally show/hide
+ * features based on subscription tier.
+ * 
+ * Does not handle subscription upgrades - see billing routes for that.
+ */
+
 import { useState, useEffect, useCallback } from 'react'
 import { TIER_LIMITS } from '@/lib/limits'
 
@@ -14,8 +24,13 @@ export interface UseTierResult {
 }
 
 /**
- * Hook for fetching and managing user tier information
- * Automatically calculates tier-based limits and features
+ * Fetches and manages user subscription tier with automatic polling.
+ * 
+ * Polls tier endpoint at specified interval and on window focus. Calculates
+ * tier-based values (min interval, feature flags) from TIER_LIMITS.
+ * 
+ * @param options - Configuration including polling interval and enabled flag
+ * @returns Tier data, loading state, error, and calculated tier-based values
  */
 export function useTier(
   options: {

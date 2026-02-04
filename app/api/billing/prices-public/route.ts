@@ -1,3 +1,13 @@
+/**
+ * Public API route for fetching subscription prices (unauthenticated).
+ * 
+ * Returns pricing plans with currency detection for landing page and
+ * public pricing displays. Uses caching headers for performance.
+ * No authentication required - public endpoint.
+ * 
+ * Does not handle checkout - see create-checkout route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getCachedPrices, type PlanKey, type PriceInfo } from '@/lib/stripe-prices'
 import { PLAN_FEATURES } from '@/lib/stripe'
@@ -6,6 +16,15 @@ import { getCurrencyFromHeaders, type Currency } from '@/lib/currency-detection'
 // This route is dynamic because it uses request.url and request.headers
 export const dynamic = 'force-dynamic'
 
+/**
+ * Returns pricing plans for public display.
+ * 
+ * Detects currency from headers or query param, fetches Stripe prices,
+ * and returns plans with features. Includes cache headers. Side effects: Stripe API call (cached).
+ * 
+ * @param request - HTTP request with optional currency query param
+ * @returns Pricing plans with currency information
+ */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)

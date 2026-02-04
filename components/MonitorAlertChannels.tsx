@@ -1,3 +1,13 @@
+/**
+ * Monitor alert channels configuration component.
+ * 
+ * Allows editing alert delivery channels (email, Slack, Discord, custom webhook)
+ * for monitors. Validates webhook URLs, enforces tier-based access (custom webhooks
+ * require Team plan), and updates monitor via API. Memoized for performance.
+ * 
+ * Does not send alerts - only configures alert channels.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'

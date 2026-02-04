@@ -1,9 +1,24 @@
+/**
+ * API route for changing subscription plan.
+ * 
+ * Handles plan upgrades/downgrades by updating existing Stripe subscription
+ * or creating new checkout session. Applies rate limiting and validates plan.
+ * Stripe webhook handles database updates asynchronously.
+ * 
+ * Does not handle initial subscription creation - see create-checkout route.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { stripe, PRICING_PLANS } from '@/lib/stripe'
 import { checkRateLimit } from '@/lib/rate-limit'
 
+/**
+ * Creates Supabase admin client for database operations.
+ * 
+ * @returns Supabase client with service role key
+ */
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -20,6 +35,15 @@ function getSupabaseClient() {
   })
 }
 
+/**
+ * Changes user's subscription plan.
+ * 
+ * Updates existing subscription or creates checkout session. Applies proration
+ * for immediate billing. Side effects: Stripe API calls, rate limiting, DB read.
+ * 
+ * @param request - HTTP request with plan in body
+ * @returns Checkout URL or success message
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

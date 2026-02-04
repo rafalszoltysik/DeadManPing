@@ -1,8 +1,24 @@
+/**
+ * Analytics opt-out controls component.
+ * 
+ * Allows users to opt-out of PostHog analytics tracking. Displays current
+ * opt-out status and toggle button. Updates localStorage and reloads page
+ * to apply changes. Used on /legal/opt-out page for GDPR compliance.
+ * 
+ * Does not handle other analytics services - only PostHog.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import { setPostHogOptOut, isPostHogOptedOut } from '@/lib/posthog/client'
 
+/**
+ * Renders analytics opt-out controls with status display.
+ * 
+ * Checks current opt-out status and provides toggle. Side effects:
+ * localStorage read/write, page reload.
+ */
 export function OptOutControls() {
   const [isOptedOut, setIsOptedOut] = useState(false)
   const [isLoading, setIsLoading] = useState(true)

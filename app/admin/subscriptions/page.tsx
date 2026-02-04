@@ -1,9 +1,26 @@
+/**
+ * Admin subscriptions overview page with subscription details.
+ * 
+ * Server component that fetches all workspace subscriptions with Stripe
+ * customer IDs, grace periods, and status information. Requires admin
+ * authentication. Displays subscription table for billing management.
+ * 
+ * Does not handle subscription updates - only displays information.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { isAdmin } from '@/lib/auth/admin'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { formatDistanceToNow } from 'date-fns'
 
+/**
+ * Fetches all workspace subscriptions with billing information.
+ * 
+ * Side effects: database queries (workspaces, profiles).
+ * 
+ * @returns Subscriptions list with Stripe customer IDs and grace periods
+ */
 async function getSubscriptions() {
   const supabaseAdmin = getSupabaseAdmin()
 

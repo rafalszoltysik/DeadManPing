@@ -1,8 +1,24 @@
+/**
+ * Contact form component for support requests.
+ * 
+ * Handles contact form submission with email, subject, and message fields.
+ * Supports both authenticated and public users, includes honeypot spam
+ * protection, and sends messages via Resend API. Used on contact page.
+ * 
+ * Does not handle support ticket management - only sends emails.
+ */
+
 'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
+/**
+ * Renders contact form with spam protection and user email detection.
+ * 
+ * Fetches user email if authenticated, validates form, and sends support
+ * message. Side effects: API calls, email sending via Resend.
+ */
 export function ContactForm() {
   const [email, setEmail] = useState('')
   const [userEmail, setUserEmail] = useState<string | null>(null)

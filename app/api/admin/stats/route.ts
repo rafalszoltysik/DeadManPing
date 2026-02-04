@@ -1,9 +1,28 @@
+/**
+ * Admin dashboard statistics endpoint.
+ * 
+ * Returns aggregated platform statistics including user counts, monitor statuses,
+ * workspace counts, and subscription distribution. Requires admin authentication.
+ * All queries run in parallel for performance.
+ * 
+ * Does not expose sensitive user data - only aggregated counts.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth/admin'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Returns platform-wide statistics for admin dashboard.
+ * 
+ * Fetches user, monitor, workspace, and subscription stats in parallel.
+ * Side effects: Multiple DB reads (profiles, monitors, workspaces).
+ * 
+ * @param request - HTTP request (unused)
+ * @returns Aggregated statistics object
+ */
 export async function GET(request: NextRequest) {
   try {
     const authResult = await requireAdmin()

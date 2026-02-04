@@ -1,14 +1,26 @@
+/**
+ * Supabase admin client singleton for elevated database access.
+ * 
+ * Provides a cached Supabase client with service role key that bypasses
+ * Row Level Security (RLS) policies. Used for administrative operations,
+ * cron jobs, and operations requiring elevated permissions.
+ * 
+ * Does not handle user sessions - see server.ts for user-scoped clients.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/types/database'
 
 let adminClient: ReturnType<typeof createClient<Database>> | null = null
 
 /**
- * Get or create a Supabase admin client with service role key.
- * This client bypasses Row Level Security (RLS) policies.
+ * Gets or creates singleton Supabase admin client with service role key.
  * 
- * @returns Supabase admin client
- * @throws Error if required environment variables are not set
+ * Bypasses RLS policies for administrative operations. Client is cached
+ * for performance across multiple calls.
+ * 
+ * @returns Supabase admin client instance
+ * @throws Error if environment variables are missing
  */
 export function getSupabaseAdmin() {
   if (adminClient) {

@@ -1,6 +1,10 @@
 /**
- * SEO Helper Functions for DeadManPing
- * Provides standardized functions for creating structured data schemas
+ * SEO helper functions for generating structured data schemas.
+ * 
+ * Provides functions to create Schema.org Article and BreadcrumbList schemas
+ * for blog posts. Used for SEO optimization and rich snippets in search results.
+ * 
+ * Does not handle page rendering - only generates JSON-LD structured data.
  */
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
@@ -22,7 +26,12 @@ export interface BreadcrumbSchemaOptions {
 }
 
 /**
- * Creates a complete Article schema for blog posts
+ * Creates Schema.org Article structured data for blog posts.
+ * 
+ * Generates complete Article schema with author, publisher, and metadata.
+ * 
+ * @param options - Article metadata (slug, headline, description, keywords, etc.)
+ * @returns Article schema object for JSON-LD
  */
 export function createArticleSchema(options: ArticleSchemaOptions) {
   const {
@@ -69,7 +78,12 @@ export function createArticleSchema(options: ArticleSchemaOptions) {
 }
 
 /**
- * Creates a BreadcrumbList schema for navigation
+ * Creates Schema.org BreadcrumbList structured data for navigation.
+ * 
+ * Generates breadcrumb schema with Home and current page items.
+ * 
+ * @param options - Breadcrumb metadata (slug, title)
+ * @returns BreadcrumbList schema object for JSON-LD
  */
 export function createBreadcrumbSchema(options: BreadcrumbSchemaOptions) {
   const { slug, title } = options
@@ -94,10 +108,4 @@ export function createBreadcrumbSchema(options: BreadcrumbSchemaOptions) {
   }
 }
 
-/**
- * Gets the clean base URL for use in components
- */
-export function getCleanBaseUrl(): string {
-  return cleanBaseUrl
-}
 

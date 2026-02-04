@@ -1,8 +1,24 @@
+/**
+ * Email verification resend API endpoint.
+ * 
+ * Allows users to request a new email verification link. Applies rate limiting
+ * per IP and per email to prevent abuse. Always returns success message to
+ * prevent email enumeration attacks. Uses Supabase Auth to send verification emails.
+ * 
+ * Does not reveal whether email exists - same response for all requests.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { checkRateLimit } from '@/lib/rate-limit'
 import { getAppUrl } from '@/lib/get-app-url'
 
+/**
+ * Creates Supabase client for email operations.
+ * 
+ * @returns Supabase client instance
+ * @throws Error if environment variables not configured
+ */
 function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -14,6 +30,16 @@ function getSupabaseClient() {
   return createClient(supabaseUrl, supabaseKey)
 }
 
+/**
+ * Handles email verification resend requests.
+ * 
+ * Validates email, applies rate limiting, and sends verification email via Supabase.
+ * Always returns success to prevent email enumeration. Side effects: rate limit
+ * checks, Supabase email sending.
+ * 
+ * @param request - HTTP request with email in JSON body
+ * @returns Success response (always, for security)
+ */
 export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json()

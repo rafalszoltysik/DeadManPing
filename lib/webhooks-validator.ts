@@ -1,4 +1,12 @@
-// Walidator webhook URLs - ochrona przed SSRF
+/**
+ * Webhook URL validation utilities with SSRF protection.
+ * 
+ * Validates Slack, Discord, and custom webhook URLs to prevent SSRF attacks.
+ * Blocks private IPs, localhost, and cloud metadata endpoints. Uses whitelist
+ * patterns for Slack/Discord and protocol/hostname checks for custom webhooks.
+ * 
+ * Does not send webhooks - only validates URLs before storage.
+ */
 
 const ALLOWED_WEBHOOK_PATTERNS = {
   slack: /^https:\/\/hooks\.slack\.com\/services\/[A-Z0-9]+\/[A-Z0-9]+\/[A-Za-z0-9]+$/,
@@ -31,6 +39,16 @@ const BLOCKED_HOSTS = [
   '172.31.',
 ]
 
+/**
+ * Validates Slack or Discord webhook URL format and security.
+ * 
+ * Checks HTTPS protocol, whitelist pattern matching, and blocks private IPs.
+ * Returns validation result with error message if invalid.
+ * 
+ * @param url - Webhook URL to validate
+ * @param type - Webhook type (slack or discord)
+ * @returns Validation result with error message if invalid
+ */
 export function validateWebhookUrl(url: string, type: 'slack' | 'discord'): { 
   valid: boolean
   error?: string 
@@ -72,8 +90,13 @@ export function validateWebhookUrl(url: string, type: 'slack' | 'discord'): {
 }
 
 /**
- * Validate custom webhook URL (Team plan)
- * Protects against SSRF attacks by blocking private IPs and localhost
+ * Validates custom webhook URL with SSRF protection (Team plan only).
+ * 
+ * Blocks private IPs, localhost, IPv6 localhost, and cloud metadata endpoints.
+ * Only allows HTTPS protocol. More permissive than Slack/Discord (no pattern matching).
+ * 
+ * @param url - Custom webhook URL to validate
+ * @returns Validation result with error message if invalid
  */
 export function validateCustomWebhookUrl(url: string): { 
   valid: boolean
@@ -121,42 +144,4 @@ export function validateCustomWebhookUrl(url: string): {
   }
 }
 
-// Optional: Test webhook before saving
-export async function testWebhookUrl(
-  url: string, 
-  type: 'slack' | 'discord',
-  timeout: number = 5000
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
-    const testPayload = type === 'slack' 
-      ? { text: '🧪 DeadManPing webhook test' }
-      : { content: '🧪 DeadManPing webhook test' }
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(testPayload),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (!response.ok) {
-      return { 
-        success: false, 
-        error: `Webhook returned status ${response.status}` 
-      }
-    }
-
-    return { success: true }
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      return { success: false, error: 'Webhook request timed out' }
-    }
-    return { success: false, error: error.message }
-  }
-}
 

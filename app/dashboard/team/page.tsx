@@ -1,8 +1,24 @@
+/**
+ * Team management page for workspace members.
+ * 
+ * Server component that fetches workspace information and members list.
+ * Verifies user has workspace access, fetches subscription tier for member
+ * limits, and renders TeamMembers component. Requires authentication.
+ * 
+ * Does not handle member invitations - delegated to TeamMembers component.
+ */
+
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import { TeamMembers } from '@/components/TeamMembers'
 
+/**
+ * Creates Supabase admin client for workspace operations.
+ * 
+ * @returns Supabase client with service role
+ * @throws Error if environment variables not configured
+ */
 function getSupabaseAdmin() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY

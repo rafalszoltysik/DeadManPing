@@ -1,3 +1,14 @@
+/**
+ * User activity monitoring component for automatic logout.
+ * 
+ * Monitors user activity (mouse, keyboard, scroll) and automatically logs out
+ * after specified inactivity period. Uses useActivityTimeout hook for activity
+ * detection. Renders nothing - only provides side effects. Used in dashboard
+ * layout for security.
+ * 
+ * Does not handle session management - only triggers logout redirect.
+ */
+
 'use client'
 
 import { useActivityTimeout } from '@/hooks/useActivityTimeout'
@@ -16,8 +27,12 @@ interface ActivityMonitorProps {
 }
 
 /**
- * Component that monitors user activity and automatically logs out after inactivity
- * Should be placed in dashboard layout
+ * Monitors user activity and triggers logout on inactivity.
+ * 
+ * Side effects: Event listeners (mouse, keyboard, scroll), redirect on timeout.
+ * 
+ * @param timeoutMinutes - Inactivity timeout in minutes
+ * @param enabled - Whether monitoring is enabled
  */
 export function ActivityMonitor({ timeoutMinutes = 30, enabled = true }: ActivityMonitorProps) {
   useActivityTimeout({

@@ -1,3 +1,13 @@
+/**
+ * Call-to-action button component with authentication-aware routing.
+ * 
+ * Checks user authentication status and routes to dashboard (if logged in)
+ * or signup page (if not). Tracks CTA clicks for analytics. Used throughout
+ * marketing pages for primary conversion actions.
+ * 
+ * Does not handle authentication - only checks session and routes.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -11,6 +21,15 @@ interface CTAButtonProps {
   className?: string
 }
 
+/**
+ * Renders CTA button with auth-aware navigation.
+ * 
+ * Checks Supabase session, routes to dashboard or signup, tracks analytics.
+ * Side effects: session check, navigation, PostHog event.
+ * 
+ * @param children - Button label/content
+ * @param className - Additional CSS classes
+ */
 export function CTAButton({ children, className = '' }: CTAButtonProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)

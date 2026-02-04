@@ -1,9 +1,28 @@
+/**
+ * Test endpoint for sending alert notifications.
+ * 
+ * Development/testing utility to test alert delivery through all channels
+ * (email, Slack, Discord, custom webhooks). Validates webhook URLs and sends
+ * test messages. Used for verifying alert configuration in settings.
+ * 
+ * SECURITY: Requires authentication. Should be disabled or restricted in production.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { sendEmailAlert, sendSlackAlert, sendDiscordAlert, sendCustomWebhookAlert } from '@/lib/alerts'
 import { validateCustomWebhookUrl, validateWebhookUrl } from '@/lib/webhooks-validator'
 
+/**
+ * Sends test alerts through configured channels.
+ * 
+ * Validates webhook URLs and sends test messages. Side effects: Email/Slack/
+ * Discord/webhook delivery, webhook URL validation.
+ * 
+ * @param request - HTTP request with alert channel URLs in JSON body
+ * @returns Test result for each channel
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

@@ -1,3 +1,13 @@
+/**
+ * Monitor deletion confirmation modal component.
+ * 
+ * Displays confirmation dialog for monitor deletion with error handling.
+ * Uses React portal to render above all content. Shows monitor name and
+ * handles deletion state (loading, error, success). Prevents accidental deletions.
+ * 
+ * Does not delete monitor - calls onConfirm callback for parent to handle.
+ */
+
 'use client'
 
 import { createPortal } from 'react-dom'
@@ -13,6 +23,20 @@ interface MonitorDeleteConfirmationProps {
   onConfirm: () => Promise<void>
 }
 
+/**
+ * Renders monitor deletion confirmation modal.
+ * 
+ * Displays modal with monitor name and confirmation prompt. Side effects:
+ * Portal rendering, modal display.
+ * 
+ * @param monitorName - Name of monitor to delete
+ * @param monitorSlug - Slug of monitor to delete
+ * @param show - Whether modal is visible
+ * @param deleting - Whether deletion is in progress
+ * @param error - Error message if deletion failed
+ * @param onCancel - Callback when user cancels
+ * @param onConfirm - Callback when user confirms deletion
+ */
 export function MonitorDeleteConfirmation({
   monitorName,
   monitorSlug,

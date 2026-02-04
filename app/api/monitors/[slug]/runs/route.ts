@@ -1,3 +1,13 @@
+/**
+ * Job runs history endpoint for start/stop tracking.
+ * 
+ * Retrieves execution history for a monitor's job runs (start/stop tracking records).
+ * Supports filtering by status (running/completed/timeout/failed) and pagination.
+ * Verifies user access to monitor before returning data.
+ * 
+ * Does not create or update runs - only reads execution history.
+ */
+
 import { NextRequest } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { requireAuth } from '@/lib/api/auth'
@@ -7,6 +17,16 @@ import { JobRun } from '@/lib/types/monitor'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Fetches job run history for a monitor with optional status filtering.
+ * 
+ * Returns up to 100 most recent runs, optionally filtered by status.
+ * Side effects: DB read (job_runs).
+ * 
+ * @param request - HTTP request with optional query params: limit, status
+ * @param params - Route parameters with monitor slug
+ * @returns Response with runs array
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ slug: string }> }

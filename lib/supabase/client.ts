@@ -1,6 +1,24 @@
+/**
+ * Supabase client for browser/client-side usage.
+ * 
+ * Creates Supabase client with cookie-based session management for client components.
+ * Handles cookie encoding/decoding correctly for Supabase Auth. Used in client
+ * components and hooks that need to access Supabase from the browser.
+ * 
+ * Does not bypass RLS - uses anon key with user's session permissions.
+ */
+
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/lib/types/database'
 
+/**
+ * Creates Supabase client for browser usage.
+ * 
+ * Configures cookie handling to work with Supabase Auth session management.
+ * Cookie names are kept encoded (as Supabase stores them), values are decoded.
+ * 
+ * @returns Supabase client instance for browser
+ */
 export function createClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

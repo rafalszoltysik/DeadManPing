@@ -1,3 +1,14 @@
+/**
+ * Interactive monitor creation form demo component.
+ * 
+ * Demonstrates monitor creation form with live preview of curl commands.
+ * Used on landing page and documentation to show how monitor creation works.
+ * Supports interval and cron scheduling, payload validation rules, and generates
+ * platform-specific curl commands. Memoized for performance.
+ * 
+ * Does not create monitors - only demonstrates form functionality.
+ */
+
 'use client'
 
 import { useState, useEffect, useCallback, memo } from 'react'

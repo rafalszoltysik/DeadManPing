@@ -1,3 +1,13 @@
+/**
+ * Dashboard page displaying user's monitors.
+ * 
+ * Fetches monitors from user's workspaces, checks tier limits, and displays
+ * monitor list with creation button. Handles workspace membership and legacy
+ * user_id-based queries. Server Component that performs data fetching.
+ * 
+ * Does not handle monitor creation - redirects to monitors/new page.
+ */
+
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -9,6 +19,14 @@ import { AccountLinkedBanner } from '@/components/AccountLinkedBanner'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { InvitationSuccessBanner } from '@/components/InvitationSuccessBanner'
 
+/**
+ * Renders dashboard page with user's monitors.
+ * 
+ * Fetches monitors from database, checks limits, and displays list.
+ * Side effects: DB read (monitors, workspace_members, workspaces).
+ * 
+ * @param searchParams - URL search parameters (invited, workspace)
+ */
 export default async function DashboardPage({
   searchParams,
 }: {

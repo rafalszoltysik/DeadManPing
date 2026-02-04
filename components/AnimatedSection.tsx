@@ -1,3 +1,13 @@
+/**
+ * Animation components for scroll-triggered fade-in and slide animations.
+ * 
+ * Provides AnimatedSection, AnimatedItem, and StaggerContainer components
+ * with IntersectionObserver-based animations. Respects prefers-reduced-motion,
+ * optimizes for mobile, and uses shared observer instance for performance.
+ * 
+ * Does not handle page transitions - only scroll-triggered animations.
+ */
+
 'use client'
 
 import { ReactNode, useEffect, useRef, useState } from 'react'
@@ -15,6 +25,14 @@ interface AnimatedSectionProps {
 let sharedObserver: IntersectionObserver | null = null
 const observedElements = new WeakMap<Element, () => void>()
 
+/**
+ * Creates or returns shared IntersectionObserver instance.
+ * 
+ * Reduces overhead by reusing single observer for all animated elements.
+ * Uses WeakMap to track element callbacks.
+ * 
+ * @returns Shared IntersectionObserver instance
+ */
 function getSharedObserver() {
   if (sharedObserver) return sharedObserver
 
@@ -35,6 +53,11 @@ function getSharedObserver() {
 
 // Check reduced motion preference once and cache
 let cachedPrefersReducedMotion: boolean | null = null
+/**
+ * Checks user's reduced motion preference (cached).
+ * 
+ * @returns True if user prefers reduced motion
+ */
 function getPrefersReducedMotion(): boolean {
   if (cachedPrefersReducedMotion === null && typeof window !== 'undefined') {
     cachedPrefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -44,6 +67,11 @@ function getPrefersReducedMotion(): boolean {
 
 // Check mobile once and cache (can be updated on resize if needed)
 let cachedIsMobile: boolean | null = null
+/**
+ * Checks if device is mobile (cached, width < 768px).
+ * 
+ * @returns True if mobile device
+ */
 function getIsMobile(): boolean {
   if (cachedIsMobile === null && typeof window !== 'undefined') {
     cachedIsMobile = window.innerWidth < 768
@@ -51,6 +79,19 @@ function getIsMobile(): boolean {
   return cachedIsMobile ?? false
 }
 
+/**
+ * Animated section container with scroll-triggered fade-in animation.
+ * 
+ * Animates children when scrolled into view. Supports multiple directions
+ * and respects reduced motion preferences.
+ * 
+ * @param children - React children to animate
+ * @param className - Additional CSS classes
+ * @param delay - Animation delay in milliseconds
+ * @param stagger - Whether to stagger child animations (unused in this component)
+ * @param direction - Animation direction (up, down, left, right, fade)
+ * @param duration - Animation duration in milliseconds
+ */
 export function AnimatedSection({ 
   children, 
   className = '', 
@@ -164,6 +205,17 @@ export function AnimatedSection({
   )
 }
 
+/**
+ * Individual animated item with scroll-triggered animation.
+ * 
+ * Similar to AnimatedSection but for individual items within a container.
+ * 
+ * @param children - React children to animate
+ * @param className - Additional CSS classes
+ * @param delay - Animation delay in milliseconds
+ * @param direction - Animation direction
+ * @param duration - Animation duration in milliseconds
+ */
 export function AnimatedItem({ 
   children, 
   className = '', 
@@ -284,6 +336,16 @@ export function AnimatedItem({
   )
 }
 
+/**
+ * Container that animates children with staggered delays.
+ * 
+ * Animates each child sequentially with configurable delay between items.
+ * Used for lists and grids where items should appear one after another.
+ * 
+ * @param children - React children to animate (must be array)
+ * @param className - Additional CSS classes
+ * @param staggerDelay - Delay between each child animation in milliseconds
+ */
 export function StaggerContainer({ 
   children, 
   className = '',

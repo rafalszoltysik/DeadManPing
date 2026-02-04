@@ -1,3 +1,13 @@
+/**
+ * Account linking success banner component.
+ * 
+ * Displays success message when Google account is linked to existing email
+ * account. Shown once per user (stored in localStorage) and auto-dismisses after
+ * 5 seconds. Removes accountLinked query parameter from URL.
+ * 
+ * Does not handle account linking - only displays success message.
+ */
+
 'use client'
 
 import { useEffect, useState } from 'react'
@@ -5,6 +15,12 @@ import { useSearchParams, useRouter } from 'next/navigation'
 
 const ACCOUNT_LINKED_BANNER_KEY = 'accountLinkedBannerShown'
 
+/**
+ * Renders account linking success banner.
+ * 
+ * Checks URL parameter and localStorage to show banner once. Side effects:
+ * localStorage read/write, URL parameter removal.
+ */
 export function AccountLinkedBanner() {
   const searchParams = useSearchParams()
   const router = useRouter()

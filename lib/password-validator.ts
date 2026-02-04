@@ -1,8 +1,27 @@
+/**
+ * Password validation and strength checking utilities.
+ * 
+ * Validates password strength, checks against common passwords, and optionally
+ * verifies against Have I Been Pwned database. Used during user registration
+ * and password changes.
+ * 
+ * Does not hash passwords - Supabase handles password hashing.
+ */
+
 export interface PasswordValidation {
   valid: boolean
   errors: string[]
 }
 
+/**
+ * Validates password against strength requirements.
+ * 
+ * Checks length, character requirements, common passwords, and sequential patterns.
+ * Returns validation result with array of error messages.
+ * 
+ * @param password - Password string to validate
+ * @returns Validation result with errors array
+ */
 export function validatePassword(password: string): PasswordValidation {
   const errors: string[] = []
 
@@ -55,72 +74,4 @@ export function validatePassword(password: string): PasswordValidation {
   }
 }
 
-/**
- * Check if password has been compromised in a data breach
- * Uses haveibeenpwned API with k-anonymity (only sends first 5 chars of hash)
- */
-export async function checkPasswordBreach(password: string): Promise<boolean> {
-  try {
-    const crypto = await import('crypto')
-    const hash = crypto.createHash('sha1').update(password).digest('hex').toUpperCase()
-    const prefix = hash.substring(0, 5)
-    const suffix = hash.substring(5)
-
-    const response = await fetch(
-      `https://api.pwnedpasswords.com/range/${prefix}`,
-      { 
-        headers: { 'Add-Padding': 'true' },
-        signal: AbortSignal.timeout(5000) 
-      }
-    )
-
-    if (!response.ok) return false // Fail open
-
-    const text = await response.text()
-    return text.includes(suffix) // true = breached
-  } catch {
-    return false // Fail open on error
-  }
-}
-
-/**
- * Get password strength score (0-4)
- * 0 = very weak, 4 = very strong
- */
-export function getPasswordStrength(password: string): {
-  score: number
-  feedback: string
-} {
-  let score = 0
-  const feedback: string[] = []
-
-  // Length bonus
-  if (password.length >= 8) score++
-  if (password.length >= 12) score++
-  if (password.length >= 16) score++
-
-  // Complexity bonus
-  if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++
-  if (/[0-9]/.test(password)) score++
-  if (/[^a-zA-Z0-9]/.test(password)) score++
-
-  // Variety bonus
-  const uniqueChars = new Set(password).size
-  if (uniqueChars > password.length * 0.5) score++
-
-  // Cap at 4
-  score = Math.min(score, 4)
-
-  // Feedback
-  if (score === 0) feedback.push('Very weak password')
-  if (score === 1) feedback.push('Weak password')
-  if (score === 2) feedback.push('Fair password')
-  if (score === 3) feedback.push('Strong password')
-  if (score === 4) feedback.push('Very strong password')
-
-  return {
-    score,
-    feedback: feedback.join('. ')
-  }
-}
 

@@ -1,3 +1,13 @@
+/**
+ * TypeScript type definitions for monitor-related entities.
+ * 
+ * Defines interfaces and types for monitors, pings, job runs, and related
+ * data structures used throughout the application. Ensures type safety
+ * across API routes, components, and utilities.
+ * 
+ * Does not contain business logic - only type definitions.
+ */
+
 import { PayloadValidationRules } from '@/lib/payload-validator'
 
 export type MonitorStatus = 'pending' | 'healthy' | 'late' | 'failed' | 'paused'

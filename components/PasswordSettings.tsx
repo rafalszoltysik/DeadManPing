@@ -1,3 +1,14 @@
+/**
+ * Password management component for user settings.
+ * 
+ * Handles password addition (for OAuth accounts) and password changes (for
+ * email accounts). Validates password strength, enforces requirements, and
+ * updates password via Supabase Auth. Includes password visibility toggles
+ * and real-time validation feedback. Memoized for performance.
+ * 
+ * Does not handle password reset - see forgot-password page for that.
+ */
+
 'use client'
 
 import React, { useState, useCallback } from 'react'

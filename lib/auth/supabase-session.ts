@@ -1,9 +1,22 @@
+/**
+ * Supabase session management utilities for server-side authentication.
+ * 
+ * Provides function to retrieve authenticated user from Supabase session cookies.
+ * Used in Server Components and API routes to check authentication status.
+ * Handles expected "no session" errors gracefully without logging.
+ * 
+ * Does not handle login/logout - see auth routes for that.
+ */
+
 import { createClient } from '@/lib/supabase/server'
 
 /**
- * Get authenticated user from Supabase session
- * Returns null if user is not authenticated
- * Use this instead of verifySession() for Supabase Auth
+ * Retrieves authenticated user from Supabase session.
+ * 
+ * Returns user object if authenticated, null otherwise. Silently handles
+ * expected "no session" errors (normal for unauthenticated users).
+ * 
+ * @returns User object or null if not authenticated
  */
 export async function getSupabaseUser() {
   const supabase = await createClient()

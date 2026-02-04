@@ -1,9 +1,27 @@
+/**
+ * API route for checking subscription tier limits.
+ * 
+ * Validates monitor count and interval limits before monitor creation/update.
+ * Used by frontend to show limit warnings and prevent invalid submissions.
+ * 
+ * Does not enforce limits - only checks and reports current status.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
 import { checkMonitorLimit, checkIntervalLimit } from '@/lib/limits'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Checks if user is within subscription tier limits.
+ * 
+ * Validates monitor count and optional interval limits. Returns limit status
+ * with current usage. Side effects: DB read (monitor count, tier lookup).
+ * 
+ * @param request - HTTP request with optional intervalSeconds in body
+ * @returns Limit check result with current usage and limits
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()

@@ -1,3 +1,13 @@
+/**
+ * Stripe checkout session creation endpoint.
+ * 
+ * Creates a Stripe Checkout session for subscription upgrades with currency support.
+ * Validates plan selection, checks for incomplete sessions, enforces rate limits,
+ * and creates workspace if needed. Integrates with Stripe API and Supabase.
+ * 
+ * Does not process payments - only creates checkout session URL.
+ */
+
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { getSupabaseUser } from '@/lib/auth/supabase-session'
@@ -37,8 +47,15 @@ function getStripeClient() {
 }
 
 /**
- * Check if user has any incomplete/expired checkout sessions
- * If they do, we should allow them to create a new one
+ * Checks for incomplete or expired Stripe checkout sessions.
+ * 
+ * Allows users to retry checkout if they left the page without completing.
+ * Checks by customer ID or email to handle both existing and new customers.
+ * 
+ * @param customerId - Stripe customer ID or null
+ * @param customerEmail - Customer email address or null
+ * @param workspaceId - Workspace identifier for session filtering
+ * @returns True if incomplete sessions exist, false otherwise
  */
 async function hasIncompleteCheckoutSessions(
   customerId: string | null,
@@ -99,6 +116,16 @@ async function hasIncompleteCheckoutSessions(
   }
 }
 
+/**
+ * Creates a Stripe Checkout session for subscription upgrade.
+ * 
+ * Validates plan selection, checks rate limits (with exception for incomplete sessions),
+ * retrieves or creates workspace, and creates Stripe checkout session with currency support.
+ * Side effects: DB read/write (profiles, workspaces), Stripe API call, rate limit check.
+ * 
+ * @param request - HTTP request with plan and optional currency in JSON body
+ * @returns Response with checkout session URL or error
+ */
 export async function POST(request: NextRequest) {
   try {
     const user = await getSupabaseUser()
