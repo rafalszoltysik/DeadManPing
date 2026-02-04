@@ -6,6 +6,32 @@ Cron monitoring that observes job results without touching execution.
 
 DeadManPing monitors your cron jobs without touching how they run. One curl line. Your job logic stays the same.
 
+## Open Source
+
+DeadManPing is open source! This repository contains the core monitoring logic, frontend components, and infrastructure setup.
+
+**Prefer using the hosted service?** [Get started at deadmanping.com](https://deadmanping.com) - no setup required, free tier available.
+
+**Want to self-host?** This repository is licensed under [MIT License](LICENSE). See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing.
+
+### What's included
+
+- Core monitoring logic (payload validation, status calculation, alerts)
+- Frontend components (React, Next.js, TypeScript)
+- Infrastructure setup (Supabase migrations, Cloudflare Workers)
+- Code examples (Bash, Python, Node.js)
+
+### Self-hosting
+
+Self-hosting requires setting up:
+- Supabase (database + auth)
+- Stripe (billing)
+- Resend (email)
+- Vercel/Cloudflare (hosting)
+- Upstash Redis (rate limiting, optional)
+
+For most users, the hosted service is more cost-effective and easier to maintain. Self-hosting is recommended for advanced users who need full control over their infrastructure.
+
 ## Setup
 
 1. Install dependencies:

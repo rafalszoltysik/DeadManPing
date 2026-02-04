@@ -13,11 +13,21 @@ function getResendClient() {
 
 // Support email - use Resend receiving address (e.g., support@yourdomain.resend.app)
 // Configure this in Resend Dashboard -> Receiving
-// Default: support@rineemvri.resend.app (replace with your Resend receiving domain)
-const SUPPORT_INBOUND_EMAIL = process.env.RESEND_RECEIVING_EMAIL || 'support@rineemvri.resend.app'
+// REQUIRED: Set RESEND_RECEIVING_EMAIL environment variable
+// No fallback - this must be configured in your environment
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate required environment variable
+    const SUPPORT_INBOUND_EMAIL = process.env.RESEND_RECEIVING_EMAIL
+    if (!SUPPORT_INBOUND_EMAIL) {
+      console.error('RESEND_RECEIVING_EMAIL environment variable is not configured')
+      return NextResponse.json(
+        { error: 'Support email is not configured. Please contact the administrator.' },
+        { status: 500 }
+      )
+    }
+
     const user = await getSupabaseUser()
     const { subject, message, email } = await request.json()
 
@@ -139,7 +149,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Use verified Resend domain as sender
-    // The email will be sent to Resend receiving address (e.g., support@rineemvri.resend.app)
+    // The email will be sent to Resend receiving address configured in RESEND_RECEIVING_EMAIL
     // which will appear in Resend Inbox
     const fromEmail = process.env.RESEND_FROM_EMAIL || 'DeadManPing <onboarding@resend.dev>'
     const supportEmail = SUPPORT_INBOUND_EMAIL
