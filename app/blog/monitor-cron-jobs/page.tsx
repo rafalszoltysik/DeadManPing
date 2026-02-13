@@ -10,19 +10,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Monitor Cron Jobs Without Migration | DeadManPing",
-  description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+  title: "Monitor Cron Jobs: One Curl Line, No Migration | DeadManPing",
+  description: "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop running. Free tier, 2-min setup. Keep your existing scripts.",
   keywords: "monitor cron jobs without migration, cron monitoring, how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts, monitor cron jobs linux, cron job not running, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron job notification service, monitor cron notification, cron notification system, cron job notification if failed, cron notification when job fails, cron notification if job fails",
   openGraph: {
-    title: "Monitor Cron Jobs Without Migration | DeadManPing",
-    description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+    title: "Monitor Cron Jobs: One Curl Line, No Migration",
+    description: "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop. Free tier, 2-min setup.",
     type: "article",
     url: `${cleanBaseUrl}/blog/monitor-cron-jobs`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Monitor Cron Jobs Without Migration | DeadManPing",
-    description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+    title: "Monitor Cron Jobs: One Curl Line, No Migration",
+    description: "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop. Free tier, 2-min setup.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/monitor-cron-jobs`,
@@ -34,8 +34,8 @@ export default function MonitorCronJobsPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     "url": `${cleanBaseUrl}/blog/monitor-cron-jobs`,
-    "headline": "How to Monitor Cron Jobs and Detect Failures",
-    "description": "Complete guide on monitoring cron jobs and detecting when they fail or stop running.",
+    "headline": "Monitor Cron Jobs: One Curl Line, No Migration",
+    "description": "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop running. Free tier, 2-min setup.",
     "datePublished": "2026-01-15",
     "dateModified": "2026-01-15",
     "author": {
@@ -113,10 +113,10 @@ export default function MonitorCronJobsPage() {
         <article>
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              Monitor Cron Jobs Without Changing Your Setup
+              Monitor Cron Jobs: One Curl Line, No Migration
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Keep your cron. Keep your scripts. Add one curl line. Get instant alerts when jobs fail or return wrong results.
+              Keep your cron and scripts. Add one curl line—no SDK, no migration. Get alerts when jobs fail or stop running. Free tier, 2-min setup.
             </p>
           </header>
 

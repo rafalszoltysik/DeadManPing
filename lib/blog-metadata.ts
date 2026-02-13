@@ -18,20 +18,20 @@ export interface BlogPostMetadata {
 
 export const blogMetadata: Record<string, BlogPostMetadata> = {
   'dead-man-switch': {
-    title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
-    description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts | DeadManPing",
+    description: "Dead man switch for backups: one curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
     keywords: "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
     canonical: "/blog/dead-man-switch"
   },
   'monitor-cron-jobs': {
-    title: "Monitor Cron Jobs Without Migration | DeadManPing",
-    description: "Keep your cron. Keep your scripts. Monitor cron jobs with one curl line. No migration required.",
+    title: "Monitor Cron Jobs: One Curl Line, No Migration | DeadManPing",
+    description: "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop running. Free tier, 2-min setup. Keep your existing scripts.",
     keywords: "monitor cron jobs without migration, cron monitoring, how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts, monitor cron jobs linux, cron job not running, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron job notification service, monitor cron notification, cron notification system, cron job notification if failed, cron notification when job fails, cron notification if job fails",
     canonical: "/blog/monitor-cron-jobs"
   },
   'cron-job-failed': {
-    title: "Cron Job Not Running? How to Detect and Fix | DeadManPing",
-    description: "Your cron job stopped running. Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
+    title: "Cron Job Failed? How to Detect & Fix in 5 Min | DeadManPing",
+    description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
     keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron notification when job fails, cron notification if job fails, cron job notification service, monitor cron notification",
     canonical: "/blog/cron-job-failed"
   },
@@ -60,8 +60,8 @@ export const blogMetadata: Record<string, BlogPostMetadata> = {
     canonical: "/blog/silent-cron-failures"
   },
   'verify-cron-output': {
-    title: "Verify Cron Output: Check Script Output Content | DeadManPing",
-    description: "How to verify cron job script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
+    title: "Verify Cron Output: Validate Script Results | DeadManPing",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails—no SDK.",
     keywords: "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
     canonical: "/blog/verify-cron-output"
   },
@@ -160,6 +160,24 @@ export const blogMetadata: Record<string, BlogPostMetadata> = {
     description: "How to check cron job exit status and verify jobs completed successfully. Examples for validating exit codes.",
     keywords: "cron job exit status check, check cron job exit status, verify cron job exit status, cron job exit code check, validate cron job exit status",
     canonical: "/blog/cron-job-exit-status-check"
+  },
+  'detect-hanging-cron-job': {
+    title: "Detect Hanging Cron Job: Timeout & Execution Time Monitoring | DeadManPing",
+    description: "Your script can hang for hours. Learn how to detect cron job timeouts and stuck scripts with start/stop execution time tracking.",
+    keywords: "detect hanging cron job, cron job timeout detection, cron job stuck, script execution time monitoring, detect cron job timeout, prevent hanging jobs",
+    canonical: "/blog/detect-hanging-cron-job"
+  },
+  'cron-monitoring-without-sdk': {
+    title: "Cron Monitoring Without SDK: One Curl Line | DeadManPing",
+    description: "Monitor cron jobs with one curl line. No SDK, no agent, no migration. Keep your scripts and cron—add a single HTTP ping to get alerts when jobs fail.",
+    keywords: "cron monitoring without SDK, monitor cron with curl, cron job monitoring no SDK, curl cron monitoring, simple cron monitoring, ping-based cron monitoring",
+    canonical: "/blog/cron-monitoring-without-sdk"
+  },
+  'stale-backup-detection': {
+    title: "Stale Backup Detection: Last Backup Was a Month Ago | DeadManPing",
+    description: "Your backup runs but the last good one was weeks ago. Learn how to detect stale backups and verify backup age with payload validation.",
+    keywords: "stale backup detection, last backup was month ago, backup age monitoring, verify backup not old, detect outdated backup, backup freshness monitoring",
+    canonical: "/blog/stale-backup-detection"
   }
 }
 

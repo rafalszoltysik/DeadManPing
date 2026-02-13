@@ -11,19 +11,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Not Running? How to Detect and Fix | DeadManPing",
-  description: "Your cron job stopped running. Learn how to detect failures, diagnose why they're not running, and set up monitoring to prevent incidents.",
+  title: "Cron Job Failed? How to Detect & Fix in 5 Min | DeadManPing",
+  description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
   keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron notification when job fails, cron notification if job fails, cron job notification service, monitor cron notification",
   openGraph: {
-    title: "Cron Job Not Running? How to Detect and Fix",
-    description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
+    title: "Cron Job Failed? How to Detect & Fix in 5 Min",
+    description: "Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-failed`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Not Running? How to Detect and Fix",
-    description: "Learn how to detect cron job failures, diagnose why they're not running, and set up monitoring to prevent future incidents.",
+    title: "Cron Job Failed? How to Detect & Fix in 5 Min",
+    description: "Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/cron-job-failed`,
@@ -33,15 +33,15 @@ export const metadata: Metadata = {
 export default function CronJobFailedPage() {
   const structuredData = createArticleSchema({
     slug: "cron-job-failed",
-    headline: "Cron Job Not Running? How to Detect and Fix",
-    description: "Troubleshooting guide for detecting and fixing cron jobs that stopped running.",
+    headline: "Cron Job Failed? How to Detect & Fix in 5 Min",
+    description: "Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
     keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring",
     articleSection: "Cron Monitoring Guides"
   })
 
   const breadcrumbSchema = createBreadcrumbSchema({
     slug: "cron-job-failed",
-    title: "Cron Job Not Running"
+    title: "Cron Job Failed - Detect & Fix"
   })
 
   return (
@@ -76,11 +76,10 @@ export default function CronJobFailedPage() {
         <article>
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              Cron Job Not Running? How to Detect and Fix
+              Cron Job Failed? How to Detect & Fix in 5 Min
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              You just discovered your cron job hasn't run in days. Learn how to detect failures immediately 
-              and prevent this from happening again.
+              Your cron job failed or stopped running—and you need to fix it fast. Step-by-step: detect why it failed, fix it, then set up monitoring so you get alerts next time.
             </p>
           </header>
 

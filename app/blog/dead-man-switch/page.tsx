@@ -10,19 +10,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Dead Man Switch for Backups | Monitor Backup Jobs | DeadManPing",
-  description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+  title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts | DeadManPing",
+  description: "Dead man switch for backups: one curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
   keywords: "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
   openGraph: {
-    title: "Dead Man Switch for Backups | DeadManPing",
-    description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts",
+    description: "One curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
     type: "article",
     url: `${cleanBaseUrl}/blog/dead-man-switch`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dead Man Switch for Backups | DeadManPing",
-    description: "Dead man switch for backups. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts",
+    description: "One curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/dead-man-switch`,
@@ -33,8 +33,8 @@ export default function DeadManSwitchPage() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "Article",
-    "headline": "Dead Man Switch for Backups: Never Miss a Failed Backup Again",
-    "description": "How to implement dead man switch monitoring for backup jobs to detect failures immediately.",
+    "headline": "Dead Man Switch for Backups: 1 Curl, Instant Alerts",
+    "description": "Dead man switch for backups: one curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start.",
     "url": `${cleanBaseUrl}/blog/dead-man-switch`,
     "datePublished": "2026-01-15",
     "dateModified": "2026-01-15",
@@ -113,10 +113,10 @@ export default function DeadManSwitchPage() {
         <article>
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              Dead Man Switch for Backups: Never Miss a Failed Backup Again
+              Dead Man Switch for Backups: 1 Curl, Instant Alerts
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground mb-4">
-              Dead man switch that doesn't touch your execution.
+              One curl line—instant alerts when your backup doesn&apos;t run or fails. No agent, no migration.
             </p>
             <p className="text-lg sm:text-xl text-muted-foreground">
               Your backup script runs as before. Just add one curl line at the end.

@@ -16,9 +16,14 @@ export interface RelatedArticle {
 export const relatedArticles: Record<string, RelatedArticle[]> = {
   'monitor-cron-jobs': [
     {
+      slug: 'cron-monitoring-without-sdk',
+      title: 'Cron Monitoring Without SDK: One Curl Line',
+      description: 'Monitor cron jobs with one curl line. No SDK, no agent, no migration.'
+    },
+    {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'dead-man-switch',
@@ -39,8 +44,13 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
   'cron-job-failed': [
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
+    },
+    {
+      slug: 'detect-hanging-cron-job',
+      title: 'Detect Hanging Cron Job: Timeout & Execution Time Monitoring',
+      description: 'Detect cron job timeouts and stuck scripts with start/stop tracking.'
     },
     {
       slug: 'cron-job-not-executing',
@@ -76,8 +86,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     }
   ],
   'backup-monitoring': [
@@ -85,6 +95,11 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
       slug: 'backup-didnt-run-how-to-detect',
       title: 'Backup Didn\'t Run - How to Detect',
       description: 'How to detect when backup jobs don\'t run using dead man switch monitoring.'
+    },
+    {
+      slug: 'stale-backup-detection',
+      title: 'Stale Backup Detection: Last Backup Was a Month Ago',
+      description: 'Learn how to detect stale backups and verify backup age with payload validation.'
     },
     {
       slug: 'dead-man-switch',
@@ -198,13 +213,13 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'verify-cron-job-actually-ran',
@@ -230,8 +245,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     }
   ],
   'cron-job-exit-code-not-zero': [
@@ -247,8 +262,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'verify-cron-job-completed',
@@ -269,8 +284,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'detect-cron-job-skipped',
@@ -330,13 +345,13 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'verify-cron-job-actually-ran',
@@ -384,8 +399,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     }
   ],
   'detect-cron-job-wrong-exit-code': [
@@ -401,8 +416,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'verify-cron-job-completed',
@@ -428,8 +443,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     }
   ],
   'detect-backup-file-missing': [
@@ -457,8 +472,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
   'cron-job-not-executing': [
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     },
     {
       slug: 'verify-cron-job-actually-ran',
@@ -467,8 +482,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'detect-cron-job-skipped',
@@ -489,8 +504,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'verify-cron-output',
@@ -511,13 +526,13 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     },
     {
       slug: 'cron-job-failed',
-      title: 'Cron Job Not Running? How to Detect and Fix',
-      description: 'Learn how to detect cron job failures and diagnose why they stop running.'
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
     }
   ],
   'backup-file-zero-bytes': [
@@ -560,8 +575,8 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
     },
     {
       slug: 'monitor-cron-jobs',
-      title: 'Monitor Cron Jobs Without Migration',
-      description: 'Keep your cron. Keep your scripts. Monitor cron jobs with one curl line.'
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
     }
   ],
   'detect-empty-backup-file-cron': [
@@ -584,6 +599,72 @@ export const relatedArticles: Record<string, RelatedArticle[]> = {
       slug: 'verify-backup-file-size',
       title: 'Verify Backup File Size',
       description: 'How to verify backup file sizes are within expected ranges.'
+    }
+  ],
+  'detect-hanging-cron-job': [
+    {
+      slug: 'monitor-cron-jobs',
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
+    },
+    {
+      slug: 'cron-job-failed',
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
+    },
+    {
+      slug: 'verify-cron-job-completed',
+      title: 'Verify Cron Job Completed',
+      description: 'How to verify that cron jobs completed successfully.'
+    },
+    {
+      slug: 'cron-job-not-executing',
+      title: 'Cron Job Not Executing',
+      description: 'How to detect when cron jobs are not executing.'
+    }
+  ],
+  'cron-monitoring-without-sdk': [
+    {
+      slug: 'monitor-cron-jobs',
+      title: 'Monitor Cron Jobs: One Curl Line, No Migration',
+      description: 'Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail.'
+    },
+    {
+      slug: 'cron-job-failed',
+      title: 'Cron Job Failed? How to Detect & Fix in 5 Min',
+      description: 'Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again.'
+    },
+    {
+      slug: 'verify-cron-output',
+      title: 'Verify Cron Output',
+      description: 'How to verify cron job script output contains expected content.'
+    },
+    {
+      slug: 'silent-cron-failures',
+      title: 'Silent Cron Failures: How to Detect Them',
+      description: 'Detect silent cron job failures that don\'t log errors.'
+    }
+  ],
+  'stale-backup-detection': [
+    {
+      slug: 'backup-monitoring',
+      title: 'Backup Monitoring Service',
+      description: 'Backup monitoring that doesn\'t touch your execution.'
+    },
+    {
+      slug: 'detect-empty-backup-file',
+      title: 'Detect Empty Backup File',
+      description: 'How to detect when backup files are empty or zero bytes.'
+    },
+    {
+      slug: 'verify-backup-file-size',
+      title: 'Verify Backup File Size',
+      description: 'How to verify backup file sizes are within expected ranges.'
+    },
+    {
+      slug: 'dead-man-switch',
+      title: 'Dead Man Switch for Backups',
+      description: 'Implement dead man switch monitoring for backup jobs to detect failures immediately.'
     }
   ]
 }

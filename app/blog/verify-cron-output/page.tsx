@@ -8,19 +8,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Verify Cron Output: Check Script Output Content | DeadManPing",
-  description: "How to verify cron job script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
+  title: "Verify Cron Output: Validate Script Results | DeadManPing",
+  description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails—no SDK.",
   keywords: "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
   openGraph: {
-    title: "Verify Cron Output: Check Script Output Content | DeadManPing",
-    description: "How to verify cron job script output contains expected content.",
+    title: "Verify Cron Output: Validate Script Results",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails.",
     type: "article",
     url: `${cleanBaseUrl}/blog/verify-cron-output`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verify Cron Output: Check Script Output Content | DeadManPing",
-    description: "How to verify cron job script output contains expected content.",
+    title: "Verify Cron Output: Validate Script Results",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/verify-cron-output`,
@@ -32,8 +32,8 @@ export default function VerifyCronOutputPage() {
     "@context": "https://schema.org",
     "@type": "Article",
     "url": `${cleanBaseUrl}/blog/verify-cron-output`,
-    "headline": "Verify Cron Output: How to Validate Script Output Content",
-    "description": "Complete guide on verifying that cron job scripts produce expected output and detecting when output is missing or incorrect.",
+    "headline": "Verify Cron Output: Validate Script Results",
+    "description": "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails—no SDK.",
     "datePublished": "2026-01-15",
     "dateModified": "2026-01-15",
     "author": {
@@ -111,10 +111,10 @@ export default function VerifyCronOutputPage() {
         <article>
           <header className="mb-8">
             <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-              Verify Cron Output: Check Script Output Content
+              Verify Cron Output: Validate Script Results
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground">
-              Your cron job runs successfully, but you need to verify the script output contains expected content. Learn how to validate output programmatically.
+              Your cron runs but the output is wrong or empty? Learn how to verify script output with payload validation and get alerts when results fail—Bash, Python, Node examples.
             </p>
           </header>
 

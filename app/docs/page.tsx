@@ -16,22 +16,26 @@ import { CTAButton } from '@/components/CTAButton'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
 
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+
 export const metadata: Metadata = {
-  title: "DeadManPing Documentation | Quick Start Guide | API Reference",
-  description: "Complete documentation for DeadManPing cron job monitoring. Quick start guide, API reference, integration examples for bash, Python, Node.js, and Docker.",
+  title: "Cron Monitoring Docs: Quick Start & API | DeadManPing",
+  description: "DeadManPing docs: quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples. Get monitoring in 2 min.",
   keywords: "deadmanping documentation, cron monitoring api, dead man switch api, cron job monitoring guide, ping api documentation",
   openGraph: {
-    title: "DeadManPing Documentation",
-    description: "Complete documentation for DeadManPing cron job monitoring. Quick start guide and API reference.",
+    title: "Cron Monitoring Docs: Quick Start & API",
+    description: "Quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples. Get monitoring in 2 min.",
     type: "article",
+    url: `${cleanBaseUrl}/docs`,
   },
   twitter: {
-    card: "summary",
-    title: "DeadManPing Documentation",
-    description: "Complete documentation for DeadManPing cron job monitoring. Quick start guide and API reference.",
+    card: "summary_large_image",
+    title: "Cron Monitoring Docs: Quick Start & API",
+    description: "Quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples.",
   },
   alternates: {
-    canonical: "/docs",
+    canonical: `${cleanBaseUrl}/docs`,
   },
 }
 

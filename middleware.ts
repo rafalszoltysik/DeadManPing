@@ -47,6 +47,9 @@ const OLD_BLOG_ROUTES = [
   '/detect-cron-job-skipped',
   '/backup-file-zero-bytes',
   '/cron-job-exit-status-check',
+  '/detect-hanging-cron-job',
+  '/cron-monitoring-without-sdk',
+  '/stale-backup-detection',
 ]
 
 const isPublicRoute = (pathname: string): boolean => {
