@@ -11,19 +11,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Failed? How to Detect & Fix in 5 Min | DeadManPing",
-  description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
+  title: "Cron Job Failed? How to Detect & Fix It in 5 Minutes [2026]",
+  description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and set up alerts so it never happens again. Free monitoring, 2-min setup.",
   keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron notification when job fails, cron notification if job fails, cron job notification service, monitor cron notification",
   openGraph: {
-    title: "Cron Job Failed? How to Detect & Fix in 5 Min",
-    description: "Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
+    title: "Cron Job Failed? How to Detect & Fix It in 5 Minutes",
+    description: "Step-by-step guide to detect why your cron failed, fix it, and set up alerts so it never happens again. Free monitoring, 2-min setup.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-failed`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Failed? How to Detect & Fix in 5 Min",
-    description: "Step-by-step guide to detect why your cron failed, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
+    title: "Cron Job Failed? How to Detect & Fix It Fast",
+    description: "Step-by-step guide to detect why your cron failed, fix it, and set up alerts so it never happens again.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/cron-job-failed`,

@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Verify Cron Job Actually Ran | DeadManPing",
-  description: "How to verify that cron jobs actually executed. Examples for confirming job execution with timestamps and pings.",
+  title: "Verify Cron Job Actually Ran - Confirm Execution With Timestamps",
+  description: "Verify cron jobs actually executed with timestamps and pings. Detect when cron silently stops running. Bash, Python, Node.js examples.",
   keywords: "verify cron job actually ran, confirm cron job executed, detect cron job not running, verify cron job completed, check cron job ran, cron job execution verification",
   openGraph: {
-    title: "Verify Cron Job Actually Ran | DeadManPing",
+    title: "Verify Cron Job Actually Ran - Confirm Execution With Timestamps",
     description: "How to verify that cron jobs actually executed.",
     type: "article",
     url: `${cleanBaseUrl}/blog/verify-cron-job-actually-ran`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verify Cron Job Actually Ran | DeadManPing",
+    title: "Verify Cron Job Actually Ran - Confirm Execution With Timestamps",
     description: "How to verify that cron jobs actually executed.",
   },
   alternates: {

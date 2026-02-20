@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Detect Cron Job Skipped | DeadManPing",
-  description: "How to detect when cron jobs are skipped—not executed when they should be. Examples for detecting skipped jobs.",
+  title: "Detect Skipped Cron Jobs - Why Your Job Didn't Run & How to Fix",
+  description: "Detect when cron jobs are skipped or not executed on schedule. Find out why and set up alerts for missed runs. Bash, Python, Node.js examples.",
   keywords: "detect cron job skipped, cron job skipped detection, verify cron job not skipped, detect skipped cron job, cron job skip detection",
   openGraph: {
-    title: "Detect Cron Job Skipped | DeadManPing",
+    title: "Detect Skipped Cron Jobs - Why Your Job Didn't Run",
     description: "How to detect when cron jobs are skipped—not executed when they should be.",
     type: "article",
     url: `${cleanBaseUrl}/blog/detect-cron-job-skipped`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Detect Cron Job Skipped | DeadManPing",
+    title: "Detect Skipped Cron Jobs - Why Your Job Didn't Run",
     description: "How to detect when cron jobs are skipped—not executed when they should be.",
   },
   alternates: {

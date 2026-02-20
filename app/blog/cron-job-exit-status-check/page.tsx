@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Exit Status Check | DeadManPing",
-  description: "How to check cron job exit status and verify jobs completed successfully. Examples for validating exit codes.",
+  title: "Cron Job Exit Status Check - Validate Exit Codes Automatically",
+  description: "Check cron job exit status and verify jobs completed successfully. Automated exit code validation with alerts. Bash, Python, Node.js examples.",
   keywords: "cron job exit status check, check cron job exit status, verify cron job exit status, cron job exit code check, validate cron job exit status",
   openGraph: {
-    title: "Cron Job Exit Status Check | DeadManPing",
+    title: "Cron Job Exit Status Check - Validate Exit Codes Automatically",
     description: "How to check cron job exit status and verify jobs completed successfully.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-exit-status-check`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Exit Status Check | DeadManPing",
+    title: "Cron Job Exit Status Check - Validate Exit Codes Automatically",
     description: "How to check cron job exit status and verify jobs completed successfully.",
   },
   alternates: {

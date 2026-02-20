@@ -9,19 +9,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
-  description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+  title: "Backup Monitoring Service - Detect Failures With One Curl Line",
+  description: "Monitor backup jobs without changing your scripts. One curl line, instant alerts when backups fail, are empty, or stop running. Free tier available.",
   keywords: "backup monitoring, backup monitoring service, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert, backup job monitoring",
   openGraph: {
-    title: "Backup Monitoring Service | DeadManPing",
-    description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Backup Monitoring Service - Detect Failures With One Curl Line",
+    description: "Monitor backup jobs without changing your scripts. One curl line, instant alerts when backups fail or are empty.",
     type: "article",
     url: `${cleanBaseUrl}/blog/backup-monitoring`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup Monitoring Service | DeadManPing",
-    description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Backup Monitoring Service - Detect Failures With One Curl",
+    description: "Monitor backup jobs without changing scripts. One curl line, instant alerts when backups fail or are empty.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/backup-monitoring`,

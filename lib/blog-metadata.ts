@@ -18,166 +18,165 @@ export interface BlogPostMetadata {
 
 export const blogMetadata: Record<string, BlogPostMetadata> = {
   'dead-man-switch': {
-    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts | DeadManPing",
+    title: "Dead Man Switch for Backups - Instant Alerts, One Curl Line",
     description: "Dead man switch for backups: one curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
     keywords: "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
     canonical: "/blog/dead-man-switch"
   },
   'monitor-cron-jobs': {
-    title: "Monitor Cron Jobs: One Curl Line, No Migration | DeadManPing",
+    title: "How to Monitor Cron Jobs With One Curl Line (No SDK, No Migration)",
     description: "Monitor cron jobs with one curl line. No SDK, no migration—get alerts when jobs fail or stop running. Free tier, 2-min setup. Keep your existing scripts.",
     keywords: "monitor cron jobs without migration, cron monitoring, how to monitor cron jobs, detect cron job failure, cron job monitoring, scheduled task monitoring, cron job alerts, monitor cron jobs linux, cron job not running, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron job notification service, monitor cron notification, cron notification system, cron job notification if failed, cron notification when job fails, cron notification if job fails",
     canonical: "/blog/monitor-cron-jobs"
   },
   'cron-job-failed': {
-    title: "Cron Job Failed? How to Detect & Fix in 5 Min | DeadManPing",
-    description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and get alerts so it never happens again. Free monitoring in 2 min.",
+    title: "Cron Job Failed? How to Detect & Fix It in 5 Minutes [2026]",
+    description: "Cron job failed or not running? Step-by-step guide to detect why, fix it, and set up alerts so it never happens again. Free monitoring, 2-min setup.",
     keywords: "cron job not running, cron job failed, detect cron job failure, why cron job not running, cron job troubleshooting, cron job stopped working, cron job monitoring, cron notification if is not working, cron notification not working, cron job notification, cron notification alert, cron notification when job fails, cron notification if job fails, cron job notification service, monitor cron notification",
     canonical: "/blog/cron-job-failed"
   },
   'backup-monitoring': {
-    title: "Backup Monitoring Service | Monitor Backup Jobs | DeadManPing",
-    description: "Backup monitoring that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail.",
+    title: "Backup Monitoring Service - Detect Failures With One Curl Line",
+    description: "Monitor backup jobs without changing your scripts. One curl line, instant alerts when backups fail, are empty, or stop running. Free tier available.",
     keywords: "backup monitoring, backup monitoring service, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert, backup job monitoring",
     canonical: "/blog/backup-monitoring"
   },
   'detect-empty-backup-file-cron': {
-    title: "Detect Empty Backup File Cron | DeadManPing",
-    description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js for verifying backup file size.",
+    title: "Detect Empty Backup Files From Cron Jobs - Automated Size Check",
+    description: "Detect when cron backup jobs create empty files. Automated file size verification in Bash, Python, Node.js. Get alerts for 0-byte backups.",
     keywords: "detect empty backup file cron, empty backup file detection, cron backup empty file, verify backup file not empty, detect zero byte backup, backup file size check cron",
     canonical: "/blog/detect-empty-backup-file-cron"
   },
   'curl-success-but-wrong-response': {
-    title: "Curl Success But Wrong Response | DeadManPing",
-    description: "How to detect when curl returns success (200) but contains wrong data or error messages. Examples for validating API responses.",
+    title: "Curl Returns 200 But Wrong Response? How to Catch False Positives",
+    description: "Detect when curl returns HTTP 200 success but contains wrong data or error messages. Validate API response content automatically. Code examples.",
     keywords: "curl success but wrong response, curl returns 200 but wrong data, verify curl response content, detect curl error in response, curl response validation, check curl response body",
     canonical: "/blog/curl-success-but-wrong-response"
   },
   'silent-cron-failures': {
-    title: "Silent Cron Failures: How to Detect Them | DeadManPing",
-    description: "How to detect silent cron job failures that don't log errors. Examples for catching failures that exit without notification.",
+    title: "Silent Cron Failures - How to Detect Jobs That Fail Without Errors",
+    description: "Detect silent cron job failures that exit with code 0 but produce wrong results. Catch failures that don't log errors. Bash, Python, Node.js examples.",
     keywords: "silent cron failures, detect silent cron failure, cron job silent failure detection, cron fails silently, detect cron job not running, silent cron job failure",
     canonical: "/blog/silent-cron-failures"
   },
   'verify-cron-output': {
-    title: "Verify Cron Output: Validate Script Results | DeadManPing",
-    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails—no SDK.",
+    title: "Verify Cron Output - Validate Script Results With Payload Rules",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node.js examples. Get alerts when output fails—no SDK.",
     keywords: "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
     canonical: "/blog/verify-cron-output"
   },
   'detect-empty-backup-file': {
-    title: "Detect Empty Backup File | DeadManPing",
-    description: "How to detect when backup files are empty or zero bytes. Examples for verifying backup file size in bash, Python, Node.js.",
+    title: "Detect Empty Backup Files (0 Bytes) Before It's Too Late",
+    description: "How to detect when backup files are empty or zero bytes. Verify backup file size with automated checks in Bash, Python, Node.js. Free monitoring.",
     keywords: "detect empty backup file, empty backup file detection, verify backup file not empty, backup file zero bytes, check backup file size, detect zero byte backup",
     canonical: "/blog/detect-empty-backup-file"
   },
   'cron-job-exit-code-not-zero': {
-    title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
-    description: "How to detect when cron jobs exit with non-zero exit codes. Examples for checking exit codes in bash, Python, Node.js.",
+    title: "Cron Job Exit Code Not Zero? How to Detect and Alert on Failures",
+    description: "Detect when cron jobs exit with non-zero exit codes. Set up automatic alerts for failed jobs. Bash, Python, Node.js examples with code.",
     keywords: "cron job exit code not zero, detect cron job exit code, cron job exit status check, check cron job exit code, verify cron job exit code, cron job failure exit code",
     canonical: "/blog/cron-job-exit-code-not-zero"
   },
   'verify-cron-job-actually-ran': {
-    title: "Verify Cron Job Actually Ran | DeadManPing",
-    description: "How to verify that cron jobs actually executed. Examples for confirming job execution with timestamps and pings.",
+    title: "Verify Cron Job Actually Ran - Confirm Execution With Timestamps",
+    description: "Verify cron jobs actually executed with timestamps and pings. Detect when cron silently stops running. Bash, Python, Node.js examples.",
     keywords: "verify cron job actually ran, confirm cron job executed, detect cron job not running, verify cron job completed, check cron job ran, cron job execution verification",
     canonical: "/blog/verify-cron-job-actually-ran"
   },
   'cron-job-returns-success-but-fails': {
-    title: "Cron Job Returns Success But Fails | DeadManPing",
-    description: "How to detect when cron jobs return success exit code but actually fail. Examples for validating job results beyond exit codes.",
+    title: "Cron Job Returns Success But Actually Fails - How to Detect It",
+    description: "Detect when cron jobs return exit code 0 but actually fail. Validate job results beyond exit codes with payload monitoring. Code examples.",
     keywords: "cron job returns success but fails, detect cron job false success, verify cron job actually succeeded, cron job success but error, check cron job real success",
     canonical: "/blog/cron-job-returns-success-but-fails"
   },
   'verify-backup-file-size': {
-    title: "Verify Backup File Size | DeadManPing",
-    description: "How to verify backup file sizes are within expected ranges. Examples for checking backup file sizes in bash, Python, Node.js.",
+    title: "Verify Backup File Size - Catch Empty and Undersized Backups",
+    description: "Verify backup file sizes are within expected ranges. Catch empty and undersized backups before you need to restore. Bash, Python, Node.js examples.",
     keywords: "verify backup file size, check backup file size, backup file size validation, verify backup file not empty, check backup file size cron, backup file size check",
     canonical: "/blog/verify-backup-file-size"
   },
   'cron-job-silent-failure-detection': {
-    title: "Cron Job Silent Failure Detection | DeadManPing",
-    description: "How to detect silent cron job failures that don't produce error logs. Examples for catching failures that exit without notification.",
+    title: "Cron Job Silent Failure Detection - Catch Jobs That Fail Quietly",
+    description: "Detect silent cron job failures that don't produce error logs. Catch jobs that exit 0 but fail silently. Payload validation examples included.",
     keywords: "cron job silent failure detection, detect silent cron failure, silent cron job failure, cron fails silently, detect cron job silent failure",
     canonical: "/blog/cron-job-silent-failure-detection"
   },
   'curl-returns-200-but-wrong-data': {
-    title: "Curl Returns 200 But Wrong Data | DeadManPing",
-    description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages. Examples for validating API responses.",
+    title: "Curl Returns 200 But Wrong Data - Validate API Response Content",
+    description: "Detect when curl returns HTTP 200 but the response body contains wrong data or errors. Validate API response content. Bash, Python, Node.js examples.",
     keywords: "curl returns 200 but wrong data, curl success but wrong response, verify curl response content, detect curl error in response, curl response validation",
     canonical: "/blog/curl-returns-200-but-wrong-data"
   },
   'detect-cron-job-partial-failure': {
-    title: "Detect Cron Job Partial Failure | DeadManPing",
-    description: "How to detect when cron jobs partially fail—some steps succeed but others fail. Examples for validating multi-step job completion.",
+    title: "Detect Cron Job Partial Failures - When Some Steps Succeed, Others Fail",
+    description: "Detect when cron jobs partially fail: some steps succeed but others don't. Validate multi-step job completion with payload rules. Code examples included.",
     keywords: "detect cron job partial failure, cron job partial failure detection, verify cron job complete, detect incomplete cron job, cron job partial success",
     canonical: "/blog/detect-cron-job-partial-failure"
   },
   'detect-cron-job-wrong-exit-code': {
-    title: "Detect Cron Job Wrong Exit Code | DeadManPing",
-    description: "How to detect when cron jobs return wrong exit codes—success when they should fail, or failure when they should succeed.",
+    title: "Detect Cron Job Wrong Exit Code - When Success Hides a Failure",
+    description: "Detect when cron jobs return wrong exit codes. Cron exits 0 but actually failed? Catch misleading exit codes with result validation.",
     keywords: "detect cron job wrong exit code, cron job wrong exit code, verify cron job exit code, check cron job exit code, cron job exit code validation",
     canonical: "/blog/detect-cron-job-wrong-exit-code"
   },
   'verify-script-output-content': {
-    title: "Verify Script Output Content | DeadManPing",
-    description: "How to verify script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
+    title: "Verify Script Output Content - Validate Cron Job Results Automatically",
+    description: "Verify script output contains expected content. Validate cron job results with payload rules. Code examples for Bash, Python, Node.js.",
     keywords: "verify script output content, check script output content, validate script output, verify script output, script output validation, check script output",
     canonical: "/blog/verify-script-output-content"
   },
   'detect-backup-file-missing': {
-    title: "Detect Backup File Missing | DeadManPing",
-    description: "How to detect when backup files are missing after backup jobs complete. Examples for verifying backup file existence.",
+    title: "Detect Missing Backup Files - Verify Backups Exist After Cron Runs",
+    description: "Detect when backup files are missing after backup jobs complete. Verify file existence and get alerts instantly. Bash, Python, Node.js examples.",
     keywords: "detect backup file missing, backup file missing detection, verify backup file exists, check backup file missing, detect missing backup file",
     canonical: "/blog/detect-backup-file-missing"
   },
   'cron-job-not-executing': {
-    title: "Cron Job Not Executing | DeadManPing",
-    description: "How to detect when cron jobs are not executing. Examples for verifying job execution and detecting when jobs don't run.",
+    title: "Cron Job Not Executing? How to Detect and Fix It Fast",
+    description: "Cron job stopped running after a system update? Detect when cron jobs are not executing and set up instant alerts. Bash, Python, Node.js examples.",
     keywords: "cron job not executing, detect cron job not running, verify cron job executed, cron job not running detection, detect cron job not executing",
     canonical: "/blog/cron-job-not-executing"
   },
   'verify-cron-job-completed': {
-    title: "Verify Cron Job Completed | DeadManPing",
-    description: "How to verify that cron jobs completed successfully. Examples for confirming job completion with explicit pings.",
+    title: "Verify Cron Job Completed - Confirm Execution With Ping Monitoring",
+    description: "Verify cron jobs completed successfully with explicit ping monitoring. Get alerts when jobs don't finish. Bash, Python, Node.js examples.",
     keywords: "verify cron job completed, confirm cron job completed, verify cron job finished, check cron job completed, cron job completion verification",
     canonical: "/blog/verify-cron-job-completed"
   },
   'detect-cron-job-skipped': {
-    title: "Detect Cron Job Skipped | DeadManPing",
-    description: "How to detect when cron jobs are skipped—not executed when they should be. Examples for detecting skipped jobs.",
+    title: "Detect Skipped Cron Jobs - Why Your Job Didn't Run & How to Fix",
+    description: "Detect when cron jobs are skipped or not executed on schedule. Find out why and set up alerts for missed runs. Bash, Python, Node.js examples.",
     keywords: "detect cron job skipped, cron job skipped detection, verify cron job not skipped, detect skipped cron job, cron job skip detection",
     canonical: "/blog/detect-cron-job-skipped"
   },
   'backup-file-zero-bytes': {
-    title: "Backup File Zero Bytes | DeadManPing",
-    description: "How to detect when backup files are zero bytes. Examples for verifying backup file size and detecting empty backups.",
+    title: "Backup File Zero Bytes? Detect Empty Backups Before Data Loss",
+    description: "Detect when backup files are zero bytes. Verify backup file size and catch empty backups before you need to restore. Bash, Python, Node.js examples.",
     keywords: "backup file zero bytes, detect zero byte backup, empty backup file detection, backup file zero bytes detection, verify backup file not zero bytes",
     canonical: "/blog/backup-file-zero-bytes"
   },
   'cron-job-exit-status-check': {
-    title: "Cron Job Exit Status Check | DeadManPing",
-    description: "How to check cron job exit status and verify jobs completed successfully. Examples for validating exit codes.",
+    title: "Cron Job Exit Status Check - Validate Exit Codes Automatically",
+    description: "Check cron job exit status and verify jobs completed successfully. Automated exit code validation with alerts. Bash, Python, Node.js examples.",
     keywords: "cron job exit status check, check cron job exit status, verify cron job exit status, cron job exit code check, validate cron job exit status",
     canonical: "/blog/cron-job-exit-status-check"
   },
   'detect-hanging-cron-job': {
-    title: "Detect Hanging Cron Job: Timeout & Execution Time Monitoring | DeadManPing",
-    description: "Your script can hang for hours. Learn how to detect cron job timeouts and stuck scripts with start/stop execution time tracking.",
+    title: "Detect Hanging Cron Jobs - Timeout & Execution Time Monitoring",
+    description: "Your script can hang for hours unnoticed. Detect cron job timeouts and stuck scripts with start/stop tracking. Bash, Python, Node.js examples.",
     keywords: "detect hanging cron job, cron job timeout detection, cron job stuck, script execution time monitoring, detect cron job timeout, prevent hanging jobs",
     canonical: "/blog/detect-hanging-cron-job"
   },
   'cron-monitoring-without-sdk': {
-    title: "Cron Monitoring Without SDK: One Curl Line | DeadManPing",
+    title: "Cron Monitoring Without SDK - Just One Curl Line, No Agent",
     description: "Monitor cron jobs with one curl line. No SDK, no agent, no migration. Keep your scripts and cron—add a single HTTP ping to get alerts when jobs fail.",
     keywords: "cron monitoring without SDK, monitor cron with curl, cron job monitoring no SDK, curl cron monitoring, simple cron monitoring, ping-based cron monitoring",
     canonical: "/blog/cron-monitoring-without-sdk"
   },
   'stale-backup-detection': {
-    title: "Stale Backup Detection: Last Backup Was a Month Ago | DeadManPing",
-    description: "Your backup runs but the last good one was weeks ago. Learn how to detect stale backups and verify backup age with payload validation.",
+    title: "Stale Backup Detection - How to Catch Outdated Backups Automatically",
+    description: "Your backup runs but the last good one was weeks ago. Detect stale backups and verify backup age with payload validation. Bash, Python, Node.js examples.",
     keywords: "stale backup detection, last backup was month ago, backup age monitoring, verify backup not old, detect outdated backup, backup freshness monitoring",
     canonical: "/blog/stale-backup-detection"
   }
 }
-

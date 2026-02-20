@@ -27,8 +27,8 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
-  description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+  title: "Dead Man Switch for Cron Jobs & Backups - Free Monitoring in 2 Min",
+  description: "Monitor cron jobs and backups with one curl line. Detect silent failures, empty backup files, hanging scripts. No SDK, no migration. Free tier with 20 monitors.",
   keywords: "backup dead man switch, dead man switch backup, detect empty backup file, backup monitoring without infrastructure, backup failure detection, empty backup file detection, backup file zero bytes, backup monitoring, dead man switch for backups, monitor backup jobs, cron monitoring, outcome-based cron monitoring, cron monitoring without migration, cron job monitoring, job result monitoring, scheduled task monitoring, cron job alerts, detect cron job failure, monitor cron jobs, job monitoring service, result-aware monitoring, declarative rules, job outcome verifier, silent failure detection, payload validation, threshold verification, multi-currency pricing, USD pricing, EUR pricing, euro pricing",
   authors: [{ name: "DeadManPing" }],
   creator: "DeadManPing",
@@ -45,8 +45,8 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
-    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+    title: "Dead Man Switch for Cron Jobs & Backups - Free Monitoring",
+    description: "Monitor cron jobs and backups with one curl line. Detect silent failures, empty backup files, hanging scripts. No SDK, no migration.",
     type: "website",
     url: cleanBaseUrl,
     siteName: "DeadManPing",
@@ -55,14 +55,14 @@ export const metadata: Metadata = {
         url: `${cleanBaseUrl}/icon.png`,
         width: 1200,
         height: 1200,
-        alt: "DeadManPing - Backup Dead Man Switch",
+        alt: "Dead Man Switch Monitoring for Cron Jobs and Backups",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup Dead Man Switch | Never Miss a Failed Backup | DeadManPing",
-    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+    title: "Dead Man Switch for Cron Jobs & Backups - Free Monitoring in 2 Min",
+    description: "Monitor cron jobs and backups with one curl line. Detect silent failures, empty backups, hanging scripts. No SDK. Free tier available.",
     images: [`${cleanBaseUrl}/icon.png`],
   },
   alternates: {

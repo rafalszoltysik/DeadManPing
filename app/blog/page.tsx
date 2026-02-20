@@ -20,19 +20,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Blog | Cron Monitoring & Backup Monitoring Guides | DeadManPing",
-  description: "Learn how to monitor cron jobs, detect backup failures, verify job completion, and prevent silent failures. Comprehensive guides with code examples in Bash, Python, and Node.js.",
+  title: "Cron Monitoring & Backup Failure Detection - Guides With Code Examples",
+  description: "Step-by-step guides: monitor cron jobs, detect backup failures, catch silent errors, verify job output. Code examples in Bash, Python, Node.js.",
   keywords: "cron monitoring blog, backup monitoring guides, cron job monitoring tutorials, detect cron failures, verify backup completion, silent failure detection, cron job troubleshooting, backup monitoring best practices",
   openGraph: {
-    title: "Blog | DeadManPing",
-    description: "Learn how to monitor cron jobs, detect backup failures, verify job completion, and prevent silent failures.",
+    title: "Cron Monitoring & Backup Failure Detection Guides",
+    description: "Step-by-step guides: monitor cron jobs, detect backup failures, catch silent errors, verify job output. Code examples included.",
     type: "website",
     url: `${cleanBaseUrl}/blog`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Blog | DeadManPing",
-    description: "Learn how to monitor cron jobs, detect backup failures, verify job completion, and prevent silent failures.",
+    title: "Cron Monitoring & Backup Failure Detection Guides",
+    description: "Step-by-step guides for monitoring cron jobs, detecting backup failures, and catching silent errors with code examples.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog`,
@@ -76,7 +76,7 @@ export default function BlogPage() {
         "item": {
           "@type": "Article",
           "url": `${cleanBaseUrl}/blog/${article.slug}`,
-          "headline": article.metadata.title.replace(' | DeadManPing', ''),
+          "headline": article.metadata.title,
           "description": article.metadata.description,
         }
       }))

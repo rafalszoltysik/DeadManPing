@@ -9,19 +9,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Verify Script Output Content | DeadManPing",
-  description: "How to verify script output contains expected content. Examples for validating script output in bash, Python, Node.js.",
+  title: "Verify Script Output Content - Validate Cron Job Results Automatically",
+  description: "Verify script output contains expected content. Validate cron job results with payload rules. Code examples for Bash, Python, Node.js.",
   keywords: "verify script output content, check script output content, validate script output, verify script output, script output validation, check script output",
   openGraph: {
-    title: "Verify Script Output Content | DeadManPing",
-    description: "How to verify script output contains expected content.",
+    title: "Verify Script Output Content - Validate Cron Job Results Automatically",
+    description: "Verify script output contains expected content. Validate cron job results with payload rules.",
     type: "article",
     url: `${cleanBaseUrl}/blog/verify-script-output-content`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verify Script Output Content | DeadManPing",
-    description: "How to verify script output contains expected content.",
+    title: "Verify Script Output Content - Validate Cron Results Automatically",
+    description: "Verify script output contains expected content. Validate cron results with payload rules.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/verify-script-output-content`,

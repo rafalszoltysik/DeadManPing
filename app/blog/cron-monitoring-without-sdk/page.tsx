@@ -11,18 +11,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Monitoring Without SDK: One Curl Line | DeadManPing",
+  title: "Cron Monitoring Without SDK - Just One Curl Line, No Agent",
   description: "Monitor cron jobs with one curl line. No SDK, no agent, no migration. Keep your scripts and cron—add a single HTTP ping to get alerts when jobs fail.",
   keywords: "cron monitoring without SDK, monitor cron with curl, cron job monitoring no SDK, curl cron monitoring, simple cron monitoring, cron alert without agent, ping-based cron monitoring",
   openGraph: {
-    title: "Cron Monitoring Without SDK: One Curl Line",
+    title: "Cron Monitoring Without SDK - Just One Curl Line, No Agent",
     description: "Monitor cron jobs with one curl line. No SDK, no agent, no migration. Get alerts when jobs fail.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-monitoring-without-sdk`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Monitoring Without SDK: One Curl Line",
+    title: "Cron Monitoring Without SDK - Just One Curl Line",
     description: "Monitor cron jobs with one curl line. No SDK, no agent, no migration.",
   },
   alternates: {

@@ -20,19 +20,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Monitoring Docs: Quick Start & API | DeadManPing",
-  description: "DeadManPing docs: quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples. Get monitoring in 2 min.",
+  title: "Cron Monitoring API Docs - Quick Start, Ping, Payload Validation",
+  description: "Set up cron job monitoring in 2 minutes. Ping API, start/stop tracking, payload validation. Code examples for Bash, Python, Node.js, Docker.",
   keywords: "deadmanping documentation, cron monitoring api, dead man switch api, cron job monitoring guide, ping api documentation",
   openGraph: {
-    title: "Cron Monitoring Docs: Quick Start & API",
-    description: "Quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples. Get monitoring in 2 min.",
+    title: "Cron Monitoring API Docs - Quick Start, Ping, Payload Validation",
+    description: "Set up cron job monitoring in 2 minutes. Ping API, start/stop tracking, payload validation. Bash, Python, Node.js, Docker examples.",
     type: "article",
     url: `${cleanBaseUrl}/docs`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Monitoring Docs: Quick Start & API",
-    description: "Quick start, ping API, start/stop tracking, payload validation. Bash, Python, Node, Docker examples.",
+    title: "Cron Monitoring API Docs - Quick Start & Payload Validation",
+    description: "Set up cron monitoring in 2 minutes. Ping API, start/stop tracking, payload validation. Bash, Python, Node.js, Docker.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/docs`,

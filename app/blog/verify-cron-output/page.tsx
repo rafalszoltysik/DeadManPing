@@ -8,19 +8,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Verify Cron Output: Validate Script Results | DeadManPing",
-  description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails—no SDK.",
+  title: "Verify Cron Output - Validate Script Results With Payload Rules",
+  description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node.js examples. Get alerts when output fails—no SDK.",
   keywords: "verify cron output, check cron job output, verify script output content, validate cron output, cron output validation, check script output",
   openGraph: {
-    title: "Verify Cron Output: Validate Script Results",
-    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails.",
+    title: "Verify Cron Output - Validate Script Results With Payload Rules",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node.js examples. Get alerts when output fails.",
     type: "article",
     url: `${cleanBaseUrl}/blog/verify-cron-output`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verify Cron Output: Validate Script Results",
-    description: "Cron runs but output is wrong? Verify script output with payload validation. Bash, Python, Node examples. Get alerts when output fails.",
+    title: "Verify Cron Output - Validate Script Results With Payload Rules",
+    description: "Cron runs but output is wrong? Verify script output with payload validation. Get alerts when output fails.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/verify-cron-output`,

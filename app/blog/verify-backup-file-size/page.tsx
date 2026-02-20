@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Verify Backup File Size | DeadManPing",
-  description: "How to verify backup file sizes are within expected ranges. Examples for checking backup file sizes in bash, Python, Node.js.",
+  title: "Verify Backup File Size - Catch Empty and Undersized Backups",
+  description: "Verify backup file sizes are within expected ranges. Catch empty and undersized backups before you need to restore. Bash, Python, Node.js examples.",
   keywords: "verify backup file size, check backup file size, backup file size validation, verify backup file not empty, check backup file size cron, backup file size check",
   openGraph: {
-    title: "Verify Backup File Size | DeadManPing",
+    title: "Verify Backup File Size - Catch Empty and Undersized Backups",
     description: "How to verify backup file sizes are within expected ranges.",
     type: "article",
     url: `${cleanBaseUrl}/blog/verify-backup-file-size`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Verify Backup File Size | DeadManPing",
+    title: "Verify Backup File Size - Catch Empty and Undersized Backups",
     description: "How to verify backup file sizes are within expected ranges.",
   },
   alternates: {

@@ -10,18 +10,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Detect Empty Backup File Cron | DeadManPing",
-  description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js for verifying backup file size.",
+  title: "Detect Empty Backup Files From Cron Jobs - Automated Size Check",
+  description: "Detect when cron backup jobs create empty files. Automated file size verification in Bash, Python, Node.js. Get alerts for 0-byte backups.",
   keywords: "detect empty backup file cron, empty backup file detection, cron backup empty file, verify backup file not empty, detect zero byte backup, backup file size check cron",
   openGraph: {
-    title: "Detect Empty Backup File Cron | DeadManPing",
+    title: "Detect Empty Backup Files From Cron Jobs - Automated Size Check",
     description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js.",
     type: "article",
     url: `${cleanBaseUrl}/blog/detect-empty-backup-file-cron`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Detect Empty Backup File Cron | DeadManPing",
+    title: "Detect Empty Backup Files From Cron Jobs - Automated Size Check",
     description: "How to detect when cron backup jobs create empty files. Examples in bash, Python, Node.js.",
   },
   alternates: {

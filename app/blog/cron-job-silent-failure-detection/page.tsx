@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Silent Failure Detection | DeadManPing",
-  description: "How to detect silent cron job failures that don't produce error logs. Examples for catching failures that exit without notification.",
+  title: "Cron Job Silent Failure Detection - Catch Jobs That Fail Quietly",
+  description: "Detect silent cron job failures that don't produce error logs. Catch jobs that exit 0 but fail silently. Payload validation examples included.",
   keywords: "cron job silent failure detection, detect silent cron failure, silent cron job failure, cron fails silently, detect cron job silent failure",
   openGraph: {
-    title: "Cron Job Silent Failure Detection | DeadManPing",
+    title: "Cron Job Silent Failure Detection - Catch Jobs That Fail Quietly",
     description: "How to detect silent cron job failures that don't produce error logs.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-silent-failure-detection`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Silent Failure Detection | DeadManPing",
+    title: "Cron Job Silent Failure Detection - Catch Jobs That Fail Quietly",
     description: "How to detect silent cron job failures that don't produce error logs.",
   },
   alternates: {

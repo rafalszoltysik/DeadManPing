@@ -20,19 +20,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup Dead Man Switch | Monitor Backup Jobs | DeadManPing",
-  description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+  title: "Backup Dead Man Switch - Detect Failed & Empty Backups Instantly",
+  description: "Monitor backup jobs with a dead man switch. One curl line detects empty files, missed runs, stale backups. No agent install. Free tier, 2-min setup.",
   keywords: "backup dead man switch, dead man switch backup, backup monitoring, detect empty backup file, backup failure detection, backup monitoring without infrastructure, empty backup file detection, backup file zero bytes, dead man switch for backups, monitor backup jobs",
   openGraph: {
-    title: "Backup Dead Man Switch | DeadManPing",
-    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+    title: "Backup Dead Man Switch - Detect Failed & Empty Backups Instantly",
+    description: "Monitor backup jobs with a dead man switch. One curl line detects empty files, missed runs, stale backups. No agent install. Free tier, 2-min setup.",
     type: "website",
     url: `${cleanBaseUrl}/backup-dead-man-switch`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup Dead Man Switch | DeadManPing",
-    description: "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+    title: "Backup Dead Man Switch - Detect Failed & Empty Backups",
+    description: "Monitor backup jobs with a dead man switch. One curl line detects empty files, missed runs, stale backups. No agent. Free tier.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/backup-dead-man-switch`,
@@ -42,8 +42,8 @@ export const metadata: Metadata = {
 const STRUCTURED_DATA = {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Backup Dead Man Switch | DeadManPing",
-  "description": "Backup dead man switch that doesn't touch your execution. Keep your backup scripts. Add one curl line. Get alerts when backups fail or are empty.",
+  "name": "Backup Dead Man Switch - Detect Failed & Empty Backups Instantly",
+  "description": "Monitor backup jobs with a dead man switch. One curl line detects empty files, missed runs, stale backups. No agent install. Free tier, 2-min setup.",
   "url": `${cleanBaseUrl}/backup-dead-man-switch`,
   "inLanguage": "en-US",
   "isPartOf": {

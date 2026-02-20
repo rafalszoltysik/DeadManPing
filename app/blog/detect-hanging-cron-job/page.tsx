@@ -11,19 +11,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Detect Hanging Cron Job: Timeout & Execution Time Monitoring | DeadManPing",
-  description: "Your script can hang for hours. Learn how to detect cron job timeouts and stuck scripts with start/stop execution time tracking. Examples in Bash, Python, Node.js.",
+  title: "Detect Hanging Cron Jobs - Timeout & Execution Time Monitoring",
+  description: "Your script can hang for hours unnoticed. Detect cron job timeouts and stuck scripts with start/stop tracking. Bash, Python, Node.js examples.",
   keywords: "detect hanging cron job, cron job timeout detection, cron job stuck, script execution time monitoring, detect cron job timeout, prevent hanging jobs, cron job execution time, stuck script detection",
   openGraph: {
-    title: "Detect Hanging Cron Job: Timeout & Execution Time Monitoring",
-    description: "Learn how to detect cron job timeouts and stuck scripts with start/stop execution time tracking.",
+    title: "Detect Hanging Cron Jobs - Timeout & Execution Time Monitoring",
+    description: "Detect cron job timeouts and stuck scripts with start/stop execution time tracking. Bash, Python, Node.js examples.",
     type: "article",
     url: `${cleanBaseUrl}/blog/detect-hanging-cron-job`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Detect Hanging Cron Job: Timeout & Execution Time Monitoring",
-    description: "Learn how to detect cron job timeouts and stuck scripts with start/stop execution time tracking.",
+    title: "Detect Hanging Cron Jobs - Timeout & Execution Time Monitoring",
+    description: "Detect cron job timeouts and stuck scripts with start/stop execution time tracking.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/detect-hanging-cron-job`,

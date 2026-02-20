@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Detect Cron Job Partial Failure | DeadManPing",
-  description: "How to detect when cron jobs partially fail—some steps succeed but others fail. Examples for validating multi-step job completion.",
+  title: "Detect Cron Job Partial Failures - When Some Steps Succeed, Others Fail",
+  description: "Detect when cron jobs partially fail: some steps succeed but others don't. Validate multi-step job completion with payload rules. Code examples included.",
   keywords: "detect cron job partial failure, cron job partial failure detection, verify cron job complete, detect incomplete cron job, cron job partial success",
   openGraph: {
-    title: "Detect Cron Job Partial Failure | DeadManPing",
+    title: "Detect Cron Job Partial Failures - When Steps Succeed and Fail",
     description: "How to detect when cron jobs partially fail—some steps succeed but others fail.",
     type: "article",
     url: `${cleanBaseUrl}/blog/detect-cron-job-partial-failure`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Detect Cron Job Partial Failure | DeadManPing",
+    title: "Detect Cron Job Partial Failures - When Steps Succeed and Fail",
     description: "How to detect when cron jobs partially fail—some steps succeed but others fail.",
   },
   alternates: {

@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Detect Backup File Missing | DeadManPing",
-  description: "How to detect when backup files are missing after backup jobs complete. Examples for verifying backup file existence.",
+  title: "Detect Missing Backup Files - Verify Backups Exist After Cron Runs",
+  description: "Detect when backup files are missing after backup jobs complete. Verify file existence and get alerts instantly. Bash, Python, Node.js examples.",
   keywords: "detect backup file missing, backup file missing detection, verify backup file exists, check backup file missing, detect missing backup file",
   openGraph: {
-    title: "Detect Backup File Missing | DeadManPing",
+    title: "Detect Missing Backup Files - Verify Backups Exist After Cron",
     description: "How to detect when backup files are missing after backup jobs complete.",
     type: "article",
     url: `${cleanBaseUrl}/blog/detect-backup-file-missing`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Detect Backup File Missing | DeadManPing",
+    title: "Detect Missing Backup Files - Verify Backups Exist After Cron",
     description: "How to detect when backup files are missing after backup jobs complete.",
   },
   alternates: {

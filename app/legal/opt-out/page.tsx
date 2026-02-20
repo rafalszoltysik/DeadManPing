@@ -15,7 +15,7 @@ import { Footer } from '@/components/Footer'
 import { OptOutControls } from '@/components/OptOutControls'
 
 export const metadata: Metadata = {
-  title: "Analytics Opt-Out | DeadManPing",
+  title: "Analytics Opt-Out - Manage Your Privacy Settings",
   description: "Opt-out of analytics tracking. DeadManPing respects your privacy and allows you to disable analytics at any time.",
   alternates: {
     canonical: "/legal/opt-out",

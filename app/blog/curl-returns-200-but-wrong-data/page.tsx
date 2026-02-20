@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Curl Returns 200 But Wrong Data | DeadManPing",
-  description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages. Examples for validating API responses.",
+  title: "Curl Returns 200 But Wrong Data - Validate API Response Content",
+  description: "Detect when curl returns HTTP 200 but the response body contains wrong data or errors. Validate API response content. Bash, Python, Node.js examples.",
   keywords: "curl returns 200 but wrong data, curl success but wrong response, verify curl response content, detect curl error in response, curl response validation",
   openGraph: {
-    title: "Curl Returns 200 But Wrong Data | DeadManPing",
+    title: "Curl Returns 200 But Wrong Data - Validate API Response Content",
     description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages.",
     type: "article",
     url: `${cleanBaseUrl}/blog/curl-returns-200-but-wrong-data`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Curl Returns 200 But Wrong Data | DeadManPing",
+    title: "Curl Returns 200 But Wrong Data - Validate API Response Content",
     description: "How to detect when curl returns HTTP 200 but contains wrong data or error messages.",
   },
   alternates: {

@@ -11,19 +11,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Stale Backup Detection: Last Backup Was a Month Ago | DeadManPing",
-  description: "Your backup runs but the last good one was weeks ago. Learn how to detect stale backups and verify backup age with payload validation. Examples in Bash, Python, Node.js.",
+  title: "Stale Backup Detection - How to Catch Outdated Backups Automatically",
+  description: "Your backup runs but the last good one was weeks ago. Detect stale backups and verify backup age with payload validation. Bash, Python, Node.js examples.",
   keywords: "stale backup detection, last backup was month ago, backup age monitoring, verify backup not old, detect outdated backup, backup modified date check, backup freshness monitoring",
   openGraph: {
-    title: "Stale Backup Detection: Last Backup Was a Month Ago",
-    description: "Learn how to detect stale backups and verify backup age with payload validation.",
+    title: "Stale Backup Detection - How to Catch Outdated Backups Automatically",
+    description: "Detect stale backups and verify backup age with payload validation. Bash, Python, Node.js examples.",
     type: "article",
     url: `${cleanBaseUrl}/blog/stale-backup-detection`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Stale Backup Detection: Last Backup Was a Month Ago",
-    description: "Learn how to detect stale backups and verify backup age with payload validation.",
+    title: "Stale Backup Detection - Catch Outdated Backups Automatically",
+    description: "Detect stale backups and verify backup age with payload validation.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/stale-backup-detection`,

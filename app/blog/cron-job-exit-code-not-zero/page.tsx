@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
-  description: "How to detect when cron jobs exit with non-zero exit codes. Examples for checking exit codes in bash, Python, Node.js.",
+  title: "Cron Job Exit Code Not Zero? How to Detect and Alert on Failures",
+  description: "Detect when cron jobs exit with non-zero exit codes. Set up automatic alerts for failed jobs. Bash, Python, Node.js examples with code.",
   keywords: "cron job exit code not zero, detect cron job exit code, cron job exit status check, check cron job exit code, verify cron job exit code, cron job failure exit code",
   openGraph: {
-    title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
+    title: "Cron Job Exit Code Not Zero? Detect and Alert on Failures",
     description: "How to detect when cron jobs exit with non-zero exit codes.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-exit-code-not-zero`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Exit Code Not Zero: Detect Failures | DeadManPing",
+    title: "Cron Job Exit Code Not Zero? Detect and Alert on Failures",
     description: "How to detect when cron jobs exit with non-zero exit codes.",
   },
   alternates: {

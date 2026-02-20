@@ -9,19 +9,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Silent Cron Failures: How to Detect Them | DeadManPing",
-  description: "How to detect silent cron job failures that don't log errors. Examples for catching failures that exit without notification.",
+  title: "Silent Cron Failures - How to Detect Jobs That Fail Without Errors",
+  description: "Detect silent cron job failures that exit with code 0 but produce wrong results. Catch failures that don't log errors. Bash, Python, Node.js examples.",
   keywords: "silent cron failures, detect silent cron failure, cron job silent failure detection, cron fails silently, detect cron job not running, silent cron job failure",
   openGraph: {
-    title: "Silent Cron Failures: How to Detect Them | DeadManPing",
-    description: "How to detect silent cron job failures that don't log errors.",
+    title: "Silent Cron Failures - How to Detect Jobs That Fail Without Errors",
+    description: "Detect silent cron job failures that exit with code 0 but produce wrong results. Bash, Python, Node.js examples.",
     type: "article",
     url: `${cleanBaseUrl}/blog/silent-cron-failures`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Silent Cron Failures: How to Detect Them | DeadManPing",
-    description: "How to detect silent cron job failures that don't log errors.",
+    title: "Silent Cron Failures - Detect Jobs That Fail Without Errors",
+    description: "Detect silent cron job failures that exit with code 0 but produce wrong results.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/silent-cron-failures`,

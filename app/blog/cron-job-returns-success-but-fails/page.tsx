@@ -9,18 +9,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Returns Success But Fails | DeadManPing",
-  description: "How to detect when cron jobs return success exit code but actually fail. Examples for validating job results beyond exit codes.",
+  title: "Cron Job Returns Success But Actually Fails - How to Detect It",
+  description: "Detect when cron jobs return exit code 0 but actually fail. Validate job results beyond exit codes with payload monitoring. Code examples.",
   keywords: "cron job returns success but fails, detect cron job false success, verify cron job actually succeeded, cron job success but error, check cron job real success",
   openGraph: {
-    title: "Cron Job Returns Success But Fails | DeadManPing",
+    title: "Cron Job Returns Success But Actually Fails - How to Detect",
     description: "How to detect when cron jobs return success exit code but actually fail.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-returns-success-but-fails`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Returns Success But Fails | DeadManPing",
+    title: "Cron Job Returns Success But Actually Fails - How to Detect",
     description: "How to detect when cron jobs return success exit code but actually fail.",
   },
   alternates: {

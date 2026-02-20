@@ -10,18 +10,18 @@
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: "FAQ - Frequently Asked Questions | DeadManPing",
-  description: "Find answers to common questions about DeadManPing cron job monitoring. Learn about pricing, features, setup, alerts, and more.",
+  title: "Cron Job Monitoring FAQ - Pricing, Setup, Alerts & Features",
+  description: "Common questions about cron job monitoring: setup in 2 min, free tier, payload validation, Slack/Discord/email alerts, start/stop tracking, and more.",
   keywords: "deadmanping faq, cron monitoring faq, cron job monitoring questions, dead man switch faq, job monitoring help",
   openGraph: {
-    title: "FAQ - Frequently Asked Questions | DeadManPing",
-    description: "Find answers to common questions about DeadManPing cron job monitoring. Learn about pricing, features, setup, alerts, and more.",
+    title: "Cron Job Monitoring FAQ - Pricing, Setup & Features",
+    description: "Common questions about cron job monitoring: free tier, payload validation, Slack/Discord alerts, start/stop tracking.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "FAQ - Frequently Asked Questions | DeadManPing",
-    description: "Find answers to common questions about DeadManPing cron job monitoring.",
+    title: "Cron Job Monitoring FAQ - Setup, Pricing & Alerts",
+    description: "Answers to common questions about dead man switch cron monitoring: setup, pricing, alerts, payload validation.",
   },
   alternates: {
     canonical: "/faq",

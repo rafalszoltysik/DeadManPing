@@ -10,19 +10,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup Monitoring Without Infrastructure | DeadManPing",
-  description: "How to monitor backups without Kubernetes, Prometheus, or complex infrastructure. Dead man switch monitoring for VPS, bare metal, and legacy servers.",
+  title: "Backup Monitoring Without Infrastructure - No K8s, No Prometheus",
+  description: "Monitor backups without Kubernetes, Prometheus, or complex infrastructure. Dead man switch monitoring for VPS, bare metal, and legacy servers. One curl line.",
   keywords: "backup monitoring without infrastructure, backup monitoring without kubernetes, backup monitoring without prometheus, backup monitoring vps, backup monitoring bare metal, dead man switch backup, simple backup monitoring",
   openGraph: {
-    title: "Backup Monitoring Without Infrastructure | DeadManPing",
-    description: "How to monitor backups without Kubernetes, Prometheus, or complex infrastructure. Dead man switch monitoring for VPS, bare metal, and legacy servers.",
+    title: "Backup Monitoring Without Infrastructure - No K8s, No Prometheus",
+    description: "Monitor backups without Kubernetes, Prometheus, or complex infrastructure. Dead man switch for VPS, bare metal, and legacy servers.",
     type: "article",
     url: `${cleanBaseUrl}/blog/backup-monitoring-without-infrastructure`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup Monitoring Without Infrastructure | DeadManPing",
-    description: "How to monitor backups without Kubernetes, Prometheus, or complex infrastructure. Dead man switch monitoring for VPS, bare metal, and legacy servers.",
+    title: "Backup Monitoring Without Infrastructure - No K8s, No Prometheus",
+    description: "Monitor backups without Kubernetes or Prometheus. Dead man switch for VPS, bare metal, and legacy servers.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/backup-monitoring-without-infrastructure`,

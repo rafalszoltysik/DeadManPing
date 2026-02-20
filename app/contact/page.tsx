@@ -16,8 +16,8 @@ import { ContactForm } from './ContactForm'
 import { Footer } from '@/components/Footer'
 
 export const metadata: Metadata = {
-  title: "Contact Us | DeadManPing",
-  description: "Have a question or need help? Contact DeadManPing support. We're here to help with your cron job monitoring needs.",
+  title: "Contact Support - Cron Monitoring Help & Questions",
+  description: "Need help with cron job monitoring setup? Have a feature request? Contact our support team for quick assistance.",
   alternates: {
     canonical: "/contact",
   },

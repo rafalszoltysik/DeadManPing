@@ -9,19 +9,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup File Zero Bytes | DeadManPing",
-  description: "How to detect when backup files are zero bytes. Examples for verifying backup file size and detecting empty backups.",
+  title: "Backup File Zero Bytes? Detect Empty Backups Before Data Loss",
+  description: "Detect when backup files are zero bytes. Verify backup file size and catch empty backups before you need to restore. Bash, Python, Node.js examples.",
   keywords: "backup file zero bytes, detect zero byte backup, empty backup file detection, backup file zero bytes detection, verify backup file not zero bytes",
   openGraph: {
-    title: "Backup File Zero Bytes | DeadManPing",
-    description: "How to detect when backup files are zero bytes.",
+    title: "Backup File Zero Bytes? Detect Empty Backups Before Data Loss",
+    description: "Detect when backup files are zero bytes. Verify file size and catch empty backups before you need to restore.",
     type: "article",
     url: `${cleanBaseUrl}/blog/backup-file-zero-bytes`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup File Zero Bytes | DeadManPing",
-    description: "How to detect when backup files are zero bytes.",
+    title: "Backup File Zero Bytes? Detect Empty Backups Before Data Loss",
+    description: "Detect when backup files are zero bytes. Verify file size automatically.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/backup-file-zero-bytes`,

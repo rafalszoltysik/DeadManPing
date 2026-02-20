@@ -10,19 +10,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Backup Didn't Run - How to Detect | DeadManPing",
-  description: "How to detect when backup jobs don't run. Dead man switch monitoring detects missing backups and sends alerts when backups fail to execute.",
+  title: "Backup Didn't Run? How to Detect Missing Backup Jobs Instantly",
+  description: "Detect when backup jobs don't run. Dead man switch monitoring catches missing backups and sends instant alerts. Bash, Python, Node.js examples.",
   keywords: "backup didn't run, detect backup didn't run, backup not running, how to detect backup didn't run, backup failure detection, dead man switch backup, backup monitoring",
   openGraph: {
-    title: "Backup Didn't Run - How to Detect | DeadManPing",
-    description: "How to detect when backup jobs don't run. Dead man switch monitoring detects missing backups and sends alerts when backups fail to execute.",
+    title: "Backup Didn't Run? How to Detect Missing Backup Jobs Instantly",
+    description: "Detect when backup jobs don't run. Dead man switch monitoring catches missing backups and sends instant alerts.",
     type: "article",
     url: `${cleanBaseUrl}/blog/backup-didnt-run-how-to-detect`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Backup Didn't Run - How to Detect | DeadManPing",
-    description: "How to detect when backup jobs don't run. Dead man switch monitoring detects missing backups and sends alerts when backups fail to execute.",
+    title: "Backup Didn't Run? How to Detect Missing Backup Jobs",
+    description: "Detect when backup jobs don't run. Dead man switch catches missing backups and sends instant alerts.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/backup-didnt-run-how-to-detect`,

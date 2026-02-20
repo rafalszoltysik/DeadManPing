@@ -16,12 +16,12 @@ import { Footer } from '@/components/Footer'
 import { FAQAccordion } from '@/components/FAQAccordion'
 
 export const metadata: Metadata = {
-  title: "Frequently Asked Questions | DeadManPing",
-  description: "Everything you need to know about DeadManPing cron job monitoring. Get answers to common questions about setup, pricing, features, and more.",
+  title: "Cron Job Monitoring FAQ - Pricing, Setup, Alerts & Features",
+  description: "Common questions about cron job monitoring: setup in 2 min, free tier, payload validation, Slack/Discord/email alerts, start/stop tracking, and more.",
   keywords: "deadmanping faq, cron monitoring questions, dead man switch faq, cron job monitoring help",
   openGraph: {
-    title: "Frequently Asked Questions | DeadManPing",
-    description: "Everything you need to know about DeadManPing cron job monitoring.",
+    title: "Cron Job Monitoring FAQ - Pricing, Setup & Features",
+    description: "Common questions about dead man switch cron monitoring: free tier, pricing, alerts, payload validation.",
     type: "website",
   },
   alternates: {

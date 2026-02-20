@@ -9,19 +9,19 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Cron Job Not Executing | DeadManPing",
-  description: "How to detect when cron jobs are not executing. Examples for verifying job execution and detecting when jobs don't run.",
+  title: "Cron Job Not Executing? How to Detect and Fix It Fast",
+  description: "Cron job stopped running after a system update? Detect when cron jobs are not executing and set up instant alerts. Bash, Python, Node.js examples.",
   keywords: "cron job not executing, detect cron job not running, verify cron job executed, cron job not running detection, detect cron job not executing",
   openGraph: {
-    title: "Cron Job Not Executing | DeadManPing",
-    description: "How to detect when cron jobs are not executing.",
+    title: "Cron Job Not Executing? How to Detect and Fix It Fast",
+    description: "Detect when cron jobs are not executing and set up instant alerts. Bash, Python, Node.js examples.",
     type: "article",
     url: `${cleanBaseUrl}/blog/cron-job-not-executing`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Cron Job Not Executing | DeadManPing",
-    description: "How to detect when cron jobs are not executing.",
+    title: "Cron Job Not Executing? How to Detect and Fix It",
+    description: "Detect when cron jobs are not executing and set up instant alerts.",
   },
   alternates: {
     canonical: `${cleanBaseUrl}/blog/cron-job-not-executing`,

@@ -10,18 +10,18 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
 const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
 
 export const metadata: Metadata = {
-  title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts | DeadManPing",
+  title: "Dead Man Switch for Backups - Instant Alerts, One Curl Line",
   description: "Dead man switch for backups: one curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
   keywords: "dead man switch, backup monitoring, dead man switch for backups, monitor backup jobs, backup failure detection, automated backup monitoring, backup alert system",
   openGraph: {
-    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts",
+    title: "Dead Man Switch for Backups - Instant Alerts, One Curl Line",
     description: "One curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
     type: "article",
     url: `${cleanBaseUrl}/blog/dead-man-switch`,
   },
   twitter: {
     card: "summary_large_image",
-    title: "Dead Man Switch for Backups: 1 Curl, Instant Alerts",
+    title: "Dead Man Switch for Backups - Instant Alerts, One Curl",
     description: "One curl line, instant alerts when backup doesn't run or fails. No agent, no migration. Free to start—setup in 2 min.",
   },
   alternates: {
