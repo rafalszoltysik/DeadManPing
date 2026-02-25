@@ -9,17 +9,16 @@
  */
 
 import { MetadataRoute } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 
 /**
  * Generates XML sitemap with all public pages.
- * 
+ * Uses canonical base URL (HTTPS, no www) so Google discovers and indexes one domain only.
+ *
  * @returns Sitemap entries with URLs, priorities, and change frequencies
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  // Ensure baseUrl is without www for SEO consistency
-  baseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
-  
+  const baseUrl = getCanonicalBaseUrl()
   return [
     {
       url: baseUrl,

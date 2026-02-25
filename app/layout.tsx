@@ -10,13 +10,12 @@
 
 import type { Metadata } from "next";
 import "./globals.css";
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 import { CookieBanner } from '@/components/CookieBanner'
 import { ThemeProvider } from '@/components/ThemeProvider'
 import AnalyticsWrapperClient from '@/components/AnalyticsWrapperClient'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-// Ensure baseUrl is without www for consistency (canonical URL)
-const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+const canonicalBaseUrl = getCanonicalBaseUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(canonicalBaseUrl),
@@ -87,9 +86,7 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  // Ensure baseUrl is without www for consistency (canonical URL)
-  const canonicalBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+  const canonicalBaseUrl = getCanonicalBaseUrl()
 
   const organizationSchema = {
     "@context": "https://schema.org",

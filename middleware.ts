@@ -84,18 +84,16 @@ export async function middleware(request: NextRequest) {
   const hostname = request.headers.get('host') || ''
   const protocol = request.headers.get('x-forwarded-proto') || url.protocol.slice(0, -1)
   
-  // Get canonical base URL (non-www, HTTPS)
+  // Canonical domain: HTTPS, no www (e.g. https://deadmanping.com).
+  // Single 301 redirect for both http→https and www→non-www to avoid redirect chains.
+  // GSC "Strona zawiera przekierowanie" for http/www URLs is expected; Google indexes the destination.
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
   const canonicalHost = baseUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/^https?:\/\//, '')
-  
-  // Check if we need to redirect to canonical URL (HTTPS, non-www)
-  // Combine both checks to avoid chain redirects
-  const needsRedirect = 
-    (protocol === 'http' && process.env.NODE_ENV === 'production') || 
+  const needsRedirect =
+    (protocol === 'http' && process.env.NODE_ENV === 'production') ||
     hostname.startsWith('www.')
-  
+
   if (needsRedirect) {
-    // Redirect to canonical URL (HTTPS, non-www) in a single redirect
     url.hostname = canonicalHost
     url.protocol = 'https:'
     return NextResponse.redirect(url, 301)

@@ -10,10 +10,13 @@
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { Footer } from '@/components/Footer'
 import { FAQAccordion } from '@/components/FAQAccordion'
+
+const canonicalBase = getCanonicalBaseUrl()
 
 export const metadata: Metadata = {
   title: "Cron Job Monitoring FAQ - Pricing, Setup, Alerts & Features",
@@ -23,9 +26,10 @@ export const metadata: Metadata = {
     title: "Cron Job Monitoring FAQ - Pricing, Setup & Features",
     description: "Common questions about dead man switch cron monitoring: free tier, pricing, alerts, payload validation.",
     type: "website",
+    url: `${canonicalBase}/faq`,
   },
   alternates: {
-    canonical: "/faq",
+    canonical: `${canonicalBase}/faq`,
   },
 }
 

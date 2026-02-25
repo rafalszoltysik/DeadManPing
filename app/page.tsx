@@ -22,9 +22,9 @@ import { FaLock, FaBolt, FaDollarSign, FaBell } from 'react-icons/fa'
 import { HowItWorksSection } from '@/components/HowItWorksSection'
 import LazyPricingSection from '@/components/LazyPricingSection'
 import LazyDashboardPreview from '@/components/LazyDashboardPreview'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+const cleanBaseUrl = getCanonicalBaseUrl()
 
 export const metadata: Metadata = {
   title: "Dead Man Switch for Cron Jobs & Backups - Free Monitoring in 2 Min",

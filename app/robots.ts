@@ -9,19 +9,18 @@
  */
 
 import { MetadataRoute } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 
 /**
  * Generates robots.txt configuration.
  * 
  * Excludes private paths and file types, allows public pages.
+ * Uses canonical base URL (HTTPS, no www) so crawlers discover the same domain as sitemap.
  * 
  * @returns Robots.txt configuration with rules and sitemap URL
  */
 export default function robots(): MetadataRoute.Robots {
-  let baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  // Ensure baseUrl is without www for SEO consistency (canonical URL)
-  baseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
-  
+  const baseUrl = getCanonicalBaseUrl()
   return {
     rules: [
       {

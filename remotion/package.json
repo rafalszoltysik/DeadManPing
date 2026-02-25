@@ -1,0 +1,29 @@
+{
+  "name": "deadmanping-remotion",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "remotion studio src/index.ts",
+    "build": "remotion bundle src/index.ts",
+    "generate-vo": "tsx scripts/generate-vo.ts",
+    "vo-lines": "tsx scripts/print-vo-lines.ts",
+    "render": "remotion render src/index.ts DeadManPing30 out/DeadManPing30.mp4",
+    "render:vertical": "remotion render src/index.ts DeadManPing30Vertical out/DeadManPing30Vertical.mp4",
+    "render:square": "remotion render src/index.ts DeadManPing30Square out/DeadManPing30Square.mp4"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "4.0.0"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "4.0.0",
+    "@remotion/cli": "4.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

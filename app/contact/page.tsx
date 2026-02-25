@@ -10,6 +10,7 @@
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection } from '@/components/AnimatedSection'
 import { ContactForm } from './ContactForm'
@@ -19,7 +20,7 @@ export const metadata: Metadata = {
   title: "Contact Support - Cron Monitoring Help & Questions",
   description: "Need help with cron job monitoring setup? Have a feature request? Contact our support team for quick assistance.",
   alternates: {
-    canonical: "/contact",
+    canonical: `${getCanonicalBaseUrl()}/contact`,
   },
 }
 

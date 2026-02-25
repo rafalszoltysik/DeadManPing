@@ -8,6 +8,7 @@
  */
 
 import type { Metadata } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 
 export const metadata: Metadata = {
   title: "Cron Job Monitoring FAQ - Pricing, Setup, Alerts & Features",
@@ -17,6 +18,7 @@ export const metadata: Metadata = {
     title: "Cron Job Monitoring FAQ - Pricing, Setup & Features",
     description: "Common questions about cron job monitoring: free tier, payload validation, Slack/Discord alerts, start/stop tracking.",
     type: "website",
+    url: `${getCanonicalBaseUrl()}/faq`,
   },
   twitter: {
     card: "summary",
@@ -24,7 +26,7 @@ export const metadata: Metadata = {
     description: "Answers to common questions about dead man switch cron monitoring: setup, pricing, alerts, payload validation.",
   },
   alternates: {
-    canonical: "/faq",
+    canonical: `${getCanonicalBaseUrl()}/faq`,
   },
 }
 

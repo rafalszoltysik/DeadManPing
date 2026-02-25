@@ -7,8 +7,17 @@
  * Does not handle page rendering - only generates JSON-LD structured data.
  */
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+/**
+ * Returns the canonical base URL (HTTPS, no www) for the site.
+ * Use for all canonical URLs, sitemap, robots, and structured data
+ * so Google indexes a single canonical domain.
+ */
+export function getCanonicalBaseUrl(): string {
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
+  return baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+}
+
+const cleanBaseUrl = getCanonicalBaseUrl()
 
 export interface ArticleSchemaOptions {
   slug: string

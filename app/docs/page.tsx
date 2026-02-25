@@ -10,14 +10,14 @@
 
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { getCanonicalBaseUrl } from '@/lib/seo-helpers'
 import { PageNav } from '@/components/PageNav'
 import { AnimatedSection, AnimatedItem } from '@/components/AnimatedSection'
 import { CTAButton } from '@/components/CTAButton'
 import { Footer } from '@/components/Footer'
 import { CodeBlock } from '@/components/CodeBlock'
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-const cleanBaseUrl = baseUrl.replace(/^https?:\/\/(www\.)?/, 'https://')
+const canonicalBase = getCanonicalBaseUrl()
 
 export const metadata: Metadata = {
   title: "Cron Monitoring API Docs - Quick Start, Ping, Payload Validation",
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     title: "Cron Monitoring API Docs - Quick Start, Ping, Payload Validation",
     description: "Set up cron job monitoring in 2 minutes. Ping API, start/stop tracking, payload validation. Bash, Python, Node.js, Docker examples.",
     type: "article",
-    url: `${cleanBaseUrl}/docs`,
+    url: `${canonicalBase}/docs`,
   },
   twitter: {
     card: "summary_large_image",
@@ -35,13 +35,12 @@ export const metadata: Metadata = {
     description: "Set up cron monitoring in 2 minutes. Ping API, start/stop tracking, payload validation. Bash, Python, Node.js, Docker.",
   },
   alternates: {
-    canonical: `${cleanBaseUrl}/docs`,
+    canonical: `${canonicalBase}/docs`,
   },
 }
 
 export default function DocsPage() {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://deadmanping.com'
-  
+  const baseUrl = getCanonicalBaseUrl()
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
