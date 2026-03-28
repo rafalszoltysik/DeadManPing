@@ -10,7 +10,7 @@
 
 import Link from 'next/link'
 import { AnimatedSection } from '@/components/AnimatedSection'
-import { getRelatedArticles, type RelatedArticle } from '@/lib/blog-related-articles'
+import { getRelatedArticles } from '@/lib/blog-related-articles'
 
 interface RelatedArticlesProps {
   slug: string
