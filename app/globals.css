@@ -68,6 +68,14 @@
   * {
     @apply border-border;
   }
+
+  html {
+    /* Fallback for mobile Safari: fixed pseudo-element backgrounds can leave gaps
+       when the address bar shows/hides during scroll. */
+    background-color: rgb(var(--background));
+    min-height: 100%;
+    min-height: 100dvh;
+  }
   
   body {
     @apply text-foreground;
@@ -75,6 +83,11 @@
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
     transition: background-color 0.3s ease, color 0.3s ease;
     position: relative;
+    background-color: rgb(var(--background));
+    min-height: 100%;
+    min-height: 100dvh;
+    /* Prevent overscroll bounce revealing the browser default (white) canvas */
+    overscroll-behavior-y: none;
   }
 
   body::before {
@@ -83,7 +96,11 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    /* Extend past viewport bottom — iOS Safari address bar resize leaves a gap
+       with bottom: 0 alone when using position: fixed backgrounds. */
+    height: 100vh;
+    height: 100dvh;
+    height: 100lvh;
     z-index: -1;
     background: rgb(var(--background));
     background-image: 
@@ -108,7 +125,9 @@
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    height: 100vh;
+    height: 100dvh;
+    height: 100lvh;
     z-index: -1;
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     opacity: 1;
