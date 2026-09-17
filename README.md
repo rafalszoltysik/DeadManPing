@@ -51,7 +51,11 @@ Useful scripts from `package.json`:
 
 ## Examples
 
-The former `examples` git submodule is not part of this public repository. After the DeadManPing organization was removed, those samples were moved to a private repo.
+Integration samples (bash, Python, Node.js, cron patterns) live in a separate public repo:
+
+https://github.com/rafalszoltysik/examples
+
+They used to be a git submodule under the DeadManPing organization. After that org was removed, the repo was moved to this account.
 
 ## License
 
