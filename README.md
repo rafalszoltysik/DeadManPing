@@ -1,55 +1,58 @@
 # DeadManPing
 
-> **Status: archived.** The hosted product is shut down. This repository remains as an open-source snapshot of what was built.
+Cron job monitoring that checks results after your job finishes. You keep your existing cron and scripts. Integration is typically one HTTP request (often a `curl`) to a ping endpoint when the job completes.
 
-Cron monitoring that observes job results without touching execution.
+**Status: archived.** The hosted product is shut down. This repository is a public snapshot of the codebase.
 
-**Keep your cron. Keep your scripts. We only verify the result.**
+I closed the service after it did not get meaningful organic search traction (weak Google Search Console demand for the positioning). The code stays public as a reference.
 
-DeadManPing monitored cron jobs without changing how they run — typically one `curl` line after the job. Job logic stayed the same.
+## What it did
 
-## Why it is archived
+- Monitors that expect periodic pings from your jobs (`/api/ping/[slug]`)
+- Optional payload validation on ping data
+- Status calculation and email alerts (Resend)
+- Dashboard, auth, workspaces, and billing (Stripe)
+- Marketing pages, docs, and blog in the same Next.js app
 
-I built and shipped DeadManPing as an independent product (Next.js app, billing, alerts, docs/SEO). I closed the hosted service after it did not get meaningful organic traction (weak Google Search Console / search demand for the positioning). The codebase is public so the work stays visible; it is not an active product.
+## Stack
 
-## What is in this repo
-
-- Core monitoring logic (payload validation, status calculation, alerts)
-- Frontend (React, Next.js, TypeScript)
-- Infrastructure setup (Supabase migrations, Cloudflare Workers examples)
-- Integration patterns for pinging from scripts
-
-MIT licensed — see [LICENSE](./LICENSE). Contribution notes: [CONTRIBUTING.md](./CONTRIBUTING.md).
-
-## Tech stack
-
-- Next.js 15 (App Router) + TypeScript + Tailwind CSS
-- Supabase (database + auth)
+- Next.js 15 (App Router), React 19, TypeScript, Tailwind CSS
+- Supabase (database and server-side access)
 - Stripe (billing)
 - Resend (email)
-- Upstash Redis (rate limiting, optional)
-- Cloudflare Workers (optional proxy for Edge Functions)
-- Sentry / PostHog / Vercel Analytics (observability)
+- Optional: Upstash Redis (rate limiting), Sentry, PostHog, Vercel Analytics
 
-## Local setup (self-host / explore)
+## Requirements
+
+- Node.js compatible with Next.js 15
+- A Supabase project, plus Stripe and Resend credentials, if you want a working local instance
+- SQL migrations under `supabase/migrations/` applied in order
+
+## Local setup
 
 ```bash
 npm install
 cp env.example .env.local
-# fill Supabase, Stripe, Resend, etc.
+# fill required values from env.example
 npm run dev
 ```
 
-Apply SQL migrations under `supabase/migrations/` in order.
+Apply the SQL files in `supabase/migrations/` in numeric order against your Supabase project.
 
-Self-hosting needs real credentials for Supabase, Stripe, Resend, and a host (e.g. Vercel). For most people this repo is a **reference**, not something to run in production without owning that ops cost.
+Self-hosting needs real infrastructure and secrets. For most people this repo is something to read, not something to run in production.
 
-## Examples submodule
+Environment variables are listed in `env.example`. Do not commit `.env` or `.env.local`.
 
-`examples/` may point at `https://github.com/DeadManPing/examples`. If that org/repo is gone, ignore the submodule or remove it locally.
+Useful scripts from `package.json`:
 
-## Notes for readers
+- `npm run dev` - local Next.js server
+- `npm run build` - production build (runs `generate-types` first)
+- `npm run lint` - ESLint
 
-- Do not expect `deadmanping.com` to be live.
-- Do not commit `.env` / secrets — `env.example` is the template only.
-- This is an independent project, separate from employment work.
+## Examples
+
+The former `examples` git submodule is not part of this public repository. After the DeadManPing organization was removed, those samples were moved to a private repo.
+
+## License
+
+MIT. See [LICENSE](./LICENSE).
